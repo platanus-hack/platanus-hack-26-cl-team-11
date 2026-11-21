@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Grabación de diez personas · Ronda</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<style>
+  /* Escenario de la segunda grabación: la pantalla de la sala, un teléfono y lo que hace el guion, lado a lado.
+     Lo maneja tools/grabar/grabar2.mjs. Dentro de los marcos corre el producto real.
+     Ancho 1920 = 24 + 1280 + 24 + 568 + 24. Alto 1080 = 12 + 76 + 12 + 36 + 12 + 800 + 12 + 108 + 12. */
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: clip; }
+  .rd-page { width: 1920px; height: 1080px; min-height: 0; padding: 0; overflow: clip; }
+  .escena { position: relative; width: 1920px; height: 1080px; padding: 12px 24px; display: grid; grid-template-columns: 1280px 568px; grid-template-rows: 76px 36px 800px 108px; gap: 12px 24px; }
+  .paso { grid-area: 1 / 1 / 2 / -1; display: flex; align-items: center; gap: var(--rd-space-4); min-width: 0; }
+  .paso .rd-chip { flex: none; font-size: var(--rd-text-body); padding: 10px 18px; }
+  .paso .rd-title { min-width: 0; font-size: 32px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rotulos { grid-area: 2 / 1; display: flex; align-items: center; gap: var(--rd-space-4); min-width: 0; }
+  .rotulo { font-size: var(--rd-text-name); white-space: nowrap; }
+  .rotulo--sala { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .rotulo--aviso { flex: none; margin-left: auto; }
+  .rotulo--telefono { grid-area: 2 / 2; place-self: center; }
+  .reloj { flex: none; padding: 4px var(--rd-space-3); font-size: var(--rd-text-name); font-variant-numeric: tabular-nums; }
+  .reloj[hidden] { display: none; }
+  .pantalla { grid-area: 3 / 1; width: 1280px; height: 800px; border-radius: var(--rd-radius-card); overflow: hidden; box-shadow: var(--rd-shadow-card); background: var(--rd-bg); }
+  .pantalla iframe { display: block; width: 1440px; height: 900px; border: 0; transform: scale(0.88889); transform-origin: 0 0; }
+  .telefono { grid-area: 3 / 2; justify-self: center; width: 406px; height: 800px; border: 8px solid var(--rd-glass-solid); border-radius: 44px; overflow: hidden; box-shadow: var(--rd-shadow-card); background: var(--rd-bg); }
+  .telefono iframe { display: block; width: 390px; height: 784px; border: 0; }
+  .telefono[data-apagado] iframe { visibility: hidden; }
+  .registro { grid-area: 4 / 1 / 5 / -1; display: grid; grid-template-columns: 240px minmax(0, 1fr); align-items: center; column-gap: 20px; padding: 11px 20px; border-radius: var(--rd-radius-card); overflow: hidden; }
+  .registro .rotulo { white-space: normal; line-height: 1.3; text-wrap: balance; }
+  .registro__lineas { display: flex; flex-direction: column; justify-content: flex-end; height: 84px; min-width: 0; padding-left: 20px; border-left: 1px solid var(--rd-hairline); overflow: hidden; font-family: var(--rd-font-mono); font-size: 14px; line-height: 21px; }
+  .registro__lineas span { flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .registro__lineas .eco { color: var(--rd-muted); }
+  .cierre { display: none; grid-area: 3 / 1 / 4 / -1; align-self: center; max-height: 800px; overflow: hidden; gap: var(--rd-space-7); padding: 48px 56px; }
+  .cierre__titulo { font-size: 44px; text-wrap: balance; }
+  .cierre__columnas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cierre__columna { min-width: 0; padding-right: 40px; }
+  .cierre__columna + .cierre__columna { padding: 0 0 0 40px; border-left: 1px solid var(--rd-hairline); }
+  .cierre__nombre { font-size: 32px; }
+  .cierre .rd-list { list-style: none; margin: var(--rd-space-2) 0 0; padding: 0; }
+  .cierre .rd-item { padding: var(--rd-space-4) 0; font-size: 28px; line-height: 1.3; }
+  .escena[data-cierre] .cierre { display: flex; }
+  .escena[data-cierre] :is(.pantalla, .telefono, .rotulo--marco, .reloj, .puntero) { visibility: hidden; }
+  .puntero { position: absolute; left: 960px; top: 540px; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: var(--rd-ink); border: 3px solid var(--rd-glass-solid); opacity: 0; pointer-events: none; z-index: 20; transition: left .55s cubic-bezier(.3,.7,.2,1), top .55s cubic-bezier(.3,.7,.2,1), opacity .25s ease, transform .12s ease; }
+  .puntero[data-visible] { opacity: .55; }
+  .puntero[data-toca] { transform: scale(.62); opacity: .85; }
+</style>
+</head>
+<body class="ss-stage">
+<div class="rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="escena">
+    <header class="paso">
+      <span class="rd-chip rd-glass" id="numero">Ronda</span>
+      <h1 class="rd-title" id="texto">Diez personas, sus fuentes y sus agentes</h1>
+    </header>
+    <div class="rotulos">
+      <span class="rd-label rotulo rotulo--sala rotulo--marco" id="rotulo-sala">Pantalla de la sala</span>
+      <span class="rd-chip rd-glass reloj" id="reloj" hidden></span>
+      <span class="rd-label rotulo rotulo--aviso" id="aviso">Personas y datos inventados · proveedores simulados · un guion actúa por todas</span>
+    </div>
+    <span class="rd-label rotulo rotulo--telefono rotulo--marco" id="rotulo-telefono">Un teléfono</span>
+    <section class="pantalla"><iframe id="sala" title="Pantalla de la sala"></iframe></section>
+    <section class="telefono" id="marco-telefono" data-apagado><iframe id="telefono" title="Teléfono" allow="clipboard-read; clipboard-write"></iframe></section>
+    <section class="cierre rd-card rd-glass" id="cierre" aria-label="Qué fue real y qué fue actuado">
+      <h2 class="rd-title cierre__titulo"></h2>
+      <div class="cierre__columnas">
+        <div class="cierre__columna">
+          <h3 class="rd-title cierre__nombre">Real</h3>
+          <ul class="rd-list" data-lista="real"></ul>
+        </div>
+        <div class="cierre__columna">
+          <h3 class="rd-title cierre__nombre">Actuado o simulado</h3>
+          <ul class="rd-list" data-lista="actuado"></ul>
+        </div>
+      </div>
+    </section>
+    <section class="registro rd-glass" aria-labelledby="rotulo-registro">
+      <span class="rd-label rotulo" id="rotulo-registro">Lo que hace el guion en lugar de cada agente y de cada fuente</span>
+      <div class="registro__lineas" id="registro"></div>
+    </section>
+    <div class="puntero" id="puntero"></div>
+  </div>
+</div>
+<script>
+  const MAX_LINEAS = 4;
+  const porId = (id) => document.getElementById(id);
+  const escenario = document.querySelector('.escena');
+  const puntero = porId('puntero');
+  const apagar = () => porId('marco-telefono').setAttribute('data-apagado', '');
+  const encender = () => porId('marco-telefono').removeAttribute('data-apagado');
+  const llenar = (lista, frases) => {
+    const filas = frases.map((frase) => {
+      const fila = document.createElement('li');
+      fila.className = 'rd-item';
+      fila.textContent = frase;
+      return fila;
+    });
+    escenario.querySelector(`[data-lista="${lista}"]`).replaceChildren(...filas);
+  };
+  window.escena = {
+    paso(numero, texto) {
+      porId('numero').textContent = numero;
+      porId('texto').textContent = texto;
+    },
+    rotuloTelefono(texto) { porId('rotulo-telefono').textContent = texto; },
+    abrirTelefono(direccion) {
+      porId('telefono').src = direccion;
+      encender();
+    },
+    anotar(linea, eco) {
+      const registro = porId('registro');
+      const fila = document.createElement('span');
+      fila.textContent = linea;
+      if (eco) fila.className = 'eco';
+      registro.append(fila);
+      while (registro.children.length > MAX_LINEAS) registro.firstElementChild.remove();
+    },
+    apuntar(x, y) {
+      puntero.style.left = x + 'px';
+      puntero.style.top = y + 'px';
+      puntero.setAttribute('data-visible', '');
+    },
+    tocar(activo) { puntero.toggleAttribute('data-toca', activo); },
+    soltar() { puntero.removeAttribute('data-visible'); },
+    abrirSala(direccion, rotulo = 'Pantalla de la sala') {
+      porId('sala').src = direccion;
+      porId('rotulo-sala').textContent = rotulo;
+    },
+    apagarTelefono() { apagar(); },
+    encenderTelefono() { encender(); },
+    cambiarTelefono(direccion, rotulo) {
+      apagar();
+      porId('telefono').src = direccion;
+      if (typeof rotulo === 'string') porId('rotulo-telefono').textContent = rotulo;
+    },
+    reloj(texto) {
+      const visible = typeof texto === 'string';
+      if (visible) porId('reloj').textContent = texto;
+      porId('reloj').hidden = !visible;
+    },
+    cierre(listas) {
+      if (!listas) {
+        escenario.removeAttribute('data-cierre');
+        return;
+      }
+      const titulo = escenario.querySelector('.cierre__titulo');
+      titulo.textContent = listas.titulo ?? '';
+      titulo.hidden = !listas.titulo;
+      llenar('real', listas.real ?? []);
+      llenar('actuado', listas.actuado ?? []);
+      escenario.setAttribute('data-cierre', '');
+    },
+    marca(nombre) { document.body.dataset.mark = nombre; },
+  };
+
+  const estado = new URLSearchParams(location.search).get('estado');
+  if (estado === 'ronda') {
+    window.escena.paso('9', 'Empieza la ronda: los agentes conversan (video acelerado ×6)');
+    window.escena.rotuloTelefono('Teléfono de Antonia');
+    window.escena.reloj('Tiempo real 0:47');
+    window.escena.anotar('guion › toca «Iniciar ronda» en el teléfono de Antonia');
+    window.escena.anotar('hilo › Antonia → Fernanda · guion y ensayo del pitch');
+    window.escena.anotar('hilo › Ignacio → Catalina · Conciliación de cobros con el banco');
+    window.escena.anotar('  ← 3 pedidos en la ronda, 5 conversaciones abiertas', true);
+  }
+  if (estado === 'cierre') {
+    window.escena.paso('16', 'Qué fue real y qué fue actuado en esta grabación');
+    window.escena.anotar('el guion acepta por Fernanda');
+    window.escena.anotar('el guion acepta por Nicolás');
+    window.escena.anotar('nota › a los otros agentes no les llega su sueño ni su agenda; al suyo solo «disponibilidad: baja»');
+    window.escena.cierre({
+      titulo: 'Diez personas, sus fuentes y sus agentes',
+      real: [
+        'El producto, tal como está en main',
+        'Las rutas de conexión, los conectores y las señales',
+        'La ronda: cada texto lo escribió el modelo en esta toma',
+      ],
+      actuado: [
+        'Las diez personas y todos sus datos',
+        'Las cuentas de Google, GitHub, Linear y Granola: las responde un proveedor de prueba',
+        'Un guion hace de cada asistente y toca por cada persona',
+      ],
+    });
+  }
+</script>
+</body>
+</html>
