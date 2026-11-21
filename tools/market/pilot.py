@@ -1,4 +1,5 @@
 """One-lot pilot for the 26-cl event. Run from a dedicated clean main checkout."""
+import argparse
 import fcntl
 import getpass
 import json
@@ -67,7 +68,7 @@ def local(route):
         return json.load(response)
 
 
-def decision(dealer, entries, portfolio):
+def decision(entries, portfolio, exits_only=False):
     snapshot = local("movers?seconds=120")
     if snapshot["status"] != "open":
         return "stop", "market "+snapshot["status"]
@@ -104,6 +105,10 @@ def decision(dealer, entries, portfolio):
         credit = quote(projects["team-11"]["price"],b,f,"sell",shares)["cashDelta"]
         if cash+credit>=TARGET:
             return "order",("team-11","sell",shares,TARGET-cash)
+    if exits_only:
+        if not positions:
+            return "stop","no remaining position"
+        return "wait",f"existing position returns {credit}; {TARGET-cash} needed for target"
     pnl = sum(r["cashDelta"] for r in entries if r["team"]!="team-11")
     if pnl<=-12 or sum(r["side"]=="buy" for r in entries)>=8:
         return "stop",f"pilot budget reached, closed-lot P&L {pnl:+}"
@@ -120,7 +125,7 @@ def decision(dealer, entries, portfolio):
     return "order",(p["team"],"buy",25,limit)
 
 
-def run():
+def run(exits_only):
     if git("branch","--show-current")!="main" or git("diff","--cached","--name-only"):
         raise RuntimeError("use a dedicated main checkout")
     dealer=Dealer(getpass.getpass("Event session: ").strip())
@@ -131,7 +136,7 @@ def run():
     portfolio=dealer.account()
     last_report=0
     while time.time()<END:
-        action, reason = decision(dealer,entries,portfolio)
+        action, reason = decision(entries,portfolio,exits_only)
         if action=="stop":
             print(reason,flush=True)
             return
@@ -156,8 +161,11 @@ def run():
 
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--exits-only", action="store_true", help="watch existing holdings without new purchases")
+    args = parser.parse_args()
     os.umask(0o077)
     DATA.mkdir(exist_ok=True,parents=True)
     with (DATA/"dealer.lock").open("a") as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        run()
+        run(args.exits_only)
