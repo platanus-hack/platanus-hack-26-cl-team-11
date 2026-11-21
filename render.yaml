@@ -8,6 +8,16 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - backend/**
+        - frontend/**
+        - design/tokens.css
+        - design/ronda.css
+        - design/faces/**
+        - package.json
+        - package-lock.json
+        - .nvmrc
     disk:
       name: ronda-data
       mountPath: /var/data
