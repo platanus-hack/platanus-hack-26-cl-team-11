@@ -1,4 +1,4 @@
-/* Ronda · streaming. Regla Stream de Stageshow: cada letra en su lugar final; se enciende con una cola suave. */
+/* Montu · streaming. Regla Stream de Stageshow: cada letra en su lugar final; se enciende con una cola suave. */
 .rs-stream { white-space: normal; }
 .rs-word { white-space: nowrap; }
 .rs-ch { transition: none; }

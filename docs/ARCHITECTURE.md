@@ -226,7 +226,7 @@ Reglas:
 
 ## Sala, asistentes y repo
 
-Una persona entra a una sala con un código, conecta el agente que ya usa y ese agente llena su repo. El agente personal de Ronda habla en las rondas con lo que hay en ese repo.
+Una persona entra a una sala con un código, conecta el agente que ya usa y ese agente llena su repo. El agente personal de Montu habla en las rondas con lo que hay en ese repo.
 
 **Sala** (`rooms/`). Es un equipo que tiene un código corto y admite sin aprobación. Por ser un equipo, le sirven las rondas, el tablero y el pulso. El código largo de un equipo sigue pidiendo aprobación. La sala guarda un registro de lo que pasa (alguien entra, un asistente se conecta, un repo cambia) para dibujarlo en la pantalla.
 
@@ -242,7 +242,7 @@ Estas dos últimas rutas no piden link: las lee la pantalla de la sala. Por eso 
 **Asistente conectado** (`assistants/`). Es el agente que la persona ya usa: Claude Code, Codex, ChatGPT, Grok, OpenClaw u otro. Entra así:
 
 1. La persona pide un código en su página. Dura 15 minutos, sirve una vez y pedir otro anula el anterior.
-2. Le pega a su agente una línea con `/a/<código>`. Esa dirección devuelve el documento de ingreso en markdown (`assistants/joinDoc.ts`): qué es Ronda, las reglas y las llamadas.
+2. Le pega a su agente una línea con `/a/<código>`. Esa dirección devuelve el documento de ingreso en markdown (`assistants/joinDoc.ts`): qué es Montu, las reglas y las llamadas.
 3. El agente llama a `POST /api/assistants/join` con el código y recibe su token. El servidor guarda solo el hash del token. La persona ve sus asistentes y puede quitar cualquiera.
 
 El documento describe llamadas HTTP y nada más: no pide instalar ni ejecutar nada, ni volver a buscar instrucciones.

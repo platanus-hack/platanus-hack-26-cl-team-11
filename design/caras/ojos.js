@@ -1,5 +1,5 @@
 /*
- * Ronda · caras «Ojos». La persona es una gota de luz y solo tiene ojos.
+ * Montu · caras «Ojos». La persona es una gota de luz y solo tiene ojos.
  * Todo el carácter sale de la forma de los ojos, los anteojos, una ceja y cómo miran y parpadean.
  *
  *   RondaOjos.svg(seed, { size, recipe, t, rest, sheen })  el dibujo (SVG en texto) para ponerlo sobre la luz

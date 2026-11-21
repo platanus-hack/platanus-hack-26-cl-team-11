@@ -1,5 +1,5 @@
 /*
- * Ronda · luz de lámpara de lava. Un sombreador WebGL2, sin librerías, con dos usos:
+ * Montu · luz de lámpara de lava. Un sombreador WebGL2, sin librerías, con dos usos:
  *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de vidrio con lava dentro, una por persona;
  *                                      cada celda puede llevar su propio reloj (ver render) y cambiar de tonos (setCell)
  *   RondaLuz.sphere(canvas, opciones)  la misma lava, más calmada, dentro del globo de vidrio

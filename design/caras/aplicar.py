@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Saca las imágenes quietas de las caras de Ronda (design/faces/caras.js) en el formato del producto.
+"""Saca las imágenes quietas de las caras de Montu (design/faces/caras.js) en el formato del producto.
 
 La cara viva la monta design/faces/caras.js. Lo que no la monta (el globo, el universo, una lámina)
 lee siete imágenes de design/faces/: mati.png, ian.png, lian.png, roberto.png y andres.png

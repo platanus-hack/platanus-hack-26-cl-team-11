@@ -1,5 +1,5 @@
 /*
- * Ronda · luz de lámpara de lava con three.js. Mismo contrato que design/luz/luz.js:
+ * Montu · luz de lámpara de lava con three.js. Mismo contrato que design/luz/luz.js:
  *   RondaLuz.grid(canvas, { cols, rows, cell, palettes, square })  -> { canvas, cols, rows, cell, render(segundos) } o null
  *   RondaLuz.sphere(canvas, { palette })                           -> { canvas, render(segundos, x, y, radio, fuerza) } o null
  *   RondaLuz.paletteFor(seed), RondaLuz.css(palette), RondaLuz.TONES

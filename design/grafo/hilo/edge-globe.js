@@ -1,4 +1,4 @@
-// Ronda · en el globo, un solo arco cuenta lo que pasa en su hilo; los demás arcos con hilo
+// Montu · en el globo, un solo arco cuenta lo que pasa en su hilo; los demás arcos con hilo
 // quedan con un punto chico que se puede tocar. Reemplaza a las miniaturas siempre encendidas.
 // Usa globeMotions (mini/motion-globe.js), threadScript (mini/thread-stories.js),
 // DemoThreads (mini/threads.js) y RondaEdge (hilo/edge.js).

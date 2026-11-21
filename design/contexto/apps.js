@@ -1,4 +1,4 @@
-/* Ronda · contexto: catálogo de apps y superficie de conexión. Todo es de prueba: nada se conecta. */
+/* Montu · contexto: catálogo de apps y superficie de conexión. Todo es de prueba: nada se conecta. */
 (function () {
   const LIGHT = '#c6c6d2';
   const GOOGLE = 'Google';
@@ -104,7 +104,7 @@
       ? '<span class="cx-pair__ok">' + ICON.check + '</span>'
       : '<span class="cx-pair__link" aria-hidden="true"><i></i><i></i><i></i></span>';
     return '<div class="cx-pair' + (state === 'conectando' ? ' cx-pair--busy' : '') + '">' + tile(app) + middle +
-      '<span class="cx-tile cx-pair__mark"><img src="../logo/ronda-mark.svg" alt=""></span></div>';
+      '<span class="cx-tile cx-pair__mark"><img src="../logo/montu-mark.svg" alt=""></span></div>';
   }
 
   function reads(app) {
@@ -152,7 +152,7 @@
     }
     if (app.method === 'atajo') {
       return '<ol class="cx-steps">' +
-        '<li><span class="cx-steps__n">1</span><span>Instala el Atajo «Ronda» en tu iPhone.</span></li>' +
+        '<li><span class="cx-steps__n">1</span><span>Instala el Atajo «Montu» en tu iPhone.</span></li>' +
         '<li><span class="cx-steps__n">2</span><span>Ábrelo una vez y permite leer Salud.</span></li>' +
         '<li><span class="cx-steps__n">3</span><span>Desde ahí se envía solo, cada mañana.</span></li></ol>' +
         '<div class="cx-code"><pre>/api/ingest/apple-health/[TU LLAVE]</pre><button type="button" class="cx-btn cx-btn--small" data-copy>' + ICON.copy + 'Copiar</button></div>' +
@@ -161,7 +161,7 @@
     }
     if (app.method === 'asistente') {
       return '<div class="cx-field"><label>Pega esto en las instrucciones de ' + esc(app.name) + '</label>' +
-        '<div class="cx-code"><pre>Al terminar una tarea, deja una línea en Ronda:\nPOST /api/context/[TU LLAVE]/push\n{ "source": "' + app.id + '", "summary": "qué hiciste" }</pre>' +
+        '<div class="cx-code"><pre>Al terminar una tarea, deja una línea en Montu:\nPOST /api/context/[TU LLAVE]/push\n{ "source": "' + app.id + '", "summary": "qué hiciste" }</pre>' +
         '<button type="button" class="cx-btn cx-btn--small" data-copy>' + ICON.copy + 'Copiar</button></div></div>' +
         '<button type="button" class="cx-btn cx-btn--primary cx-btn--wide" data-go="conectando">Ya lo pegué</button>' +
         '<p class="cx-sheet__foot">' + ICON.lock + '<span>Esa dirección es personal. No la compartas.</span></p>';

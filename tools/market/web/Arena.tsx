@@ -50,7 +50,7 @@ export function Arena() {
         </span>
       </div>
       <p className="rd-note">
-        21 nov · {clock(round.at)} · Ronda {index + 1} de {rounds.length}
+        21 nov · {clock(round.at)} · Montu {index + 1} de {rounds.length}
       </p>
       <p>
         Uno llega con impulso. El otro tiene el precio más alto entre sus rivales. ¿Cuál subió más en los cinco minutos

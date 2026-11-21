@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import markUrl from '../../design/logo/ronda-mark.svg';
+import markUrl from '../../design/logo/montu-mark.svg';
 import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
@@ -30,7 +30,7 @@ function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean
         <header className="rd-bar">
           <a className="rd-brand" href="/">
             <img className="rd-mark" src={markUrl} alt="" />
-            Ronda
+            Montu
           </a>
         </header>
         <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>

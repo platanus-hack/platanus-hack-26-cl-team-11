@@ -15,7 +15,7 @@ def asset(path, mime):
     return f"data:{mime};base64,{data}"
 
 
-LOGO = asset("logo/ronda-mark.svg", "image/svg+xml")
+LOGO = asset("logo/montu-mark.svg", "image/svg+xml")
 ICONS = {
     "play": '<path d="m8 5 11 7-11 7z"/>',
     "pause": '<path d="M8 5v14m8-14v14"/>',
@@ -176,10 +176,10 @@ def build():
 {license_text}
 -->
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} · Ronda</title><link rel="icon" type="image/svg+xml" href="{LOGO}"><style>{css}</style></head>
+<title>{title} · Montu</title><link rel="icon" type="image/svg+xml" href="{LOGO}"><style>{css}</style></head>
 <body class="rd-page"><div aria-hidden="true" class="rd-aura"><i></i><i></i><i></i><i></i></div>
 <div class="rd-page__inner shell">
-<header class="rd-bar"><div class="rd-brand"><img class="rd-mark" src="{LOGO}" alt="">Ronda</div><div class="scene-nav"><a class="rd-note" href="minis.html#mini-{slug}">Ver en el grafo</a><span class="rd-note">Datos simulados</span></div></header>
+<header class="rd-bar"><div class="rd-brand"><img class="rd-mark" src="{LOGO}" alt="">Montu</div><div class="scene-nav"><a class="rd-note" href="minis.html#mini-{slug}">Ver en el grafo</a><span class="rd-note">Datos simulados</span></div></header>
 <main><div class="heading"><div class="rd-label label-icon">{icon(symbol)}{label}</div><h1 class="rd-hero">{first}<br><span class="rd-gradient-text">{second}</span></h1></div>
 <div class="art" id="example" aria-label="{title}"></div><template id="illustration">{scene()}</template></main>
 <footer class="rd-player" data-duration="{duration}" data-scene="{slug}" aria-label="Reproducción de la escena">

@@ -4,7 +4,7 @@ import { initialState, apply, replay, view, settle, expireOrders } from '../web/
 
 const T = 1000;
 const END = 10000;
-const terms = { id: 'px-abc123', kind: 'call', team: 'ronda', strike: 140, expiry: END, title: 'Call Ronda' };
+const terms = { id: 'px-abc123', kind: 'call', team: 'ronda', strike: 140, expiry: END, title: 'Call Montu' };
 const evidence = { source: 'local-fixture', at: END };
 
 function setup(actors = ['a', 'b', 'c']) {

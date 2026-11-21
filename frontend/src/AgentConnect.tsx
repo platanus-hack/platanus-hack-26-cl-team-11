@@ -40,7 +40,7 @@ export function AgentConnect({ token, assistants, onChange }: AgentConnectProps)
             </ItemIcon>
           }
           title={assistants.length ? 'Conectar otro agente' : 'Conecta tu agente'}
-          subtitle="Claude, Codex, Instinct o el que uses. Solo lee y escribe en Ronda"
+          subtitle="Claude, Codex, Instinct o el que uses. Solo lee y escribe en Montu"
         />
         <div className="rd-item__detail">
           <PairingLine token={token} connected={assistants.length} auto />

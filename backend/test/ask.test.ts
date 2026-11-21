@@ -39,7 +39,7 @@ function fakeModel(script: Script = {}) {
       if (script.hold) await script.hold;
       if (script.fail) throw new AgentModelError('El modelo no respondió.');
       const schema: z.ZodType = request.schema;
-      const ownerName = /agente personal de (\S+) en Ronda/.exec(request.system)?.[1] ?? '';
+      const ownerName = /agente personal de (\S+) en Montu/.exec(request.system)?.[1] ?? '';
       if (schema === QuestionAnswer) {
         const knows = script.knows?.(ownerName) ?? 'si';
         return request.schema.parse({ knows, answer: knows === 'no' ? '' : `${ownerName} integró pagos con Toku en marzo.` });

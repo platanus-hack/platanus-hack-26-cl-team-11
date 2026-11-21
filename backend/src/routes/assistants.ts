@@ -20,7 +20,7 @@ const REFUSAL: Record<Refused, { status: 404 | 409 | 410; error: string }> = {
   desconocido: { status: 404, error: 'Ese código no existe. Pide un link nuevo a tu persona.' },
   usado: { status: 410, error: 'Ese código ya se usó. Pide un link nuevo a tu persona.' },
   vencido: { status: 410, error: 'Ese código venció. Pide un link nuevo a tu persona.' },
-  lleno: { status: 409, error: `Ya hay ${MAX_ASSISTANTS_PER_PERSON} asistentes conectados. Tu persona tiene que quitar uno en su página de Ronda.` },
+  lleno: { status: 409, error: `Ya hay ${MAX_ASSISTANTS_PER_PERSON} asistentes conectados. Tu persona tiene que quitar uno en su página de Montu.` },
 };
 
 const viewAssistant = (assistant: Assistant) => ({ id: assistant.id, kind: assistant.kind, label: assistant.label, createdAt: assistant.createdAt, lastSeenAt: assistant.lastSeenAt });

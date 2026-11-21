@@ -1,4 +1,4 @@
-# Diseño de Ronda
+# Diseño de Montu
 
 Esta es la única dirección visual del proyecto. Mati la aprobó el 21-nov-2026 después de descartar
 cinco (están en `archive/`, no se usan). **Toda pantalla, slide o gráfico del proyecto sigue este
@@ -13,7 +13,7 @@ que existe en `design/`, con su estado, está en [`index.html`](index.html).
 ## Antes de tocar UI: 5 pasos
 
 1. Abre `design/index.html`: dice qué existe, qué es estándar, qué es demo y qué es archivo.
-2. Abre `design/contexto/resumen.html`, `conexiones.html` y `mapa.html`. Así se ve Ronda.
+2. Abre `design/contexto/resumen.html`, `conexiones.html` y `mapa.html`. Así se ve Montu.
 3. Carga `design/tokens.css` y `design/ronda.css` en tu pantalla. Arma todo con las clases `rd-*`,
    empezando por el marco de «La página estándar».
 4. Si te falta una pieza, agrégala a `ronda.css` (y un token a `tokens.css` si hace falta) en un
@@ -69,7 +69,7 @@ Reglas que salieron de las revisiones de Mati y que toda página cumple:
 - **Un tinte por tarjeta.** El degradado, solo en sus lugares.
 - **Ningún texto cortado con puntos suspensivos.** Se acorta el texto o se le da espacio.
 - **El grafo es el globo aprobado** (`grafo/globo.html`, incrustado con `?embed`). No se dibuja otro.
-- **Las personas llevan la cara de Ronda**, y quien no está en lo que se muestra retrocede: más
+- **Las personas llevan la cara de Montu**, y quien no está en lo que se muestra retrocede: más
   vidrio, menos color.
 - Una decisión por pantalla. Íconos reales de las apps. Datos que muestran el efecto de red.
 
@@ -134,7 +134,7 @@ izquierda; solo se centran los nombres bajo una cara.
 |---|---|---|
 | `rd-page` + `rd-page__inner` | Contenedor de toda pantalla. | Siempre el elemento raíz. |
 | `rd-aura` | Las cuatro manchas de color del fondo (`<i>` × 4). | Una por pantalla, primer hijo de `rd-page`. |
-| `rd-bar`, `rd-brand`, `rd-mark` | Barra superior con isotipo y nombre. | Isotipo: `logo/ronda-mark.svg`, sin modificar. En páginas nuevas la barra es `rd-top`. |
+| `rd-bar`, `rd-brand`, `rd-mark` | Barra superior con isotipo y nombre. | Isotipo: `logo/montu-mark.svg`, sin modificar. En páginas nuevas la barra es `rd-top`. |
 | `rd-top`, `rd-nav`, `rd-tag` | El marco estándar: barra con marca, pestañas (la activa con `aria-current`) y aviso. | Ver «La página estándar». Los nombres `cx-top`, `cx-nav` y `cx-tag` de `contexto/` son los mismos estilos. |
 | `rd-pagehead`, `rd-pagetitle`, `rd-pagesub` | Encabezado de página: el titular de una frase y su línea gris. | Un titular por pantalla. Iguales a `cx-head`, `cx-title` y `cx-sub`. |
 | `rd-seg` | Selector con relieve: hueco y tecla levantada. | Botones con `aria-pressed`. Para velocidad, tamaño o filtro; no para navegar. |
@@ -196,7 +196,7 @@ cuatro los fija el producto con `cara.set(estado)` según lo que le pasa a la pe
 | `reposo` | Siempre que no pasa otra cosa. | Miran alrededor y parpadean, cada cara a su ritmo. Si el puntero pasa cerca, lo siguen. Dos vecinas de un mismo grupo se miran cada tanto. | La lava fluye tranquila. |
 | hover | El puntero o el foco del teclado está encima. | Se abren un poco, la ceja sube y siguen al puntero. | Se levanta: crece 6 %, sombra más larga, halo de su color y la lava se acelera. |
 | presionada | Mientras dura el clic, el dedo o la tecla Espacio o Enter. | Se aprietan. | Se aplasta como gel y la lava se agita. Al soltar rebota, parpadea y sale una onda. |
-| `activa` | La persona está en la conversación que se muestra, o es la elegida. | Atentos: miran menos a los lados. | Aro con el degradado de Ronda que gira lento, halo y una respiración suave. |
+| `activa` | La persona está en la conversación que se muestra, o es la elegida. | Atentos: miran menos a los lados. | Aro con el degradado de Montu que gira lento, halo y una respiración suave. |
 | `pensando` | Su agente está negociando por ella. | Miran hacia arriba y se pasean, con el párpado algo caído. | El aro es un cometa que gira rápido, el halo late y la lava se mueve más. |
 | `lista` | Hay acuerdo o la persona aceptó. | Sonríen: dos arcos, con un rubor de luz debajo. | Un salto corto, una onda y el halo encendido. |
 | `ausente` | No está disponible o pausó a su agente. | Cerrados, sin mirada ni parpadeo. | La lava casi se detiene y pierde color. |
@@ -260,7 +260,7 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 - **Profundidad gradual** (nunca «sí/no»): cada cara se desenfoca, se aclara con niebla y pierde
   sombra de forma continua según su profundidad (`smoothstep` sobre z); los nombres también se
   desvanecen. Encima del fondo va el brillo del vidrio, que se desplaza lento, y un borde blanco.
-- **Toda persona tiene cara.** El globo dibuja las imágenes quietas de las caras de Ronda (ver
+- **Toda persona tiene cara.** El globo dibuja las imágenes quietas de las caras de Montu (ver
   «Caras»): el equipo usa `faces/*.png` y el resto sale del atlas de 64 caras
   (`faces/atlas/faces.png`, 8 × 8 de 128 px) y su gemelo desenfocado para el fondo
   (`faces/atlas/faces-blur.png`). Cerca del borde del globo las caras se achican para no
@@ -435,8 +435,8 @@ Cada punto es una dirección que Mati ya rechazó.
 - Fondo negro u oscuro. Bloques de color sólido. Bordes negros gruesos.
 - Tipografía serif (Instrument Serif u otra). Mayúsculas espaciadas tipo etiqueta.
 - Grillas tipo Mondrian, círculos de metro, sellos circulares, estética «retro».
-- Copiar Montu: tarjetas gris opaco `#f5f5f7` sobre blanco, avatares de arcilla 3D, un color por
-  persona (la luz de una cara es de esa persona, pero ese color no sale de la cara). Ronda comparte con Montu solo el bento redondeado y los números tipo Apple Health.
+- Copiar el Montu anterior (el panel de salud del equipo): tarjetas gris opaco `#f5f5f7` sobre blanco, avatares de arcilla 3D, un color por
+  persona (la luz de una cara es de esa persona, pero ese color no sale de la cara). Esta app comparte con ese panel solo el bento redondeado y los números tipo Apple Health.
 - Degradado morado genérico de «app de IA» en botones o fondos.
 - Frases ingeniosas como titular o subtítulo («Conecta lo tuyo. Tu agente hace el resto.»). El
   titular es el nombre de la pantalla.
@@ -447,18 +447,18 @@ Cada punto es una dirección que Mati ya rechazó.
 
 | Fecha | Decisión | Quién |
 |---|---|---|
-| 21-nov-2026 | La app se va a llamar Montu, por el dios egipcio. Se agrega una carga en que Montu se arma como un grafo (`rd-loader`, `montu/montu.js`). Es el único lugar nuevo con el degradado completo. El resto de la app sigue diciendo Ronda hasta que se haga el cambio de nombre. Propuesta, pendiente de revisión de Mati. | Ian |
+| 21-nov-2026 | **La app se llama Montu**, por el dios egipcio de cabeza de halcón (antes «Ronda», que era provisorio). El nombre cambió en la app, los textos del agente y la documentación. No cambiaron los nombres de código (`rd-*`, `--rd-*`, `ronda.css`, `RondaCaras` y las herramientas `ronda_*`), la dirección `ronda-n8if.onrender.com` ni el Atajo publicado «Ronda Salud». Isotipo nuevo: la cabeza de halcón dibujada como un grafo (`logo/montu-mark.svg`). Se agrega una carga en que Montu se arma como un grafo (`rd-loader`, `montu/montu.js`), el único lugar nuevo con el degradado completo. Pendiente de revisión de Mati. | Ian |
 | 21-nov-2026 | Universo e hilo pasan al estándar de `contexto/` (propuesto por Claude, a revisión de Mati). Universo: marco `rd-top` con los tres pasos como pestañas; las 100 personas siguen con cara, pero fuera de foco retroceden (niebla, menos color, el hemisferio de atrás casi desaparece); lava más suave y esfera más chica; arcos del grupo delgados y curvos; panel como tarjeta del Resumen con tema y miembros con rol; final «Tu semana» sin frase de dos tiempos, números grandes y calendario de un solo tono; temas de hasta 26 letras, sin texto cortado. Hilo: la tarjeta de herramienta muestra solo ícono, etiqueta, recibo y escena; el nombre técnico va en el desplegable; radios de la escala única; galería y duplas con `rd-top` y titular de una frase. | Claude |
 | 21-nov-2026 | **El estándar de todo el producto y de las demos es `contexto/`** (Resumen, Conexiones, Mapa): «these UIs are the ones that I love the most». Pidió estandarizar y documentar lo que hicieron las distintas sesiones. Queda así: el marco de esas páginas pasa a `ronda.css` (`rd-top`, `rd-nav`, `rd-tag`, `rd-pagetitle`, `rd-seg`); `index.html` es el mapa de todas las superficies con su estado; `reference.html` pasa a referencia anterior. El detalle de cómo se aplicó lo propuso Claude y queda a revisión de Mati. | Mati |
-| 21-nov-2026 | Caras: «me gustaron los ojos», esas son las caras de Ronda. Gota de vidrio con lámpara de lava y solo ojos, con estados (reposo, hover, presionada, activa, pensando, lista, ausente). Reemplazan a las Vita Faces en todo el producto. El único color por persona es la luz de su cara. | Mati |
-| 21-nov-2026 | Resumen de `contexto/`, sexta vuelta: bento con el globo al centro. El grafo del Resumen es el globo aprobado, incrustado (`grafo/globo.html?embed`), y no se detiene; la demo se puede pausar, adelantar y apurar. Las personas llevan la cara de Ronda (`RondaCaras`). Relieve solo en lo que se aprieta y en las marcas de los datos: las tarjetas son vidrio, sin canto. Una sola escala de radios (28, 16, 12, 6 y píldora). Una sola decisión por pantalla («no des tantas tareas»). Reemplaza el presupuesto de la fila de abajo. | Mati |
+| 21-nov-2026 | Caras: «me gustaron los ojos», esas son las caras de Montu. Gota de vidrio con lámpara de lava y solo ojos, con estados (reposo, hover, presionada, activa, pensando, lista, ausente). Reemplazan a las Vita Faces en todo el producto. El único color por persona es la luz de su cara. | Mati |
+| 21-nov-2026 | Resumen de `contexto/`, sexta vuelta: bento con el globo al centro. El grafo del Resumen es el globo aprobado, incrustado (`grafo/globo.html?embed`), y no se detiene; la demo se puede pausar, adelantar y apurar. Las personas llevan la cara de Montu (`RondaCaras`). Relieve solo en lo que se aprieta y en las marcas de los datos: las tarjetas son vidrio, sin canto. Una sola escala de radios (28, 16, 12, 6 y píldora). Una sola decisión por pantalla («no des tantas tareas»). Reemplaza el presupuesto de la fila de abajo. | Mati |
 | 21-nov-2026 | Resumen de `contexto/`: la versión sin relieve «perdió todo el sabor». Vuelve el look chunky que gustó, con presupuesto: un canto por tarjeta, un número grande y un objeto o gráfico con relieve por tarjeta; relieve en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior ni en las pestañas; un tinte por tarjeta. Conexiones y Mapa quedan como están: ahí el relieve va solo en el ícono de cada app y el botón principal. | Mati |
 | 21-nov-2026 | Los datos y gráficos del producto muestran el efecto de red (tú frente a la mediana de tu equipo, conversaciones entre agentes, lo que llegó a ti). Un panel de seguimiento personal «no agrega valor». No toda superficie lleva relieve; el alcance quedó fijado en la fila de arriba. | Mati |
 | 21-nov-2026 | Mapa de contexto aprobado («I love it»): esfera de puntos de vidrio que se mueve sola, apps y personas derivando sobre ella, las de atrás muy desenfocadas. | Mati |
 | 21-nov-2026 | Titulares de una sola frase simple que nombra la pantalla («Conexiones»). Sin frases ingeniosas de dos tiempos. | Mati |
 | 21-nov-2026 | Contexto personal (`contexto/`): íconos reales de cada app, superficies chunky (tarjeta blanca con canto, ícono como tecla, botón 3D). Mapa como esfera de puntos en 3D, sin cables. El primer mapa plano con cables: rechazado. | Mati |
 | 21-nov-2026 | Dirección «Aura»: luz tipo Apple Intelligence, vidrio, bento, red de agentes al centro. | Mati |
-| 21-nov-2026 | Se conserva de Montu: tarjetas bento redondeadas y números tipo Apple Health. | Mati |
+| 21-nov-2026 | Se conserva del Montu anterior (el panel de salud del equipo): tarjetas bento redondeadas y números tipo Apple Health. | Mati |
 | 21-nov-2026 | Globo: luz fluida dentro de la esfera e hilos de luz en vez de las líneas grises, que se veían como rayas en el vidrio. Caras: se explora «Aura», gota de luz con cara (`caras/sabores.html`); pendiente de aprobación. | Mati |
 | 21-nov-2026 | La primera luz no era lo pedido: Mati quería una lámpara de lava. Se rehace con masas que se funden y se separan. Caras dibujadas sobre la gota, descartadas; quedan Ojos, Vita de luz o la luz sola, a elección de Mati. | Mati |
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
@@ -473,8 +473,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Globo: cara en todos los nodos, nodos de atrás desenfocados bajo un velo de vidrio, varios grupos negociando con aro de grupo, tocar un grupo lo destaca, efectos de nacimiento y acuerdo. | Mati |
 | 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |
 
-Abierto: nombre definitivo («Ronda» es provisorio) e isotipo definitivo (el actual, tres órbitas y
-un punto, todavía no lo revisó Mati en grande).
+Abierto: el isotipo (la cabeza de halcón como grafo) todavía no lo revisó Mati.
 
 ## Archivos
 
@@ -485,8 +484,8 @@ un punto, todavía no lo revisó Mati en grande).
 | `ronda.css` | Primitivas `rd-*`. |
 | `index.html`, `indice/` | El mapa de todas las superficies de `design/` con su estado (estándar, demo, pieza aprobada, grabación, producto, archivo) y sus miniaturas. Toda página nueva se agrega ahí. |
 | `reference.html`, `reference.png` | Referencia anterior: la primera pantalla, hecha solo con primitivas. Su titular de dos líneas ya no se usa. El estándar es `contexto/`. |
-| `logo/ronda-mark.svg` | Isotipo. |
-| `faces/` | Las caras de Ronda: `caras.js` (la cara viva, con sus estados) y sus imágenes quietas (`*.png` del equipo y `atlas/`). |
+| `logo/montu-mark.svg` | Isotipo: la cabeza de halcón de Montu dibujada como un grafo, con nodos y líneas blancas sobre el degradado cálido. |
+| `faces/` | Las caras de Montu: `caras.js` (la cara viva, con sus estados) y sus imágenes quietas (`*.png` del equipo y `atlas/`). |
 | `caras/` | `caras.html`: página para ver y probar las caras, sus estados y tamaños. `atlas.html` y `aplicar.py`: sacan las imágenes quietas. `sabores.html`, `intentos.html`, `intentos/`, `ojos.js`, `vita-luz.js`: archivo de las alternativas que no se eligieron. |
 | `luz/` | `luz.js`: la lámpara de lava del globo y de las caras. |
 | `montu/` | `montu.js`: la carga en que Montu se arma como un grafo. `index.html`: su página de prueba. |

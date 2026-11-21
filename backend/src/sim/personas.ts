@@ -60,7 +60,7 @@ export function openSimStore(db: DatabaseSync): SimStore {
 }
 
 const SYSTEM = [
-  'Inventas personas de trabajo verosímiles para simular una organización en Ronda. Todas son ficticias.',
+  'Inventas personas de trabajo verosímiles para simular una organización en Montu. Todas son ficticias.',
   'Escribe en español de Chile, breve y concreto, sin signos de exclamación ni emojis.',
   'No uses las palabras «paciente», «cita» ni «consulta».',
 ].join('\n');

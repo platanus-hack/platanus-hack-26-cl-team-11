@@ -1,5 +1,5 @@
 /*
- * Ronda · Ojos, segunda vuelta. La persona es una gota de luz y solo tiene ojos, pero ahora los ojos
+ * Montu · Ojos, segunda vuelta. La persona es una gota de luz y solo tiene ojos, pero ahora los ojos
  * viven dentro del vidrio: sombra de contacto sobre la lava, borde de luz refractada, destello que
  * coincide con el de la gota, párpados de verdad y una mirada que sigue al puntero y a sus vecinos.
  *

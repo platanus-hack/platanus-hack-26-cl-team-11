@@ -102,7 +102,7 @@ test('start only answers a navigation that comes from the own page', async () =>
   for (const headers of foreign) {
     const response = await start(headers);
     assert.equal(response.status, 403);
-    assert.deepEqual(await response.json(), { error: 'Abre la conexión desde tu página de Ronda.' });
+    assert.deepEqual(await response.json(), { error: 'Abre la conexión desde tu página de Montu.' });
     assert.equal(response.headers.get('set-cookie'), null);
     assert.equal(response.headers.get('location'), null);
   }

@@ -14,7 +14,7 @@ Node 22.23.5), sobre `b78e3ae`; el producto es el mismo de `298419a`.
 | Pruebas sin servidor (Node 22.23.1) | `proveedor-demo.test.mts` 11 de 11, `servidor-demo.test.mts` 15 de 15, `preparar2.test.mjs` 16 de 16, `tiempos2.test.mjs` 20 de 20 |
 | Copia congelada en `50663e5` y `npm run build` | Construyó |
 | Arranque del servidor de demo (`servidor-demo.mts`, puerto 8797) | Partió. Calentamiento del modelo: 2,6 s. `/demo/estado` responde, `rondaSola: false` |
-| Ensayo 1 (`preparar2.mjs --ensayo`, HTTP real, modelo real) | Sin diferencias en las diez personas ni en la sala. Ronda lista en 26,1 s reales, 19 llamadas, 0 fallidas |
+| Ensayo 1 (`preparar2.mjs --ensayo`, HTTP real, modelo real) | Sin diferencias en las diez personas ni en la sala. Montu lista en 26,1 s reales, 19 llamadas, 0 fallidas |
 
 ## Ensayo 1: qué decidió el modelo
 
@@ -63,7 +63,7 @@ Es una sola ronda, no una tasa. La sonda corrió después, en la sesión en la n
 
 ### Ensayo 2 (`preparar2.mjs --ensayo --parcial-vale`)
 
-Ronda lista en 17,6 s reales, 19 llamadas, 0 fallidas. Piden exactamente Antonia, Ignacio y
+Montu lista en 17,6 s reales, 19 llamadas, 0 fallidas. Piden exactamente Antonia, Ignacio y
 Javiera. Catalina `parcial`, Felipe `no`, los otros tres `si`. Puertas G0, G1, G2, G2b y G3 pasan.
 Variante **V2**. Felipe: «Felipe conoce animación en canvas, pero ahora no tiene disponibilidad
 para hacerse cargo. Por ahora no puede ayudar a Javiera con esto.» Sin causa.
@@ -108,7 +108,7 @@ más largo probado (63 caracteres) mide 910 px de los 1.768 disponibles: uno de 
 | Toma | Opciones | Variante | Largo | Resultado |
 |---|---|---|---|---|
 | 1 | `--parcial-vale` | V2 | 431 s | No publicable: pasó de 200 s. Sin GPU, la lava de las caras corre por software y cada operación del navegador tarda unos 230 ms (7 ms sin WebGL, medido en la pantalla de la sala). No se armó el video. |
-| 2 | `--parcial-vale --sin-webgl` | V2 | 172 s | **Publicada.** Ronda en 20 s reales, 19 llamadas, puertas G0 a G3 pasan. |
+| 2 | `--parcial-vale --sin-webgl` | V2 | 172 s | **Publicada.** Montu en 20 s reales, 19 llamadas, puertas G0 a G3 pasan. |
 
 `--sin-webgl` se agregó a `grabar2.mjs` en `b78e3ae`. Sin WebGL las caras muestran su mezcla
 quieta, con los ojos vivos; es el respaldo que ya tiene el producto. No se usaron `--permiso api` ni

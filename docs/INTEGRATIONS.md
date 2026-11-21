@@ -80,7 +80,7 @@ Límites del Atajo:
 2. Toca **Agregar Atajo**. Se abre el link de iCloud y lo agrega. Esto se hace una sola vez.
 3. Vuelve a la página y toca **Enviar datos**. La página abre el Atajo y le pasa la dirección personal de esa persona, así que nadie pega ni escribe nada.
 4. La primera vez acepta el permiso de Salud y el de conexión. El Atajo muestra la respuesta del servidor: «Listo. Llegaron 7 días de datos, del 15-11 al 21-11.»
-5. Al terminar, el Atajo vuelve solo a la página de Ronda. La fila de Apple Health muestra «Esperando tus datos…» y después la hora del envío con lo que llegó, o el motivo si falló. Si en dos minutos no llega nada, lo dice.
+5. Al terminar, el Atajo vuelve solo a la página de Montu. La fila de Apple Health muestra «Esperando tus datos…» y después la hora del envío con lo que llegó, o el motivo si falló. Si en dos minutos no llega nada, lo dice.
 6. Para actualizar, toca **Enviar datos** otra vez. La confirmación aparece aunque lleguen los mismos días.
 
 Los dos botones aparecen cuando el servidor tiene `HEALTH_SHORTCUT_URL` (ver [DEPLOY.md](DEPLOY.md)). Sin esa variable la fila muestra solo la dirección personal, como antes.
@@ -142,7 +142,7 @@ El Atajo no se arma a mano: lo genera `tools/atajo-salud/build.py` y queda en `t
 | Pasos, agrupados por día | 7 días | `steps_by_day` |
 | Energía activa, agrupada por día | 7 días | `active_energy_by_day` |
 
-Si se abre sin la dirección de la persona, avisa «Abre este Atajo desde tu página de Ronda» y termina. Al final muestra la frase `message` que responde el servidor.
+Si se abre sin la dirección de la persona, avisa «Abre este Atajo desde tu página de Montu» y termina. Al final muestra la frase `message` que responde el servidor.
 
 Para dejarlo disponible:
 
@@ -153,7 +153,7 @@ Para dejarlo disponible:
        shortcuts sign --mode anyone --input "/tmp/Ronda Salud.shortcut" --output "$HOME/Desktop/Ronda Salud.shortcut"
 
 2. **Agregarlo.** Abre el archivo firmado en el Mac y acepta «Agregar atajo». iCloud lo lleva al iPhone de esa misma cuenta.
-3. **Probarlo en el iPhone**, desde la página de Ronda (ver «Qué revisar» abajo).
+3. **Probarlo en el iPhone**, desde la página de Montu (ver «Qué revisar» abajo).
 4. **Compartirlo.** En Atajos, **Compartir → Copiar enlace de iCloud**. Ese link va en `HEALTH_SHORTCUT_URL`, en el panel de Render.
 
 El archivo se armó con la estructura que documenta [Shortcuts Playground](https://github.com/viticci/shortcuts-playground-plugin) (MIT) para las acciones de Salud, que solo existen en iPhone y iPad. La primera versión se probó en un iPhone el 21-nov-2026: importó bien, leyó Salud y llegó hasta el envío, donde iOS la frenó por cantidad de datos. La versión liviana actual falta probarla. Qué revisar:
@@ -170,7 +170,7 @@ Pulso en reposo y variabilidad no van en el archivo: no confirmamos el nombre co
 Sirve para agregar un tipo al Atajo generado o para rehacerlo si el archivo no importa bien. Los nombres de las acciones cambian un poco entre versiones de iOS.
 
 1. Abre **Atajos**, crea uno nuevo y nómbralo exactamente `Ronda Salud`.
-2. En el panel de detalles (ⓘ), en «Recibir», deja solo **Texto**. En «Si no hay entrada», elige **Detener y responder** con el texto «Abre este Atajo desde tu página de Ronda.»
+2. En el panel de detalles (ⓘ), en «Recibir», deja solo **Texto**. En «Si no hay entrada», elige **Detener y responder** con el texto «Abre este Atajo desde tu página de Montu.»
 3. **Sueño.** Agrega **Buscar muestras de salud**: tipo **Sueño**, filtro «Fecha de inicio está en los últimos 7 días», ordenado por fecha de inicio.
 4. Agrega **Repetir con cada** sobre esas muestras. Adentro, una acción **Texto** con tres variables del elemento, separadas por una barra vertical: `Fecha de inicio|Fecha de término|Valor`. En las dos fechas, toca la variable y elige formato **ISO 8601** con la hora incluida.
 5. Después del fin de la repetición, agrega **Combinar texto** sobre los resultados de la repetición, separado por **líneas nuevas**, y guárdalo con **Definir variable** como `Sueño`.
@@ -267,7 +267,7 @@ Cobertura resultante: iPhone por el Atajo; Fitbit y Pixel Watch por Google; un A
 ## Las demás fuentes
 
 - **Google Calendar y Gmail.** Un solo OAuth. Una app sin verificar solo admite usuarios de prueba agregados a mano. De Gmail se guarda asunto y remitente, no el cuerpo.
-- **Granola.** Se conecta por OAuth contra su servidor MCP (`https://mcp.granola.ai/mcp`), que acepta registrar un cliente por programa y pide PKCE. Ronda quedó registrada como cliente el 21-nov-2026, con la dirección de retorno de producción. El servidor llama a la herramienta `search_meetings` y guarda una nota por reunión: título, hora, cantidad de asistentes y link. No pide transcripciones ni resúmenes. Antes se conectaba con una llave de su API REST, que exige plan Business; esa forma se quitó.
+- **Granola.** Se conecta por OAuth contra su servidor MCP (`https://mcp.granola.ai/mcp`), que acepta registrar un cliente por programa y pide PKCE. Montu quedó registrada como cliente el 21-nov-2026, con la dirección de retorno de producción. El servidor llama a la herramienta `search_meetings` y guarda una nota por reunión: título, hora, cantidad de asistentes y link. No pide transcripciones ni resúmenes. Antes se conectaba con una llave de su API REST, que exige plan Business; esa forma se quitó.
 - **GitHub.** OAuth App.
 
 Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cuenta y no sirven para el producto: cada persona autoriza sus cuentas contra nuestro backend.

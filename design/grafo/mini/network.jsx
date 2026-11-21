@@ -79,7 +79,7 @@ function Network({layout,paused,poster}) {
 }
 if (calendarStudy) {
   document.body.classList.add("study-page");
-  document.title="Cruce de agendas · Ronda";
+  document.title="Cruce de agendas · Montu";
   const favicon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="4" width="28" height="26" rx="6" fill="#016075"/><path d="M7 12h18M10 3v5m12-5v5m-11 12 4 4 7-8" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   document.querySelector('link[rel="icon"]').href="data:image/svg+xml,"+encodeURIComponent(favicon);
   document.querySelector(".brand-note .rd-note").textContent="Calendarios";

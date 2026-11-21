@@ -61,7 +61,7 @@ test('a page that already exists is associated with a Google account, and one ac
   assert.equal((await loginOf(ana.token)).name, 'Ana');
 
   const taken = await through(`/api/people/${tomas.token}/login/google/start`);
-  assert.match(decodeURIComponent(taken.headers.get('location') ?? ''), /ya está asociada a otra página de Ronda/);
+  assert.match(decodeURIComponent(taken.headers.get('location') ?? ''), /ya está asociada a otra página de Montu/);
   assert.equal((await loginOf(tomas.token)).login.email, null);
 
   const back = await through('/api/login/google/start');

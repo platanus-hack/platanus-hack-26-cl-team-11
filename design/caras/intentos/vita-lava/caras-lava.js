@@ -1,5 +1,5 @@
 /*
- * Ronda · «Vita de lava». La persona es una gota de lava y lleva el dibujo de Vita Faces encima.
+ * Montu · «Vita de lava». La persona es una gota de lava y lleva el dibujo de Vita Faces encima.
  *
  * La luz (RondaLuz.grid) llena toda la gota. Sobre ella van, dibujados por el equipo de Vita Faces: pelo, cejas, ojos,
  * boca y anteojos, en tinta, con un halo claro muy fino para que se lean sobre cualquier masa de color.

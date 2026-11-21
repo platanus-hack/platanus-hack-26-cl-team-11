@@ -1,4 +1,4 @@
-// Graba el camino feliz de Ronda sobre el producto real: una sala al azar, personas al azar y cada una
+// Graba el camino feliz de Montu sobre el producto real: una sala al azar, personas al azar y cada una
 // con un agente al azar. Quien corre este script hace de todos los agentes: lee cada link y escribe cada repo.
 //
 //   node tools/grabar/grabar.mjs --base http://localhost:8797 --out docs/demo/camino-feliz.mp4

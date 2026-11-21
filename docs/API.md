@@ -59,7 +59,7 @@ Cada elemento de `sources`:
 
 Sobre OAuth:
 
-- `start` solo responde a una navegación que viene de la propia página de Ronda. Desde otro sitio responde 403 «Abre la conexión desde tu página de Ronda.»
+- `start` solo responde a una navegación que viene de la propia página de Montu. Desde otro sitio responde 403 «Abre la conexión desde tu página de Montu.»
 - Sin credenciales del proveedor en el servidor, `start` responde 500 con el nombre de las dos variables que faltan.
 - El permiso queda amarrado al navegador que lo inició, dura 10 minutos y se usa una sola vez. Si no calza, `callback` responde 400.
 - Si el proveedor falla después del consentimiento, `callback` redirige a `/conectar/<token>?aviso=<mensaje>` y la página muestra el mensaje.
@@ -182,7 +182,7 @@ Qué hace el agente con cada mensaje está en [INTEGRATIONS.md](INTEGRATIONS.md#
 
 ## Hablarle a tu agente desde otro agente
 
-El agente que una persona conectó (Claude Code, Codex) puede hablarle a su agente de Ronda igual que ella por WhatsApp. Todas piden `Authorization: Bearer <token del asistente>`; sin un token vigente responden 401.
+El agente que una persona conectó (Claude Code, Codex) puede hablarle a su agente de Montu igual que ella por WhatsApp. Todas piden `Authorization: Bearer <token del asistente>`; sin un token vigente responden 401.
 
 | Ruta | Recibe | Responde |
 |---|---|---|

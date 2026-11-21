@@ -1,5 +1,5 @@
 /*
- * Ronda · el globo, incrustado en otra página. globo.html carga este archivo solo si la dirección trae ?embed:
+ * Montu · el globo, incrustado en otra página. globo.html carga este archivo solo si la dirección trae ?embed:
  *
  *   <iframe src="../grafo/globo.html?embed"></iframe>
  *

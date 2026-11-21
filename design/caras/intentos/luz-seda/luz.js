@@ -1,5 +1,5 @@
 /*
- * Ronda · luz de seda (intento): lámpara de lava hecha de luz translúcida. Un sombreador WebGL2, sin librerías, con dos usos:
+ * Montu · luz de seda (intento): lámpara de lava hecha de luz translúcida. Un sombreador WebGL2, sin librerías, con dos usos:
  *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de vidrio con lava dentro, una por persona
  *   RondaLuz.sphere(canvas, opciones)  la misma lava, más calmada, dentro del globo de vidrio
  * Cada gota es una esfera de vidrio con cinco esferas de cera que suben, bajan, se estiran y se funden

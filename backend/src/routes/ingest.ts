@@ -10,7 +10,7 @@ const MAX_BODY_BYTES = 1_000_000;
 const NOTHING_READABLE = 'No pudimos leer ningún dato de salud en el envío.';
 const RECEIVED_ONE = 'Listo. Llegaron tus datos.';
 const MOST_DAYS_FROM_CURRENT_SHORTCUT = 10;
-const OLD_SHORTCUT_HINT = 'Tu Atajo es una versión antigua y lee un mes entero, por eso tarda. Bórralo en la app Atajos y agrégalo de nuevo desde tu página de Ronda.';
+const OLD_SHORTCUT_HINT = 'Tu Atajo es una versión antigua y lee un mes entero, por eso tarda. Bórralo en la app Atajos y agrégalo de nuevo desde tu página de Montu.';
 const NOTHING_SENT = 'Tu teléfono no mandó datos de salud. Revisa que Salud tenga sueño o pasos registrados.';
 
 const shortDay = (day: string) => day.slice(5).split('-').reverse().join('-');

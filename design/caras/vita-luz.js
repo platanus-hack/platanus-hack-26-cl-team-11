@@ -1,5 +1,5 @@
 /*
- * Ronda · «Vita Faces de luz». Una persona hecha de luz.
+ * Montu · «Vita Faces de luz». Una persona hecha de luz.
  *
  * Mismas piezas que las Vita Faces (cara, pelo, ropa, lentes), pero la cabeza no tiene color propio: es la luz
  * fluida de la persona, recortada con la silueta de la cabeza y con su volumen encima (sombra y brillo de vidrio).

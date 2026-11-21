@@ -1,4 +1,4 @@
-// Ronda · tarjetas de herramienta. Una por conector, chunky, con una ilustración viva de lo que hace.
+// Montu · tarjetas de herramienta. Una por conector, chunky, con una ilustración viva de lo que hace.
 // API: RondaTools.create(call) -> { el, update(t) }. call = { name, label, at, end, input, output,
 // receipt, privateResult }. t en segundos absolutos del hilo. Movimiento según Stageshow:
 // el estado cambia en su propio lugar (States), el spinner gira antes de verse, nada salta.
@@ -60,7 +60,7 @@ window.RondaTools = (() => {
     return 'chat';
   }
 
-  // Una cara redonda real, con aro blanco, como en el resto de Ronda.
+  // Una cara redonda real, con aro blanco, como en el resto de Montu.
   function face(g, x, y, r, url) {
     const id = 'rtf' + (++uid);
     const cp = s('clipPath', { id }, g); s('circle', { cx: x, cy: y, r }, cp);

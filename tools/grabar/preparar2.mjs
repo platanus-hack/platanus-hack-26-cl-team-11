@@ -548,7 +548,7 @@ async function correrEnsayo({ base = BASE, parcialVale = false, fetchImpl, cadaM
   });
   const despues = (await cliente.api('/demo/estado')).llamadas ?? {};
   const llamadas = (despues.total ?? 0) - (antes.total ?? 0);
-  contar(`Ronda ${espera.vencio ? 'sin terminar' : espera.estado.round.status} · ${espera.segundos} s reales · ${llamadas} llamadas al modelo en la ronda`);
+  contar(`Montu ${espera.vencio ? 'sin terminar' : espera.estado.round.status} · ${espera.segundos} s reales · ${llamadas} llamadas al modelo en la ronda`);
   contar(`Servidor desde que partió: ${despues.total ?? 0} llamadas, ${despues.fallidas ?? 0} fallidas, ${despues.reintentos ?? 0} reintentos, ${despues.segundos ?? 0} s de modelo`);
 
   const resultado = await leerResultado(cliente, codigo, fichas);

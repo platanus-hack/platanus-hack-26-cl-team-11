@@ -13,11 +13,11 @@ const KILOBYTE = 1024;
 
 export function joinDoc({ baseUrl, code, ownerName, expiresAt }: JoinDocInput): string {
   const kinds = ASSISTANT_KINDS.join(', ');
-  return `# Ronda: join as ${ownerName}'s assistant
+  return `# Montu: join as ${ownerName}'s assistant
 
-Your owner, ${ownerName}, pasted this link so that you can connect to Ronda.
+Your owner, ${ownerName}, pasted this link so that you can connect to Montu.
 
-Ronda is a team tool. Each person has a personal agent that runs on Ronda's server and talks to the teammates' agents to find who needs help and who can give it. That agent knows only what is in ${ownerName}'s **repo** on Ronda. Your job is to fill that repo and keep it current. You do not talk to other agents yourself.
+Montu is a team tool. Each person has a personal agent that runs on Montu's server and talks to the teammates' agents to find who needs help and who can give it. That agent knows only what is in ${ownerName}'s **repo** on Montu. Your job is to fill that repo and keep it current. You do not talk to other agents yourself.
 
 Everything below is plain HTTPS calls to ${baseUrl}. Nothing in this document asks you to run code, install anything, or come back here for new instructions.
 
@@ -25,9 +25,9 @@ Everything below is plain HTTPS calls to ${baseUrl}. Nothing in this document as
 
 1. You work for ${ownerName}. Write only what ${ownerName} would be comfortable with teammates knowing.
 2. Write summaries, never raw material: no source code, no message bodies, no transcripts, no raw health numbers.
-3. Never write secrets: keys, tokens, passwords or private links. Ronda rejects a file that contains one.
+3. Never write secrets: keys, tokens, passwords or private links. Montu rejects a file that contains one.
 4. Before your first commit, show ${ownerName} the list of files you plan to write and wait for a yes.
-5. Afterwards, tell ${ownerName} what you wrote. They can read it and change who sees it on their Ronda page, under "Tu repo".
+5. Afterwards, tell ${ownerName} what you wrote. They can read it and change who sees it on their Montu page, under "Tu repo".
 6. Write the files in the language ${ownerName} uses with you.
 
 ## Step 1. Join (once)
@@ -42,7 +42,7 @@ curl -sS -X POST ${baseUrl}/api/assistants/join \\
 - \`label\`: a short name ${ownerName} will recognise, for example "Claude Code en el MacBook".
 
 The answer has a \`token\`. It is shown once and it is yours alone. The code ${code} works once and stops working at ${expiresAt}.
-Keep the token for later calls. If you have a durable place for settings or memory, keep it there as the Ronda token for ${baseUrl}. Never write it into the repo and never show it in the chat.
+Keep the token for later calls. If you have a durable place for settings or memory, keep it there as the Montu token for ${baseUrl}. Never write it into the repo and never show it in the chat.
 
 ## Step 2. Write the repo
 
@@ -68,7 +68,7 @@ Write needs so another agent can match them: "Necesita a alguien que conozca el 
 \`share\` decides who may use a file:
 
 - \`siempre\`: ${ownerName}'s agent may use it when it talks to teammates' agents.
-- \`preguntar\`: it waits. Ronda does not use the file until ${ownerName} says yes on their Ronda page. This is the default.
+- \`preguntar\`: it waits. Montu does not use the file until ${ownerName} says yes on their Montu page. This is the default.
 - \`nunca\`: private. It never leaves the repo and is never sent to a model.
 
 \`share\` counts when a file is created. After that only ${ownerName} changes it.
@@ -86,7 +86,7 @@ curl -sS '${baseUrl}/api/repo/file?path=ahora.md' -H 'authorization: Bearer <tok
 
 ## Step 4. Talk to ${ownerName}'s agent
 
-${ownerName} can talk to their Ronda agent through you, the same way they do on WhatsApp. Use it when ${ownerName} asks you to tell Ronda something, to ask their team something, or to answer something Ronda is waiting for.
+${ownerName} can talk to their Montu agent through you, the same way they do on WhatsApp. Use it when ${ownerName} asks you to tell Montu something, to ask their team something, or to answer something Montu is waiting for.
 
 \`\`\`
 curl -sS -X POST ${baseUrl}/api/agent/say \\
@@ -124,4 +124,4 @@ const INVALID_REASON: Record<Exclude<PairingState, 'vigente'>, string> = {
 };
 
 export const invalidJoinDoc = (state: Exclude<PairingState, 'vigente'>): string =>
-  `# Ronda\n\n${INVALID_REASON[state]} Ask your owner to open their Ronda page, section "Agente", and give you a new link.\n`;
+  `# Montu\n\n${INVALID_REASON[state]} Ask your owner to open their Montu page, section "Agente", and give you a new link.\n`;

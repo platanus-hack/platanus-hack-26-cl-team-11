@@ -1,5 +1,5 @@
 /*
- * Ronda · primitivas de UI. Toda pantalla se arma con estas clases.
+ * Montu · primitivas de UI. Toda pantalla se arma con estas clases.
  * Depende de tokens.css (cargarlo antes). No se redefinen acá colores ni tipografías: solo var(--rd-*).
  * Cada primitiva está documentada en design/DESIGN.md y se ve funcionando en design/reference.html.
  */
@@ -258,7 +258,7 @@ button.rd-item, a.rd-item { cursor: pointer; }
 .rd-cara__gota > canvas { transition: filter .4s ease; }
 .rd-cara__gota > svg { transition: opacity .4s ease; }
 .rd-cara__halo { position: absolute; inset: -24%; border-radius: 50%; background: radial-gradient(circle closest-side, var(--rd-cara-luz, transparent) 30%, transparent 100%); opacity: 0; transition: opacity .32s ease; pointer-events: none; } /* rd-lint-ok: la luz de cada persona */
-.rd-cara__anillo { position: absolute; inset: calc(-1 * (var(--rd-cara-aro) + var(--rd-cara-aire))); border-radius: 50%; background: conic-gradient(var(--rd-g1), var(--rd-g2), var(--rd-g3), var(--rd-g4), var(--rd-g5), var(--rd-g1)); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rd-cara-aro) - .6px), #000 calc(100% - var(--rd-cara-aro))); mask: radial-gradient(farthest-side, transparent calc(100% - var(--rd-cara-aro) - .6px), #000 calc(100% - var(--rd-cara-aro))); opacity: 0; scale: .88; transition: opacity .35s ease, scale .5s cubic-bezier(.2, .9, .3, 1.25); pointer-events: none; animation: rd-cara-gira 7s linear infinite paused; } /* rd-lint-ok: el aro usa el degradado de Ronda en círculo */
+.rd-cara__anillo { position: absolute; inset: calc(-1 * (var(--rd-cara-aro) + var(--rd-cara-aire))); border-radius: 50%; background: conic-gradient(var(--rd-g1), var(--rd-g2), var(--rd-g3), var(--rd-g4), var(--rd-g5), var(--rd-g1)); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rd-cara-aro) - .6px), #000 calc(100% - var(--rd-cara-aro))); mask: radial-gradient(farthest-side, transparent calc(100% - var(--rd-cara-aro) - .6px), #000 calc(100% - var(--rd-cara-aro))); opacity: 0; scale: .88; transition: opacity .35s ease, scale .5s cubic-bezier(.2, .9, .3, 1.25); pointer-events: none; animation: rd-cara-gira 7s linear infinite paused; } /* rd-lint-ok: el aro usa el degradado de Montu en círculo */
 .rd-cara__onda { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--rd-cara-luz, transparent); opacity: 0; pointer-events: none; }
 .rd-cara--chica { --rd-cara-aro: 2px; --rd-cara-aire: 1.5px; }
 .rd-cara--chica .rd-cara__gota { box-shadow: var(--rd-shadow-face-small); }

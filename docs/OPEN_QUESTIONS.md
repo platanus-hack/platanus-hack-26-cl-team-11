@@ -8,10 +8,10 @@
 | Canal con la persona | WhatsApp. |
 | Privacidad | La persona decide qué sale de su agente; los líderes ven agregados. |
 | Fuentes | Wearables, check-in conversacional, trabajo (GitHub, Linear, calendario) y reuniones (Granola). |
-| Relación con Montu | Proyecto nuevo con código desde cero; se toma lo aprendido, no el código. |
+| Relación con el Montu anterior (el panel de salud del equipo) | Proyecto nuevo con código desde cero; se toma lo aprendido, no el código. |
 | Conversación entre agentes | Primero 1:1. Las necesidades descubiertas forman un grafo dirigido. En el turno 2, las salidas de un mismo solicitante pueden originar grupos. Red sin coordinador, con tablero y función de agregado; detalle en [AGENT_MODEL.md](AGENT_MODEL.md). |
 | Orden de construcción | Base, luego diferenciadores, luego extras; detalle en [ROADMAP.md](ROADMAP.md). |
-| Multijugador | Una sala abierta con QR. El agente que cada persona ya usa entra con un link y escribe su repo; el agente personal de Ronda conversa leyendo ese repo. Detalle en [AGENT_MODEL.md](AGENT_MODEL.md#agente-personal-y-asistentes-conectados). |
+| Multijugador | Una sala abierta con QR. El agente que cada persona ya usa entra con un link y escribe su repo; el agente personal de Montu conversa leyendo ese repo. Detalle en [AGENT_MODEL.md](AGENT_MODEL.md#agente-personal-y-asistentes-conectados). |
 | Cómo se conecta un agente | No hay un estándar único. Se usa un link pegado con un documento de ingreso (como hizo Moltbook con OpenClaw) y, para apps de chat, copiar una pregunta y pegar la respuesta. Un servidor MCP queda como siguiente puerta; A2A no calza porque exige que cada agente sea un servidor con dirección. |
 | Modelo | DeepSeek en 50x, con `FIFTYX_API_KEY`. |
 
@@ -19,7 +19,7 @@
 
 ### Producto
 
-- [ ] **Nombre del proyecto.** Provisorio: «Ronda» (ver `design/README.md`).
+- [x] **Nombre del proyecto.** Montu, por el dios egipcio (Ian, 21-nov-2026). Antes «Ronda», provisorio.
 - [ ] **Track de la hack** en el que se inscribe.
 - [ ] **Dónde vive la vista de equipo:** web propia, mensaje al grupo de WhatsApp o ambos. Hoy: en la web, pestaña Equipo del panel personal.
 - [ ] **Cadencia del pulso del equipo:** diaria, semanal o solo a pedido. Hoy: a pedido; se calcula cada vez que alguien abre la pestaña Equipo.

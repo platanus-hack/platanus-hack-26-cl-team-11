@@ -14,11 +14,11 @@ Hay **un agente personal por persona** y ningún otro agente.
 
 ## Agente personal y asistentes conectados
 
-Decisión del 21-nov-2026. El agente personal corre en el servidor de Ronda. Los agentes que la persona ya usa (Claude Code, Codex, ChatGPT, Grok, OpenClaw y otros) entran como **asistentes conectados**.
+Decisión del 21-nov-2026. El agente personal corre en el servidor de Montu. Los agentes que la persona ya usa (Claude Code, Codex, ChatGPT, Grok, OpenClaw y otros) entran como **asistentes conectados**.
 
 | | Agente personal | Asistente conectado |
 |---|---|---|
-| Dónde corre | En Ronda, siempre disponible | Donde la persona lo usa, solo mientras lo tiene abierto |
+| Dónde corre | En Montu, siempre disponible | Donde la persona lo usa, solo mientras lo tiene abierto |
 | Qué hace | Habla con los agentes de los demás | Escribe y ordena el repo de su persona |
 | Qué sabe | Las señales y el repo de su persona | Lo que la persona ya le cuenta |
 

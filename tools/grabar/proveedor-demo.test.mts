@@ -164,7 +164,7 @@ function montar(elenco: Elenco) {
       const enlace = (await pedir(`/api/people/${ficha}/assistants/pairings`, { metodo: 'POST', cuerpo: {} })).json();
       guardar(enlace.code);
       const documento = await pedir(enlace.path);
-      assert.ok(documento.texto.startsWith(`# Ronda: join as ${persona.nombre}'s assistant`), `${persona.id} · el link no entregó el documento de ingreso`);
+      assert.ok(documento.texto.startsWith(`# Montu: join as ${persona.nombre}'s assistant`), `${persona.id} · el link no entregó el documento de ingreso`);
       const ingreso = (await pedir('/api/assistants/join', { metodo: 'POST', cuerpo: { code: enlace.code, kind: persona.asistente.tipo, label: persona.asistente.etiqueta } })).json();
       guardar(ingreso.token);
       assert.deepEqual([ingreso.assistant.kind, ingreso.assistant.label], [persona.asistente.tipo, persona.asistente.etiqueta]);

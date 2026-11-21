@@ -1,4 +1,4 @@
-import markUrl from '../../design/logo/ronda-mark.svg';
+import markUrl from '../../design/logo/montu-mark.svg';
 import { CopyButton } from './CopyButton';
 import { OverflowMenu } from './OverflowMenu';
 
@@ -7,7 +7,7 @@ export function TopBar({ token }: { token: string }) {
     <header className="app-top">
       <a className="rd-brand" href="/">
         <img className="rd-mark" src={markUrl} alt="" />
-        Ronda
+        Montu
       </a>
       <OverflowMenu>
         <a className="rd-menu__item" href={`/contexto/${encodeURIComponent(token)}`}>

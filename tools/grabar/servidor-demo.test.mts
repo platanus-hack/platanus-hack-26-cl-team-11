@@ -233,7 +233,7 @@ test('las rutas de la demo van antes que la app, y el diseño y la app se sirven
   const demo = montar();
   assert.match((await demo.pedir('/demo/estado')).headers.get('content-type') ?? '', /json/);
   assert.equal((await demo.pedir('/api/health')).status, 200);
-  for (const ruta of ['/design/tokens.css', '/design/ronda.css', '/design/logo/ronda-mark.svg', '/design/sources/gmail.svg']) assert.equal((await demo.pedir(ruta)).status, 200, ruta);
+  for (const ruta of ['/design/tokens.css', '/design/ronda.css', '/design/logo/montu-mark.svg', '/design/sources/gmail.svg']) assert.equal((await demo.pedir(ruta)).status, 200, ruta);
   assert.equal((await demo.app.request('/demo/estado', { method: 'POST' })).status, 404);
 
   const conApp = existsSync(join(RAIZ, 'frontend', 'dist', 'index.html'));
@@ -384,8 +384,8 @@ test('la sonda de respuestas, con un modelo de prueba: fichas con disponibilidad
   const salida = lineas.join('\n');
 
   assert.deepEqual(pedidos.slice(0, 2).map(({ system, respuesta }) => [system.split('\n')[0], respuesta]), [
-    ['Lees los archivos de trabajo que Catalina decidió compartir con su equipo en Ronda.', false],
-    ['Lees los archivos de trabajo que Felipe decidió compartir con su equipo en Ronda.', false],
+    ['Lees los archivos de trabajo que Catalina decidió compartir con su equipo en Montu.', false],
+    ['Lees los archivos de trabajo que Felipe decidió compartir con su equipo en Montu.', false],
   ]);
   const deCatalina = pedidos.filter(({ system, respuesta }) => respuesta && system === systemFor('Catalina'));
   const deFelipe = pedidos.filter(({ system, respuesta }) => respuesta && system === systemFor('Felipe'));

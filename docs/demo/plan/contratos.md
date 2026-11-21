@@ -1,4 +1,4 @@
-# Demo 2 de Ronda · build contracts
+# Demo 2 de Montu · build contracts
 
 Script: `docs/demo/plan/guion-final.md` (cast, data, scenes, gates). This file says who builds what and how the pieces fit.
 Repo root, called `R` below: `<repo>`. Checked at `98db251`.
@@ -219,7 +219,7 @@ Run (lead only, it calls the model): `cd <root> && npx tsx tools/grabar/ensayo-r
 
 ## 4. B3 · stage and permission page
 
-Read `R/design/DESIGN.md` whole and open `R/design/reference.html` first (AGENTS.md rule 3). Only `rd-*` primitives and `--rd-*` tokens. Layout rules may live in the page's own `<style>`; colours, fonts, weights, gradients and shadows may not. Both pages carry the Ronda favicon (the same data URI as `design/demo/escenario.html`).
+Read `R/design/DESIGN.md` whole and open `R/design/reference.html` first (AGENTS.md rule 3). Only `rd-*` primitives and `--rd-*` tokens. Layout rules may live in the page's own `<style>`; colours, fonts, weights, gradients and shadows may not. Both pages carry the Montu favicon (the same data URI as `design/demo/escenario.html`).
 
 ### 4.1 `R/design/demo/escenario2.html`
 

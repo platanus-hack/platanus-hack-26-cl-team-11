@@ -1,4 +1,4 @@
-// Ronda · lo que se ve sobre un arco del grafo mientras su hilo corre.
+// Montu · lo que se ve sobre un arco del grafo mientras su hilo corre.
 // Depende de RondaMotion (../mini/motion-paint.js y calendar-edge.js) y de RondaTools.motionKind.
 // RondaEdge.state(events, t) dice qué pasa en el arco; RondaEdge.paint(ctx, arc, st, opts) lo dibuja.
 //   arc  = { from: {x,y}, to: {x,y}, control: {x,y} }   (curva cuadrática, como en el globo)

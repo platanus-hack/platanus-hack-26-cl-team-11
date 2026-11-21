@@ -1,12 +1,12 @@
 # Pitch
 
-Cómo se explica Ronda en una frase, en dos minutos y medio, y frente a preguntas. Está armado con las guías públicas de Y Combinator; las fuentes están al final.
+Cómo se explica Montu en una frase, en dos minutos y medio, y frente a preguntas. Está armado con las guías públicas de Y Combinator; las fuentes están al final.
 
 Todo dato de avance viene de pruebas hechas el 21-nov-2026. Lo que falta decidir está en [Pendientes](#pendientes).
 
 ## En una frase
 
-> **Ronda le da a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.**
+> **Montu le da a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.**
 
 Versiones para otros momentos:
 
@@ -14,7 +14,7 @@ Versiones para otros momentos:
 |---|---|
 | Decirlo en voz alta | «Le escribes por WhatsApp a tu agente en qué estás trabado y en un minuto te propone a la persona de tu empresa que sabe de eso.» |
 | Compararlo con algo conocido | «Es la daily, pero la hacen los agentes en vez de las personas.» |
-| Dos frases, con el porqué | «Ronda le da a cada persona un agente que la conoce. Los agentes conversan entre sí, así que una empresa de 300 personas se coordina sin que nadie tenga que ir a una reunión.» |
+| Dos frases, con el porqué | «Montu le da a cada persona un agente que la conoce. Los agentes conversan entre sí, así que una empresa de 300 personas se coordina sin que nadie tenga que ir a una reunión.» |
 
 Reglas de YC que cumple, y que hay que cuidar al cambiarla:
 
@@ -28,7 +28,7 @@ Reglas de YC que cumple, y que hay que cuidar al cambiarla:
 
 Geoff Ralston pide armar la presentación sobre tres o cuatro ideas, porque es lo que la audiencia retiene. Responden cuatro preguntas:
 
-| Pregunta de YC | Respuesta de Ronda |
+| Pregunta de YC | Respuesta de Montu |
 |---|---|
 | ¿Qué construyen y para quién? | Un agente personal para cada persona de un equipo. Los agentes conversan entre sí y de ahí salen propuestas de ayuda que cada persona acepta. |
 | ¿Por qué nadie lo hizo antes? | Los agentes personales que existen trabajan cada uno por su lado. Las herramientas que miran a los equipos trabajan para RR. HH., no para la persona. Nadie juntó las dos cosas. |
@@ -76,13 +76,13 @@ Dos minutos y medio es lo que dura un pitch en el Demo Day de YC. El guion largo
 
 | Tiempo | Qué se dice | Qué se ve |
 |---|---|---|
-| 0:00 | «Somos Ronda. Le damos a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.» | El nombre |
+| 0:00 | «Somos Montu. Le damos a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.» | El nombre |
 | 0:15 | «Con 5 personas hay 10 conversaciones posibles. Con 300 hay 44.850. Nadie puede tenerlas, así que las empresas pierden información.» | El grafo llenándose |
 | 0:35 | «Un agente sí puede. Miren.» Una persona le escribe a su agente por WhatsApp que está trabada con algo. El agente pregunta si puede contarlo. Ella toca «Permitir». | El teléfono en pantalla |
 | 1:05 | «Ahora su agente conversa con los de su equipo.» En segundos llega la propuesta: quién la ayuda. Toca «Aceptar». | El globo con los arcos; el teléfono |
 | 1:35 | «Lo que durmió, cómo se siente y qué le escribió a su agente no salió nunca. El agente es de ella, no de la empresa.» | Sus permisos en Ajustes |
 | 1:55 | «Esto lo construimos este fin de semana. Una ronda toma 15 segundos. Funciona con el agente que ya usas.» | Tres números |
-| 2:15 | «Ronda: un agente por persona, los agentes conversan, tú recibes solo las conversaciones que necesitas tener. Escaneen el QR y pruébenlo.» | El QR |
+| 2:15 | «Montu: un agente por persona, los agentes conversan, tú recibes solo las conversaciones que necesitas tener. Escaneen el QR y pruébenlo.» | El QR |
 
 Cómo presentarlo, según Ralston y Hale:
 
@@ -105,7 +105,7 @@ Kevin Hale: entre cinco y siete láminas, una idea por lámina. La audiencia rec
 
 | # | Texto de la lámina | Idea |
 |---|---|---|
-| 1 | Ronda: un agente por persona | Qué hacemos |
+| 1 | Montu: un agente por persona | Qué hacemos |
 | 2 | 300 personas, 44.850 conversaciones | El problema |
 | 3 | Los agentes sí pueden tenerlas | El giro; después va la demo |
 | 4 | Tu agente es tuyo | Privacidad |
@@ -127,7 +127,7 @@ YC pide llegar con las objeciones ya pensadas y contar los defectos antes de que
 | Pregunta | Respuesta corta |
 |---|---|
 | ¿No es vigilancia para jefes? | No. El agente es de la persona: pregunta antes de contar un bloqueo y respeta el no. El líder ve solo totales del grupo, nunca una respuesta individual. |
-| ¿En qué se diferencia de un agente personal como Instinct? | Esos aceleran a cada persona por separado. Ronda es lo que pasa entre los agentes: la coordinación del equipo. |
+| ¿En qué se diferencia de un agente personal como Instinct? | Esos aceleran a cada persona por separado. Montu es lo que pasa entre los agentes: la coordinación del equipo. |
 | ¿Y de Culture Amp, Viva u Oura Teams? | Terminan en un panel para RR. HH. Aquí el dato es de la persona y termina en una acción: «habla con ella, sabe de esto». |
 | ¿Por qué no un canal de Slack? | Porque pedir ayuda en público cuesta, y nadie lee 300 canales. El agente pregunta por ti y te trae una sola respuesta. |
 | ¿Qué pasa si el agente inventa? | El agente solo cuenta lo que su persona dejó compartir, y nada queda comprometido sin que la persona acepte. Si ningún agente sabe, lo dice. |
@@ -155,7 +155,7 @@ De [ROADMAP.md](ROADMAP.md#qué-existe-hoy-en-estados-unidos). Una línea por ca
 
 - **Lo que se puede decir:** según varios artículos sobre los pedidos de startups de YC para Fall 2026, uno de los 13 se llama «Multiplayer AI», de Aaron Epstein. Su argumento es que la colaboración hizo ganar a Google Docs y a Figma, y que la IA todavía no tiene su momento multijugador.
 - **Lo que no se pudo verificar:** el texto original. La página oficial muestra hoy la lista de Winter 2027, que no incluye ese pedido, y el anuncio de Fall 2026 no cargó.
-- **Cuidado al citarlo:** ese pedido habla de sesiones compartidas donde un equipo mira y redirige a un agente. Ronda es otra cosa: un agente por persona, que conversan entre sí. Se puede decir que YC pidió IA multijugador; no que pidió esto.
+- **Cuidado al citarlo:** ese pedido habla de sesiones compartidas donde un equipo mira y redirige a un agente. Montu es otra cosa: un agente por persona, que conversan entre sí. Se puede decir que YC pidió IA multijugador; no que pidió esto.
 
 ## Pendientes
 

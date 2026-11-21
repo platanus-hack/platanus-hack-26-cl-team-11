@@ -1,5 +1,5 @@
 /*
- * Ronda · contexto: Resumen, Conexiones y Mapa. Páginas de prueba (AGENTS.md regla 5).
+ * Montu · contexto: Resumen, Conexiones y Mapa. Páginas de prueba (AGENTS.md regla 5).
  * Conexiones y Mapa: superficies tranquilas, relieve solo en el ícono real de cada app y en el botón
  * principal. Resumen (.cx-r): bento de vidrio con el globo al centro; relieve solo en lo que se
  * aprieta y en las marcas de los datos (Mati, 21-nov: «perdió el sabor», y después «no toda
@@ -166,7 +166,7 @@
 @keyframes cx-roll-in { from { opacity: 0; transform: translateY(100%); } }
 @keyframes cx-roll-out { to { opacity: 0; transform: translateY(-100%); } }
 
-/* Cara: la pieza única de Ronda (rd-cara, la monta ../faces/caras.js). Acá solo se le da tamaño. */
+/* Cara: la pieza única de Montu (rd-cara, la monta ../faces/caras.js). Acá solo se le da tamaño. */
 .cx-face { --s: 36px; width: var(--s); height: var(--s); }
 .cx-pair { display: inline-flex; gap: 6px; }
 

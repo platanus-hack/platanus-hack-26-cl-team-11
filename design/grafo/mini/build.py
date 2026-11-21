@@ -20,9 +20,9 @@ page = f'''<!doctype html>
 {license_text}
 -->
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Interacciones en paralelo · Ronda</title><link rel="icon" href="{motion.LOGO}" type="image/svg+xml">
+<title>Interacciones en paralelo · Montu</title><link rel="icon" href="{motion.LOGO}" type="image/svg+xml">
 <style>{styles}</style></head><body><div class="rd-page"><div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-<div class="rd-page__inner frame"><header class="rd-bar"><div class="brand-note"><span class="rd-brand"><img class="rd-mark" src="{motion.LOGO}" alt="">Ronda</span><span class="rd-note">Red de agentes</span></div>
+<div class="rd-page__inner frame"><header class="rd-bar"><div class="brand-note"><span class="rd-brand"><img class="rd-mark" src="{motion.LOGO}" alt="">Montu</span><span class="rd-note">Red de agentes</span></div>
 <button class="rd-button rd-button--quiet" id="toggle" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="pause-icon" d="M3 2h3v12H3zm7 0h3v12h-3z"/><path class="play-icon" d="m3 1 11 7-11 7z"/></svg><span>Pausar</span></button><span id="still" class="rd-note" hidden>Movimiento reducido</span></header>
 <main><h1 class="rd-hero stage-title">Interacciones en paralelo</h1><div id="example" aria-label="Cinco agentes y sus intercambios"></div></main>
 <footer class="note rd-note"><span>Selecciona un objeto para ver la escena completa.</span><span>Demo con datos simulados</span></footer>

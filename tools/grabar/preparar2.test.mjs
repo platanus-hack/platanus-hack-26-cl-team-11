@@ -224,7 +224,7 @@ function servidorDeMentira(opciones = {}) {
   };
 
   const rutas = [
-    ['GET', /^\/demo\/estado$/, () => (opciones.sinDemo ? new Response('<!doctype html><title>Ronda</title>', { status: 200, headers: { 'content-type': 'text/html' } }) : json(200, { commit: 'abc1234', arrancoEn: `${HOY}T14:00:00.000Z`, hoy: opciones.hoy ?? HOY, sala: SALA, modelo: 'guionado', rondaSola: opciones.rondaSola ?? false, llamadas: { ...llamadas } }))],
+    ['GET', /^\/demo\/estado$/, () => (opciones.sinDemo ? new Response('<!doctype html><title>Montu</title>', { status: 200, headers: { 'content-type': 'text/html' } }) : json(200, { commit: 'abc1234', arrancoEn: `${HOY}T14:00:00.000Z`, hoy: opciones.hoy ?? HOY, sala: SALA, modelo: 'guionado', rondaSola: opciones.rondaSola ?? false, llamadas: { ...llamadas } }))],
     ['POST', /^\/api\/rooms$/, ({ cuerpo }) => {
       if (cuerpo?.name !== SALA) return error(400, 'Falta el nombre.');
       sala.abierta = true;
@@ -268,7 +268,7 @@ function servidorDeMentira(opciones = {}) {
       return json(201, { ok: true, id: persona.noches, summary: cuerpo.sleep_hours === '23040,5' ? 'sueño 6.4 h' : `sueño ${cuerpo.sleep_hours} h` });
     }],
     ['GET', /^\/api\/people\/([^/]+)\/oauth\/([^/]+)\/start$/, ({ persona, partes: [, proveedor], cabeceras, redirect }) => {
-      if (opciones.sinPagina || cabeceras['sec-fetch-site'] !== 'same-origin' || cabeceras.origin !== BASE || redirect !== 'manual') return error(403, 'Abre la conexión desde tu página de Ronda.');
+      if (opciones.sinPagina || cabeceras['sec-fetch-site'] !== 'same-origin' || cabeceras.origin !== BASE || redirect !== 'manual') return error(403, 'Abre la conexión desde tu página de Montu.');
       if (!FUENTES.some((fuente) => fuente.provider === proveedor)) return error(400, 'Ese proveedor no existe.');
       const sello = secreto('sello');
       const galleta = secreto('galleta');
@@ -308,8 +308,8 @@ function servidorDeMentira(opciones = {}) {
     }],
     ['GET', /^\/a\/([^/]+)$/, ({ partes: [codigo] }) => {
       const persona = enlaces.get(codigo);
-      if (!persona) return new Response('# Ronda: this link is not valid', { status: 404, headers: { 'content-type': 'text/markdown; charset=utf-8' } });
-      return new Response(`# Ronda: join as ${persona.nombre}'s assistant\n\nPOST /api/assistants/join with the code ${codigo}.\n`, { status: 200, headers: { 'content-type': 'text/markdown; charset=utf-8' } });
+      if (!persona) return new Response('# Montu: this link is not valid', { status: 404, headers: { 'content-type': 'text/markdown; charset=utf-8' } });
+      return new Response(`# Montu: join as ${persona.nombre}'s assistant\n\nPOST /api/assistants/join with the code ${codigo}.\n`, { status: 200, headers: { 'content-type': 'text/markdown; charset=utf-8' } });
     }],
     ['POST', /^\/api\/assistants\/join$/, ({ cuerpo }) => {
       const persona = enlaces.get(cuerpo?.code);
@@ -389,7 +389,7 @@ function servidorDeMentira(opciones = {}) {
       if (deUnaPersona && !persona) return noValido();
       return responder({ partes, persona, cuerpo, cabeceras, consulta: Object.fromEntries(searchParams), redirect: init.redirect });
     }
-    return new Response('<!doctype html><title>Ronda</title>', { status: metodo === 'GET' ? 200 : 404, headers: { 'content-type': 'text/html; charset=utf-8' } });
+    return new Response('<!doctype html><title>Montu</title>', { status: metodo === 'GET' ? 200 : 404, headers: { 'content-type': 'text/html; charset=utf-8' } });
   };
 
   const recorrido = (desde = 0) => pedidos.slice(desde).map((pedido) => `${pedido.metodo} ${visible(pedido.ruta)}`);
@@ -439,7 +439,7 @@ test('el cliente habla JSON, entrega el texto que no es JSON y nunca deja una fi
   assert.deepEqual(demo.pedidos.at(-1).cabeceras, {});
 
   const enlace = await cliente.api(`/api/people/${ficha}/assistants/pairings`, { metodo: 'POST', cuerpo: {} });
-  assert.match(await cliente.api(enlace.path), /^# Ronda: join as Antonia's assistant/);
+  assert.match(await cliente.api(enlace.path), /^# Montu: join as Antonia's assistant/);
   const ingreso = await cliente.api('/api/assistants/join', { metodo: 'POST', cuerpo: { code: enlace.code, kind: 'claude-code', label: 'Claude Code en el MacBook' } });
   await cliente.api('/api/repo/commit', { metodo: 'POST', token: ingreso.token, cuerpo: { message: 'Primer contexto', topics: [], files: [] } });
   assert.equal(demo.pedidos.at(-1).cabeceras.authorization, `Bearer ${ingreso.token}`);
@@ -504,7 +504,7 @@ test('conectarOAuth manda las dos cabeceras, no sigue la redirección, devuelve 
   const sinPagina = servidorDeMentira({ sinPagina: true });
   const { token: tercera } = await sinPagina.cliente.api('/api/people', { metodo: 'POST', cuerpo: { name: 'Ignacio' } });
   const rechazada = await fallaDe(sinPagina.cliente.conectarOAuth(tercera, 'github', 'ignacio'));
-  assert.equal(rechazada.message, 'El inicio del permiso de GitHub para ignacio respondió 403 y se esperaba 302: Abre la conexión desde tu página de Ronda.');
+  assert.equal(rechazada.message, 'El inicio del permiso de GitHub para ignacio respondió 403 y se esperaba 302: Abre la conexión desde tu página de Montu.');
   assert.equal(sinPagina.pedidos.length, 2);
 
   const fallas = [
@@ -769,7 +769,7 @@ test('los pasos de Antonia por API: asistente, sueño, Google, Granola, check-in
   assert.deepEqual(Object.keys(pasosDeAntonia), ['asistente', 'salud', 'google', 'granola', 'checkin', 'permitir']);
   assert.deepEqual(await pasosDeAntonia.asistente(cliente, ficha, { alPaso: (paso, detalle) => void vistos.push([paso, detalle]) }), { archivos: 4 });
   assert.deepEqual(vistos, [
-    ['lee', { titulo: "Ronda: join as Antonia's assistant", kb: 0.1 }],
+    ['lee', { titulo: "Montu: join as Antonia's assistant", kb: 0.1 }],
     ['entra', { tipo: 'claude-code', etiqueta: 'Claude Code en el MacBook' }],
     ['escribe', { mensaje: 'Primer contexto de Antonia', archivos: ['README.md', 'ahora.md', 'sabe.md', 'estado.md'], total: 4 }],
   ]);
@@ -1168,7 +1168,7 @@ test('el ensayo completo: imprime sin fichas y termina con 0, o con 1 si hay dif
     '  propuesta › Antonia con Fernanda y Nicolás',
     '  propuesta › Javiera con Cristóbal',
     '  ronda › termina · lista',
-    'Ronda lista · 2.6 s reales · 18 llamadas al modelo en la ronda',
+    'Montu lista · 2.6 s reales · 18 llamadas al modelo en la ronda',
     'Servidor desde que partió: 19 llamadas, 0 fallidas, 0 reintentos, 42.5 s de modelo',
     'Conversaciones: 5',
     '  Antonia → Fernanda · guion y ensayo del pitch · si',

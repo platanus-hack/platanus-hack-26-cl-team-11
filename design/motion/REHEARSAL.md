@@ -1,4 +1,4 @@
-# Ensayo de las cinco escenas de Ronda
+# Ensayo de las cinco escenas de Montu
 
 Cada enlace abre una escena independiente. Descarga el HTML y ábrelo en un navegador. El archivo contiene el reproductor, las caras, el favicon y los estilos. Todos los ejemplos usan datos simulados.
 
@@ -10,9 +10,9 @@ Cada enlace abre una escena independiente. Descarga el HTML y ábrelo en un nave
 | [Permisos](permission.html) · 12 s | `share` y `messages` | Destinatario y frase → aprobación de un solo uso → recepción limitada a actuar. |
 | [Ayuda](help.html) · 12 s | `payout-flow` | Pedido → oferta → dos aceptaciones independientes → presentación. |
 
-La primera imagen es la referencia de Ronda. Las otras cinco muestran el resultado que queda en pantalla cuando termina cada escena.
+La primera imagen es la referencia de Montu. Las otras cinco muestran el resultado que queda en pantalla cuando termina cada escena.
 
-![Referencia de Ronda junto a los cinco estados finales](rehearsal.jpg)
+![Referencia de Montu junto a los cinco estados finales](rehearsal.jpg)
 
 ## Verificación
 
@@ -64,7 +64,7 @@ python3 design/grafo/mini/build.py
 design/lint.sh
 ```
 
-El generador incorpora la versión instalada de Stageshow y su licencia en cada HTML. Usa las primitivas, el logo, los tokens y las caras de Ronda. Los guiones y controles de tiempo están en `src/player.jsx`. Para repetir el ensayo de una pieza, cambia `chat.html` en estos comandos.
+El generador incorpora la versión instalada de Stageshow y su licencia en cada HTML. Usa las primitivas, el logo, los tokens y las caras de Montu. Los guiones y controles de tiempo están en `src/player.jsx`. Para repetir el ensayo de una pieza, cambia `chat.html` en estos comandos.
 
 ```sh
 page_url="file://$PWD/design/motion/chat.html"

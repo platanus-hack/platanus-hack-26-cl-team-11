@@ -27,7 +27,7 @@ export function duelRoutes(ctx: AppContext) {
       attempted = Date.now();
       inflight = (async () => {
         const res = await ctx.fetch(source, {
-          headers: { accept: 'application/json', 'user-agent': 'Ronda-Duelos/1.0' },
+          headers: { accept: 'application/json', 'user-agent': 'Montu-Duelos/1.0' },
           signal: AbortSignal.timeout(5000),
         });
         if (!res.ok) throw new Error('feed unavailable');

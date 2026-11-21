@@ -49,7 +49,7 @@ Se detuvo toda ejecución de órdenes del piloto, incluida la venta automática 
 
 Dos jugadores comparan el rendimiento de dos equipos durante cinco minutos. Cada monedero recibe 100 fichas de juego. Una oferta reserva 10 fichas del creador. Al aceptarla, el rival aporta otras 10 y se fijan los dos precios iniciales. El ganador recibe las 20. Un empate, un cierre anticipado o la falta de cotización al vencimiento devuelve los aportes. Una oferta sin rival vence a los diez minutos. El enlace de una oferta permite invitar a otra persona desde su propio navegador.
 
-La sala usa la lectura pública de los precios de la edición 26-cl. Las fichas y los recibos viven en SQLite de Ronda. La clave privada del monedero vive en el navegador donde se creó. Si se borran sus datos se pierde el acceso. Una transacción SQLite reserva o libera los aportes y registra el resultado. El servidor revisa los duelos activos cada ocho segundos y acepta una cotización de cierre en los primeros 45 segundos desde el vencimiento.
+La sala usa la lectura pública de los precios de la edición 26-cl. Las fichas y los recibos viven en SQLite de Montu. La clave privada del monedero vive en el navegador donde se creó. Si se borran sus datos se pierde el acceso. Una transacción SQLite reserva o libera los aportes y registra el resultado. El servidor revisa los duelos activos cada ocho segundos y acepta una cotización de cierre en los primeros 45 segundos desde el vencimiento.
 
 [Abrir la sala de duelos](https://ronda-n8if.onrender.com/duelos)
 

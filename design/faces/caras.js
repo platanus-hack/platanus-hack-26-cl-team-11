@@ -1,5 +1,5 @@
 /*
- * Ronda · caras. Cada persona es una gota de vidrio con su lámpara de lava adentro, y solo tiene ojos.
+ * Montu · caras. Cada persona es una gota de vidrio con su lámpara de lava adentro, y solo tiene ojos.
  * Todo el carácter sale de la forma de los ojos, los anteojos, una ceja, cómo miran y cómo parpadean.
  * Decisión de Mati del 21-nov-2026: estas son las caras del producto. Regla y estados: design/DESIGN.md § Caras.
  *

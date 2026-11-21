@@ -1,4 +1,4 @@
-# Handoff de diseño · Miniaturas del grafo de Ronda
+# Handoff de diseño · Miniaturas del grafo de Montu
 
 Tu encargo es rediseñar cómo se ve una interacción entre dos agentes cuando hay varias ocurriendo a la vez. **Mati aprobó el globo 3D y rechazó las cinco miniaturas actuales.** El comentario al verlas fue «no me gusta nada las miniaturas». El motivo concreto sigue abierto. La primera entrega que le serviría ver es una dirección visual nueva, en movimiento y a tamaño real sobre el globo.
 

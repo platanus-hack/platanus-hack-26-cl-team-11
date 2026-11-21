@@ -32,10 +32,10 @@ const REJECT: PartyDecision = 'rechaza';
 const CHOICES: Record<PromptKind, readonly string[]> = { permiso: [ALLOW, DENY], propuesta: [ACCEPT, REJECT] };
 
 const COPY = {
-  unknownSender: 'Hola. Todavía no sé quién eres. Abre tu página de Ronda, entra a Ajustes y toca «Conectar WhatsApp».',
+  unknownSender: 'Hola. Todavía no sé quién eres. Abre tu página de Montu, entra a Ajustes y toca «Conectar WhatsApp».',
   onlyText: 'Por ahora solo leo mensajes de texto.',
   noModel: 'Todavía no puedo leer mensajes: al servidor le falta el modelo.',
-  noTeam: 'Todavía no estás en un equipo. Entra a uno desde tu página de Ronda y pregunta de nuevo.',
+  noTeam: 'Todavía no estás en un equipo. Entra a uno desde tu página de Montu y pregunta de nuevo.',
   alreadyAnswered: 'Eso ya lo respondiste.',
   proposalClosed: 'Esa propuesta ya está cerrada.',
   noted: 'Anotado.',
@@ -108,7 +108,7 @@ const asRecord = (value: unknown): JsonObject => (value && typeof value === 'obj
 const textOf = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
 const lowerFirst = (text: string) => text.charAt(0).toLocaleLowerCase('es') + text.slice(1);
 const names = new Intl.ListFormat('es', { style: 'long', type: 'conjunction' });
-const linkMessage = (code: string) => `Hola Ronda, mi código es ${code}`;
+const linkMessage = (code: string) => `Hola Montu, mi código es ${code}`;
 
 const todayLine = (signals: LevelSignal[]): string | null => {
   const known = signals.filter((signal) => signal.level !== 'sin_datos').map((signal) => lowerFirst(signal.statement));
@@ -275,7 +275,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
       const person = personToken ? ctx.store.findPerson(personToken) : undefined;
       if (!person) continue;
       links.link(person.token, phone, now);
-      sendTextThrough(person.token, [`Listo, ${person.name}. Soy tu agente en Ronda.`, todayOf(person, now), COPY.help].filter(Boolean).join('\n'), 'whatsapp');
+      sendTextThrough(person.token, [`Listo, ${person.name}. Soy tu agente en Montu.`, todayOf(person, now), COPY.help].filter(Boolean).join('\n'), 'whatsapp');
       askPermissions(person.token, 'whatsapp');
       return;
     }

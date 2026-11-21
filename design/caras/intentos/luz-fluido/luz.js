@@ -1,5 +1,5 @@
 /*
- * Ronda · luz «fluida». Mismo API que luz/luz.js, otro motor: la lava ya no son esferas de cera sino tinta
+ * Montu · luz «fluida». Mismo API que luz/luz.js, otro motor: la lava ya no son esferas de cera sino tinta
  * de colores arrastrada por un líquido de verdad (fluidos estables en WebGL2, sin librerías).
  *
  *   RondaLuz.grid(canvas, { cols, rows, cell, palettes, square })  grilla de gotas, una por persona

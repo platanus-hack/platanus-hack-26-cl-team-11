@@ -91,7 +91,7 @@ filman la animación y revisan cada cuadro.
 - **El look lo manda `design/DESIGN.md`, el oficio lo manda Stageshow.** Colores, tipografía,
   vidrio, degradado y caras salen de los tokens `--rd-*`; encuadre, recorte, ritmo, cursor y
   restricción de texto salen de Stageshow. Si chocan (por ejemplo Stageshow desaconseja morado y
-  brillos de «IA»), gana `DESIGN.md`: el degradado de Ronda se usa, pero solo en sus cuatro lugares.
+  brillos de «IA»), gana `DESIGN.md`: el degradado de Montu se usa, pero solo en sus cuatro lugares.
 - No se copian al producto los íconos de apps ni las marcas de terceros que trae la skill como
   ejemplo; no están cubiertos por su licencia.
 - La skill no se edita a mano. Se actualiza con

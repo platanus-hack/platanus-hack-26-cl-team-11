@@ -13,7 +13,7 @@ import { NOT_FOUND } from './shared.js';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const OWN_PAGE_SITE = 'same-origin';
-const NOT_FROM_OWN_PAGE = { error: 'Abre la conexión desde tu página de Ronda.' } as const;
+const NOT_FROM_OWN_PAGE = { error: 'Abre la conexión desde tu página de Montu.' } as const;
 const UNKNOWN_PROVIDER = { error: 'Ese proveedor no existe.' } as const;
 const INVALID_STATE = { error: 'El enlace de conexión venció o no es válido. Vuelve a intentarlo desde tu página.' } as const;
 const MISSING_CODE = { error: 'Falta el código de autorización.' } as const;
@@ -30,7 +30,7 @@ const LOGIN_PROVIDER = 'google';
 const LOGIN_SCOPES = ['profile'];
 const LOGINS_PER_MINUTE = 30;
 const MAX_NAME_LENGTH = 80;
-const ACCOUNT_TAKEN = 'Esa cuenta de Google ya está asociada a otra página de Ronda.';
+const ACCOUNT_TAKEN = 'Esa cuenta de Google ya está asociada a otra página de Montu.';
 
 const hashOf = (nonce: string) => createHash('sha256').update(nonce).digest('hex');
 const challengeOf = (verifier: string) => createHash('sha256').update(verifier).digest('base64url');

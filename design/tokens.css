@@ -1,5 +1,5 @@
 /*
- * Ronda · tokens de diseño. ÚNICA fuente de colores, tipografías, radios, sombras y espacios.
+ * Montu · tokens de diseño. ÚNICA fuente de colores, tipografías, radios, sombras y espacios.
  * Regla: fuera de este archivo no se escribe ningún color, font-family, radio ni sombra a mano.
  * Si falta un token, se agrega acá primero (con un commit propio) y después se usa.
  * Explicación de cada decisión: design/DESIGN.md.

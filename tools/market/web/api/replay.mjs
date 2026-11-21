@@ -4,7 +4,7 @@ export default function replay(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return res.status(405).setHeader('Allow', 'GET, POST').end();
   const number = Number(req.query.round ?? 1),
     round = rounds[number - 1];
-  if (!round || !Number.isInteger(number)) return res.status(404).json({ error: 'Ronda desconocida' });
+  if (!round || !Number.isInteger(number)) return res.status(404).json({ error: 'Montu desconocida' });
   const view = {
     number,
     total: rounds.length,

@@ -46,7 +46,7 @@ export function AgentTab({ token }: { token: string }) {
             {error ?? removeError}
           </p>
         )}
-        {assistants?.length === 0 && <p className="rd-note">Conecta el agente que ya usas. Le cuenta a Ronda en qué trabajas y qué necesitas, y tú decides qué se comparte.</p>}
+        {assistants?.length === 0 && <p className="rd-note">Conecta el agente que ya usas. Le cuenta a Montu en qué trabajas y qué necesitas, y tú decides qué se comparte.</p>}
         {assistants && assistants.length > 0 && (
           <div className="rd-list">
             {assistants.map((assistant) => (

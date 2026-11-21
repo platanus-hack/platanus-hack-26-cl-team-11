@@ -18,12 +18,12 @@ const TOOLS = [
   {
     name: 'ronda_decir',
     description:
-      'Le dice algo al agente personal de tu persona en Ronda, igual que por WhatsApp: cómo viene, en qué está, qué la tiene bloqueada, o una pregunta para su equipo. Devuelve lo que el agente responde. Una pregunta al equipo puede tardar hasta un minuto.',
+      'Le dice algo al agente personal de tu persona en Montu, igual que por WhatsApp: cómo viene, en qué está, qué la tiene bloqueada, o una pregunta para su equipo. Devuelve lo que el agente responde. Una pregunta al equipo puede tardar hasta un minuto.',
     inputSchema: { type: 'object', properties: { mensaje: { type: 'string', description: 'Lo que tu persona quiere decirle a su agente, con sus palabras.' } }, required: ['mensaje'] },
   },
   {
     name: 'ronda_pendientes',
-    description: 'Muestra lo que el agente de Ronda espera de tu persona (permisos para contar un bloqueo, propuestas de ayuda por aceptar) y sus últimos mensajes.',
+    description: 'Muestra lo que el agente de Montu espera de tu persona (permisos para contar un bloqueo, propuestas de ayuda por aceptar) y sus últimos mensajes.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -99,7 +99,7 @@ export function agentDoorRoutes({ assistants, whatsapp }: AppContext) {
         protocolVersion: typeof params.protocolVersion === 'string' ? params.protocolVersion : PROTOCOL_VERSION,
         capabilities: { tools: {} },
         serverInfo: { name: 'ronda', version: '1' },
-        instructions: 'Ronda es el agente personal de tu persona dentro de su equipo. Úsalo cuando tu persona quiera contarle algo a su agente, preguntarle algo a su equipo o responder un pendiente.',
+        instructions: 'Montu es el agente personal de tu persona dentro de su equipo. Úsalo cuando tu persona quiera contarle algo a su agente, preguntarle algo a su equipo o responder un pendiente.',
       });
     }
     if (method === 'ping') return result({});

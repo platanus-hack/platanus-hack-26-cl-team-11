@@ -10,7 +10,7 @@ import { usePolling } from './usePolling';
 
 function subtitleOf(status: WhatsAppStatus, link: WhatsAppLink | null) {
   if (status.linked) return `Conectado · termina en ${status.phoneEnding ?? ''}`;
-  if (link) return `Mándale el código ${link.code} al WhatsApp de Ronda`;
+  if (link) return `Mándale el código ${link.code} al WhatsApp de Montu`;
   return 'Tu agente te lee y te escribe por aquí';
 }
 

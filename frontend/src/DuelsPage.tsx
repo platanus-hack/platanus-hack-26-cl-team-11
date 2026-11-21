@@ -89,7 +89,7 @@ export function DuelsPage() {
   }, [focus]);
   const { error, refresh } = usePolling(load, 6000);
   useEffect(() => {
-    document.title = 'Duelo de equipos · Ronda';
+    document.title = 'Duelo de equipos · Montu';
     const fav = document.createElement('link');
     fav.rel = 'icon';
     fav.href = favicon();

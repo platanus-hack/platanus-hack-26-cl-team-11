@@ -108,7 +108,7 @@ function setup(readingOf: ((message: string) => Reading) | null = () => ({ inten
   };
   const link = async (personToken: string, phone: string) => {
     const started = (await (await app.request(`/api/people/${personToken}/whatsapp/link`, json({}))).json()) as { code: string; url: string | null };
-    await say(phone, `Hola Ronda, mi código es ${started.code}`);
+    await say(phone, `Hola Montu, mi código es ${started.code}`);
     return started;
   };
   const status = async (personToken: string) => (await (await app.request(`/api/people/${personToken}/whatsapp`)).json()) as { configured: boolean; linked: boolean; phoneEnding: string | null };

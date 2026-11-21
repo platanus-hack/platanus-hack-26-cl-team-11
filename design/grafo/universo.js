@@ -1,4 +1,4 @@
-// Ronda · Universo: 100 personas, grupos complejos de 3 a 5 que conversan sobre cientos de temas.
+// Montu · Universo: 100 personas, grupos complejos de 3 a 5 que conversan sobre cientos de temas.
 //
 // ┌──────────────────────────────────────────────────────────────────────────────────────────┐
 // │ PANEL DEMO OMNIPOTENTE. Esta demo (universo.html) muestra TODO lo que existe en el grafo: │

@@ -44,7 +44,7 @@ Todo lo demás (tarjetas, colores, tipografía, layout) ya está cerrado y no se
 
 ## Lo que ya está decidido (no lo cambies)
 
-- Las personas son nodos con su cara (las caras de Ronda: gota de luz con ojos, `design/faces/`; ver «Caras» en `DESIGN.md`). Nombre y estado junto a la cara.
+- Las personas son nodos con su cara (las caras de Montu: gota de luz con ojos, `design/faces/`; ver «Caras» en `DESIGN.md`). Nombre y estado junto a la cara.
 - Las conexiones son curvas delgadas, nunca rectas.
 - Conexión en reposo: 1 px, gris translúcido. Conexión negociando: degradado, con halo y un punto
   de luz que la recorre.
@@ -75,7 +75,7 @@ Esta sesión se equivocó cinco veces antes de acertar. Lo aprendido:
 - **Mira tu resultado antes de mostrarlo.** Saca una captura con Chrome sin ventana y ábrela.
   Mati rechazó todo lo que se le mostró sin revisar.
 - **Una propuesta por vez**, no tres variantes.
-- No inventes referencias. Las suyas son: Apple (keynote bento, Apple Intelligence), Montu, y la
+- No inventes referencias. Las suyas son: Apple (keynote bento, Apple Intelligence), el Montu anterior (el panel de salud del equipo), y la
   pantalla de referencia. Dijo que no le gustan las inspiraciones de nicho.
 - Rechazó por «tosco» una versión con líneas rectas grises, caras con aro grueso y una caja
   blanca alrededor del grafo. Fino significa: líneas delgadas, mucha luz, poco peso.

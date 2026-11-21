@@ -1,4 +1,4 @@
-// Ronda · streaming de mensajes y deslizamiento del feed.
+// Montu · streaming de mensajes y deslizamiento del feed.
 // Regla Stream de Stageshow: cada letra está desde el inicio en su lugar final, invisible, así el
 // globo de texto nunca se reacomoda. update() mueve una «cabeza» continua por el texto y las letras
 // se encienden con una cola suave de opacidad (sin palabras que saltan ni cursor que parpadea).

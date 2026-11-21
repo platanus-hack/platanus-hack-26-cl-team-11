@@ -1,4 +1,4 @@
-# Demo 2 de Ronda · guion final
+# Demo 2 de Montu · guion final
 
 Video: **«Diez personas, sus fuentes y sus agentes»**. Salida: `docs/demo/diez-personas.mp4` (+ `.png`, `.json`, `.md`).
 Repo: `<repo>`. Checked at `98db251` on 21-nov-2026, 13:05 (Santiago). Nothing was run to write this plan.
