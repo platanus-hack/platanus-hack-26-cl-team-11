@@ -37,7 +37,7 @@
 - [ ] **«Simular 30 personas» es lenta para mostrarla en vivo.** Medido en producción el 21-nov-2026: poblar 30 personas toma 30 segundos y la ronda casi 2 minutos (45 conversaciones); con 60, 1 minuto y 4 minutos y medio (89 conversaciones). El límite es que 50x atiende 4 llamadas a la vez. Para la demo conviene dejar una sala ya simulada.
 - [x] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación con 50x. Hecho el 21-nov-2026: `npm run agents:check` contra 50x terminó en 11 segundos con 2 conversaciones y 1 propuesta, y en producción una simulación de 4 personas terminó en 30 segundos con 2 conversaciones.
 - [ ] **El globo dentro de `/sala/<código>`.** Hoy es una página de prueba (`design/grafo/sala.html`). Falta que Mati decida cómo nace un nodo, cómo se ve antes y después de conectar su agente, y la dirección del arco.
-- [ ] **Puerta MCP** para conectar apps de chat sin copiar y pegar, y **respuestas en vivo** de un asistente que esté abierto durante la ronda. No construidas.
+- [ ] **Puerta MCP.** Construida para hablarle al agente propio desde Claude Code o Codex (`/api/mcp`, con el token del asistente): decirle algo, ver pendientes y responder. Probada con pruebas automáticas, no con un Claude Code real. Falta la puerta para apps de chat sin copiar y pegar (necesita OAuth) y las **respuestas en vivo** de un asistente que esté abierto durante la ronda.
 - [ ] **«Preguntar antes» por archivo.** Hoy un archivo en ese estado espera a que la persona lo cambie. Falta que el agente le pregunte por WhatsApp.
 - [ ] **Logos de ChatGPT, Grok, OpenClaw e Instinct.** Usan un glifo genérico.
 

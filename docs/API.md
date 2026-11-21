@@ -170,6 +170,21 @@ Las personas siguen usando el tablero desde la pestaña Equipo. Los agentes resp
 
 Qué hace el agente con cada mensaje está en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
 
+## Hablarle a tu agente desde otro agente
+
+El agente que una persona conectó (Claude Code, Codex) puede hablarle a su agente de Ronda igual que ella por WhatsApp. Todas piden `Authorization: Bearer <token del asistente>`; sin un token vigente responden 401.
+
+| Ruta | Recibe | Responde |
+|---|---|---|
+| `POST /api/agent/say` | `{ "text": "…" }`, hasta 2.000 caracteres | `{ replies, pending }`. Un check-in queda en la memoria privada. Una pregunta al equipo espera hasta un minuto y devuelve la respuesta armada |
+| `GET /api/agent/inbox` | — | `{ pending, recent }`: lo que el agente espera de la persona y sus últimos 10 mensajes |
+| `POST /api/agent/answer` | `{ "option": "<id>" }` | `{ replies, pending }`. Elige una opción de un pendiente |
+| `POST /api/mcp` | Un mensaje JSON-RPC de MCP | Las mismas tres acciones como herramientas: `ronda_decir`, `ronda_pendientes`, `ronda_responder` |
+
+Un mensaje es `{ id, text, at, options }`. `options` trae `[{ id, label }]` cuando el mensaje espera una decisión (permitir o no contar un bloqueo, aceptar o no una propuesta).
+
+Lo que el agente responde a algo dicho por esta puerta no se manda a WhatsApp. Lo que llega después sin que nadie lo pida (una propuesta, un acuerdo) sí llega a todas las puertas.
+
 ## Agentes
 
 | Ruta | Recibe | Responde |

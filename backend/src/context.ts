@@ -126,6 +126,6 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     whatsapp: SILENT_BRIDGE,
   };
   const channel = options.whatsapp === undefined ? channelFrom(process.env, options.fetch ?? fetch) : options.whatsapp;
-  if (channel) ctx.whatsapp = createWhatsAppBridge(ctx, channel, openWhatsAppStore(db));
+  ctx.whatsapp = createWhatsAppBridge(ctx, channel, openWhatsAppStore(db));
   return ctx;
 }

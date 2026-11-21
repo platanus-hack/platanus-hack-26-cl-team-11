@@ -16,6 +16,19 @@ export interface WhatsAppPrompt {
   choice: string | null;
 }
 
+export interface PromptOption {
+  choice: string;
+  title: string;
+}
+
+export interface InboxMessage {
+  id: number;
+  body: string;
+  promptId: string | null;
+  options: PromptOption[];
+  createdAt: string;
+}
+
 export interface LinkCode {
   code: string;
   expiresAt: string;
@@ -32,7 +45,30 @@ export interface WhatsAppStore {
   findPrompt(id: string): WhatsAppPrompt | undefined;
   closePrompt(id: string, choice: string, now: Date): boolean;
   firstDelivery(key: string, now: Date): boolean;
+  addMessage(personToken: string, body: string, promptId: string | null, options: PromptOption[], now: Date): number;
+  lastMessageId(personToken: string): number;
+  messagesAfter(personToken: string, id: number): InboxMessage[];
+  recentMessages(personToken: string, limit: number): InboxMessage[];
+  openPromptMessages(personToken: string): InboxMessage[];
 }
+
+interface MessageRow {
+  id: number;
+  body: string;
+  prompt_id: string | null;
+  options: string;
+  created_at: string;
+}
+
+const MESSAGE_COLUMNS = 'm.id AS id, m.body AS body, m.prompt_id AS prompt_id, m.options AS options, m.created_at AS created_at';
+
+const toMessage = (row: MessageRow): InboxMessage => ({
+  id: Number(row.id),
+  body: row.body,
+  promptId: row.prompt_id,
+  options: JSON.parse(row.options) as PromptOption[],
+  createdAt: row.created_at,
+});
 
 interface PromptRow {
   id: string;
@@ -64,6 +100,15 @@ export function openWhatsAppStore(db: DatabaseSync): WhatsAppStore {
       answered_at TEXT,
       UNIQUE (person_token, kind, ref)
     );
+    CREATE TABLE IF NOT EXISTS agent_inbox (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      person_token TEXT NOT NULL REFERENCES people (token),
+      body TEXT NOT NULL,
+      prompt_id TEXT,
+      options TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS agent_inbox_by_person ON agent_inbox (person_token, id);
     CREATE TABLE IF NOT EXISTS whatsapp_deliveries (
       key TEXT PRIMARY KEY,
       received_at TEXT NOT NULL
@@ -128,6 +173,35 @@ export function openWhatsAppStore(db: DatabaseSync): WhatsAppStore {
     firstDelivery(key, now) {
       const stored = db.prepare('INSERT INTO whatsapp_deliveries (key, received_at) VALUES (?, ?) ON CONFLICT (key) DO NOTHING').run(key, now.toISOString());
       return stored.changes > 0;
+    },
+
+    addMessage(personToken, body, promptId, options, now) {
+      const added = db
+        .prepare('INSERT INTO agent_inbox (person_token, body, prompt_id, options, created_at) VALUES (?, ?, ?, ?, ?)')
+        .run(personToken, body, promptId, JSON.stringify(options), now.toISOString());
+      return Number(added.lastInsertRowid);
+    },
+
+    lastMessageId(personToken) {
+      const row = db.prepare('SELECT MAX(id) AS last FROM agent_inbox WHERE person_token = ?').get(personToken) as { last: number | null };
+      return Number(row.last ?? 0);
+    },
+
+    messagesAfter(personToken, id) {
+      const rows = db.prepare(`SELECT ${MESSAGE_COLUMNS} FROM agent_inbox m WHERE m.person_token = ? AND m.id > ? ORDER BY m.id`).all(personToken, id) as unknown as MessageRow[];
+      return rows.map(toMessage);
+    },
+
+    recentMessages(personToken, limit) {
+      const rows = db.prepare(`SELECT ${MESSAGE_COLUMNS} FROM agent_inbox m WHERE m.person_token = ? ORDER BY m.id DESC LIMIT ?`).all(personToken, limit) as unknown as MessageRow[];
+      return rows.map(toMessage).reverse();
+    },
+
+    openPromptMessages(personToken) {
+      const rows = db
+        .prepare(`SELECT ${MESSAGE_COLUMNS} FROM agent_inbox m JOIN whatsapp_prompts p ON p.id = m.prompt_id WHERE m.person_token = ? AND p.choice IS NULL ORDER BY m.id`)
+        .all(personToken) as unknown as MessageRow[];
+      return rows.map(toMessage);
     },
   };
 }

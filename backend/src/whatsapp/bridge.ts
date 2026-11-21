@@ -11,13 +11,18 @@ import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
 import type { JsonObject, Person } from '../types.js';
 import { digitsOf, type ReplyButton, type WhatsAppChannel } from './kapso.js';
 import { InboundReading, isIntent, readingPrompt, readingSystemFor } from './reading.js';
-import { LINK_CODE_LENGTH, type PromptKind, type WhatsAppStore } from './store.js';
+import { LINK_CODE_LENGTH, type InboxMessage, type PromptKind, type PromptOption, type WhatsAppStore } from './store.js';
 
 const UNKNOWN_SENDER_QUIET_MS = 60 * 60_000;
 const MAX_TRACKED_SENDERS = 5000;
 const VISIBLE_PHONE_DIGITS = 4;
 const RECENT_EVENTS = 50;
 const UNSTATED_MOOD: Mood = 'normal';
+const RECENT_MESSAGES = 10;
+const ANSWER_WAIT_MS = 60_000;
+
+type Door = 'whatsapp' | 'asistente';
+const EVERY_DOOR = null;
 const NOT_A_CODE_CHARACTER = /[^0-9A-Z]+/;
 
 const ALLOW = 'si';
@@ -55,6 +60,18 @@ export interface WhatsAppLink {
   expiresAt: string;
 }
 
+export interface AgentMessage {
+  id: number;
+  text: string;
+  at: string;
+  options: Array<{ id: string; label: string }>;
+}
+
+export interface AgentInbox {
+  pending: AgentMessage[];
+  recent: AgentMessage[];
+}
+
 export interface WhatsAppBridge {
   configured: boolean;
   statusOf(personToken: string): WhatsAppStatus;
@@ -66,6 +83,9 @@ export interface WhatsAppBridge {
   proposalCreated(proposal: Proposal): void;
   proposalAnswered(proposal: Proposal, answeredBy: string): void;
   askPermissions(personToken: string): void;
+  say(personToken: string, text: string): Promise<AgentMessage[]>;
+  choose(personToken: string, optionId: string): AgentMessage[];
+  inboxOf(personToken: string): AgentInbox;
 }
 
 export const SILENT_BRIDGE: WhatsAppBridge = {
@@ -79,6 +99,9 @@ export const SILENT_BRIDGE: WhatsAppBridge = {
   proposalCreated: () => {},
   proposalAnswered: () => {},
   askPermissions: () => {},
+  say: () => Promise.resolve([]),
+  choose: () => [],
+  inboxOf: () => ({ pending: [], recent: [] }),
 };
 
 const asRecord = (value: unknown): JsonObject => (value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonObject) : {});
@@ -92,23 +115,48 @@ const todayLine = (signals: LevelSignal[]): string | null => {
   return known.length > 0 ? `Por tus fuentes veo: ${known.join(' y ')}.` : null;
 };
 
-export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, links: WhatsAppStore): WhatsAppBridge {
+const optionIdOf = (promptId: string, choice: string) => `${promptId}:${choice}`;
+
+const viewMessage = (message: InboxMessage): AgentMessage => ({
+  id: message.id,
+  text: message.body,
+  at: message.createdAt,
+  options: message.promptId ? message.options.map((option) => ({ id: optionIdOf(message.promptId as string, option.choice), label: option.title })) : [],
+});
+
+const settledWithin = (work: Promise<void>, limitMs: number): Promise<void> =>
+  new Promise((resolve) => {
+    const timer = setTimeout(resolve, limitMs);
+    timer.unref();
+    void work.finally(() => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+
+export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel | null, links: WhatsAppStore): WhatsAppBridge {
   const board = openBoardStore(ctx.db);
   const policies = openPolicyStore(ctx.db);
   const lastUnknownReply = new Map<string, number>();
 
-  const sendText = (personToken: string, body: string): void => {
-    const phone = links.phoneOf(personToken);
-    if (phone) void channel.sendText(phone, body);
+  const phoneFor = (personToken: string, door: Door | null) => (channel && door !== 'asistente' ? links.phoneOf(personToken) : undefined);
+  const hasDoor = (personToken: string) => (channel !== null && links.phoneOf(personToken) !== undefined) || ctx.assistants.assistantsOf(personToken).length > 0;
+
+  const sendTextThrough = (personToken: string, body: string, door: Door | null = EVERY_DOOR): void => {
+    links.addMessage(personToken, body, null, [], new Date());
+    const phone = phoneFor(personToken, door);
+    if (channel && phone) void channel.sendText(phone, body);
   };
 
-  const sendPrompt = (personToken: string, kind: PromptKind, ref: string, body: string, buttons: Array<{ choice: string; title: string }>): void => {
-    const phone = links.phoneOf(personToken);
-    if (!phone) return;
-    const promptId = links.openPrompt(personToken, kind, ref, new Date());
+  const sendPrompt = (personToken: string, kind: PromptKind, ref: string, body: string, options: PromptOption[], door: Door | null = EVERY_DOOR): void => {
+    if (!hasDoor(personToken)) return;
+    const now = new Date();
+    const promptId = links.openPrompt(personToken, kind, ref, now);
     if (!promptId) return;
-    const replies: ReplyButton[] = buttons.map((button) => ({ id: `${promptId}:${button.choice}`, title: button.title }));
-    void channel.sendButtons(phone, body, replies);
+    links.addMessage(personToken, body, promptId, options, now);
+    const phone = phoneFor(personToken, door);
+    const replies: ReplyButton[] = options.map((option) => ({ id: optionIdOf(promptId, option.choice), title: option.title }));
+    if (channel && phone) void channel.sendButtons(phone, body, replies);
   };
 
   const todayOf = (person: Person, now: Date): string | null => {
@@ -123,14 +171,21 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     return isMood(mood) ? mood : null;
   };
 
-  const askPermissions = (personToken: string): void => {
+  const askPermissions = (personToken: string, door: Door | null = EVERY_DOOR): void => {
     const person = ctx.store.findPerson(personToken);
-    if (!person || !links.phoneOf(personToken)) return;
+    if (!person || !hasDoor(personToken)) return;
     for (const need of cardFor(cardDepsFrom(ctx), person, new Date()).pendingAsks) {
-      sendPrompt(person.token, 'permiso', need.topic, `¿Le pido ayuda a tu equipo con «${need.topic}»? Si dices que sí, los agentes de tu equipo van a saber que tienes ese bloqueo.`, [
-        { choice: ALLOW, title: 'Permitir' },
-        { choice: DENY, title: 'No contar' },
-      ]);
+      sendPrompt(
+        person.token,
+        'permiso',
+        need.topic,
+        `¿Le pido ayuda a tu equipo con «${need.topic}»? Si dices que sí, los agentes de tu equipo van a saber que tienes ese bloqueo.`,
+        [
+          { choice: ALLOW, title: 'Permitir' },
+          { choice: DENY, title: 'No contar' },
+        ],
+        door,
+      );
     }
   };
 
@@ -147,27 +202,35 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     return started;
   };
 
-  const reportAnswer = (personToken: string, post: BoardPost): void => {
+  const reportAnswer = (personToken: string, post: BoardPost, door: Door): void => {
+    const sendTextTo = (to: string, body: string) => sendTextThrough(to, body, door);
     const answer = board.answerOf(post.id, new Date());
     if (!answer) return;
-    if (answer.status === 'fallida') return sendText(personToken, `Los agentes no pudieron responder. ${answer.problem ?? ''}`.trim());
-    if (!answer.text) return sendText(personToken, COPY.nothingKnown);
+    if (answer.status === 'fallida') return sendTextTo(personToken, `Los agentes no pudieron responder. ${answer.problem ?? ''}`.trim());
+    if (!answer.text) return sendTextTo(personToken, COPY.nothingKnown);
     const sources = answer.sourceTokens.flatMap((token) => ctx.store.findPerson(token)?.name ?? []);
-    sendText(personToken, sources.length > 0 ? `${answer.text}\n\nArmada con lo que ${sources.length === 1 ? 'comparte' : 'comparten'} ${names.format(sources)}.` : answer.text);
+    sendTextTo(personToken, sources.length > 0 ? `${answer.text}\n\nArmada con lo que ${sources.length === 1 ? 'comparte' : 'comparten'} ${names.format(sources)}.` : answer.text);
   };
 
-  const askQuestion = (person: Person, question: string): void => {
+  const askQuestion = (person: Person, question: string, door: Door): Promise<void> | null => {
     const team = ctx.teams.teamsOf(person.token).at(-1);
-    if (!team) return sendText(person.token, COPY.noTeam);
+    if (!team) {
+      sendTextThrough(person.token, COPY.noTeam, door);
+      return null;
+    }
     const post = board.createPost({ teamId: team.id, authorToken: person.token, kind: 'pregunta', text: question.slice(0, MAX_POST_LENGTH) });
     const outcome = askTeam({ ...cardDepsFrom(ctx), board, model: ctx.model }, post);
-    if (outcome.state !== 'started') return sendText(person.token, `Tu pregunta quedó en el tablero de ${team.name}. Los agentes están ocupados; pídeles la respuesta desde tu página.`);
-    sendText(person.token, `Le pregunto a los agentes de ${team.name}. Te aviso cuando respondan.`);
-    void outcome.done.then(() => reportAnswer(person.token, post));
+    if (outcome.state !== 'started') {
+      sendTextThrough(person.token, `Tu pregunta quedó en el tablero de ${team.name}. Los agentes están ocupados; pídeles la respuesta desde tu página.`, door);
+      return null;
+    }
+    sendTextThrough(person.token, `Le pregunto a los agentes de ${team.name}. Te aviso cuando respondan.`, door);
+    return outcome.done.then(() => reportAnswer(person.token, post, door));
   };
 
-  const converse = async (person: Person, message: string): Promise<void> => {
+  const converse = async (person: Person, message: string, door: Door): Promise<void> => {
     const { model } = ctx;
+    const sendText = (personToken: string, body: string) => sendTextThrough(personToken, body, door);
     if (!model) return sendText(person.token, COPY.noModel);
     let reading;
     try {
@@ -180,7 +243,11 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     const reply = reading.reply.trim();
     const question = reading.question.trim();
     if (!isIntent(intent) || intent === 'otro' || (intent === 'pregunta' && !question)) return sendText(person.token, reply || COPY.help);
-    if (intent === 'pregunta') return askQuestion(person, question);
+    if (intent === 'pregunta') {
+      const answered = askQuestion(person, question, door);
+      if (answered && door === 'asistente') await settledWithin(answered, ANSWER_WAIT_MS);
+      return;
+    }
 
     const now = new Date();
     const stated = reading.mood.trim().toLowerCase();
@@ -188,10 +255,11 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     const within = (text: string) => [...text.trim()].slice(0, MAX_CHECKIN_TEXT_LENGTH).join('') || null;
     recordCheckin(ctx.store, person.token, { mood: isMood(stated) ? stated : (earlier ?? UNSTATED_MOOD), blocker: within(reading.blocker), note: within(reading.note) }, now);
     sendText(person.token, [reply || COPY.noted, earlier === null ? todayOf(person, now) : null].filter(Boolean).join('\n'));
-    askPermissions(person.token);
+    askPermissions(person.token, door);
   };
 
   const greetUnknown = (phone: string): void => {
+    if (!channel) return;
     const now = Date.now();
     if (now - (lastUnknownReply.get(phone) ?? 0) < UNKNOWN_SENDER_QUIET_MS) return;
     if (lastUnknownReply.size >= MAX_TRACKED_SENDERS) lastUnknownReply.clear();
@@ -207,20 +275,20 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
       const person = personToken ? ctx.store.findPerson(personToken) : undefined;
       if (!person) continue;
       links.link(person.token, phone, now);
-      sendText(person.token, [`Listo, ${person.name}. Soy tu agente en Ronda.`, todayOf(person, now), COPY.help].filter(Boolean).join('\n'));
-      askPermissions(person.token);
+      sendTextThrough(person.token, [`Listo, ${person.name}. Soy tu agente en Ronda.`, todayOf(person, now), COPY.help].filter(Boolean).join('\n'), 'whatsapp');
+      askPermissions(person.token, 'whatsapp');
       return;
     }
     const personToken = links.personOf(phone);
     const person = personToken ? ctx.store.findPerson(personToken) : undefined;
     if (!person) return greetUnknown(phone);
-    await converse(person, text);
+    await converse(person, text, 'whatsapp');
   };
 
-  const onButton = (phone: string, buttonId: string): void => {
-    const [promptId = '', choice = ''] = buttonId.split(':');
+  const press = (personToken: string | undefined, optionId: string, door: Door): void => {
+    const sendText = (to: string, body: string) => sendTextThrough(to, body, door);
+    const [promptId = '', choice = ''] = optionId.split(':');
     const prompt = links.findPrompt(promptId);
-    const personToken = links.personOf(phone);
     if (!prompt || !personToken || prompt.personToken !== personToken || !CHOICES[prompt.kind].includes(choice)) return;
     if (!links.closePrompt(prompt.id, choice, new Date())) return sendText(personToken, COPY.alreadyAnswered);
 
@@ -240,6 +308,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
   };
 
   const handle = async (event: JsonObject): Promise<void> => {
+    if (!channel) return;
     const message = asRecord(event.message);
     const detail = asRecord(message.kapso);
     const conversation = asRecord(event.conversation);
@@ -251,20 +320,21 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
 
     if (message.type === 'text') return onText(phone, textOf(asRecord(message.text).body));
     const interactive = asRecord(message.interactive);
-    if (message.type === 'interactive' && interactive.type === 'button_reply') return onButton(phone, textOf(asRecord(interactive.button_reply).id));
+    if (message.type === 'interactive' && interactive.type === 'button_reply') return press(links.personOf(phone), textOf(asRecord(interactive.button_reply).id), 'whatsapp');
     const personToken = links.personOf(phone);
-    if (personToken) sendText(personToken, COPY.onlyText);
+    if (personToken) sendTextThrough(personToken, COPY.onlyText, 'whatsapp');
   };
 
   const bridge: WhatsAppBridge = {
-    configured: true,
+    configured: channel !== null,
 
     statusOf(personToken) {
-      const phone = links.phoneOf(personToken);
-      return { configured: true, linked: phone !== undefined, phoneEnding: phone ? phone.slice(-VISIBLE_PHONE_DIGITS) : null };
+      const phone = channel ? links.phoneOf(personToken) : undefined;
+      return { configured: channel !== null, linked: phone !== undefined, phoneEnding: phone ? phone.slice(-VISIBLE_PHONE_DIGITS) : null };
     },
 
     async startLink(personToken) {
+      if (!channel) return null;
       const { code, expiresAt } = links.createCode(personToken, new Date());
       const number = await channel.number();
       return { code, expiresAt, url: number ? `https://wa.me/${number}?text=${encodeURIComponent(linkMessage(code))}` : null };
@@ -272,7 +342,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
 
     unlink: (personToken) => links.unlink(personToken),
 
-    accepts: (rawBody, signature) => channel.isSigned(rawBody, signature),
+    accepts: (rawBody, signature) => channel?.isSigned(rawBody, signature) ?? false,
 
     firstDelivery: (key) => links.firstDelivery(key, new Date()),
 
@@ -296,12 +366,31 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
       if (proposal.status === 'por_aprobar') return;
       const everyone = names.format(proposal.parties.map((party) => party.name));
       for (const party of proposal.parties) {
-        if (proposal.status === 'acordada') sendText(party.token, `Quedó acordado entre ${everyone}.\n\n${proposal.text}\n\nYa pueden hablar directo.`);
-        else if (party.token !== answeredBy) sendText(party.token, `La propuesta sobre «${proposal.topic}» no salió esta vez.`);
+        if (proposal.status === 'acordada') sendTextThrough(party.token, `Quedó acordado entre ${everyone}.\n\n${proposal.text}\n\nYa pueden hablar directo.`);
+        else if (party.token !== answeredBy) sendTextThrough(party.token, `La propuesta sobre «${proposal.topic}» no salió esta vez.`);
       }
     },
 
-    askPermissions,
+    askPermissions: (personToken) => askPermissions(personToken),
+
+    async say(personToken, text) {
+      const person = ctx.store.findPerson(personToken);
+      if (!person) return [];
+      const before = links.lastMessageId(person.token);
+      await converse(person, text, 'asistente');
+      return links.messagesAfter(person.token, before).map(viewMessage);
+    },
+
+    choose(personToken, optionId) {
+      const before = links.lastMessageId(personToken);
+      press(personToken, optionId, 'asistente');
+      return links.messagesAfter(personToken, before).map(viewMessage);
+    },
+
+    inboxOf: (personToken) => ({
+      pending: links.openPromptMessages(personToken).map(viewMessage),
+      recent: links.recentMessages(personToken, RECENT_MESSAGES).map(viewMessage),
+    }),
   };
 
   return bridge;

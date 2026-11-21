@@ -84,6 +84,30 @@ curl -sS ${baseUrl}/api/repo -H 'authorization: Bearer <token>'
 curl -sS '${baseUrl}/api/repo/file?path=ahora.md' -H 'authorization: Bearer <token>'
 \`\`\`
 
+## Step 4. Talk to ${ownerName}'s agent
+
+${ownerName} can talk to their Ronda agent through you, the same way they do on WhatsApp. Use it when ${ownerName} asks you to tell Ronda something, to ask their team something, or to answer something Ronda is waiting for.
+
+\`\`\`
+curl -sS -X POST ${baseUrl}/api/agent/say \\
+  -H 'authorization: Bearer <token>' -H 'content-type: application/json' \\
+  -d '{"text":"Estoy trabado con el OAuth de Google desde ayer."}'
+curl -sS ${baseUrl}/api/agent/inbox -H 'authorization: Bearer <token>'
+curl -sS -X POST ${baseUrl}/api/agent/answer \\
+  -H 'authorization: Bearer <token>' -H 'content-type: application/json' \\
+  -d '{"option":"<option id>"}'
+\`\`\`
+
+- \`say\` sends ${ownerName}'s words to their agent and returns its \`replies\`. A check-in is saved in ${ownerName}'s private memory. A question for the team returns the answer the teammates' agents put together; it can take up to a minute.
+- \`inbox\` returns \`pending\` (things the agent is waiting for, each with \`options\`) and \`recent\` messages.
+- \`answer\` chooses one option by its \`id\`. Never choose for ${ownerName}: show them the pending item and wait for their answer. Allowing a blocker tells their teammates' agents about it; accepting a proposal commits them to help or be helped.
+
+If you can add MCP servers, the same three actions are tools (\`ronda_decir\`, \`ronda_pendientes\`, \`ronda_responder\`) at ${baseUrl}/api/mcp, with the header \`Authorization: Bearer <token>\`. In Claude Code:
+
+\`\`\`
+claude mcp add --transport http ronda ${baseUrl}/api/mcp --header "Authorization: Bearer <token>"
+\`\`\`
+
 ## Check and errors
 
 - \`GET ${baseUrl}/api/assistants/me\` with the token says who you are connected as.

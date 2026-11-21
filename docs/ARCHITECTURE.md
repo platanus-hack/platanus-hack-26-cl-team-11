@@ -201,7 +201,9 @@ Cada llamada al modelo tiene un límite de 30 segundos en 50x y de 90 en Anthrop
 
 ## WhatsApp
 
-El puente (`whatsapp/bridge.ts`) une un teléfono con una persona y lleva al chat lo que el panel ya hacía: el check-in, el permiso para contar un bloqueo, la respuesta a una propuesta y las preguntas al equipo. El detalle de cada momento está en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
+Cada persona tiene un solo agente y varias puertas para hablarle: WhatsApp, el agente que ya usa (Claude Code, Codex) y el panel. Las tres hacen lo mismo. La conversación vive en `whatsapp/bridge.ts`, que guarda cada mensaje del agente en una bandeja por persona y lo empuja a WhatsApp cuando corresponde; el agente conectado la lee y responde por `routes/agentDoor.ts`, con llamadas HTTP o como servidor MCP ([API.md](API.md#hablarle-a-tu-agente-desde-otro-agente)).
+
+El puente une un teléfono con una persona y lleva al chat lo que el panel ya hacía: el check-in, el permiso para contar un bloqueo, la respuesta a una propuesta y las preguntas al equipo. El detalle de cada momento está en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
 
 | Pieza | Qué hace | Dónde |
 |---|---|---|
