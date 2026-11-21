@@ -176,3 +176,17 @@ Cinco analistas de solo lectura revisaron por qué no hay más ganancia. Sus con
 - El umbral de venta quedó en 20% sobre el costo con un mínimo de 4 bananas.
 - `guard` y `patience`: si la caja más el valor de venta del inventario se mantiene bajo 912 durante 10 minutos, vende todo. Hoy esa suma es 943.
 - Las cinco fallas de la auditoría quedaron corregidas.
+
+## Ganancia realizada · 16:13 UTC
+
+Entre las 15:28 y las 16:00 UTC volvieron las compras grandes: 49 operaciones de 140 bananas o más y 141 operaciones en los diez minutos más activos. El proceso cerró 11 ventas con ganancia por un total de +277 bananas. Las mayores:
+
+| Equipo | Compra | Costo | Venta | Recibido | Ganancia |
+|---|---|---:|---|---:|---:|
+| team-34 | 15:47:41, justo después de una venta ajena de 627 que lo dejó en 0,0041 | 19 | 15:48:40, tras una compra ajena de 329 | 110 | +91 |
+| team-2 | 14:54:49 | 19 | 15:42:30, un segundo después de una compra ajena de 492 | 91 | +72 |
+| team-20 | 14:55:20 y un segundo lote tras una caída | 38 | 15:56:57, tras una compra ajena de 197 | 93 | +55 |
+
+Las otras ocho ventas dejaron entre +4 y +14 cada una. Todas están en [órdenes verificadas](MARKET-ORDERS.md).
+
+A las 16:11 UTC Mati aprobó subir el tope de inventario de 300 a 500 bananas para cubrir más equipos baratos. El proceso compró 11 lotes más. A las 16:13 la cartola mostraba 762 en caja y 21 lotes que costaron 494 y se podían vender por 362. La tabla del evento marcaba 1.214 en total, puesto 15 de 84, con el corte del 40% superior en el puesto 34 con 990. La partida empezó en 979.
