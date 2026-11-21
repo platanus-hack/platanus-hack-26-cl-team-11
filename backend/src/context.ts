@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createVault, type Vault } from './crypto.js';
 import { openStore, type Store } from './db.js';
+import { openHubStore, type HubStore } from './hub/store.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
@@ -16,6 +17,7 @@ export interface AppContext {
   db: DatabaseSync;
   store: Store;
   teams: TeamStore;
+  hub: HubStore;
   vault: Vault;
   fetch: Fetch;
   config: Config;
@@ -40,6 +42,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     vault,
     store,
     teams: openTeamStore(db),
+    hub: openHubStore(db),
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),
   };

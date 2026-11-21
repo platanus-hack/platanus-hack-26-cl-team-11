@@ -5,6 +5,7 @@ import type { AppContext } from './context.js';
 import { boardRoutes } from './routes/board.js';
 import { checkinRoutes } from './routes/checkins.js';
 import { connectionRoutes } from './routes/connections.js';
+import { hubRoutes } from './routes/hub.js';
 import { ingestRoutes } from './routes/ingest.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { peopleRoutes } from './routes/people.js';
@@ -37,6 +38,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', checkinRoutes(ctx));
   api.route('/', boardRoutes(ctx));
   api.route('/', pulseRoutes(ctx));
+  api.route('/', hubRoutes(ctx));
 
   return new Hono().route('/api', api);
 }
