@@ -22,6 +22,7 @@
  *   RondaCaras.customize(nombre, { recipe, palette })   la cara que la persona eligió para sí; toda cara de ese nombre
  *                 que se monte después la usa. Sin argumento vuelve a la que da el nombre. Avisa con el evento
  *                 «rondacaras:cambio» en window (detail.key) para que quien ya la montó la vuelva a montar.
+ *   RondaCaras.compose(nombre, cambios)   la receta de esa persona con algunos cambios encima (para mostrar opciones)
  *   RondaCaras.CHOICES      lo que se puede elegir: forma de ojos, tamaño, anteojos, ceja, marca, pestañas y luz
  *
  * Hover y presionada no son estados que se fijan: salen solos del puntero, del foco y del teclado.
@@ -168,6 +169,13 @@
     if (!custom || !custom.recipe) return base;
     for (key in base) recipe[key] = base[key];
     for (key in custom.recipe) recipe[key] = custom.recipe[key];
+    return tidy(recipe);
+  }
+
+  function compose(name, partial) {
+    var recipe = {}, base = chosenRecipe(keyFor(name)), key;
+    for (key in base) recipe[key] = base[key];
+    for (key in partial || {}) recipe[key] = partial[key];
     return tidy(recipe);
   }
 
@@ -704,5 +712,5 @@
 
   function group() { groupCount += 1; return { seed: hashText('grupo' + groupCount), faces: [] }; }
 
-  root.RondaCaras = { mount: mount, group: group, still: still, recipeFor: recipeFor, keyFor: keyFor, lightFor: lightFor, customize: customize, paletteFromTone: paletteFromTone, CHOICES: CHOICES, levelFor: levelFor, STATES: STATES, TEAM: TEAM, TEAM_LIGHT: TEAM_LIGHT };
+  root.RondaCaras = { mount: mount, group: group, still: still, recipeFor: recipeFor, keyFor: keyFor, lightFor: lightFor, customize: customize, compose: compose, paletteFromTone: paletteFromTone, CHOICES: CHOICES, levelFor: levelFor, STATES: STATES, TEAM: TEAM, TEAM_LIGHT: TEAM_LIGHT };
 })(window);

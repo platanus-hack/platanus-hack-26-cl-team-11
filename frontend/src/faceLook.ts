@@ -1,4 +1,5 @@
 import type { FaceLook } from './api';
+import type { FaceRecipe } from './Face';
 
 export const FACE_TONES = 15;
 
@@ -9,25 +10,28 @@ const TILTS = { rectos: 0, arriba: 4, abajo: -4 } satisfies Record<FaceLook['til
 
 export const facePalette = (tone: number, mix: FaceLook['mix']) => window.RondaCaras.paletteFromTone(tone, mix);
 
+export function recipeFromLook(look: FaceLook): Partial<FaceRecipe> {
+  return {
+    kind: look.kind,
+    a: SIZES[look.size],
+    gap: SPACINGS[look.spacing] ?? SPACINGS.normal,
+    lid: LIDS[look.lid] ?? LIDS.despiertos,
+    tilt: TILTS[look.tilt] ?? TILTS.rectos,
+    glasses: look.glasses,
+    brow: look.brow,
+    mark: look.mark,
+    lashes: look.lashes,
+  };
+}
+
+export const paletteFromLook = (look: FaceLook) => facePalette(look.tone, look.mix ?? 'armonica');
+
 export function applyFaceLook(name: string, look: FaceLook | null): void {
   if (!look) {
     window.RondaCaras.customize(name);
     return;
   }
-  window.RondaCaras.customize(name, {
-    recipe: {
-      kind: look.kind,
-      a: SIZES[look.size],
-      gap: SPACINGS[look.spacing] ?? SPACINGS.normal,
-      lid: LIDS[look.lid] ?? LIDS.despiertos,
-      tilt: TILTS[look.tilt] ?? TILTS.rectos,
-      glasses: look.glasses,
-      brow: look.brow,
-      mark: look.mark,
-      lashes: look.lashes,
-    },
-    palette: facePalette(look.tone, look.mix ?? 'armonica'),
-  });
+  window.RondaCaras.customize(name, { recipe: recipeFromLook(look), palette: paletteFromLook(look) });
 }
 
 function nearest<Key extends string>(values: Record<Key, number>, target: number): Key {

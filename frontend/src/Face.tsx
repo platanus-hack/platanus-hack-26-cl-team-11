@@ -3,7 +3,7 @@ import '../../design/luz/luz.js';
 import '../../design/faces/caras.js';
 
 export type FaceState = 'reposo' | 'activa' | 'pensando' | 'lista' | 'ausente';
-export type FaceSize = 'chat' | 'row' | 'node' | 'hub' | 'tab';
+export type FaceSize = 'chat' | 'row' | 'node' | 'hub' | 'tab' | 'pick';
 
 interface MountedFace {
   set(state: FaceState): MountedFace;
@@ -25,7 +25,8 @@ export interface FaceRecipe {
 declare global {
   interface Window {
     RondaCaras: {
-      mount(node: HTMLElement, name: string, options: { trigger?: Element }): MountedFace;
+      mount(node: HTMLElement, name: string, options: { trigger?: Element; recipe?: FaceRecipe; palette?: number[]; enter?: boolean }): MountedFace;
+      compose(name: string, partial: Partial<FaceRecipe>): FaceRecipe;
       customize(name: string, look?: { recipe?: Partial<FaceRecipe>; palette?: number[] }): void;
       keyFor(name: string): string;
       recipeFor(name: string): FaceRecipe;
@@ -58,9 +59,12 @@ interface FaceProps {
   name: string;
   state?: FaceState;
   size?: FaceSize;
+  recipe?: Partial<FaceRecipe>;
+  palette?: number[];
 }
 
-export function Face({ name, state = 'reposo', size = 'row' }: FaceProps) {
+export function Face({ name, state = 'reposo', size = 'row', recipe, palette }: FaceProps) {
+  const override = recipe || palette ? JSON.stringify({ recipe, palette }) : '';
   const host = useRef<HTMLSpanElement>(null);
   const face = useRef<MountedFace | null>(null);
   const version = useFaceVersion(name);
@@ -68,13 +72,17 @@ export function Face({ name, state = 'reposo', size = 'row' }: FaceProps) {
   useEffect(() => {
     const node = host.current;
     if (!node) return;
-    const mounted = window.RondaCaras.mount(node, name, { trigger: node.closest(ROW_SELECTOR) ?? undefined });
+    const look = override ? (JSON.parse(override) as { recipe?: Partial<FaceRecipe>; palette?: number[] }) : null;
+    const mounted = window.RondaCaras.mount(node, name, {
+      trigger: node.closest(ROW_SELECTOR) ?? undefined,
+      ...(look && { recipe: window.RondaCaras.compose(name, look.recipe ?? {}), palette: look.palette, enter: false }),
+    });
     face.current = mounted;
     return () => {
       face.current = null;
       mounted.destroy();
     };
-  }, [name, size, version]);
+  }, [name, size, version, override]);
 
   useEffect(() => {
     face.current?.set(state);
