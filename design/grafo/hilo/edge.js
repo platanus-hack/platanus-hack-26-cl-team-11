@@ -65,11 +65,14 @@ window.RondaEdge = (() => {
       try { window.RondaMotion.paint(ctx, st.kind, st.phase === 'tool' ? 0.86 * st.p : 0.86, opts.faces || []); } catch (e) {}
       ctx.restore();
       if (st.phase === 'tool') {
-        // Avance de la herramienta: un arco fino alrededor del plato.
-        ctx.save(); ctx.strokeStyle = TINT[st.kind] || '#6e6e73'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-        ctx.globalAlpha = 0.85;
-        ctx.beginPath(); ctx.roundRect(mid.x - (w + 10) / 2, mid.y - (h + 8) / 2, w + 10, h + 8, 12 * k + 4);
-        ctx.setLineDash([(2 * (w + h + 18)) * st.p, 4000]); ctx.stroke(); ctx.restore();
+        // Avance de la herramienta: una barrita fina bajo la miniatura, con el tinte del conector.
+        const bw = w * 0.7, by = mid.y + (h + 8) / 2 + 5;
+        ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.moveTo(mid.x - bw / 2, by); ctx.lineTo(mid.x + bw / 2, by); ctx.stroke();
+        ctx.strokeStyle = TINT[st.kind] || '#6e6e73';
+        ctx.beginPath(); ctx.moveTo(mid.x - bw / 2, by); ctx.lineTo(mid.x - bw / 2 + bw * Math.max(0.04, ease(st.p)), by); ctx.stroke();
+        ctx.restore();
       }
       if (d > 0) {
         const pop = ease(d / 0.35), r = 9 * Math.max(0.8, k);

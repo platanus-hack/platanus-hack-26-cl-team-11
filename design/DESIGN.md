@@ -203,6 +203,12 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
 - El pulso del equipo nunca muestra valores individuales: solo aportes contados contra el mínimo
   y un nivel común.
 - Galería de trabajo: `grafo/hilo/herramientas.html` (pasa `film.mjs --gate`, ver `REHEARSAL.md`).
+- **En el grafo, un solo arco a la vez** (`grafo/hilo/edge.js`, `edge-globe.js`): el arco del hilo
+  activo cuenta lo que pasa en él, con el mismo reloj que el hilo. Escriben: tres puntos chicos
+  viajan desde quien escribe. Corre la herramienta: su miniatura sobre un plato blanco, con una
+  barrita de avance del tinte. Termina: check del tinte que se encoge hasta un punto. Los demás arcos
+  con hilo muestran solo un punto chico que se puede tocar. La tarjeta grande vive solo en el hilo.
+- Duplas para revisar cada herramienta con su miniatura: `grafo/hilo/duplas.html` (tamaño ajustable).
 
 ## Texto de la interfaz
 
@@ -286,6 +292,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Grafo: menos cosas. Un solo arco activo a la vez, con la miniatura de la herramienta en uso, sincronizada con su tarjeta en el hilo; los demás arcos, un punto chico. Sin Claude Artifacts: prototipos en `design/`. | Mati |
 | 21-nov-2026 | Hilo: streaming sin reacomodo (Stream de Stageshow) y tarjetas de herramienta chunky con escena y tinte por conector (el tinte solo vive en la tarjeta). | Mati |
 | 21-nov-2026 | Globo: grupos de hasta 9 en tres rondas con personas puente; miniaturas sobre los hilos (a color solo en el grupo con color). Hilo de chat diseñado en `grafo/hilo/`. | Mati |
 | 21-nov-2026 | Globo: grupos de 3 a 6 en dos rondas; a lo más un grupo con color; desenfoque gradual por profundidad; sin «burbuja» de acuerdo: hilos que se recogen, brillo y chip «Listo». | Mati |

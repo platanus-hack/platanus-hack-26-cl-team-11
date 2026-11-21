@@ -15,3 +15,13 @@ Filmado con `film.mjs --gate` sobre `herramientas.html` (21-nov-2026).
 - **Lo que no se revisó:**
   - las 15 tarjetas juntas sin huecos de muestreo: con 15 escenarios el filmador pierde cuadros;
   - el cruce de estados cuadro a cuadro dentro del hilo real (lo midió Codex, no yo).
+
+## Duplas arco + herramienta (`duplas.html`) y globo
+
+- `film.mjs --gate` sobre los arcos de las dos primeras duplas: `rehearsal passed`.
+- Corregido en el ensayo:
+  - el borde de avance alrededor de la miniatura parecía un corchete roto: ahora es una barrita del tinte bajo la miniatura;
+  - el arco se apagaba a gris un instante entre que escribían y arrancaba la herramienta: queda encendido toda la conversación.
+- Globo (`globo.html?motion=all|calendars|permission`): un solo arco activo a la vez; con un hilo abierto, su arco va con el reloj del hilo. Revisado con Playwright a 1440 px (ambiental y con hilo abierto).
+- Todas las pestañas del playground cargan sin errores de consola ni de red a 1440 y 390 px.
+- Sin revisar: el ensayo cuadro a cuadro del globo (la escena es un canvas grande dentro de la página) y el toque en el punto chico a 390 px.

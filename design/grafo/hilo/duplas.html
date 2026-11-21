@@ -80,9 +80,9 @@ const rows = CALLS.map((c, idx) => {
     { type: 'message', at: 7.1, end: 8.7, author: 1, text: c.reply }
   ];
   const row = document.createElement('article'); row.className = 'du-row rd-glass';
-  const edge = document.createElement('div'); edge.className = 'du-edge'; edge.tabIndex = 0; edge.setAttribute('role', 'button'); edge.setAttribute('aria-label', 'Resaltar la herramienta de este hilo');
+  const edge = document.createElement('div'); edge.className = 'du-edge ss-stage'; edge.tabIndex = 0; edge.setAttribute('role', 'button'); edge.setAttribute('aria-label', 'Resaltar la herramienta de este hilo');
   const cv = document.createElement('canvas'); cv.width = 760; cv.height = 380; edge.append(cv);
-  const cap = document.createElement('span'); cap.className = 'du-cap rd-label'; cap.textContent = RondaTools.FLAVORS[RondaTools.flavorOf(c.name)].connector + ' · ' + RondaTools.motionKind(c.name); edge.append(cap);
+  const cap = document.createElement('span'); cap.className = 'du-cap rd-label'; cap.textContent = RondaTools.FLAVORS[RondaTools.flavorOf(c.name)].connector; edge.append(cap);
   const thread = document.createElement('div'); thread.className = 'du-thread';
   const msg = (e, mine) => {
     const m = document.createElement('div'); m.className = 'du-msg' + (mine ? ' mine' : ''); m.hidden = true;
@@ -110,7 +110,8 @@ function drawEdge(r, t) {
   const ctx = r.cv.getContext('2d'); ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, 380, 190);
   const A = { x: 52, y: 128 }, B = { x: 328, y: 128 }, C = { x: 190, y: 18 };
   const st = RondaEdge.state(r.events, t);
-  const live = st.phase !== 'idle' && st.phase !== 'receipt';
+  const last = r.events[r.events.length - 1];
+  const live = t >= r.events[0].at && t < last.end + 0.4;
   // El arco: degradado mientras negocian, tinta suave cuando no.
   const g = ctx.createLinearGradient(A.x, 0, B.x, 0); ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'].forEach((c, i) => g.addColorStop(i / 4, c));
   ctx.lineCap = 'round';
