@@ -104,7 +104,7 @@ export function DuelsPage() {
   const first = teams.find((p) => p.id === a) ?? teams[0];
   const second = teams.find((p) => p.id === b && p.id !== first?.id) ?? teams.find((p) => p.id !== first?.id);
   const wallet = lobby?.wallet;
-  const fresh = !!lobby?.feed.available && !!lobby.feed.ts && now - lobby.feed.ts < 25000;
+  const fresh = !error && !!lobby?.feed.available && !!lobby.feed.ts && now - lobby.feed.ts < 25000;
   const label = (id: string) => {
     const p = teams.find((x) => x.id === id);
     return p ? teamLabel(p) : id;
@@ -341,7 +341,7 @@ export function DuelsPage() {
         </section>
       </div>
       <div role="status" aria-live="polite">
-        {(error || notice) && <p>{error || notice}</p>}
+        {(error || notice) && <p>{error ? 'Reconectando con la sala. Tus fichas y ofertas se conservan.' : notice}</p>}
         {share && (
           <input
             aria-label="Enlace para compartir"
