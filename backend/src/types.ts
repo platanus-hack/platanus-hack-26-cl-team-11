@@ -36,10 +36,17 @@ interface ConnectorInfo {
   how: string;
 }
 
+export interface PushBatch {
+  events: EventDraft[];
+  ignored: number;
+  ignoredSample: string | null;
+}
+
 export interface PushConnector extends ConnectorInfo {
   kind: 'push';
   ingestSlug: string;
   toEvent(payload: JsonObject, receivedAt?: string): EventDraft;
+  toBatch?(payload: JsonObject, receivedAt?: string): PushBatch | null;
 }
 
 export interface KeyConnector extends ConnectorInfo {
