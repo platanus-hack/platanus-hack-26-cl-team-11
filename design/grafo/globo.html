@@ -7,6 +7,18 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
+<script>
+  (function () {
+    var own = new URLSearchParams(location.search).get('estado') || '';
+    if (own.indexOf('/api/people/') !== 0) return;
+    window.__estadoPrevio = fetch(own).then(function (response) { return response.ok ? response.json() : null; }).catch(function () { return null; });
+    ['./sala.js?v=4', '../faces/caras.js'].forEach(function (href) {
+      var link = document.createElement('link');
+      link.rel = 'preload'; link.as = 'script'; link.href = href;
+      document.head.appendChild(link);
+    });
+  })();
+</script>
 <link rel="stylesheet" href="./hilo/stream.css">
 <link rel="stylesheet" href="./hilo/tools.css">
 <link rel="stylesheet" href="./mini/threads.css">
@@ -136,8 +148,9 @@ class Component extends DCLogic {
   componentDidMount() {
     var self = this;
     var load = function (s) { var im = new Image(); im.src = s; return im; };
-    this.team = this.TEAM_SRC.map(load);
-    this.atlas = load(this.ATLAS); this.atlasBlur = load(this.ATLAS_BLUR);
+    var liveRoom = new URLSearchParams(location.search).has('estado');
+    this.team = liveRoom ? [] : this.TEAM_SRC.map(load);
+    this.atlas = liveRoom ? new Image() : load(this.ATLAS); this.atlasBlur = liveRoom ? new Image() : load(this.ATLAS_BLUR);
     this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.cur = []; this.vis = [];
     for (var i = 0; i < this.MAX; i++) { this.cur.push(null); this.vis.push(0); }
@@ -486,7 +499,7 @@ class Component extends DCLogic {
       var own = self.people[id].image || (id < 5 && self.people[id].tile === undefined ? self.team[id] : null);
       if (own) {
         var im = own;
-        if (im.complete && im.naturalWidth) { if (blur > 0.02) ctx.filter = 'blur(' + (blur * Math.max(1.2, r * 0.14)).toFixed(2) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
+        if (im && im.complete && im.naturalWidth) { if (blur > 0.02) ctx.filter = 'blur(' + (blur * Math.max(1.2, r * 0.14)).toFixed(2) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
       } else {
         var tile = self.people[id].tile, sx0 = (tile % 8) * 128 + 4, sy0 = Math.floor(tile / 8) * 128 + 4;
         if (blur > 0.02 && self.atlasBlur.complete && self.atlasBlur.naturalWidth) ctx.drawImage(self.atlasBlur, sx0, sy0, 120, 120, pp.x - r, pp.y - r, r * 2, r * 2);
@@ -796,6 +809,9 @@ if ((calendarPreview || motionPreview) && q.has('open') && g.openThread) {
 if (q.has('embed')) document.body.appendChild(Object.assign(document.createElement('script'), { src: './embed.js' })); // el globo dentro de otra página: ver embed.js
 if (q.has('still')) { g.vis = g.vis.map((x, i) => i < g.state.n ? 1 : 0); g.p = g.look(g.state.n); g.edgeFade = 1; }
 sync();
+</script>
+<script>
+  if (new URLSearchParams(location.search).has('estado')) { var liveRoomScript = document.createElement('script'); liveRoomScript.src = './sala.js?v=4'; document.body.appendChild(liveRoomScript); }
 </script>
 </body>
 </html>

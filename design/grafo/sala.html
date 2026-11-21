@@ -32,7 +32,7 @@
     frame.addEventListener('load', () => {
       frame.contentWindow.salaLista = reveal;
       const script = frame.contentDocument.createElement('script');
-      script.src = './sala.js?v=3';
+      script.src = './sala.js?v=4';
       frame.contentDocument.body.appendChild(script);
       setTimeout(reveal, REVEAL_ANYWAY_MS);
     });

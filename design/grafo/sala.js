@@ -7,7 +7,8 @@
   var own = params.get('estado') || '';
   // ?estado=/api/… lee el estado de un equipo que no es sala (la pestaña Equipo). Solo rutas propias.
   var source = own.indexOf('/api/people/') === 0 ? own : code ? '/api/rooms/' + encodeURIComponent(code) + '/state' : null;
-  if (!source || typeof g === 'undefined') return;
+  if (!source || typeof g === 'undefined' || window.__salaViva) return;
+  window.__salaViva = true;
 
   var REFRESH_MS = 1500;
   var ATLAS_FACES = 64;
@@ -28,7 +29,8 @@
       'html, body { height: 100%; overflow: hidden; background: transparent; }' +
       '.rd-page { min-height: 0; height: 100%; overflow: hidden; background: transparent; }' +
       '.globo { margin: 0; transform-origin: 0 0; }' +
-      '.globo > .rd-aura, #thread-view { display: none !important; }';
+      '.globo > .rd-aura, #thread-view { display: none !important; }' +
+      '.globo { opacity: 0; transition: opacity .35s ease; } .globo.is-lista { opacity: 1; }';
     var stage = document.querySelector('.globo');
     var fit = function () {
       var width = window.innerWidth, height = window.innerHeight, scale = Math.min(width / (HALF_X * 2), height / (HALF_Y * 2));
@@ -41,11 +43,12 @@
   var live = { people: [], threads: [] };
   var seen = '';
 
-  // Cada persona real sale con su cara: la que eligió en Ajustes o la que le da su nombre. Se dibuja una vez y queda como imagen.
-  var PORTRAIT_PX = 256, PORTRAIT_SETTLE_MS = 450, MAX_PORTRAITS = 60;
+  // Cada persona real sale con su cara: la que eligió en Ajustes o la que le da su nombre. Se dibuja una vez y queda guardada.
+  var PORTRAIT_PX = 192, PORTRAIT_SETTLE_MS = 600, MAX_PORTRAITS = 60, MAX_KEPT = 24, REVEAL_AFTER_MS = 1400;
+  var KEPT_INDEX = 'montu-caras-v1', KEPT_PREFIX = 'montu-cara-v1:';
   var EYE_SIZES = { chica: 4.2, media: 5.2, grande: 6.4 }, EYE_SPACINGS = { juntos: 11.6, normal: 13.6, separados: 16 };
   var EYE_LIDS = { despiertos: 0, tranquilos: 0.22, sueno: 0.34 }, EYE_TILTS = { rectos: 0, arriba: 4, abajo: -4 };
-  var portraits = {}, portraitQueue = Promise.resolve(), carasLoading = null;
+  var portraits = {}, byName = {}, carasLoading = null;
 
   var loadCaras = function () {
     if (!carasLoading) carasLoading = new Promise(function (resolve, reject) {
@@ -68,6 +71,36 @@
     });
   };
 
+  var kept = function (key) {
+    try { return window.localStorage.getItem(KEPT_PREFIX + key); } catch (failure) { return null; }
+  };
+
+  var keep = function (key, source) {
+    try {
+      var index = JSON.parse(window.localStorage.getItem(KEPT_INDEX) || '[]').filter(function (other) { return other !== key; });
+      index.push(key);
+      while (index.length > MAX_KEPT) window.localStorage.removeItem(KEPT_PREFIX + index.shift());
+      window.localStorage.setItem(KEPT_PREFIX + key, source);
+      window.localStorage.setItem(KEPT_INDEX, JSON.stringify(index));
+    } catch (failure) { return; }
+  };
+
+  var lavaReady = function (lava) {
+    if (!lava || lava.width <= 2) return true;
+    try { return lava.getContext('2d').getImageData(lava.width >> 1, lava.height >> 1, 1, 1).data[3] > 0; } catch (failure) { return true; }
+  };
+
+  var settled = function (node) {
+    var since = performance.now();
+    return new Promise(function (resolve) {
+      var check = function () {
+        if (lavaReady(node.querySelector('.rd-cara__gota > canvas')) || performance.now() - since > PORTRAIT_SETTLE_MS) resolve();
+        else requestAnimationFrame(check);
+      };
+      requestAnimationFrame(function () { requestAnimationFrame(check); });
+    });
+  };
+
   var drawPortrait = function (person) {
     var caras = window.RondaCaras, look = person.face;
     if (look) caras.customize(person.name, {
@@ -78,7 +111,7 @@
     node.style.cssText = 'position:fixed;left:0;top:0;width:' + PORTRAIT_PX + 'px;height:' + PORTRAIT_PX + 'px;opacity:0.01;pointer-events:none;z-index:-1';
     document.body.appendChild(node);
     var face = caras.mount(node, person.name, { size: PORTRAIT_PX, rest: true, interactive: false, enter: false });
-    return new Promise(function (resolve) { setTimeout(resolve, PORTRAIT_SETTLE_MS); }).then(function () {
+    return settled(node).then(function () {
       var tokens = getComputedStyle(document.documentElement);
       var canvas = document.createElement('canvas');
       canvas.width = canvas.height = PORTRAIT_PX;
@@ -99,18 +132,31 @@
       var markup = new XMLSerializer().serializeToString(eyes).replace(/^(<svg[^>]*>)/, '$1' + defs);
       return imageFrom('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup)).then(function (drawn) {
         ctx.drawImage(drawn, 0, 0, PORTRAIT_PX, PORTRAIT_PX);
-        return imageFrom(canvas.toDataURL('image/png'));
+        return canvas.toDataURL('image/webp', 0.92);
       });
     }).finally(function () { face.destroy(); node.remove(); });
   };
 
   var portraitOf = function (person) {
-    var key = person.id + '|' + person.name + '|' + JSON.stringify(person.face || null);
-    if (!portraits[key]) {
-      portraits[key] = portraitQueue.then(loadCaras).then(function () { return drawPortrait(person); }).catch(function () { return null; });
-      portraitQueue = portraits[key];
+    var key = person.name + '|' + JSON.stringify(person.face || null);
+    if (portraits[key]) return portraits[key];
+    var saved = kept(key);
+    if (saved) {
+      portraits[key] = imageFrom(saved).catch(function () { return null; });
+      return portraits[key];
     }
+    var turn = (byName[person.name] || Promise.resolve()).then(loadCaras).then(function () { return drawPortrait(person); });
+    byName[person.name] = turn.catch(function () { return null; });
+    portraits[key] = turn.then(function (source) { keep(key, source); return imageFrom(source); }).catch(function () { return null; });
     return portraits[key];
+  };
+
+  var shown = false;
+  var reveal = function () {
+    if (shown) return;
+    shown = true;
+    var stage = document.querySelector('.globo');
+    if (stage) stage.classList.add('is-lista');
   };
 
   var tileOf = function (id) {
@@ -150,13 +196,19 @@
     if (next === seen) return;
     seen = next;
     live = state;
+    var waiting = [];
     state.people.slice(0, g.MAX).forEach(function (person, index) {
       g.people[index] = { name: person.name, status: statusOf(person), tile: tileOf(person.id), pid: person.id, image: null };
-      if (person.synthetic || index >= MAX_PORTRAITS) return;
-      portraitOf(person).then(function (image) {
+      if (person.synthetic || index >= MAX_PORTRAITS) {
+        if (!g.atlas.src) { g.atlas.src = g.ATLAS; g.atlasBlur.src = g.ATLAS_BLUR; }
+        return;
+      }
+      waiting.push(portraitOf(person).then(function (image) {
         if (image && g.people[index] && g.people[index].pid === person.id) g.people[index].image = image;
-      });
+      }));
     });
+    Promise.all(waiting).then(reveal);
+    setTimeout(reveal, REVEAL_AFTER_MS);
     var count = Math.max(1, Math.min(g.MAX, state.people.length));
     if (count !== g.state.n) g.setN(count, false);
     else { g.buildGroups(count); g.setState({ auto: false, focus: null, groupCount: g.groups.length }); }
@@ -177,6 +229,9 @@
   };
 
   g.setState({ auto: false });
-  refresh();
+  if (own) loadCaras().catch(function () {});
+  else reveal();
+  if (own && window.__estadoPrevio) window.__estadoPrevio.then(function (state) { if (state) apply(state); else refresh(); });
+  else refresh();
   setInterval(refresh, REFRESH_MS);
 })();
