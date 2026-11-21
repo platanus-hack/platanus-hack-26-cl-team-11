@@ -24,9 +24,10 @@ MARKET_ID = "dc7d3432-3ee8-4631-9c2a-ef8ed5eede67"
 OWN_TEAM = "team-11"
 SETTINGS = DATA / "inventory.json"
 STOP = DATA / "inventory.stop"
+TAPE = DATA / "feed-tape.jsonl"
 DEFAULTS = dict(buying=True, clip=20, clips=1, budget=300, floor=600, cheap=1.3,
-                gain=0.5, edge=4, pace=4, calm=180, rest=180, liquidate=False)
-BOUNDS = dict(clip=(10, 66), clips=(1, 3), budget=(0, 700), floor=(300, 5000), cheap=(1.0, 2.0),
+                gain=0.5, edge=4, pace=4, calm=180, rest=180, liquidate=False, only=[], skip=[], sell=[])
+BOUNDS = dict(clip=(10, 66), clips=(1, 3), budget=(0, 700), floor=(300, 5000), cheap=(0.3, 2.0),
               gain=(0.2, 9.0), edge=(2, 500), pace=(2, 600), calm=(0, 3600), rest=(30, 7200))
 
 
@@ -42,6 +43,8 @@ def settings():
         elif name in BOUNDS and isinstance(value, (int, float)) and not isinstance(value, bool):
             low, high = BOUNDS[name]
             values[name] = min(high, max(low, value))
+        elif name in ("only", "skip", "sell") and isinstance(value, list):
+            values[name] = [team for team in value if isinstance(team, str) and re.fullmatch(r"team-\d+", team) and team != OWN_TEAM]
     values["clip"], values["clips"] = int(values["clip"]), int(values["clips"])
     return values
 
@@ -62,6 +65,7 @@ class Book:
         self.ids = {}
         self.price = {}
         self.trail = {}
+        self.shares = {}
 
     def load(self, state):
         with self.lock:
@@ -72,6 +76,7 @@ class Book:
             self.checked = time.time()
             if state["version"] >= self.version:
                 self.version = state["version"]
+                self.shares = dict(state.get("qVector") or self.shares)
                 self.record({p["id"]: p["price"] for p in state["projects"]})
 
     def tick(self, message):
@@ -84,8 +89,22 @@ class Book:
                 return False
             self.version = message["version"]
             self.checked = time.time()
+            self.remember(message)
             self.record(message["prices"])
             return True
+
+    def remember(self, message):
+        """Append the trade behind a broadcast to a local tape, from the change in net shares."""
+        held = message.get("qVector") or {}
+        moved = [(pid, amount - self.shares[pid]) for pid, amount in held.items()
+                 if pid in self.shares and amount != self.shares[pid]]
+        self.shares = dict(held)
+        if len(moved) == 1:
+            pid, change = moved[0]
+            row = dict(at=message.get("at"), team=self.slug.get(pid), shares=change,
+                       before=self.price.get(pid), after=message["prices"].get(pid))
+            with TAPE.open("a") as out:
+                out.write(json.dumps(row) + "\n")
 
     def record(self, prices):
         now = time.time()
@@ -316,7 +335,8 @@ class Desk:
             for team, lot in list(self.lots.items()):
                 if team not in self.book.ids or self.halted:
                     continue
-                floor = 1 if config["liquidate"] else max(lot["cost"] * (1 + config["gain"]), lot["cost"] + config["edge"])
+                leave = config["liquidate"] or team in config["sell"]
+                floor = 1 if leave else max(lot["cost"] * (1 + config["gain"]), lot["cost"] + config["edge"])
                 self.trade(team, "sell", lot["shares"], lambda est: est["cashDelta"] >= floor)
 
     def entry(self):
@@ -344,6 +364,8 @@ class Desk:
                 low = self.book.low(pid, config["calm"])
                 if team == OWN_TEAM or price > ceiling or (lot and lot["clips"] >= config["clips"]):
                     continue
+                if team in config["skip"] or team in config["sell"] or (config["only"] and team not in config["only"]):
+                    continue
                 if now - self.sold.get(team, 0) < config["rest"] or (low and price > low * 1.10):
                     continue
                 choices.append((price, team))
@@ -358,15 +380,17 @@ class Desk:
 
     def status(self, feed):
         with self.lock:
-            worth = 0
+            worth, detail = 0, {}
             for team, lot in self.lots.items():
                 if team in self.book.ids:
-                    worth += max(0, self.estimate(team, "sell", lot["shares"])[1]["cashDelta"])
+                    price, est = self.estimate(team, "sell", lot["shares"])
+                    worth += max(0, est["cashDelta"])
+                    detail[team] = dict(shares=lot["shares"], cost=lot["cost"], sellable=est["cashDelta"], price=round(price, 6))
             committed = sum(lot["cost"] for lot in self.lots.values())
             return dict(time=datetime.now(timezone.utc).isoformat(timespec="seconds"), paper=self.paper,
                         cash=self.cash, lots=len(self.lots), committed=committed, sellableNow=worth,
                         realized=self.realized, fills=self.fills, feed=feed.alive(), halted=self.halted,
-                        note=self.note, config=self.config)
+                        note=self.note, config=self.config, detail=detail)
 
 
 def run(paper, cash):
