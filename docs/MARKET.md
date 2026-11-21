@@ -70,3 +70,7 @@ Para regenerarlo, descarga los datos con `python3 tools/market/replay.py --refre
 La ruta anterior de duelos usa el libro SQLite de Render. La prueba local de cinco minutos dejó 110 y 90 fichas en los dos monederos. Los monederos se guardan por origen web. La terminal, el archivo y los pronósticos firmados funcionan en Vercel con lecturas públicas de Platanus.
 
 El archivo también admite pronosticar empate con `{"team":"tie"}`. Dos equipos que conservan la misma proporción de precios pueden moverse juntos cuando se negocia un tercero. La misma tolerancia absoluta de 1e-9 en la diferencia de rendimientos se usa para pronósticos en vivo e históricos. El marcador solo acredita la elección que coincide con el resultado.
+
+### Verificación pública · 14:36 UTC
+
+El pronóstico de prueba se fijó a las 14:31:35 UTC. Al vencer a las 14:36:35, team-11 registró −7,10% y el favorito team-9 +33,53%. La API devolvió `settled` y `winner=rival`. La última observación de ambas series anterior al cierre fue de las 14:34:33.500 UTC. Una lectura independiente de esas dos series reprodujo ambos rendimientos. Se verificaron también el comprobante compartido entre dos navegadores, la selección y seguimiento de equipos, la resolución de una ronda histórica y el archivo jugable con la fuente en pausa. La prueba usó pronósticos sin gasto de bananas.
