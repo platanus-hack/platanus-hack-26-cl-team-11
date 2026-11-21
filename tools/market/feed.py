@@ -118,7 +118,7 @@ class Feed(threading.Thread):
                         self.on_message(frame["message"])
             except Exception as exc:
                 self.connected = False
-                print("Feed reconnect:", type(exc).__name__, flush=True)
+                print("Feed reconnect:", type(exc).__name__, exc, flush=True)
             finally:
                 if link:
                     link.close()

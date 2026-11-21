@@ -383,8 +383,12 @@ def run(paper, cash):
     print(json.dumps(dict(start=name, cash=desk.cash, lots=desk.lots, realized=desk.realized, config=desk.config)), flush=True)
 
     def on_message(message):
-        if book.tick(message):
-            desk.exits()
+        try:
+            if book.tick(message):
+                desk.exits()
+        except Exception as exc:
+            desk.note = "error: " + type(exc).__name__
+            print("Exit check failed:", type(exc).__name__, exc, flush=True)
 
     feed = Feed(on_message)
     feed.start()

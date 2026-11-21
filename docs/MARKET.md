@@ -75,7 +75,7 @@ El archivo también admite pronosticar empate con `{"team":"tie"}`. Dos equipos 
 
 El pronóstico de prueba se fijó a las 14:31:35 UTC. Al vencer a las 14:36:35, team-11 registró −7,10% y el favorito team-9 +33,53%. La API devolvió `settled` y `winner=rival`. La última observación de ambas series anterior al cierre fue de las 14:34:33.500 UTC. Una lectura independiente de esas dos series reprodujo ambos rendimientos. Se verificaron también el comprobante compartido entre dos navegadores, la selección y seguimiento de equipos, la resolución de una ronda histórica y el archivo jugable con la fuente en pausa. La prueba usó pronósticos sin gasto de bananas.
 
-## Inventario en equipos baratos · 14:45 UTC
+## Inventario en equipos baratos · 14:42 UTC
 
 El historial público trae un punto por operación. La variación de precio de cada punto identifica el equipo y la cantidad, así que la cinta completa se puede reconstruir: 627 operaciones hasta las 14:38 UTC. La cinta muestra por qué perdió el piloto de impulso. Otros participantes mantienen lotes chicos en los equipos baratos y los venden uno o dos segundos después de cada compra fuerte. La compra del piloto en team-42 a las 14:13:44 fue seguida un segundo después por la venta de 6.839 acciones que alguien había comprado a las 12:05.
 
