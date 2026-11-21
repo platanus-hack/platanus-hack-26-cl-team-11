@@ -140,6 +140,8 @@ interface PartyRow {
 
 const DEFAULT_PROPOSAL_LIMIT = 30;
 const ACTIVE_ROUND: RoundStatus = 'en_curso';
+export const ROUND_TIME_LIMIT_MS = 10 * 60 * 1000;
+const TIMED_OUT = 'La ronda tardó demasiado y se dio por terminada.';
 
 const newId = () => randomBytes(9).toString('base64url');
 
@@ -249,6 +251,15 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
 
   return {
     startRound(teamId, startedBy) {
+      const deadline = new Date(Date.now() - ROUND_TIME_LIMIT_MS).toISOString();
+      db.prepare('UPDATE agent_rounds SET status = ?, problem = ?, finished_at = ? WHERE team_id = ? AND status = ? AND started_at < ?').run(
+        'fallida',
+        TIMED_OUT,
+        now(),
+        teamId,
+        ACTIVE_ROUND,
+        deadline,
+      );
       const running = db.prepare('SELECT 1 FROM agent_rounds WHERE team_id = ? AND status = ?').get(teamId, ACTIVE_ROUND);
       if (running) return null;
       const round: Round = { id: newId(), teamId, startedBy, startedAt: now(), finishedAt: null, status: ACTIVE_ROUND, problem: null };
@@ -263,7 +274,7 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
     },
 
     finishRound(roundId, status, problem) {
-      db.prepare('UPDATE agent_rounds SET status = ?, problem = ?, finished_at = ? WHERE id = ?').run(status, problem, now(), roundId);
+      db.prepare('UPDATE agent_rounds SET status = ?, problem = ?, finished_at = ? WHERE id = ? AND status = ?').run(status, problem, now(), roundId, ACTIVE_ROUND);
     },
 
     latestRound(teamId) {

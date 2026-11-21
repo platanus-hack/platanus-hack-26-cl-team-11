@@ -19,7 +19,8 @@
     "add-person": "npm run add-person -w backend --",
     "seed": "npm run seed -w backend --",
     "lint:design": "design/lint.sh",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "agents:check": "npm run agents:check -w backend"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

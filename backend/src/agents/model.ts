@@ -5,6 +5,8 @@ import type * as z from 'zod/v4';
 export const DEFAULT_AGENT_MODEL = 'claude-opus-5-5';
 const MAX_OUTPUT_TOKENS = 16000;
 const PROXY_PLACEHOLDER_KEY = 'via-proxy';
+const REQUEST_TIMEOUT_MS = 90_000;
+const MAX_RETRIES = 1;
 
 export interface AgentRequest<Schema extends z.ZodType> {
   system: string;
@@ -46,6 +48,8 @@ export function createClaudeModel(config: AgentModelConfig): AgentModel {
     apiKey: config.apiKey ?? (config.authToken ? null : PROXY_PLACEHOLDER_KEY),
     authToken: config.authToken ?? null,
     ...(config.baseURL ? { baseURL: config.baseURL } : {}),
+    timeout: REQUEST_TIMEOUT_MS,
+    maxRetries: MAX_RETRIES,
   });
 
   return {

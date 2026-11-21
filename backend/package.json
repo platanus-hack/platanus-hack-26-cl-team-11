@@ -8,7 +8,8 @@
     "add-person": "tsx src/cli.ts add-person",
     "seed": "tsx src/seed.ts",
     "test": "tsx --test test/*.test.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "agents:check": "tsx src/agents/check.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",

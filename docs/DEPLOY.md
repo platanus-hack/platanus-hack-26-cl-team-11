@@ -61,6 +61,8 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 
 Se cargan en el panel de Render: **ronda → Environment → Add Environment Variable**. Render vuelve a desplegar al guardar. Nunca van en el repo.
 
+Para probar el modelo antes de cargarlas, define la misma variable en tu terminal y corre `npm run agents:check`. Arma un equipo de demo en memoria, corre una ronda contra el modelo real y muestra las conversaciones y las propuestas. No toca la base ni producción.
+
 ## Después del primer despliegue
 
 - **Google:** registra `https://<dirección>/api/oauth/google/callback` como dirección de retorno en el cliente OAuth. Detalle en [INTEGRATIONS.md](INTEGRATIONS.md).

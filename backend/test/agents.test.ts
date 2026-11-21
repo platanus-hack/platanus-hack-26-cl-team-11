@@ -4,6 +4,7 @@ import type * as z from 'zod/v4';
 import { AgentModelError, type AgentModel, type AgentRequest } from '../src/agents/model.js';
 import { ContactPlan, HelpReply, ProposalDraft } from '../src/agents/prompts.js';
 import { runDueRounds } from '../src/agents/routine.js';
+import { ROUND_TIME_LIMIT_MS } from '../src/agents/store.js';
 import { createApp } from '../src/app.js';
 import { createContext, type AppContext } from '../src/context.js';
 import { seedDemo } from '../src/seed.js';
@@ -214,4 +215,22 @@ test('the daily routine waits for its hour, skips teams with nothing to ask and 
   assert.ok(calls >= 3);
   assert.equal(await runDueRounds(withHour(ctx, hour), now), 0);
   assert.equal(prompts.length, calls);
+});
+
+test('a round stuck past its time limit is closed as failed and no longer blocks the team', () => {
+  const { ctx, team } = setup(fakeModel().model);
+  const stuck = ctx.agents.startRound(team.id, null);
+  assert.ok(stuck);
+  assert.equal(ctx.agents.startRound(team.id, null), null);
+
+  const longAgo = new Date(Date.now() - ROUND_TIME_LIMIT_MS - 1000).toISOString();
+  ctx.db.prepare('UPDATE agent_rounds SET started_at = ? WHERE id = ?').run(longAgo, stuck.id);
+  const next = ctx.agents.startRound(team.id, null);
+  assert.ok(next);
+  assert.notEqual(next.id, stuck.id);
+
+  ctx.agents.finishRound(stuck.id, 'lista', null);
+  const closed = ctx.db.prepare('SELECT status, problem FROM agent_rounds WHERE id = ?').get(stuck.id) as { status: string; problem: string };
+  assert.equal(closed.status, 'fallida');
+  assert.ok(closed.problem.includes('tardó demasiado'));
 });
