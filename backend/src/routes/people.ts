@@ -1,12 +1,14 @@
 import { Hono } from 'hono';
 import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
+import { openDeliveryStore } from '../deliveries.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const RECENT_EVENTS = 12;
 
-export function peopleRoutes({ store, config }: AppContext) {
+export function peopleRoutes({ db, store, config }: AppContext) {
   const routes = new Hono();
+  const deliveries = openDeliveryStore(db);
 
   routes.post('/people', async (c) => {
     const body = asObject(await c.req.text());
@@ -20,6 +22,7 @@ export function peopleRoutes({ store, config }: AppContext) {
     if (!person) return c.json(NOT_FOUND, 404);
     const sync = store.syncBySource(person.token);
     const connections = store.listConnections(person.token);
+    const delivered = deliveries.latestBySource(person.token);
     const health = CONNECTORS.find((connector) => connector.kind === 'push');
     return c.json({
       name: person.name,
@@ -36,6 +39,7 @@ export function peopleRoutes({ store, config }: AppContext) {
           provider: connector.kind === 'oauth' ? connector.provider : null,
           configured: connector.kind !== 'oauth' || Boolean(config.oauth[connector.provider]),
           sync: sync[connector.id] ?? null,
+          delivery: delivered[connector.id] ?? null,
           connection: connection ? { account: connection.account, lastSyncedAt: connection.lastSyncedAt, lastError: connection.lastError } : null,
         };
       }),

@@ -55,7 +55,7 @@ export function SourceRow({ token, source, ingestUrl, healthShortcut, open, onTo
   function detail() {
     if (!open) return null;
     if (source.connection) return <SourceDetail source={source} connection={source.connection} busy={busy} onSync={sync} onDisconnect={disconnect} />;
-    if (source.connect === 'push') return <HealthAddress url={ingestUrl} sync={source.sync} shortcut={healthShortcut} />;
+    if (source.connect === 'push') return <HealthAddress url={ingestUrl} sync={source.sync} delivery={source.delivery ?? null} shortcut={healthShortcut} onCheck={onChange} />;
     if (needsKey) return <KeyForm label={source.label} busy={busy} onSubmit={connect} />;
     return null;
   }

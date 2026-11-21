@@ -1,5 +1,6 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
+import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals } from './api';
 import { ONBOARDING_STEPS, OnboardingSection } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
@@ -18,7 +19,7 @@ export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
   const [signals, setSignals] = useState<Signals | null>(null);
   const [firstSteps, setFirstSteps] = useState<OnboardingStep[]>([]);
-  const [focusedSource, setFocusedSource] = useState<string | null>(null);
+  const [focusedSource, setFocusedSource] = useState<string | null>(() => (new URLSearchParams(window.location.search).has(HEALTH_RETURN_PARAM) ? HEALTH_SOURCE : null));
   const { tab, select } = useHashTab();
 
   const load = useCallback(async () => {

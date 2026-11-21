@@ -349,7 +349,7 @@ test('the person payload keeps every field the page reads and never shows a toke
   const text = await (await app.request(`/api/people/${token}`)).text();
   const page = JSON.parse(text) as { sources: Array<Record<string, unknown>> };
   for (const source of page.sources) {
-    assert.deepEqual(Object.keys(source).sort(), ['configured', 'connect', 'connection', 'how', 'id', 'label', 'provider', 'sync']);
+    assert.deepEqual(Object.keys(source).sort(), ['configured', 'connect', 'connection', 'delivery', 'how', 'id', 'label', 'provider', 'sync']);
   }
   for (const secret of ['gho-access', 'lin-access', 'lin-refresh-1', 'gh-secret', 'lin-secret']) assert.ok(!text.includes(secret));
 });

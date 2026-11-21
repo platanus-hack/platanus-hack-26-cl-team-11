@@ -9,6 +9,12 @@ export interface SourceConnection {
   lastError: string | null;
 }
 
+export interface Delivery {
+  at: string;
+  ok: boolean;
+  message: string;
+}
+
 export interface Source {
   id: string;
   label: string;
@@ -17,6 +23,7 @@ export interface Source {
   provider: string | null;
   configured?: boolean;
   sync: SourceSync | null;
+  delivery?: Delivery | null;
   connection: SourceConnection | null;
 }
 
