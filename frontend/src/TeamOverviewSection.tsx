@@ -20,7 +20,7 @@ const levelOf = (level: LevelSignal['level'] | null) => (level === null ? PRIVAT
 function doingOf(member: OverviewMember) {
   if (member.working) return `Trabaja en «${member.working}»`;
   if (member.topics.length > 0) return `Anda en ${member.topics.join(', ')}`;
-  return 'Todavía no se sabe en qué está';
+  return null;
 }
 
 function Stat({ tint, label, value }: { tint: string; label: string; value: string }) {
@@ -42,7 +42,7 @@ function PersonCard({ member, order }: { member: OverviewMember; order: number }
         <Face name={member.name} />
         <span className="rd-persona__who">
           <span className="rd-persona__name">{member.me ? `${member.name} · tú` : member.name}</span>
-          <span className="rd-persona__doing">{doingOf(member)}</span>
+          {doingOf(member) && <span className="rd-persona__doing">{doingOf(member)}</span>}
         </span>
       </div>
       <div className="rd-persona__stats">

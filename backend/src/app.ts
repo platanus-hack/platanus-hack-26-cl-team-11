@@ -34,6 +34,8 @@ const INGEST_PATH_PREFIX = '/api/ingest/';
 
 const setsItsOwnLimit = (path: string) => path.startsWith(INGEST_PATH_PREFIX) || path === REPO_COMMIT_PATH || path === WHATSAPP_WEBHOOK_PATH || path.endsWith(REPO_PASTE_SUFFIX);
 
+const SLOW_REQUEST_MS = 150;
+
 export function createApp(ctx: AppContext) {
   const api = new Hono();
   const limitBody = bodyLimit({ maxSize: DEFAULT_MAX_BODY_BYTES, onError: (c) => c.json({ error: 'El contenido es demasiado largo.' }, 413) });
@@ -49,7 +51,10 @@ export function createApp(ctx: AppContext) {
     const queries = databaseStats.queries;
     const spent = databaseStats.ms;
     await next();
-    c.res.headers.append('Server-Timing', `db;dur=${(databaseStats.ms - spent).toFixed(1)};desc="${databaseStats.queries - queries} consultas", total;dur=${(performance.now() - started).toFixed(1)}`);
+    const total = performance.now() - started;
+    const asked = databaseStats.queries - queries;
+    c.res.headers.append('Server-Timing', `db;dur=${(databaseStats.ms - spent).toFixed(1)};desc="${asked} consultas", total;dur=${total.toFixed(1)}`);
+    if (total >= SLOW_REQUEST_MS) console.warn(`Pedido lento: ${c.req.method} ${c.req.routePath} tardó ${Math.round(total)} ms, ${Math.round(databaseStats.ms - spent)} ms en la base con ${asked} consultas.`);
   });
   api.use('*', (c, next) => (setsItsOwnLimit(c.req.path) ? next() : limitBody(c, next)));
   api.get('/health', (c) => c.json({ ok: true }));
