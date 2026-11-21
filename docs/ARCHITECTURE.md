@@ -249,7 +249,7 @@ Una persona entra a una sala con un código, conecta el agente que ya usa y ese 
 |---|---|
 | `POST /api/rooms` | `{ "name": "…" }` crea una sala y devuelve su código |
 | `POST /api/rooms/<código>/join` | `{ "name": "…" }` crea a la persona, la deja dentro y devuelve su link. Con `{ "token": "…" }` entra una persona que ya existe |
-| `GET /api/rooms/<código>/state` | Quién está, qué asistentes tiene cada uno y los hilos de la última ronda |
+| `GET /api/rooms/<código>/state` | Quién está, qué asistentes tiene cada uno, la cara que eligió (`face`, o `null`) y los hilos de la última ronda. El globo dibuja con esa cara a cada persona real |
 | `GET /api/rooms/<código>/events?since=<id>` | Lo que pasó después de ese punto |
 
 Estas dos últimas rutas no piden link: las lee la pantalla de la sala. Por eso nunca devuelven el link de una persona; cada persona aparece con un identificador derivado.
