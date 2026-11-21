@@ -16,9 +16,10 @@ window.RondaUniverse = (() => {
   const NAMES = ['Camila', 'Benjamín', 'Sofía', 'Matías', 'Valentina', 'Tomás', 'Isidora', 'Vicente', 'Florencia', 'Agustín', 'Josefa', 'Martín', 'Antonia', 'Joaquín', 'Catalina', 'Lucas', 'Fernanda', 'Diego', 'Trinidad', 'Maximiliano', 'Javiera', 'Cristóbal', 'Emilia', 'Felipe', 'Constanza', 'Ignacio', 'Amanda', 'Nicolás', 'Paz', 'Sebastián', 'Renata', 'Gaspar', 'Elisa', 'Bruno', 'Julieta', 'Simón', 'Rocío', 'Pedro', 'Martina', 'León'];
 
   // Temas: verbos × asuntos = cientos de conversaciones posibles.
+  // Cada tema cabe en 26 letras: va entero en el panel, en las filas y en el calendario, sin puntos suspensivos.
   const VERBS = ['Mover', 'Cubrir', 'Revisar', 'Preparar', 'Coordinar', 'Cerrar', 'Probar', 'Ordenar', 'Agendar', 'Presentar', 'Repartir', 'Confirmar'];
-  const THINGS = ['la demo', 'el pitch', 'la reunión del lunes', 'el bug de pagos', 'el deck', 'el turno del sábado', 'la entrevista', 'el onboarding de Paz', 'el viaje a Valparaíso', 'el contrato', 'la retro', 'el almuerzo del equipo', 'las llaves de la oficina', 'el post de lanzamiento', 'la clase de prueba', 'la visita del cliente'];
-  const TOPICS = VERBS.flatMap(v => THINGS.map(t => v + ' ' + t));
+  const THINGS = ['la demo', 'el pitch', 'la reunión', 'el bug de pagos', 'el deck', 'el turno', 'la entrevista', 'el onboarding', 'el viaje', 'el contrato', 'la retro', 'el almuerzo', 'las llaves', 'el lanzamiento', 'la clase', 'la visita'];
+  const TOPICS = VERBS.flatMap(v => THINGS.map(t => v + ' ' + t)).filter(t => t.length <= 26);
 
   // Catálogo completo de herramientas. Agrega aquí cada herramienta nueva (regla del panel omnipotente).
   // reply = lo que dice el agente después de usarla; [[x]] = dato privado (solo marcador).

@@ -10,27 +10,21 @@
 <link rel="stylesheet" href="./hilo/stream.css">
 <link rel="stylesheet" href="./hilo/tools.css">
 <style>
-  /* PANEL DEMO OMNIPOTENTE (ver universo.js y AGENTS.md regla 6): todo lo nuevo aparece aquí. */
+  /* PANEL DEMO OMNIPOTENTE (ver universo.js y AGENTS.md regla 6): todo lo nuevo aparece aquí.
+     Sigue el estándar de contexto/resumen.html: barra rd-top, tarjetas rd-card rd-glass, una sola escala
+     de radios (28, 16, 12, 6, píldora) y relieve solo en lo que se aprieta y en las marcas de datos. */
   html, body { margin: 0; height: 100%; }
   .uv { --ease: cubic-bezier(.32,.72,0,1); position: relative; height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) 420px; overflow: hidden; background: var(--rd-bg); }
   .uv-stage { position: relative; min-width: 0; }
-  .uv-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity .9s var(--ease), transform 1.2s var(--ease); }
-  .uv[data-scene="semana"] .uv-stage canvas { opacity: .28; transform: scale(.94); }
-  .uv-brand { position: absolute; left: 28px; top: 22px; z-index: 3; font-size: 17px; }
-  .uv-brand .rd-mark { width: 28px; height: 28px; }
+  .uv-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity 1s var(--ease), transform 1.2s var(--ease); }
+  .uv[data-scene="semana"] .uv-stage canvas { opacity: 0; transform: scale(.92); }
 
-  /* Tres pasos de la historia: uno a uno, grupos, tu semana. */
-  .uv-steps { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); z-index: 3; display: flex; gap: 4px; padding: 4px; border-radius: var(--rd-radius-pill); }
-  .uv-step { position: relative; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 13px; border-radius: var(--rd-radius-pill); font-size: 13px; font-weight: var(--rd-weight); color: var(--rd-faint); white-space: nowrap; transition: color .5s var(--ease), background .5s var(--ease); }
-  .uv-step b { font-weight: var(--rd-weight); font-family: var(--rd-font-num); font-size: 12px; }
-  .uv-step[data-on] { color: var(--rd-ink); background: var(--rd-glass-solid); box-shadow: 0 1px 2px var(--rd-hairline), 0 6px 18px rgba(40,30,90,.08); }
-  .uv-step[data-done] { color: var(--rd-muted); }
-
-  /* Contador de la ronda uno a uno: solo durante ese paso. */
-  .uv-count { position: absolute; left: 28px; bottom: 28px; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .6s var(--ease); }
-  .uv[data-scene="ronda"] .uv-count { opacity: 1; }
-  .uv-count .rd-stat { font-size: 34px; }
-  .uv-count .rd-note { display: block; margin-top: 4px; }
+  /* Barra: marca, los tres pasos como pestañas y la nota de datos de prueba. */
+  .uv-top { position: absolute; left: 28px; right: 28px; top: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; }
+  .uv-top .rd-tag { justify-self: end; }
+  .uv-top .rd-nav > * { transition: background-color .45s var(--ease), color .45s var(--ease); }
+  .uv-top .rd-nav b { display: inline-block; min-width: 2.1em; font-weight: var(--rd-weight); font-family: var(--rd-font-num); font-variant-numeric: tabular-nums; transition: opacity .3s ease; }
+  .uv-top .rd-nav b:empty { display: none; }
 
   /* Controles de quien presenta: ocultos por defecto (botón, tecla H, ?ui=1). */
   .uv-admin { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 4; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -38,7 +32,7 @@
   .uv-cat { display: flex; flex-direction: column; gap: 6px; transition: opacity .35s var(--ease), transform .35s var(--ease); }
   .uv-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
   .uv-tag { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px 0 3px; border-radius: var(--rd-radius-pill); font-size: 10.5px; font-weight: var(--rd-weight); background: rgba(255,255,255,.55); color: var(--rd-faint); transition: background .4s ease, color .4s ease; }
-  .uv-tag i { width: 14px; height: 14px; border-radius: 5px; background: color-mix(in srgb, var(--t) 20%, white); }
+  .uv-tag i { width: 14px; height: 14px; border-radius: 6px; background: color-mix(in srgb, var(--t) 20%, white); }
   .uv-tag[data-seen] { background: rgba(255,255,255,.92); color: var(--rd-ink); }
   .uv-tag[data-seen] i { background: var(--t); }
   .uv-tag[data-now] { box-shadow: 0 0 0 1.5px var(--t); }
@@ -49,48 +43,49 @@
   .uv[data-clean] .uv-ctl .uv-hide { opacity: 0; }
   .uv[data-clean] .uv-ctl .uv-hide:hover, .uv[data-clean] .uv-ctl .uv-hide:focus-visible { opacity: .8; }
 
-  /* Final: la semana coordinada. */
-  .uv-week { position: absolute; left: 50%; top: 50%; z-index: 3; width: min(680px, calc(100% - 64px)); box-sizing: border-box; padding: 26px 28px 24px; border-radius: var(--rd-radius-card); transform: translate(-50%, -46%) scale(.96); opacity: 0; filter: blur(10px); pointer-events: none; transition: opacity .8s var(--ease), transform 1s var(--ease), filter .8s var(--ease); }
-  .uv[data-scene="semana"] .uv-week { opacity: 1; transform: translate(-50%, -50%); filter: none; }
-  .uv-week h2 { margin: 6px 0 0; font-size: 30px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); line-height: 1.15; }
-  .uv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0 18px; }
-  .uv-stats .rd-stat { font-size: 30px; display: block; }
-  .uv-stats .rd-note { display: block; margin-top: 4px; }
-  .uv-cal { display: grid; grid-template-columns: 36px repeat(5, 1fr); grid-template-rows: 22px 320px; column-gap: 6px; }
+  /* Final: la semana. Una tarjeta del Resumen: título simple, números grandes y el calendario. */
+  .uv-week { position: absolute; left: 50%; top: calc(50% + 33px); z-index: 2; width: min(680px, calc(100% - 64px)); box-sizing: border-box; gap: 0; transform: translate(-50%, -48%) scale(.97); opacity: 0; pointer-events: none; transition: opacity .8s var(--ease), transform 1s var(--ease); }
+  .uv[data-scene="semana"] .uv-week { opacity: 1; transform: translate(-50%, -50%); }
+  .uv-ctitle { margin: 0; font-size: 18px; font-weight: var(--rd-weight); letter-spacing: -0.02em; line-height: 1.25; }
+  .uv-stats { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 16px; align-items: start; margin: 18px 0 22px; }
+  .uv-num { display: block; font-family: var(--rd-font-num); font-size: 44px; font-weight: var(--rd-weight); letter-spacing: -0.035em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .uv-stats .rd-note { display: block; margin-top: 6px; white-space: nowrap; }
+  .uv-cal { display: grid; grid-template-columns: 36px repeat(5, minmax(0, 1fr)); grid-template-rows: 22px 420px; column-gap: 6px; }
   .uv-cal-day { font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); text-align: center; }
   .uv-cal-hours { position: relative; grid-row: 2; }
-  .uv-cal-hours span { position: absolute; right: 2px; transform: translateY(-50%); font-family: var(--rd-font-num); font-size: 10.5px; color: var(--rd-faint); }
-  .uv-cal-col { position: relative; grid-row: 2; border-radius: 12px; background: rgba(255,255,255,.5); background-image: linear-gradient(to bottom, var(--rd-hairline) 0, var(--rd-hairline) 1px, transparent 1px); background-size: 100% calc(100% / 9); }
-  .uv-ev { position: absolute; left: 3px; right: 3px; box-sizing: border-box; padding: 5px 7px; border-radius: 9px; overflow: hidden; background: color-mix(in srgb, var(--t) 16%, white); box-shadow: inset 3px 0 0 var(--t), 0 4px 12px rgba(40,30,90,.08); font-size: 11px; line-height: 1.25; opacity: 0; transform: scale(.85); }
-  .uv-ev b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: var(--rd-weight); color: var(--rd-ink); }
-  .uv-ev span { display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .uv-ev span { color: var(--rd-muted); font-family: var(--rd-font-num); }
-  .uv-ev.you { padding: 6px 8px; background: var(--rd-glass-solid); box-shadow: 0 0 0 1.5px var(--rd-g2), 0 8px 22px rgba(123,97,255,.25); }
+  .uv-cal-hours span { position: absolute; right: 2px; transform: translateY(-50%); font-family: var(--rd-font-num); font-size: 11px; color: var(--rd-faint); }
+  .uv-cal-col { position: relative; grid-row: 2; border-radius: 12px; background: rgba(255,255,255,.45); background-image: linear-gradient(to bottom, var(--rd-hairline) 0, var(--rd-hairline) 1px, transparent 1px); background-size: 100% calc(100% / 9); }
+  .uv-ev { position: absolute; left: 3px; right: 3px; box-sizing: border-box; min-height: 56px; padding: 6px 8px; border-radius: 6px; border: 1.5px solid transparent; background: rgba(255,255,255,.92) padding-box; box-shadow: 0 2px 0 rgba(60,60,90,.1), 0 6px 14px rgba(40,30,90,.06); font-size: 11.5px; line-height: 1.25; opacity: 0; transform: scale(.9); }
+  .uv-ev b { display: block; font-weight: var(--rd-weight); color: var(--rd-ink); }
+  .uv-ev span { display: block; margin-top: 2px; color: var(--rd-muted); font-family: var(--rd-font-num); }
+  .uv-ev.you { background: linear-gradient(#fff, #fff) padding-box, var(--rd-gradient) border-box; z-index: 1; }
   .uv[data-scene="semana"] .uv-ev { animation: uv-pop .7s var(--ease) forwards; animation-delay: var(--d); }
-  @keyframes uv-pop { from { opacity: 0; transform: scale(.85) translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes uv-pop { from { opacity: 0; transform: scale(.9) translateY(6px); } to { opacity: 1; transform: none; } }
 
-  /* Panel del hilo */
-  .uv-panel { position: relative; display: flex; flex-direction: column; min-height: 0; height: calc(100vh - 32px); margin: 16px 16px 16px 0; border-radius: var(--rd-radius-card); overflow: hidden; }
-  .uv-head { position: relative; display: flex; align-items: center; gap: 12px; height: 84px; box-sizing: border-box; padding: 16px 20px; border-bottom: 1px solid var(--rd-hairline); }
-  .uv-faces { display: flex; flex: 0 0 auto; }
-  .uv-faces span { width: 30px; height: 30px; margin-left: -9px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px var(--rd-on-ink); }
-  .uv-faces span:first-child { margin-left: 0; }
-  .uv-hcopy { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
-  .uv-hcopy .rd-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .uv-hcopy .uv-topic { font-size: 18px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .uv-prog { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
-  .uv-prog i { display: block; height: 100%; width: 0; background: var(--rd-gradient); }
+  /* Panel: una tarjeta del Resumen. Arriba, el tema y el grupo; abajo, el hilo anclado al pie. */
+  .uv-panel { position: relative; height: calc(100vh - 50px); margin: 26px 24px 24px 0; padding: 22px 22px 0; box-sizing: border-box; gap: 0; overflow: hidden; }
+  .uv-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 3px; padding-bottom: 16px; border-bottom: 1px solid var(--rd-hairline); }
+  .uv-members { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; margin-top: 14px; }
+  .uv-members:empty { display: none; }
+  .uv-member { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .uv-member .uv-face { width: 32px; height: 32px; }
+  .uv-member div { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .uv-member b { font-size: 15px; font-weight: var(--rd-weight); letter-spacing: -0.01em; }
+  .uv-member span { font-size: 13px; color: var(--rd-muted); }
 
-  .uv-feed { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 18px 18px 20px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 90px); mask-image: linear-gradient(to bottom, transparent 0, #000 90px); }
+  .uv-feed { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 18px 0 22px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 72px); mask-image: linear-gradient(to bottom, transparent 0, #000 72px); }
+  .uv[data-scene="ronda"] .uv-feed, .uv[data-scene="semana"] .uv-feed { gap: 0; }
+  .uv[data-scene="semana"] .uv-feed { justify-content: flex-start; -webkit-mask-image: none; mask-image: none; padding-top: 6px; }
+  .uv-feed > * { will-change: transform; }
   .uv-item { display: flex; gap: 9px; align-items: flex-end; }
   .uv-item.mine { flex-direction: row-reverse; }
-  .uv-face { width: 28px; height: 28px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px var(--rd-on-ink); flex: 0 0 auto; }
+  .uv-face { width: 28px; height: 28px; border-radius: 50%; background-size: cover; box-shadow: var(--rd-shadow-face-small); flex: 0 0 auto; }
   .uv-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 84%; }
   .uv-item.mine .uv-col { align-items: flex-end; }
   .uv-who { padding: 0 6px; font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-ink); line-height: 1.2; }
   .uv-who em { font-style: normal; font-weight: var(--rd-weight-body); color: var(--rd-muted); }
-  .uv-bubble { position: relative; padding: 10px 14px 11px; border-radius: 20px 20px 20px 6px; background: var(--rd-glass-solid); border: 1px solid var(--rd-hairline); box-shadow: 0 1px 1px var(--rd-hairline), 0 10px 26px rgba(40,30,90,.06); font-size: 14.5px; line-height: 1.45; letter-spacing: -0.005em; color: var(--rd-ink); }
-  .uv-item.mine .uv-bubble { border-radius: 20px 20px 6px 20px; background: color-mix(in srgb, var(--rd-g2) 8%, white); border-color: color-mix(in srgb, var(--rd-g2) 14%, transparent); box-shadow: none; }
+  .uv-bubble { position: relative; padding: 10px 14px 11px; border-radius: 16px 16px 16px 6px; background: var(--rd-glass-solid); border: 1px solid var(--rd-hairline); box-shadow: 0 1px 1px var(--rd-hairline), 0 10px 26px rgba(40,30,90,.06); font-size: 14.5px; line-height: 1.45; letter-spacing: -0.005em; color: var(--rd-ink); }
+  .uv-item.mine .uv-bubble { border-radius: 16px 16px 6px 16px; background: color-mix(in srgb, var(--rd-g2) 7%, white); border-color: color-mix(in srgb, var(--rd-g2) 12%, transparent); box-shadow: none; }
   .uv-item.human .uv-bubble { background: var(--rd-ink); color: var(--rd-on-ink); border-color: var(--rd-ink); }
   .uv-dots { position: absolute; left: 14px; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); opacity: 0; transition: opacity .25s ease; }
   .uv-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rd-faint); animation: uv-dot 1.1s ease-in-out infinite; }
@@ -103,8 +98,8 @@
   .uv-tool-who .uv-face { width: 18px; height: 18px; box-shadow: none; }
   .uv-tool-who b { font-weight: var(--rd-weight); color: var(--rd-ink); }
 
-  .uv-ask { margin: 2px 0; padding: 1.5px; border-radius: 20px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
-  .uv-ask > div { display: flex; flex-direction: column; gap: 9px; padding: 14px 15px 13px; border-radius: 18.5px; background: var(--rd-glass-solid); }
+  .uv-ask { margin: 2px 0; padding: 1.5px; border-radius: 17.5px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
+  .uv-ask > div { display: flex; flex-direction: column; gap: 9px; padding: 14px 15px 13px; border-radius: 16px; background: var(--rd-glass-solid); }
   .uv-ask .rd-title { font-size: 19px; }
   .uv-ask .rd-actions .rd-button { height: 36px; font-size: 14px; }
   .uv-ask-foot { display: grid; }
@@ -113,25 +108,38 @@
   .uv-ask[data-done] .rd-actions { opacity: 0; pointer-events: none; }
   .uv-ask[data-done] .uv-ask-done { opacity: 1; }
 
-  /* Filas compactas: ronda uno a uno y acuerdos del final. */
-  .uv-pair { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 16px; background: rgba(255,255,255,.62); border: 1px solid var(--rd-hairline); }
-  .uv-pair .uv-faces span { width: 24px; height: 24px; margin-left: -7px; }
-  .uv-pair .uv-faces span:first-child { margin-left: 0; }
-  .uv-pair-copy { min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 13px; line-height: 1.3; }
-  .uv-pair-copy b { font-weight: var(--rd-weight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .uv-pair-copy span { color: var(--rd-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .uv-pair.big { padding: 12px 14px; background: var(--rd-glass-solid); box-shadow: 0 10px 26px rgba(40,30,90,.08); }
-  .uv-pair.big .uv-pair-copy { font-size: 14px; }
-  .uv-check { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: var(--rd-gradient); display: grid; place-items: center; }
-  .uv-check svg { width: 12px; height: 12px; fill: none; stroke: var(--rd-on-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  /* Filas de lista, como las del Resumen: cara, título en 600, una línea gris y el check al final. */
+  .uv-li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 2px; box-sizing: border-box; }
+  .uv-li + .uv-li { border-top: 1px solid var(--rd-hairline); }
+  .uv-li .uv-faces { display: flex; flex: 0 0 auto; width: 78px; }
+  .uv-li .uv-face { width: 34px; height: 34px; }
+  .uv-li .uv-face + .uv-face { margin-left: -12px; }
+  .uv-li-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .uv-li-text b { font-size: 15px; font-weight: var(--rd-weight); letter-spacing: -0.01em; line-height: 1.3; }
+  .uv-li-text span { font-size: 13px; color: var(--rd-muted); line-height: 1.35; }
+  .uv-check { flex: 0 0 auto; width: 18px; height: 18px; color: var(--rd-ink); }
+  .uv-check svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
   @media (max-width: 900px) {
     .uv { grid-template-columns: 1fr; grid-template-rows: 46vh 54vh; }
-    .uv-panel { margin: 0 10px 10px; }
-    .uv-steps, .uv-admin { display: none; }
+    .uv-top { left: 14px; right: 14px; }
+    .uv-top .rd-tag, .uv-admin { display: none; }
+    .uv-top .rd-brand { font-size: 0; gap: 0; }
+    .uv-top .rd-mark { width: 30px; height: 30px; }
+    .uv-top .rd-nav > * { height: 30px; padding: 0 10px; font-size: 13px; }
+    .uv-top .rd-nav b { min-width: 1.9em; }
+    .uv-panel { height: auto; margin: 0 10px 10px; padding: 16px 16px 0; }
+    .uv-members { display: flex; gap: 0; margin-top: 10px; }
+    .uv-member div { display: none; }
+    .uv-member + .uv-member { margin-left: -8px; }
+    .uv-week { top: calc(50% + 24px); width: calc(100% - 28px); padding: 16px 18px; }
+    .uv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin: 12px 0 0; }
+    .uv-num { font-size: 32px; }
+    .uv-stats .rd-note { white-space: normal; }
+    .uv-cal { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .uv-stage canvas, .uv-week, .uv-ask-foot > *, .uv-step { transition: none; }
+    .uv-stage canvas, .uv-week, .uv-ask-foot > *, .uv-top .rd-nav > *, .uv-top .rd-nav b { transition: none; }
     .uv-dots i, .uv[data-scene="semana"] .uv-ev { animation: none; opacity: 1; transform: none; }
   }
 </style>
@@ -142,19 +150,20 @@
   <section class="uv-stage" aria-label="Universo de agentes">
     <canvas id="luz" aria-hidden="true"></canvas>
     <canvas id="c" role="img" aria-label="Globo de cien agentes. Primero cada uno conversa con cada uno; después la cámara viaja entre grupos."></canvas>
-    <span class="rd-brand uv-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</span>
-    <nav class="uv-steps rd-glass" aria-label="Pasos">
-      <span class="uv-step" id="step0">Uno a uno</span>
-      <span class="uv-step" id="step1">Grupos <b id="stepn"></b></span>
-      <span class="uv-step" id="step2">Tu semana</span>
-    </nav>
-    <div class="uv-count" aria-live="off"><span class="rd-stat" id="pairs">0</span><span class="rd-note">de 4.950 conversaciones uno a uno</span></div>
-    <div class="uv-week rd-glass" aria-label="Resultado de la vuelta">
-      <span class="rd-label rd-gradient-text">Tu semana, coordinada</span>
-      <h2 id="wtitle">Seis acuerdos. Cero mensajes escritos por ti.</h2>
+    <header class="rd-top uv-top">
+      <a class="rd-brand" href="../contexto/resumen.html" aria-label="Ronda"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="rd-nav" aria-label="Pasos de la demo">
+        <span id="step0">Uno a uno</span>
+        <span id="step1">Grupos <b id="stepn"></b></span>
+        <span id="step2">Tu semana</span>
+      </nav>
+      <span class="rd-tag">Datos de prueba</span>
+    </header>
+    <section class="uv-week rd-card rd-glass" aria-label="Tu semana">
+      <h2 class="uv-ctitle">Tu semana</h2>
       <div class="uv-stats" id="wstats"></div>
       <div class="uv-cal" id="wcal"></div>
-    </div>
+    </section>
     <div class="uv-admin">
       <div class="uv-cat" aria-label="Catálogo visto en esta vuelta">
         <div class="uv-row" id="cat-tools"></div>
@@ -167,11 +176,11 @@
       </div>
     </div>
   </section>
-  <aside class="uv-panel rd-glass ss-stage" aria-label="Hilo">
+  <aside class="uv-panel rd-card rd-glass ss-stage" aria-label="Hilo">
     <header class="uv-head">
-      <div class="uv-faces" id="hfaces"></div>
-      <div class="uv-hcopy"><span class="rd-label" id="hsub"></span><span class="uv-topic" id="htopic"></span></div>
-      <div class="uv-prog"><i id="fbar"></i></div>
+      <h2 class="uv-ctitle" id="htitle"></h2>
+      <span class="rd-note" id="hsub"></span>
+      <div class="uv-members" id="hmembers"></div>
     </header>
     <div class="uv-feed" id="feed" aria-live="polite"></div>
   </aside>
@@ -216,22 +225,32 @@ U.motionKinds.forEach(k => { const e = document.createElement('span'); e.classNa
 const root = document.querySelector('.uv'), feed = document.getElementById('feed');
 let si = 0, scene = SCENES[0], current = null, clock = 0, paused = false, items = [], shownTicks = 0;
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
-function faces(list) { const w = el('div', 'uv-faces'); list.forEach(m => { const s = el('span'); Object.assign(s.style, faceCss(m)); w.append(s); }); return w; }
-function header(list, sub, topic) {
-  document.getElementById('hfaces').replaceChildren(...faces(list).children);
-  document.getElementById('hsub').textContent = sub; document.getElementById('htopic').textContent = topic;
+function face(m) { const s = el('span', 'uv-face'); Object.assign(s.style, faceCss(m)); return s; }
+function faces(list) { const w = el('div', 'uv-faces'); list.slice(0, 3).forEach(m => w.append(face(m))); return w; }
+const nameOf = i => i === 0 ? 'Tú' : people[i].name;
+// Encabezado del panel: tema, una línea gris y, en los grupos, cada miembro con cara, nombre y rol.
+function header(title, sub, members) {
+  document.getElementById('htitle').textContent = title; document.getElementById('hsub').textContent = sub;
+  document.getElementById('hmembers').replaceChildren(...(members || []).map((m, k) => {
+    const d = el('div', 'uv-member'), t = el('div'); t.append(el('b', '', nameOf(m)), el('span', '', k === 0 ? 'Pide ayuda' : 'Puede ayudar'));
+    d.append(face(m), t); return d;
+  }));
 }
-function clearFeed() { items = []; [...feed.children].forEach(c => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(4px)' }], { duration: 360, easing: 'ease-in', fill: 'forwards' }).onfinish = () => c.remove()); }
+// Lo que sale se fija donde está, fuera del flujo, para que lo nuevo no se mueva cuando termina de irse.
+function clearFeed() { items = []; const old = [...feed.children], fr = feed.getBoundingClientRect(), rects = old.map(c => c.getBoundingClientRect());
+  old.forEach((c, k) => Object.assign(c.style, { position: 'absolute', left: (rects[k].left - fr.left) + 'px', top: (rects[k].top - fr.top) + 'px', width: rects[k].width + 'px', margin: 0 }));
+  old.forEach(c => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(4px)' }], { duration: 360, easing: 'ease-in', fill: 'forwards' }).onfinish = () => c.remove()); }
 function push(node) { RondaStream.append(feed, node); while (feed.children.length > 16) feed.firstElementChild.remove(); }
-function pairRow(list, title, sub, big, check) {
-  const n = el('div', 'uv-pair' + (big ? ' big' : ''));
-  if (check) { const c = el('span', 'uv-check'); c.innerHTML = '<svg viewBox="0 0 12 12"><path d="M2.5 6.3 5 8.7l4.6-5"/></svg>'; n.append(c); }
-  const copy = el('div', 'uv-pair-copy'); copy.append(el('b', '', title), el('span', '', sub));
-  n.append(faces(list), copy); return n;
+// Fila de lista, como las del Resumen: caras, título, una línea gris y el check al final.
+function pairRow(list, title, sub, check) {
+  const n = el('div', 'uv-li'), copy = el('div', 'uv-li-text'); copy.append(el('b', '', title), el('span', '', sub));
+  n.append(faces(list), copy);
+  if (check) { const c = el('span', 'uv-check'); c.innerHTML = '<svg viewBox="0 0 18 18"><path d="M4 9.4 7.4 12.6 14 5.6"/></svg>'; n.append(c); }
+  return n;
 }
 function setSteps() {
   const k = scene.kind === 'ronda' ? 0 : scene.kind === 'group' ? 1 : 2;
-  [0, 1, 2].forEach(j => { const s = document.getElementById('step' + j); s.toggleAttribute('data-on', j === k); s.toggleAttribute('data-done', j < k); });
+  [0, 1, 2].forEach(j => { const s = document.getElementById('step' + j); if (j === k) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
   document.getElementById('stepn').textContent = scene.kind === 'group' ? (scene.i + 1) + '/' + SHOWN.length : '';
   root.dataset.scene = scene.kind;
 }
@@ -239,15 +258,15 @@ function startScene(k) {
   si = (k + SCENES.length) % SCENES.length; scene = SCENES[si]; clock = 0; current = null; shownTicks = 0;
   clearFeed(); setSteps();
   if (scene.kind === 'ronda') {
-    header([1, 2, 3, 4], 'Paso 1 · antes de formar grupos', 'Cada agente conversa con cada uno');
+    header('Uno a uno', 'Cada agente conversa con cada uno');
     turnTo([0]);
   } else if (scene.kind === 'group') {
     const g = SHOWN[scene.i], sc = SCRIPTS[scene.i];
     current = { g, events: sc.events, duration: sc.duration, shown: new Set() };
-    header(g.members, g.members.length + ' agentes · pide ' + people[g.members[0]].name, g.topic);
+    header(g.topic, g.members.length + ' agentes, ' + (g.members.length * (g.members.length - 1) / 2) + ' conversaciones. Nadie más se entera.', g.members);
     turnTo(g.members);
   } else {
-    header([0], 'Paso 3 · resultado de la vuelta', 'Lo que quedó acordado');
+    header('Acuerdos', SHOWN.length + ' grupos cerraron esta vuelta');
     turnTo([0]); buildWeek();
   }
 }
@@ -295,8 +314,8 @@ function buildWeek() {
   if (weekBuilt) { document.querySelectorAll('.uv-ev').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }); return; }
   weekBuilt = true;
   const st = document.getElementById('wstats');
-  [[SHOWN.length, 'acuerdos cerrados'], [4950, 'conversaciones uno a uno'], [STATS.asks, STATS.asks === 1 ? 'decisión tuya, en un toque' : 'decisiones tuyas, en un toque'], [STATS.saved, 'que nadie pasó coordinando']].forEach(([v, l]) => {
-    const d = el('div'); const n = el('span', 'rd-stat', typeof v === 'number' ? '0' : v); d.append(n, el('span', 'rd-note', l)); st.append(d); statEls.push({ n, v });
+  [[SHOWN.length, 'acuerdos'], [4950, 'conversaciones uno a uno'], [STATS.asks, STATS.asks === 1 ? 'decisión tuya' : 'decisiones tuyas'], [STATS.saved, 'sin coordinar']].forEach(([v, l]) => {
+    const d = el('div'); const n = el('span', 'uv-num', typeof v === 'number' ? '0' : v); d.append(n, el('span', 'rd-note', l)); st.append(d); statEls.push({ n, v });
   });
   const cal = document.getElementById('wcal');
   cal.append(el('span'));
@@ -305,9 +324,8 @@ function buildWeek() {
   const cols = U.DAYS.map(() => { const c = el('div', 'uv-cal-col'); cal.append(c); return c; });
   SHOWN.forEach((g, i) => {
     const o = U.outcome(i), you = g.members.includes(0), ev = el('div', 'uv-ev' + (you ? ' you' : ''));
-    ev.style.top = ((o.start - 9) / 9 * 100) + '%'; ev.style.height = 'calc(' + ((o.end - o.start) / 9 * 100) + '% - 2px)'; ev.style.minHeight = '50px';
-    ev.style.setProperty('--t', COLS[i % 5]); ev.style.setProperty('--d', (0.5 + i * 0.22) + 's');
-    ev.append(el('b', '', g.topic), el('span', '', o.span + (you ? ' · contigo' : '')));
+    ev.style.top = ((o.start - 9) / 9 * 100) + '%'; ev.style.height = 'calc(' + ((o.end - o.start) / 9 * 100) + '% - 2px)'; ev.style.setProperty('--d', (0.5 + i * 0.22) + 's');
+    ev.append(el('b', '', g.topic), el('span', '', o.span));
     cols[o.day].append(ev);
   });
 }
@@ -317,20 +335,21 @@ function weekTick(t) {
   const due = Math.floor((t - 0.9) / 0.5);
   while (shownTicks < SHOWN.length && shownTicks <= due) {
     const i = shownTicks++, g = SHOWN[i], o = U.outcome(i);
-    push(pairRow(g.members, g.topic, o.when + (g.members.includes(0) ? ' · contigo' : '') + ' · ' + g.members.length + ' personas', true, true));
+    push(pairRow(g.members, g.topic, o.when + (g.members.includes(0) ? ' · contigo' : '') + ' · ' + g.members.length + ' personas', true));
   }
 }
 function rondaTick(t) {
-  document.getElementById('pairs').textContent = Math.round(4950 * Math.min(1, Math.pow(Math.max(0, t / RONDA.flashEnd), 1.15))).toLocaleString('es-CL');
+  const n = Math.round(4950 * Math.min(1, Math.pow(Math.max(0, t / RONDA.flashEnd), 1.15)));
+  document.getElementById('hsub').textContent = n.toLocaleString('es-CL') + ' de 4.950 conversaciones';
   while (shownTicks < TICKS.length && TICKS[shownTicks].t <= t) { const k = TICKS[shownTicks++]; push(pairRow([k.a, k.b], people[k.a].name + ' y ' + people[k.b].name, k.text)); }
-  if (shownTicks === TICKS.length && t > RONDA.flashEnd + 0.3) { shownTicks++; push(pairRow(SHOWN.map(g => g.members[0]), 'Se forman ' + SHOWN.length + ' grupos', 'Solo donde hay algo que resolver juntos', true, true)); }
+  if (shownTicks === TICKS.length && t > RONDA.flashEnd + 0.3) { shownTicks++; push(pairRow(SHOWN.map(g => g.members[0]).slice(0, 4), 'Se forman ' + SHOWN.length + ' grupos', 'Solo donde hay algo que resolver juntos', true)); }
 }
 
 // ───────── Globo ─────────
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const lc = document.getElementById('luz');
 const luz = new URLSearchParams(location.search).get('luz') !== '0' && window.RondaLuz ? RondaLuz.sphere(lc, { palette: [0, 9, 7, 5] }) : null;
-let W = 0, H = 0, yaw = 0, pitch = 0.15, tYaw = 0, tPitch = 0.15, luzK = 0;
+let gc = null, W = 0, H = 0, yaw = 0, pitch = 0.15, tYaw = 0, tPitch = 0.15, luzK = 0, calm = 0;
 function resize() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); if (luz) { lc.width = Math.round(W / 2); lc.height = Math.round(H / 2); } }
 new ResizeObserver(resize).observe(cv); resize();
 function turnTo(members) {
@@ -341,19 +360,27 @@ function turnTo(members) {
 }
 const smooth = (a, b, x) => { const u = Math.max(0, Math.min(1, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
 function grad(x0, y0, x1, y1) { const g = ctx.createLinearGradient(x0, y0, x1, y1); COLS.forEach((c, i) => g.addColorStop(i / 4, c)); return g; }
+const ARC_LIFT = 0.22;   // los arcos del grupo en foco se curvan hacia afuera del grupo, sobre la esfera
 const AMB = GROUPS.map((g, i) => ({ g, off: i * 1.7 }));
 function draw(T) {
   ctx.clearRect(0, 0, W, H);
-  const CX = W * 0.5, CY = H * 0.53, S = Math.min(W * 0.37, H * 0.38), D = 3.4, sr = S * 1.06, kS = S / 300;
-  if (luz) { luzK += (1 - luzK) * 0.04; luz.render(T * 0.9, CX / 2, CY / 2, sr / 2, 0.85 * luzK); }
+  const narrow = W < 600, CX = W * 0.5, CY = narrow ? H * 0.56 : H * 0.54, S = narrow ? Math.min(W * 0.4, H * 0.36) : Math.min(W * 0.33, H * 0.34), D = 3.4, sr = S * 1.06, kS = Math.max(S, 170) / 300;
+  // Calma: en «uno a uno» todos están presentes; al formarse los grupos, quien no está en foco retrocede.
+  const calmT = scene.kind === 'ronda' ? smooth(RONDA.flashEnd - 1, RONDA.dur - 0.4, clock) : 1;
+  calm += (calmT - calm) * 0.06;
+  if (luz) { luzK += (1 - luzK) * 0.04; luz.render(T * 0.9, CX / 2, CY / 2, sr / 2, (0.5 - 0.12 * calm) * luzK); }
   const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
   const P = POS.map(v => { const x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy, y2 = v[1] * cp - z * sp, z2 = v[1] * sp + z * cp, f = D / (D - z2); return { x: CX + x * S * f, y: CY - y2 * S * f, z: z2, f, R: [x, y2, z2] }; });
-  const ctrl = (a, b) => { const A = P[a].R, B = P[b].R, m = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2], L = Math.hypot(...m), d = Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]), k = L > 0.45 ? (1 + 0.05 * d) / L : 1, f = D / (D - m[2] * k); const pm = { x: CX + m[0] * k * S * f, y: CY - m[1] * k * S * f }; return { x: 2 * pm.x - (P[a].x + P[b].x) / 2, y: 2 * pm.y - (P[a].y + P[b].y) / 2, z: m[2] }; };
-  const curve = (a, b, u0, u1) => { const c = ctrl(a, b), pa = P[a], pb = P[b]; ctx.beginPath(); for (let s = 0, N = 20; s <= N; s++) { const v = u0 + (u1 - u0) * s / N, w = 1 - v, x = w * w * pa.x + 2 * w * v * c.x + v * v * pb.x, y = w * w * pa.y + 2 * w * v * c.y + v * v * pb.y; s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } return c; };
+  const ctrl = (a, b, bow = 0) => { const lift = 0.05; const A = P[a].R, B = P[b].R, m = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2], L = Math.hypot(...m), d = Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]), k = L > 0.45 ? (1 + lift * d) / L : 1, f = D / (D - m[2] * k); const pm = { x: CX + m[0] * k * S * f, y: CY - m[1] * k * S * f };
+    let x = 2 * pm.x - (P[a].x + P[b].x) / 2, y = 2 * pm.y - (P[a].y + P[b].y) / 2;
+    if (bow && gc) { const dx = P[b].x - P[a].x, dy = P[b].y - P[a].y, l = Math.hypot(dx, dy) || 1; let nx = -dy / l, ny = dx / l; const mx = (P[a].x + P[b].x) / 2, my = (P[a].y + P[b].y) / 2; if ((mx - gc.x) * nx + (my - gc.y) * ny < 0) { nx = -nx; ny = -ny; } x += nx * l * bow; y += ny * l * bow; }
+    return { x, y, z: m[2] }; };
+  const curve = (a, b, u0, u1, bow) => { const c = ctrl(a, b, bow), pa = P[a], pb = P[b]; ctx.beginPath(); for (let s = 0, N = 20; s <= N; s++) { const v = u0 + (u1 - u0) * s / N, w = 1 - v, x = w * w * pa.x + 2 * w * v * c.x + v * v * pb.x, y = w * w * pa.y + 2 * w * v * c.y + v * v * pb.y; s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } return c; };
   // Neblina: todas las conversaciones posibles, como hilos de luz dentro del vidrio.
   const haze = [new Path2D(), new Path2D()];
   for (let a = 0; a < U.N; a++) for (let b = a + 1; b < U.N; b++) { const c = ctrl(a, b), h = c.z > -0.1 ? haze[0] : haze[1]; h.moveTo(P[a].x, P[a].y); h.quadraticCurveTo(c.x, c.y, P[b].x, P[b].y); }
-  ctx.lineWidth = 0.5; ctx.strokeStyle = luz ? 'rgba(255,255,255,0.05)' : 'rgba(70,70,150,0.035)'; ctx.stroke(haze[1]); ctx.strokeStyle = luz ? 'rgba(255,255,255,0.11)' : 'rgba(70,70,150,0.07)'; ctx.stroke(haze[0]);
+  const hk = 1 - 0.45 * calm;
+  ctx.lineWidth = 0.5; ctx.strokeStyle = luz ? 'rgba(255,255,255,' + (0.05 * hk).toFixed(3) + ')' : 'rgba(70,70,150,' + (0.035 * hk).toFixed(3) + ')'; ctx.stroke(haze[1]); ctx.strokeStyle = luz ? 'rgba(255,255,255,' + (0.11 * hk).toFixed(3) + ')' : 'rgba(70,70,150,' + (0.07 * hk).toFixed(3) + ')'; ctx.stroke(haze[0]);
   // Vidrio.
   const hg = ctx.createRadialGradient(CX - sr * 0.35, CY - sr * 0.45, 0, CX - sr * 0.35, CY - sr * 0.45, sr * 1.2);
   hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(0.45, 'rgba(255,255,255,0.1)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
@@ -363,6 +390,7 @@ function draw(T) {
   ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.stroke();
 
   const focusSet = new Set(current ? current.g.members : []), pop = new Map();
+  if (current) { gc = { x: 0, y: 0 }; current.g.members.forEach(m => { gc.x += P[m].x / current.g.members.length; gc.y += P[m].y / current.g.members.length; }); } else gc = null;
   ctx.lineCap = 'round';
   if (scene.kind === 'ronda') {
     // Destellos: cada par conversa un instante; el arco crece, brilla y se apaga.
@@ -401,8 +429,8 @@ function draw(T) {
     const talked = new Map();
     current.events.forEach(e => { if (clock >= e.at) talked.set(Math.min(e.from, e.to) + '-' + Math.max(e.from, e.to), [e.from, e.to]); if (clock >= e.at && clock < e.end + (e.type === 'call' ? 2.2 : 0.3)) activeEv = e; });
     talked.forEach(([a, b]) => { const pa = P[a], pb = P[b], g = grad(pa.x, pa.y, pb.x, pb.y);
-      ctx.save(); ctx.globalAlpha = 0.3; ctx.filter = 'blur(8px)'; ctx.strokeStyle = g; ctx.lineWidth = 12; curve(a, b, 0, 1); ctx.stroke(); ctx.restore();
-      ctx.strokeStyle = g; ctx.lineWidth = 3; curve(a, b, 0, 1); ctx.stroke(); });
+      ctx.save(); ctx.globalAlpha = 0.2; ctx.filter = 'blur(6px)'; ctx.strokeStyle = g; ctx.lineWidth = 8; curve(a, b, 0, 1, ARC_LIFT); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle = g; ctx.lineWidth = 2.6; curve(a, b, 0, 1, ARC_LIFT); ctx.stroke(); });
   }
   // Personas, de atrás hacia adelante, con niebla y desenfoque graduales.
   const order = P.map((p, i) => i).sort((a, b) => P[a].z - P[b].z);
@@ -410,15 +438,18 @@ function draw(T) {
   for (const i of order) {
     const p = P[i], fog = smooth(0.45, -0.75, p.z), blur = smooth(0.3, -0.55, p.z), focus = focusSet.has(i) || (youScene && i === 0);
     const edge = 0.5 + 0.5 * Math.min(1, Math.abs(p.z) * 1.6), pp = pop.get(i) || 0;
-    const r = (focus ? 22 : 9 * (1 + 0.45 * pp)) * kS * p.f * (focus ? 1 : edge);
-    ctx.save(); ctx.globalAlpha = (1 - 0.5 * fog) * (current && !focus ? 0.85 : 1);
+    const back = focus ? 1 : 1 - calm * (1 - smooth(-0.45, 0.15, p.z) * 0.9) - calm * 0.1;   // el hemisferio de atrás casi desaparece
+    if (back < 0.03) continue;
+    const r = (focus ? 22 : (9 - 2 * calm) * (1 + 0.45 * pp)) * kS * p.f * (focus ? 1 : edge);
+    ctx.save(); ctx.globalAlpha = (1 - 0.5 * fog) * (focus ? 1 : back * (1 - 0.35 * calm));
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, r + (focus ? 3 : 1.5), 0, 6.2832); ctx.fill();
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.2832); ctx.clip();
     if (i < 5) { if (teamImg[i].complete) { if (blur > 0.05) ctx.filter = 'blur(' + (blur * 2).toFixed(1) + 'px)'; ctx.drawImage(teamImg[i], p.x - r, p.y - r, r * 2, r * 2); } }
     else { const t = +people[i].face.slice(5), sx = (t % 8) * 128 + 4, sy = Math.floor(t / 8) * 128 + 4;
       if (blur > 0.05 && atlasBlur.complete) ctx.drawImage(atlasBlur, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2);
       if (atlas.complete) { ctx.globalAlpha *= 1 - blur; ctx.drawImage(atlas, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2); } }
-    if (fog > 0.02) { ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(244,244,250,' + (0.5 * fog).toFixed(3) + ')'; ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2); }
+    const veil = focus ? 0.5 * fog : Math.min(0.85, 0.5 * fog + 0.5 * calm);   // niebla de vidrio: menos color fuera de foco
+    if (veil > 0.02) { ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(244,244,250,' + veil.toFixed(3) + ')'; ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2); }
     ctx.restore();
     if (pp > 0.05 && !focus) { ctx.save(); ctx.globalAlpha = pp; ctx.strokeStyle = grad(p.x - r, p.y, p.x + r, p.y); ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(p.x, p.y, r + 3.5, 0, 6.2832); ctx.stroke(); ctx.restore(); }
     if (focus) { const cg = ctx.createConicGradient(T * 0.6 + i, p.x, p.y); COLS.concat([COLS[0]]).forEach((c, k) => cg.addColorStop(k / 5, c));
@@ -430,7 +461,7 @@ function draw(T) {
   // Arco activo: los puntos viajan al escribir; la miniatura de la herramienta flota fuera del arco, atada a él.
   Object.values(tagEls).forEach(x => x.removeAttribute('data-now')); Object.values(miniEls).forEach(x => x.removeAttribute('data-now'));
   if (activeEv && current) {
-    const a = activeEv.from, b = activeEv.to, c = ctrl(a, b);
+    const a = activeEv.from, b = activeEv.to, c = ctrl(a, b, ARC_LIFT);
     const evs = current.events.filter(e => (e.from === a && e.to === b) || (e.from === b && e.to === a)).map(e => Object.assign({}, e, { author: e.from === a ? 0 : 1, type: e.type === 'ask' ? 'message' : e.type }));
     const st = RondaEdge.state(evs, clock), arc = { from: P[a], to: P[b], control: c };
     if (st.phase === 'tool' || st.phase === 'done') {
@@ -462,7 +493,6 @@ function frame(now) {
     current.events.forEach((e, idx) => { if (clock >= e.at && !current.shown.has(idx)) { current.shown.add(idx); addItem(e); } });
     items.forEach(it => it.upd(clock));
   }
-  document.getElementById('fbar').style.width = (Math.min(1, clock / scene.dur) * 100).toFixed(1) + '%';
   if (clock > scene.dur) startScene(si + 1);
   draw(T);
   requestAnimationFrame(frame);
