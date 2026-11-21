@@ -6,7 +6,7 @@ const globeMotions = [
 
 const previousAnchors = new Map();
 
-function paintGraphMotions(ctx,points,control,zoom,seconds,poster,photos,selection) {
+function paintGraphMotions(ctx,points,control,zoom,seconds,poster,photos,selection,threadPhase) {
   const occupied=points.filter(p=>p && p.z>-.1 && p.r>2).map(p=>({x:p.x,y:p.y,r:p.r+3}));
   const width=(innerWidth<750?52:64)/zoom;
   const drawn=[];
@@ -58,11 +58,12 @@ function paintGraphMotions(ctx,points,control,zoom,seconds,poster,photos,selecti
       ctx.beginPath();ctx.moveTo(anchor.x,anchor.y);ctx.lineTo(spot.x,spot.y);ctx.stroke();ctx.restore();
     }
     const period=window.RondaMotion.periods[motion.kind];
-    const fraction=poster ? .74 : (seconds/period+i*.27)%1;
+    const ambient=poster ? .74 : (seconds/period+i*.27)%1;
+    const fraction=threadPhase ? threadPhase(motion.a,motion.b,ambient,poster) : ambient;
     ctx.save();ctx.translate(spot.x,spot.y);ctx.scale(width/64,width/64);ctx.translate(-32,-22);
     window.RondaMotion.paint(ctx,motion.kind,fraction,[photos[motion.a],photos[motion.b]]);
     ctx.restore();occupied.push({...spot,r:width*.55});
-    drawn.push({kind:motion.kind,...spot,width});
+    drawn.push({...motion,...spot,width,fraction});
   }
   return drawn;
 }
