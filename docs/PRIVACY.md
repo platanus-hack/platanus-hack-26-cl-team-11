@@ -7,8 +7,8 @@ Regla central: **la persona decide qué sale de su agente.** Sin esa confianza n
 | Capa | Qué contiene | Quién la ve |
 |---|---|---|
 | **Privada** | Datos crudos: sueño, recuperación, ánimo, lo que la persona le dijo al agente, notas de reuniones. | Solo la persona y su agente. |
-| **Compartida** | Lo que el agente entrega en rondas o mensajes directos, ya filtrado. | El coordinador y los agentes del equipo. |
-| **Agregada** | Síntesis de equipo, área o empresa. | El equipo y los niveles superiores. |
+| **Compartida** | Lo que el agente entrega a otro agente o publica en el tablero, ya filtrado. | Los agentes que lo reciben. Sus dueños, solo si el mensaje lo permite. |
+| **Agregada** | Totales de un grupo (equipo, área o empresa) que calcula la función de agregado. | Las personas de ese grupo y dirección. |
 
 Los datos crudos no salen nunca de la capa privada. Lo que sale es una **afirmación** derivada de ellos («energía baja esta semana»), no el dato («durmió 4 h 50 min»).
 
@@ -22,7 +22,15 @@ Cada persona configura con su agente, en lenguaje natural, qué se comparte. Cad
 
 Valor por defecto para toda persona nueva: trabajo en **Siempre**; ánimo, energía y carga en **Preguntar antes**; salud y datos del wearable en **Nunca** como dato crudo.
 
-## Reglas para líderes y niveles superiores
+## Entre agentes: usar no es contar
+
+Sin coordinador, los agentes se hablan uno a uno, así que un agente puede enterarse de algo sobre la persona de otro («energía baja esta semana»). La regla:
+
+- Lo que un agente aprende de otro lo **usa para actuar**: ofrecer ayuda, acordar un plazo, no pedir algo esta semana.
+- **No se lo cuenta a su dueño** salvo que el mensaje venga marcado como contable, y eso lo decide el dueño del dato.
+- Cada mensaje entre agentes lleva ese permiso ([AGENT_MODEL.md](AGENT_MODEL.md)).
+
+## Reglas para líderes y dirección
 
 - Un líder ve agregados del equipo, no respuestas individuales.
 - Para que una alerta nombre a una persona, esa persona tuvo que aprobarlo.

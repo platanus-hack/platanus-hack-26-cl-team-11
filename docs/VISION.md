@@ -50,8 +50,8 @@ Es un multijugador de agentes personales: la coordinación ocurre entre agentes,
 2. **La persona decide qué se comparte.** Los datos crudos (sueño, ánimo, salud) nunca salen del agente sin permiso. Detalle en [PRIVACY.md](PRIVACY.md).
 3. **Ayudar, no vigilar.** El sistema no es una herramienta de evaluación de desempeño. Su salida son ofertas de ayuda y mejoras de equipo, no rankings de personas.
 4. **Cero trabajo extra.** El agente vive donde la persona ya está (WhatsApp) y saca la señal de fuentes que ya existen. Nadie llena formularios.
-5. **Escala por niveles.** Lo que funciona para un equipo de 5 debe funcionar para 300 agregando niveles (equipo → área → empresa), no reuniones.
-6. **Toda conclusión es trazable.** Cada recomendación de equipo indica de qué ronda y de cuántos agentes salió, sin exponer datos privados.
+5. **Sin intermediarios.** No hay agente coordinador ni jerarquía de agentes: cada agente le habla directo a cualquier otro. Lo que funciona para un equipo de 5 funciona para 300 con la misma red plana.
+6. **Toda conclusión es trazable.** Cada recomendación de equipo indica de cuántos agentes salió, sin exponer datos privados.
 
 ## Qué no es
 

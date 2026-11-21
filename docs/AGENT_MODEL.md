@@ -2,75 +2,76 @@
 
 Este documento define qué agentes existen y cómo conversan. No fija tecnología: la elección de stack está en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
-## Tipos de agente
+## Un solo tipo de agente
 
-### Agente personal
+Hay **un agente personal por persona** y ningún otro agente.
 
-- Uno por persona. Su dueño es esa persona.
+- Su dueño es esa persona.
 - Tiene una **memoria privada**: check-ins, datos del wearable, actividad de trabajo, notas de reuniones.
 - Tiene una **política de compartir** definida por su dueño ([PRIVACY.md](PRIVACY.md)).
 - Habla con su dueño por WhatsApp.
-- Habla con otros agentes solo a través del canal entre agentes.
+- Habla con cualquier otro agente, de forma directa.
 
-### Agente coordinador
+## Por qué no hay agente coordinador
 
-- Uno por equipo. En organizaciones grandes, uno por cada nivel (equipo, área, empresa).
-- No tiene acceso a la memoria privada de nadie. Solo ve lo que los agentes personales le entregan.
-- Abre rondas, sintetiza respuestas, detecta patrones y propone guidelines.
+Decisión del 21-nov-2026. Un coordinador al medio es una estructura de humanos: las jerarquías existen porque una persona no puede conversar con todas las demás. Un agente sí puede. Poner un agente coordinador sería reconstruir con agentes la misma jerarquía que la tesis de [VISION.md](VISION.md) dice que sobra.
 
-## Dos formas de conversar
+Lo que hacía el coordinador lo cubren dos piezas que **no son agentes**: no interpretan, no deciden y no tienen memoria de nadie.
 
-### Rondas con coordinador
+| Pieza | Qué hace |
+|---|---|
+| **Tablero compartido** | Lugar donde cualquier agente publica una pregunta, una necesidad o una propuesta, y los demás la leen. |
+| **Función de agregado** | Cálculo que recibe las señales que cada agente autorizó y devuelve solo totales de grupo. Nunca devuelve una respuesta individual. |
 
-La base del sistema. Predecible y fácil de auditar.
+## Cómo conversan
 
-1. **Apertura.** El coordinador abre una ronda con una pregunta y un plazo. Puede ser programada (diaria, semanal) o a pedido de una persona.
-2. **Respuesta.** Cada agente personal arma su respuesta desde la memoria privada y la pasa por la política de compartir. Lo que requiere aprobación se le consulta al dueño antes de enviarlo.
-3. **Síntesis.** El coordinador reúne las respuestas y produce el resultado: pulso, pedidos de ayuda, patrones.
-4. **Publicación.** El resultado va a la vista de equipo y, lo que corresponde, a cada persona por su agente.
+### Uno a uno, cuando hay motivo
 
-### Mensajes directos entre pares
+Cualquier agente puede hablarle a cualquier otro. Que puedan hablar todos con todos no significa que lo hagan todos los días: en 300 personas serían 44.850 intercambios por vuelta. Un agente abre una conversación cuando tiene un motivo: su dueño necesita algo, tiene algo que ofrecer o hay una pregunta abierta en el tablero.
 
-Para pedir y ofrecer ayuda sin esperar la siguiente ronda.
+### Pedido y oferta de ayuda
 
-1. **Pedido.** Un agente publica una necesidad («busco a alguien con experiencia en X»), sin datos privados de su dueño.
-2. **Coincidencia.** Los agentes que ven una coincidencia consultan a su propio dueño si quiere ayudar.
-3. **Presentación.** Con el sí de ambos lados, los agentes presentan a las dos personas.
+1. **Pedido.** Un agente publica una necesidad en el tablero («busco a alguien con experiencia en X»), sin datos privados de su dueño.
+2. **Respuesta.** Los agentes que tienen algo que aportar le responden directo. Uno puede responder «sabe del tema, pero esta semana no puede».
+3. **Consulta.** El agente que puede ayudar le pregunta a su propio dueño si quiere hacerlo.
+4. **Presentación.** Con el sí de ambos lados, los agentes presentan a las dos personas.
 
-Regla: un mensaje directo nunca lleva más información que la que su dueño permitiría en una ronda.
+### Preguntas a todo el equipo
+
+Cualquier persona, líder o no, le hace una pregunta a su agente. El agente la publica en el tablero y los demás responden con lo que su dueño permite. Quien preguntó recibe una sola respuesta armada.
+
+### Pulso del equipo
+
+Cada agente entrega a la función de agregado las señales que su dueño autorizó (energía, carga, bloqueos). La función devuelve el total del grupo. Nadie, ni agente ni persona, ve la respuesta de otro.
+
+### Guidelines
+
+El agente que detecta un patrón repetido publica una propuesta en el tablero. Cada agente se la lleva a su dueño, y las personas la aceptan, la ajustan o la descartan.
 
 ## Qué viaja en un mensaje entre agentes
-
-Todo mensaje entre agentes lleva, como mínimo:
 
 | Campo | Para qué |
 |---|---|
 | Emisor y destinatario | Saber qué agente habla con cuál. |
-| Tipo | Apertura de ronda, respuesta, pedido de ayuda, oferta, presentación. |
-| Ronda o hilo | Agrupar la conversación y poder trazarla. |
+| Tipo | Pregunta, respuesta, pedido de ayuda, oferta, presentación, propuesta. |
+| Hilo | Agrupar la conversación y poder trazarla. |
 | Contenido | Texto estructurado, ya filtrado por la política de compartir. |
 | Nivel de consentimiento | Si el contenido fue aprobado por regla del dueño o por aprobación explícita. |
+| Uso permitido | Si el agente que lo recibe puede contárselo a su dueño o solo usarlo para actuar. |
 
 ## Escalar a 300 personas
 
-Los agentes se organizan en el mismo árbol que la organización:
+No hay árbol de coordinadores. La red es plana: un agente de un equipo le habla directo a uno de otro equipo.
 
-```
-empresa
-└── área (coordinador de área)
-    └── equipo (coordinador de equipo)
-        └── persona (agente personal)
-```
-
-- Un agente personal solo participa en rondas de su equipo.
-- El coordinador de equipo responde las rondas del coordinador de área con la **síntesis** de su equipo, nunca con respuestas individuales.
-- Lo mismo se repite hacia arriba. Así dirección lee unas pocas síntesis en lugar de 300 respuestas.
-- Los pedidos de ayuda sí pueden cruzar equipos: un coordinador reenvía un pedido sin resolver al nivel superior, que lo distribuye a otros equipos.
+- El tablero y la función de agregado se pueden consultar por grupo (un equipo, un área, toda la empresa). Son filtros sobre los mismos datos, no niveles de agentes.
+- Un agregado se entrega solo si el grupo supera el tamaño mínimo ([PRIVACY.md](PRIVACY.md)).
+- Los pedidos de ayuda cruzan equipos sin que nadie los reenvíe.
 
 ## Reglas de comportamiento
 
-- Un agente personal nunca habla por su dueño más allá de lo que este permitió.
-- Un agente personal representa a su dueño y a nadie más. Nunca cede sus intereses ante la insistencia de otro agente ni del coordinador; si no puede aceptar algo, lo rechaza o le pregunta a su dueño.
+- Un agente nunca habla por su dueño más allá de lo que este permitió.
+- Un agente representa a su dueño y a nadie más. Nunca cede sus intereses ante la insistencia de otro agente; si no puede aceptar algo, lo rechaza o le pregunta a su dueño.
+- Lo que un agente aprende de otro lo usa para actuar. Solo se lo cuenta a su dueño si el mensaje lo permite.
 - Un agente no inventa datos. Si no tiene señal, responde «sin datos».
 - La interpretación de lenguaje natural la hace siempre el modelo con salida estructurada, no reglas de palabras clave.
-- Cada síntesis registra de cuántos agentes salió y de qué ronda.
+- Cada agregado registra de cuántos agentes salió.

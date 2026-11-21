@@ -35,7 +35,7 @@ Sin esto no hay demo.
 |---|---|---|
 | 1 | Agente personal con check-in por WhatsApp | Una persona conversa con su agente y lo dicho queda en su memoria privada |
 | 2 | Política de compartir y aprobación | El agente pide permiso por WhatsApp antes de compartir un tema marcado «preguntar antes», y respeta el no |
-| 3 | Ronda con coordinador | El coordinador abre una ronda, al menos tres agentes responden y sale una síntesis |
+| 3 | Agentes uno a uno, tablero y agregado | Al menos tres agentes se hablan directo, uno publica en el tablero y sale un pulso agregado sin respuestas individuales |
 | 4 | Vista en vivo de la red | Se ven los check-ins entrando, los mensajes entre agentes viajando y las decisiones apareciendo |
 
 ### Nivel 1 — lo que nos diferencia
@@ -47,7 +47,7 @@ En este orden.
 | 5 | **El agente que representa a su dueño.** Se niega a compartir lo no autorizado y cuida su carga: «esta semana no puede» | Culture Amp y Viva (el dato es de la empresa) y el «echoing» de Salesforce | Otro agente insiste y el agente no cede; el dato crudo no aparece en ningún mensaje |
 | 6 | **Preguntarle a la organización.** Una pregunta que responden todos los agentes en un minuto, sin interrumpir a nadie | Glean (busca documentos, no personas) | Una persona pregunta por WhatsApp y recibe una respuesta armada con lo que saben los demás agentes |
 | 7 | **Pedido y oferta de ayuda** entre pares, con presentación de las dos personas | Agentes personales sueltos (Instinct, Muse) | Las dos personas reciben el mensaje de presentación después de aceptar |
-| 8 | **Del wearable a la acción.** La señal de energía cambia lo que hacen los agentes | WHOOP Unite y Oura Teams (se quedan en el panel) | Un dato de sueño real cambia la respuesta de un agente en una ronda |
+| 8 | **Del wearable a la acción.** La señal de energía cambia lo que hacen los agentes | WHOOP Unite y Oura Teams (se quedan en el panel) | Un dato de sueño real cambia lo que un agente le responde a otro |
 
 ### Nivel 2 — solo si sobra tiempo
 
@@ -55,7 +55,7 @@ En este orden.
 |---|---|---|
 | 9 | El equipo como experimento | Una guideline propuesta muestra una medición antes y después |
 | 10 | Detección de trabajo duplicado | Dos agentes notan que sus dueños resuelven lo mismo y los presentan |
-| 11 | Organización simulada de 300 | Una red sintética corre una ronda por niveles |
+| 11 | Organización simulada de 300 | Una red sintética plana resuelve un pedido de ayuda entre equipos |
 
 ### Fuera de la hack
 
