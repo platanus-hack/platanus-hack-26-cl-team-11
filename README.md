@@ -16,6 +16,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/PRIVACY.md](docs/PRIVACY.md) | Qué se comparte, quién ve qué y los derechos de cada persona. |
 | [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Fuentes de señal y qué deriva el agente de cada una. |
 | [docs/DEMO.md](docs/DEMO.md) | Alcance y guion de la demo. |
+| [docs/PITCH.md](docs/PITCH.md) | Cómo se explica Ronda: la frase, la estructura, el guion de 2:30, las láminas y las preguntas difíciles. |
 | [docs/demo/](docs/demo/README.md) | El camino feliz grabado de punta a punta: sala, QR, agente, repo, ronda y globo. Borrador de la segunda grabación: [diez personas, sus fuentes y sus agentes](docs/demo/diez-personas.md). |
 | [tools/grabar/](tools/grabar/README.md) | Los guiones que graban las demos, el servidor y el proveedor simulados, y sus pruebas. |
 | [design/grafo/universo.html](design/grafo/universo.html) | Demo omnipotente del grafo: ronda uno a uno, grupos en vivo y la semana coordinada (AGENTS.md, regla 6). |

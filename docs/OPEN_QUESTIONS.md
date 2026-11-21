@@ -53,8 +53,8 @@
 
 ### Equipo
 
-- [ ] Quién toma cada ítem de [ROADMAP.md](ROADMAP.md) y quién arma la presentación.
-- [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo. Fuentes secundarias (21-nov-2026) dicen que es el n.º 4 de Fall 2026, de Aaron Epstein; falta verlo en la página de YC.
+- [ ] Quién toma cada ítem de [ROADMAP.md](ROADMAP.md) y quién arma la presentación. La frase, la estructura, el guion de 2:30 y las preguntas difíciles están en [PITCH.md](PITCH.md), con sus pendientes.
+- [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo. Revisado el 21-nov-2026: la página oficial muestra la lista de Winter 2027, que no lo incluye, y el texto de Fall 2026 no cargó. Varias fuentes secundarias coinciden en que es uno de los 13 pedidos de Fall 2026, de Aaron Epstein, y en que pide sesiones compartidas con un agente, no agentes que conversan entre sí. Cómo citarlo está en [PITCH.md](PITCH.md#y-combinator-y-multiplayer-ai).
 
 ### Hallazgos de la revisión del backend sin verificar (21-nov-2026)
 

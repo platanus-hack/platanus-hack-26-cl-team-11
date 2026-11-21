@@ -14,7 +14,7 @@ Revisión hecha el 21-nov-2026 con búsqueda web. Las fuentes son en su mayoría
 | **Protocolos entre agentes** | A2A, presentado por Google en 2025 [10] | Estándar para que agentes de distintos sistemas se hablen | Salesforce documentó el «echoing»: un agente cede ante el otro y abandona los intereses de su dueño [9] |
 | **Búsqueda empresarial** | Glean [8] | Busca en los documentos de la empresa | No le pregunta a las personas, que es donde está lo que no se escribió |
 
-Sin verificar: una publicación de segunda mano dice que Y Combinator pidió «Multiplayer AI» en sus Requests for Startups. Hay que confirmarlo en el sitio de YC antes de citarlo en la presentación.
+Sin verificar en la fuente original: varias publicaciones de segunda mano dicen que Y Combinator pidió «Multiplayer AI» en sus Requests for Startups de Fall 2026. Cómo citarlo está en [PITCH.md](PITCH.md#y-combinator-y-multiplayer-ai).
 
 ## La posición que queda libre
 
