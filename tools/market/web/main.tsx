@@ -5,9 +5,12 @@ import '../../../design/ronda.css';
 import '../../../frontend/src/app.css';
 import { DuelsPage } from '../../../frontend/src/DuelsPage';
 import { Terminal } from './Terminal';
+import { Exchange } from './Exchange';
 import mark from '../../../design/logo/ronda-mark.svg';
 
 const duel = location.pathname === '/duelos';
+const exchange = location.pathname === '/bolsa';
+if (exchange) document.title = 'Bolsa de derivados · Ronda';
 createRoot(document.getElementById('root')!).render(
   <div className="rd-page">
     <div className="rd-aura" aria-hidden="true">
@@ -18,17 +21,18 @@ createRoot(document.getElementById('root')!).render(
     </div>
     <div className="rd-page__inner">
       <header className="rd-bar">
-        <a className="rd-brand" href="/terminal">
+        <a className="rd-brand" href="/bolsa">
           <img className="rd-mark" src={mark} alt="" />
           Ronda
         </a>
         <nav className="market-nav">
-          <a href="/terminal#arena">Archivo</a>
+          <a href="/bolsa">Bolsa</a>
+          <a href="/terminal">Terminal</a>
           <a href="/agent.md">Para agentes</a>
           <a href="/duelos">Duelos</a>
         </nav>
       </header>
-      <main className="app-wide">{duel ? <DuelsPage /> : <Terminal />}</main>
+      <main className="app-wide">{exchange ? <Exchange /> : duel ? <DuelsPage /> : <Terminal />}</main>
     </div>
   </div>,
 );

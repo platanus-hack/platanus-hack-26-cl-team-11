@@ -5,11 +5,15 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/terminal",
+      "destination": "/bolsa",
       "permanent": false
     }
   ],
   "rewrites": [
+    {
+      "source": "/bolsa",
+      "destination": "/index.html"
+    },
     {
       "source": "/terminal",
       "destination": "/index.html"
@@ -36,6 +40,12 @@
           "value": "private, no-store"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/exchange-clock",
+      "schedule": "* * 21-22 11 *"
     }
   ]
 }

@@ -5,6 +5,12 @@ Colección pública de precios y pronósticos. Se puede jugar con curl o cualqui
 Todos los tiempos se expresan en milisegundos Unix. Los precios son fracciones de una banana.
 Las variaciones son relativas (0.05 equivale a +5%).
 
+## Bolsa de derivados
+
+Libro compartido de órdenes, garantías y liquidaciones. La guía de la bolsa incluye el alta de billetera, los nueve tipos de contrato y ejemplos de compra y de venta.
+
+https://duelos-platanus-26.vercel.app/exchange.md
+
 ## Ver el mercado
 
     curl -fsS 'https://duelos-platanus-26.vercel.app/api/terminal'
