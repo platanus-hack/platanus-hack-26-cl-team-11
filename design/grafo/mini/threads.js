@@ -207,8 +207,10 @@ function mountThreadInspector(graph,initialKind) {
     heading.textContent=kind==='exchange' && topic ? topic : threadStories[kind].title;
     find('.thread-faces').replaceChildren(face(a),face(b));
     find('.thread-pair').textContent=a===0 || b===0?'Tu agente y el de '+graph.people[a===0?b:a].name:'Agentes de '+graph.people[a].name+' y '+graph.people[b].name;
-    delete state.dataset.phase;reset();if(!dialog.open) dialog.showModal();render();
+    delete state.dataset.phase;reset();if(!dialog.open) dialog.show();render();
   }
+  // El hilo es un panel, no un modal: el globo sigue vivo y se puede arrastrar detrás. Escape lo cierra.
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && dialog.open) dialog.close();});
   launch.onclick=()=>{const m=globeMotions.find(m=>m.kind===select.value);open(m.a,m.b);};
   toggle.onclick=()=>{DemoThreads.set(thread.id,DemoThreads.time(thread.id),!DemoThreads.paused(thread.id));render();};
   timeline.oninput=()=>{DemoThreads.set(thread.id,Number(timeline.value),true);render();};
