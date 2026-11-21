@@ -104,6 +104,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-input`, `rd-row`, `rd-code` | Campo de texto, fila de lista con divisor y bloque de código. | Para pantallas de configuración. El código usa `--rd-font-mono`, nada más lo usa. |
 | `rd-mini`, `rd-mini-link` | Miniatura de una interacción sobre su conexión. | Un objeto, un gesto reconocible y su ejemplo ampliado. |
 | `rd-player`, `rd-player__position`, `rd-player__time` | Controles de una escena. | Pausa y repetición, avance de izquierda a derecha y tiempo transcurrido. |
+| `rd-source` (`__disc`, `__name`, `__when`, `--off`, `--dim`), `rd-edge--focus`, `rd-edge--dim`, `rd-edge--incoming` | Mapa de contexto: cada fuente (salud, correo, asistentes) es un disco de vidrio con un glifo en tinta alrededor de tu cara. | Glifo de trazo en `currentColor`, nunca el logo de la marca. La seleccionada lleva aro de tinta, no degradado. Un dato que llega se ve como trazos de tinta que viajan hacia tu cara. Propuesta del 21-nov, pendiente de revisión de Mati. |
 | `rd-layout`, `rd-stack` | Dos columnas: contenido y columna de tarjetas de 392 px. | En teléfono queda una columna. |
 
 ## Caras
