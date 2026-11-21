@@ -81,9 +81,10 @@ export function DuelsPage() {
     if (seq.current !== revision) return;
     setLobby(data);
     const ranked = [...data.feed.teams].sort((x, y) => y.price - x.price);
-    if (ranked.length >= 2) {
-      setA((previous) => previous || ranked[0].id);
-      setB((previous) => previous || ranked[1].id);
+    const [leader, runnerUp] = ranked;
+    if (leader && runnerUp) {
+      setA((previous) => previous || leader.id);
+      setB((previous) => previous || runnerUp.id);
     }
   }, [focus]);
   const { error, refresh } = usePolling(load, 6000);
