@@ -130,3 +130,13 @@ con Escape, la repetición del hilo y la lectura del resultado con movimiento re
 | Ayuda | Cada cara acepta a su tiempo. Las dos se acercan y una conexión ocupa el espacio entre ellas. |
 
 Se revisó cada secuencia en cinco fotogramas y el conjunto sobre el globo a 1280 y 390 px en Chrome. Se ajustaron la legibilidad del pulso cerrado, la transición entre los puntos y el texto del chat, y el espacio entre las dos caras de ayuda. Se verificaron los cinco filtros individuales, la pausa y reanudación y el fotograma de movimiento reducido. El ensayo de Stageshow pasó el gate en escritorio, móvil y por estados. Algunas capturas de escritorio registraron intervalos sin muestras. El móvil corresponde a emulación.
+
+### Ocho miniaturas con hilos interactivos
+
+[Permiso individual](../grafo/globo.html?n=5&motion=permission) · [Las ocho en el globo](../grafo/globo.html?n=5&motion=all) · [Referencia del hilo](../grafo/hilo/README.md)
+
+A chat, calendario, salud, permiso y ayuda se suman tres escenas. En el check-in, un selector mecánico encaja en la respuesta. En el pulso de equipo, la aguja espera tres aportes antes de marcar el nivel agregado. En la propuesta de regla, un lápiz escribe el borrador y una chincheta lo fija al tablero.
+
+En Chrome a 1280 y 390 px se tocaron las ocho piezas a escala real y un arco de fondo. Cada pieza abrió la conversación del par correcto. Se comprobó que arrastrar gira el globo, que pausa y repetición controlan el hilo y que se puede retroceder a un instante anterior a una llamada. La entrada se puede leer durante la consulta y la salida aparece al terminar. El hilo de permiso esperó la elección del dueño y conservó la frase ajustada en el mensaje humano y el recibo. La escena de salud mostró el marcador privado. Con movimiento reducido se pudo leer el intercambio completo y abrir los detalles. Se verificaron el favicon incrustado, la carga local y el selector hasta 300 agentes. El teléfono se probó por emulación.
+
+En Stageshow se revisaron las hojas de contacto a ambos anchos y por estados. El gate pasó en las tres pasadas. Las capturas de escritorio y por estados tuvieron intervalos sin muestras. El barrido independiente de movimiento registró 12,56 segundos con cobertura completa y sin saltos detectados. La prueba de geometría de la página pasó en ambos tamaños.
