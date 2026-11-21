@@ -40,6 +40,18 @@ window.RondaUniverse = (() => {
     { name: 'salud.descanso', label: 'Leer el descanso', receipt: 'Solo para su dueña', privateResult: true, input: { senal: 'sueño' }, output: { compartir: false }, reply: 'Ese dato es solo para su dueña: [[x]]' }
   ];
 
+  // Ronda uno a uno: lo que sacan en limpio dos agentes en su conversación corta, antes de formar grupos.
+  const MATCHES = ['coinciden el jueves en la tarde', 'los dos van a la retro', 'ninguno puede el lunes', 'comparten el bug de pagos', 'uno sabe del deck, el otro lo necesita', 'sin tema en común por ahora', 'ambos cubren el sábado', 'quieren la misma sala', 'uno tiene el contrato, el otro la firma', 'se ofrecen para la demo', 'mismo cliente, distinto horario', 'los dos esperan a Paz', 'uno viaja, el otro se queda', 'pueden cruzar agendas', 'temas cruzados: se avisan'];
+
+  // Resultado de cada grupo: el bloque que queda en la semana (día 0 = lunes, horas decimales).
+  const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+  function outcome(i) {
+    const day = (i * 3 + 1) % 5, start = 9 + ((i * 5) % 8) + ((i % 2) ? 0.5 : 0);
+    const dur = [0.5, 1, 0.5, 1.5, 1, 0.5][i % 6];
+    const hh = h => Math.floor(h) + ':' + (h % 1 ? '30' : '00');
+    return { day, start, end: start + dur, when: DAYS[day] + ' ' + hh(start), span: hh(start) + '–' + hh(start + dur) };
+  }
+
   function rnd(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; }; }
 
   function people() {
@@ -105,5 +117,5 @@ window.RondaUniverse = (() => {
     return { events: ev, duration: t + 0.4 };
   }
 
-  return { N, CATALOG, TOPICS, people, sphere, groups, script, motionKinds: ['calendars', 'health', 'permission', 'help', 'checkin', 'pulse', 'guideline', 'chat'] };
+  return { N, CATALOG, TOPICS, MATCHES, DAYS, outcome, rnd, people, sphere, groups, script, motionKinds: ['calendars', 'health', 'permission', 'help', 'checkin', 'pulse', 'guideline', 'chat'] };
 })();

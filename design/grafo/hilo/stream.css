@@ -1,14 +1,7 @@
-/* Ronda · streaming. Regla Stream de Stageshow: palabras en su lugar final, se encienden. */
+/* Ronda · streaming. Regla Stream de Stageshow: cada letra en su lugar final; se enciende con una cola suave. */
 .rs-stream { white-space: normal; }
-.rs-word {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(4px);
-  transform: translateY(0.18em);
-  transition: opacity 0.42s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.42s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.42s cubic-bezier(0.25, 0.8, 0.25, 1);
-  will-change: opacity, filter, transform;
-}
-.rs-word[data-on] { opacity: 1; filter: none; transform: none; }
+.rs-word { white-space: nowrap; }
+.rs-ch { transition: none; }
 .rs-private {
   display: inline-flex;
   align-items: center;
@@ -22,21 +15,3 @@
   vertical-align: 1px;
 }
 .rs-private svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
-.rs-caret {
-  display: inline-block;
-  width: 2px;
-  height: 1.05em;
-  margin-right: -2px;
-  transform: translateX(2px);
-  vertical-align: -3px;
-  border-radius: 1px;
-  background: var(--rd-ink);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.rs-stream[data-writing] .rs-caret { opacity: 1; animation: rs-caret 1.05s steps(1) infinite; }
-@keyframes rs-caret { 50% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) {
-  .rs-word { transition: none; transform: none; }
-  .rs-stream[data-writing] .rs-caret { animation: none; }
-}

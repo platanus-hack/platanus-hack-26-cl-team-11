@@ -53,10 +53,8 @@
 .human .thread-bubble {background:var(--rd-on-ink);border:1.5px solid var(--rd-ink)}
 .thread-bubble {position:relative}
 .thread-bubble .thread-dots {position:absolute;top:9px;left:12px}
-.thread-bubble .rs-word:not([data-on]) {visibility:hidden}
 .thread-bubble.quiet .rs-word {transition:none}
 /* Keep the moving cursor out of line layout, including at a soft wrap. */
-.thread-bubble .rs-caret {position:absolute;margin:2px 0 0 1px}
 .thread-dots {height:20px;display:inline-flex;align-items:center;gap:4px}
 .thread-dots i {width:6px;height:6px;border-radius:50%;background:var(--rd-muted);animation:thread-dot 1.2s ease-in-out infinite}
 .thread-dots i:nth-child(2) {animation-delay:.15s}.thread-dots i:nth-child(3) {animation-delay:.3s}
