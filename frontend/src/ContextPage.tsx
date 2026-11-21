@@ -5,6 +5,7 @@ import { formatAgo } from './ago';
 import { messageOf } from './format';
 import { connectMock, contextPath, disconnectMock, fetchContext, simulatePush, type ContextMap } from './hubApi';
 import { useAction } from './useAction';
+import { MontuLoading } from './MontuLoader';
 
 const REFRESH_MS = 3000;
 const SIMULATE_MS = 6000;
@@ -50,7 +51,7 @@ export function ContextPage({ token }: { token: string }) {
   }, [load, token]);
 
   if (error && !map) return <h1 className="rd-hero">{error}</h1>;
-  if (!map) return <p className="rd-note">Cargando…</p>;
+  if (!map) return <MontuLoading />;
 
   const connect = (id: string) => action.run(async () => {
     await connectMock(token, id);

@@ -10,6 +10,7 @@ import { RowButton } from './RowButton';
 import { VISIBILITY_LABEL } from './signalGroups';
 import { useAction } from './useAction';
 import { VisibilityChoice } from './VisibilityChoice';
+import { MontuInline } from './MontuLoader';
 
 interface RepoFileRowProps {
   token: string;
@@ -67,7 +68,7 @@ export function RepoFileRow({ token, entry, open, onToggle, onChange }: RepoFile
       {open && (
         <div className="rd-item__detail">
           {content !== null && <p className="app-body">{content}</p>}
-          {content === null && !problem && <span className="rd-note">Cargando…</span>}
+          {content === null && !problem && <MontuInline />}
           <VisibilityChoice label={`Quién ve ${entry.path}`} value={entry.share} disabled={busy} onChange={share} />
           <div className="rd-actions">
             <RowButton label="Borrar" name={`Borrar ${entry.path}`} disabled={busy} onClick={remove} />

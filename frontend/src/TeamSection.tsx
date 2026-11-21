@@ -5,6 +5,7 @@ import { SectionHead } from './SectionHead';
 import { TeamStart } from './TeamStart';
 import { TeamView } from './TeamView';
 import { usePolling } from './usePolling';
+import { MontuInline } from './MontuLoader';
 
 interface TeamList {
   teams: Team[];
@@ -22,7 +23,7 @@ export function TeamSection({ token }: { token: string }) {
       <div className="app-block">
         <SectionHead first title="Equipo" />
         <p className="rd-note" role={error ? 'alert' : undefined}>
-          {error ?? 'Cargando…'}
+          {error ?? <MontuInline />}
         </p>
       </div>
     );

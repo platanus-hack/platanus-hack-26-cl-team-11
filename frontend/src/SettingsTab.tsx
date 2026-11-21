@@ -14,6 +14,7 @@ import { SIGNAL_GROUPS } from './signalGroups';
 import { TeamAdminSection } from './TeamAdminSection';
 import { usePolicy } from './usePolicy';
 import { WhatsAppSection } from './WhatsAppSection';
+import { MontuInline } from './MontuLoader';
 
 interface SettingsTabProps {
   token: string;
@@ -38,7 +39,7 @@ export function SettingsTab({ token, name, login, firstSteps, onOpenStep, source
 
       <div className="app-block">
         <SectionHead title="Permisos" />
-        {!policy && !problem && <p className="rd-note">Cargando…</p>}
+        {!policy && !problem && <MontuInline />}
         {problem && (
           <p className="rd-note" role="alert">
             {problem}

@@ -13,6 +13,7 @@ import { ThreadRow } from './ThreadRow';
 import { useAction } from './useAction';
 import { useCountUp } from './useCountUp';
 import { usePolling } from './usePolling';
+import { MontuInline } from './MontuLoader';
 
 const INTERVALS: ReadonlyArray<{ seconds: number | null; label: string }> = [
   { seconds: null, label: 'Manual' },
@@ -95,7 +96,7 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
       <div className="app-block">
         <SectionHead title="Mesa pública" />
         <p className="rd-note" role={error ? 'alert' : undefined}>
-          {error ?? 'Cargando…'}
+          {error ?? <MontuInline />}
         </p>
       </div>
     );

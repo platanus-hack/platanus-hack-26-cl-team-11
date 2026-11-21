@@ -15,6 +15,7 @@ import { useHashTab } from './useHashTab';
 import { savePerson } from './savedPerson';
 import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
+import { MontuLoading } from './MontuLoader';
 
 const HEALTH_SOURCE = 'apple_health';
 const RETIRED_STEP = 'checkin';
@@ -57,7 +58,7 @@ export function ConnectPage({ token }: { token: string }) {
     return (
       <div className="app-column rd-panel">
         <TopBar />
-        <main className="app-tab">{error ? <h1 className="rd-title">{error}</h1> : <p className="rd-note">Cargando…</p>}</main>
+        <main className="app-tab">{error ? <h1 className="rd-title">{error}</h1> : <MontuLoading />}</main>
       </div>
     );
   }

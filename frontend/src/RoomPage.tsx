@@ -9,6 +9,7 @@ import { RowButton } from './RowButton';
 import { SectionHead } from './SectionHead';
 import { useAction } from './useAction';
 import { usePolling } from './usePolling';
+import { MontuLoading } from './MontuLoader';
 
 const REFRESH_MS = 2000;
 const PEOPLE_SHOWN = 12;
@@ -28,7 +29,7 @@ export function RoomPage({ code }: { code: string }) {
   const { busy, error: simulationError, run } = useAction();
   const people = useMemo(() => new Map((state?.people ?? []).map((person) => [person.id, person])), [state]);
 
-  if (!state) return <main className="app-main">{error ? <h1 className="rd-title">{error}</h1> : <p className="rd-note">Cargando…</p>}</main>;
+  if (!state) return <main className="app-main">{error ? <h1 className="rd-title">{error}</h1> : <MontuLoading />}</main>;
 
   const joinUrl = `${window.location.origin}/unirse/${state.code}`;
   const withAssistant = state.people.filter((person) => person.assistants.length > 0).length;

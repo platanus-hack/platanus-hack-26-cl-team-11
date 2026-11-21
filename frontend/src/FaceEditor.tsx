@@ -3,6 +3,7 @@ import { fetchFace, saveFace, type FaceLook } from './api';
 import { Face } from './Face';
 import { applyFaceLook, FACE_TONES, facePalette, lookFromName, paletteFromLook, recipeFromLook } from './faceLook';
 import { SectionHead } from './SectionHead';
+import { MontuInline } from './MontuLoader';
 
 type Field = Exclude<keyof FaceLook, 'tone'>;
 type Option = { value: FaceLook[Field]; label: string };
@@ -204,7 +205,7 @@ export function FaceEditor({ token, name }: { token: string; name: string }) {
           <span className="rd-note">Así te ve tu equipo.</span>
         </div>
         {!look ? (
-          <p className="rd-note">Cargando…</p>
+          <MontuInline />
         ) : (
           <div className="app-face-editor__choices">
             <div className="rd-seg rd-seg--wrap" role="group" aria-label="Qué cambiar">

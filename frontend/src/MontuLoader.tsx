@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import '../../design/montu/montu.js';
 
 interface MountedMontu {
@@ -18,6 +18,24 @@ const SEEN_KEY = 'montu-carga-vista';
 const REPLAY_AFTER_MS = 20 * 60 * 1000;
 const HOLD_MS = 700;
 const FADE_MS = 500;
+const SHORTEST_VISIT_MS = 900;
+
+let pagesLoading = 0;
+const watchers = new Set<() => void>();
+
+function changeLoading(by: number) {
+  pagesLoading += by;
+  for (const notify of watchers) notify();
+}
+
+function watchLoading(notify: () => void) {
+  watchers.add(notify);
+  return () => {
+    watchers.delete(notify);
+  };
+}
+
+const isLoading = () => pagesLoading > 0;
 
 function alreadySeen() {
   try {
@@ -46,7 +64,7 @@ function Aura() {
   );
 }
 
-function MontuFigure() {
+function MontuCanvas({ className }: { className: string }) {
   const host = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -56,23 +74,49 @@ function MontuFigure() {
     return () => mounted.destroy();
   }, []);
 
-  return <canvas ref={host} className="rd-loader__figure" aria-hidden="true" />;
+  return <canvas ref={host} className={className} aria-hidden="true" />;
+}
+
+const MontuFigure = () => <MontuCanvas className="rd-loader__figure" />;
+
+export function MontuLoading() {
+  useEffect(() => {
+    changeLoading(1);
+    return () => changeLoading(-1);
+  }, []);
+  return null;
+}
+
+export function MontuInline() {
+  return (
+    <span className="app-loading" role="status" aria-label="Cargando">
+      <MontuCanvas className="app-loading__figure" />
+    </span>
+  );
 }
 
 export function MontuSplash() {
-  const [stage, setStage] = useState<SplashStage>(() => (alreadySeen() ? 'gone' : 'shown'));
+  const loading = useSyncExternalStore(watchLoading, isLoading);
+  const [stage, setStage] = useState<SplashStage>('shown');
+  const visit = useRef({ since: Date.now(), atLeast: alreadySeen() ? SHORTEST_VISIT_MS : window.RondaMontu.introMs() + HOLD_MS });
 
   useEffect(() => {
-    if (stage === 'gone') return;
-    const wait = stage === 'shown' ? window.RondaMontu.introMs() + HOLD_MS : FADE_MS;
+    if (!loading || stage === 'shown') return;
+    visit.current = { since: Date.now(), atLeast: SHORTEST_VISIT_MS };
+    setStage('shown');
+  }, [loading, stage]);
+
+  useEffect(() => {
+    if (stage === 'gone' || (stage === 'shown' && loading)) return;
+    const wait = stage === 'shown' ? Math.max(0, visit.current.since + visit.current.atLeast - Date.now()) : FADE_MS;
     const timer = window.setTimeout(() => setStage(stage === 'shown' ? 'leaving' : 'gone'), wait);
     if (stage === 'leaving') rememberSeen();
     return () => window.clearTimeout(timer);
-  }, [stage]);
+  }, [stage, loading]);
 
   if (stage === 'gone') return null;
   return (
-    <div className={stage === 'leaving' ? 'rd-loader rd-loader--out' : 'rd-loader'} role="status" aria-label="Cargando Montu" onClick={() => setStage('leaving')}>
+    <div className={stage === 'leaving' ? 'rd-loader rd-loader--out' : 'rd-loader'} role="status" aria-label="Cargando Montu" onClick={() => (loading ? undefined : setStage('leaving'))}>
       <Aura />
       <MontuFigure />
       <p className="rd-loader__name">Montu</p>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { request } from './api';
 import { usePolling } from './usePolling';
 import './duels.css';
+import { MontuInline } from './MontuLoader';
 
 type Team = { id: string; name: string; price: number };
 type Order = {
@@ -288,7 +289,7 @@ export function DuelsPage() {
               ? 'Precios de Platanus · ' + timeOf(lobby!.feed.ts!)
               : lobby
                 ? 'Precios en pausa. Las ofertas se habilitan con la próxima lectura.'
-                : 'Cargando precios de Platanus…'}
+                : <MontuInline />}
           </span>
         </section>
         <section className="rd-decision">

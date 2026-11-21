@@ -5,6 +5,7 @@ import { IconButton } from './IconButton';
 import { PostForm } from './PostForm';
 import { SectionHead } from './SectionHead';
 import { usePolling } from './usePolling';
+import { MontuInline } from './MontuLoader';
 
 export function BoardSection({ token, teamId }: { token: string; teamId: string }) {
   const [posts, setPosts] = useState<BoardPost[] | null>(null);
@@ -32,7 +33,7 @@ export function BoardSection({ token, teamId }: { token: string; teamId: string 
           {error}
         </p>
       )}
-      {!posts && !error && <p className="rd-note">Cargando…</p>}
+      {!posts && !error && <MontuInline />}
       {posts?.length === 0 && <p className="rd-note">No hay publicaciones abiertas.</p>}
       <div className="rd-list">
         {posts?.map((post) => (

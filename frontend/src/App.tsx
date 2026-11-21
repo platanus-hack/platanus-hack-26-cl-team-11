@@ -7,7 +7,7 @@ import { HomePage } from './HomePage';
 import { InvitePage } from './InvitePage';
 import { JoinPage } from './JoinPage';
 import { LoginPage } from './LoginPage';
-import { MontuSplash, MontuStage } from './MontuLoader';
+import { MontuLoading, MontuSplash, MontuStage } from './MontuLoader';
 import { RoomPage } from './RoomPage';
 import { RoomStart } from './RoomStart';
 import { fetchLoginOptions, fetchSession } from './api';
@@ -61,7 +61,12 @@ function Home() {
       });
   }, []);
 
-  if (google === null) return <Backdrop>{null}</Backdrop>;
+  if (google === null)
+    return (
+      <Backdrop>
+        <MontuLoading />
+      </Backdrop>
+    );
   if (google)
     return (
       <Backdrop>
