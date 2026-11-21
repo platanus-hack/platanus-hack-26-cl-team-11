@@ -1,13 +1,41 @@
 {
   "buildCommand": null,
+  "outputDirectory": "public",
   "framework": null,
-  "redirects": [{ "source": "/", "destination": "/duelos", "permanent": false }],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/terminal",
+      "permanent": false
+    }
+  ],
   "rewrites": [
-    { "source": "/duelos", "destination": "/index.html" },
-    { "source": "/api/duelos", "destination": "https://ronda-n8if.onrender.com/api/duelos" },
-    { "source": "/api/duelos/:action", "destination": "https://ronda-n8if.onrender.com/api/duelos/:action" }
+    {
+      "source": "/terminal",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/duelos",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/duelos",
+      "destination": "https://ronda-n8if.onrender.com/api/duelos"
+    },
+    {
+      "source": "/api/duelos/:action",
+      "destination": "https://ronda-n8if.onrender.com/api/duelos/:action"
+    }
   ],
   "headers": [
-    { "source": "/api/duelos(.*)", "headers": [{ "key": "Cache-Control", "value": "private, no-store" }] }
+    {
+      "source": "/api/duelos(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    }
   ]
 }
