@@ -21,6 +21,7 @@ backend/
     teams/              equipos y membresías
     board/              tablero compartido: preguntas, pedidos, propuestas y votos
     policy/             qué permite compartir cada persona
+    hub/                servidor de contexto: catálogo de fuentes, guardado y mapa (datos de prueba)
     connectors/         un archivo por fuente
       registry.ts       la lista de fuentes
     oauth/              un archivo por proveedor OAuth
@@ -96,3 +97,16 @@ No hay agente coordinador. Lo que comparte un equipo son dos piezas que no inter
 Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
 
 Un equipo se crea desde una persona. Los demás piden entrar con un código y quedan dentro cuando cada integrante aprueba. Todas las rutas de equipo verifican la membresía.
+
+## Servidor de contexto (datos de prueba)
+
+`hub/` es el lugar donde los asistentes de cada persona dejan lo que saben de ella: salud, reuniones, correo, agenda, WhatsApp, código, Claude y Codex. **Hoy todo es de prueba**: conectar una fuente no habla con ningún servicio, solo crea la conexión y tres registros de ejemplo. Vive en tablas propias (`hub_connections`, `hub_items`) y no toca los eventos reales ni las señales.
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/context/<token>` | El mapa: cada fuente con su estado, total, último dato y sus 6 registros más nuevos, más las conexiones entre fuentes que comparten un tema. |
+| `POST /api/context/<token>/push` | Un asistente deja un registro: `{ "source": "claude", "summary": "…", "topics": ["demo"], "occurredAt": "…" }`. Si la fuente no estaba conectada, la conecta. |
+| `POST /api/context/<token>/sources/<fuente>` · `DELETE` | Conecta una fuente con datos de prueba / la desconecta y borra sus registros. |
+| `POST /api/context/<token>/simulate` | Agrega un registro de prueba de alguna fuente conectada. La pantalla lo llama cada 6 s para que se vea llegar contexto. |
+
+Dos fuentes quedan unidas cuando sus registros comparten un tema (`topics`); el nombre de cada tema está en `hub/catalog.ts`. La pantalla es `/contexto/<token>` (`frontend/src/ContextPage.tsx`); `?fuente=<id>` abre una fuente directo.
