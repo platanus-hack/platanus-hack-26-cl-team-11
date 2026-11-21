@@ -2,55 +2,62 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Ronda · lámina de caras Ojos</title>
+<title>Ronda · lámina de caras</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%237b61ff'/%3E%3Crect x='32' y='40' width='11' height='23' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='57' y='40' width='11' height='23' rx='5.5' fill='%231d1d1f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
 <style>
-  /* Lámina para fotografiar, que aplicar.py captura y corta en las imágenes que usa el globo:
-     ?capa=atlas   64 caras, 8 x 8 de 128 px (1024 x 1024); chicas, para el globo: se dibujan con el detalle de 36 px
+  /* Lámina para fotografiar, que aplicar.py captura y corta en las imágenes quietas del producto
+     (el globo, el universo y las páginas que no montan la cara viva):
+     ?capa=atlas   64 caras, 8 x 8 de 128 px (1024 x 1024); se dibujan con el detalle de las caras medianas
      ?capa=equipo  las cinco del equipo en el orden mati, ian, lian, roberto, andres, de 320 px (1600 x 320)
      ?t=8          instante de la luz, en segundos
-     Las caras salen en reposo: ojos abiertos y mirada al frente. */
+     Son las mismas caras de design/faces/caras.js, en reposo: ojos abiertos y mirada al frente. */
   html, body { margin: 0; background: var(--rd-bg); }
   #stage { position: relative; }
   #light { position: absolute; left: 0; top: 0; display: block; }
   #sheet { position: relative; display: grid; }
-  .tile { position: relative; overflow: hidden; color: var(--rd-ink); }
-  .tile svg { position: relative; display: block; width: 100%; height: 100%; }
+  .tile.rd-cara { border-radius: 0; }
+  .tile .rd-cara__gota { border-radius: 0; box-shadow: none; }
+  .tile .rd-cara__halo, .tile .rd-cara__anillo, .tile .rd-cara__onda { display: none; }
 </style>
 </head>
 <body>
 <div id="stage"><canvas id="light"></canvas><div id="sheet"></div></div>
 <script src="../luz/luz.js"></script>
-<script src="ojos.js"></script>
+<script src="../faces/caras.js"></script>
 <script>
 (function () {
   'use strict';
-  var Ojos = window.RondaOjos, Luz = window.RondaLuz;
+  var Caras = window.RondaCaras, Luz = window.RondaLuz;
   var query = new URLSearchParams(location.search);
   var team = query.get('capa') === 'equipo';
+  var instant = Number(query.get('t') || 8);
   var order = ['mati', 'ian', 'lian', 'roberto', 'andres'];
   var size = team ? 320 : 128, cols = team ? order.length : 8, rows = team ? 1 : 8;
-  var sheet = document.getElementById('sheet'), light = document.getElementById('light');
+  var sheet = document.getElementById('sheet'), canvas = document.getElementById('light');
   sheet.style.gridTemplateColumns = 'repeat(' + cols + ', ' + size + 'px)';
 
-  var palettes = [];
+  var lights = [];
   for (var index = 0; index < cols * rows; index += 1) {
     var tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.width = tile.style.height = size + 'px';
-    var seed = team ? order[index] : 'persona-' + index;
-    tile.innerHTML = Ojos.svg(seed, { size: team ? 184 : 36, rest: true });
-    palettes.push(team ? Ojos.TEAM_LIGHT[order[index]] : Luz.paletteFor(seed));
     sheet.appendChild(tile);
+    var name = team ? order[index] : 'persona-' + index;
+    Caras.mount(tile, name, { size: size, level: team ? 'xl' : 'm', light: false, interactive: false, rest: true, enter: false });
+    lights.push(Caras.lightFor(name));
   }
+  Caras.still(instant);
 
-  var grid = Luz.grid(light, { cols: cols, rows: rows, cell: size, palettes: palettes, square: true });
+  var grid = Luz.grid(canvas, { cols: cols, rows: rows, cell: size, palettes: lights.map(function (light) { return light.palette; }), square: true });
   if (grid) {
-    grid.render(Number(query.get('t') || 8));
+    var clocks = new Float32Array(cols * rows);
+    lights.forEach(function (light, slot) { grid.setCell(slot, light.palette, light.seed); clocks[slot] = instant + light.offset; });
+    grid.render(instant, clocks);
   } else {
-    light.remove();
-    Array.prototype.forEach.call(sheet.children, function (tile, index) { tile.style.background = Luz.css(palettes[index]); });
+    canvas.remove();
+    Array.prototype.forEach.call(sheet.children, function (tile, slot) { tile.style.background = Luz.css(lights[slot].palette); });
   }
   document.documentElement.dataset.luz = grid ? 'webgl2' : 'css';
 })();

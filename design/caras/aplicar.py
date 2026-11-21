@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Deja las caras «Ojos» en el formato de imágenes que usa el producto.
+"""Saca las imágenes quietas de las caras de Ronda (design/faces/caras.js) en el formato del producto.
 
-El globo, las tarjetas de herramienta y el frontend leen siete archivos de design/faces/:
-mati.png, ian.png, lian.png, roberto.png y andres.png (320 px, recortadas en círculo) y
-atlas/faces.png con su gemelo atlas/faces-blur.png (64 caras, 8 x 8 de 128 px).
+La cara viva la monta design/faces/caras.js. Lo que no la monta (el globo, el universo, una lámina)
+lee siete imágenes de design/faces/: mati.png, ian.png, lian.png, roberto.png y andres.png
+(320 px, recortadas en círculo) y atlas/faces.png con su gemelo atlas/faces-blur.png
+(64 caras, 8 x 8 de 128 px).
 
 Uso:  python3 design/caras/aplicar.py --out <carpeta> [--t 8]
 
-Captura design/caras/atlas.html con Chrome y corta las láminas. Escribe en --out, nunca en
-design/faces/. Aplicar las caras es copiar esos siete archivos a design/faces/ en un commit
-propio, después de que Mati lo apruebe.
+Captura design/caras/atlas.html con Chrome y corta las láminas. Escribe en --out, nunca directo en
+design/faces/: se miran primero y después se copian esos siete archivos a design/faces/ en un commit
+propio. Hay que volver a correrlo cada vez que cambie el dibujo de las caras.
 """
 import argparse
 import os
@@ -56,7 +57,7 @@ def main():
     parser.add_argument('--t', default='8')
     args = parser.parse_args()
     if os.path.abspath(args.out) == os.path.abspath(os.path.join(HERE, '..', 'faces')):
-        parser.error('--out no puede ser design/faces/: copia los archivos a mano después de la aprobación')
+        parser.error('--out no puede ser design/faces/: escribe en otra carpeta, mira las imágenes y después cópialas')
 
     atlas = capture('atlas', args.t, CELL * 8, CELL * 8)
     team = capture('equipo', args.t, TEAM_CELL * len(TEAM_FILES), TEAM_CELL)
@@ -65,7 +66,7 @@ def main():
     blurred(atlas).save(os.path.join(args.out, 'atlas', 'faces-blur.png'), optimize=True)
     for slot, name in enumerate(TEAM_FILES):
         circle(team.crop((slot * TEAM_CELL, 0, (slot + 1) * TEAM_CELL, TEAM_CELL))).save(os.path.join(args.out, name + '.png'), optimize=True)
-    print('Listo: Ojos en ' + args.out)
+    print('Listo: caras en ' + args.out)
 
 
 if __name__ == '__main__':
