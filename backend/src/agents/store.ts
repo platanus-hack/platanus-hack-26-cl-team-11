@@ -22,6 +22,24 @@ export interface Round {
   problem: string | null;
 }
 
+export interface RoundUsage {
+  needs: number;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  inputChars: number;
+  measured: boolean;
+}
+
+export interface UsageTotals {
+  rounds: number;
+  needs: number;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  inputChars: number;
+}
+
 export interface ThreadMessage {
   fromToken: string;
   fromName: string;
@@ -92,6 +110,28 @@ export interface AgentStore {
   activeTopicKeys(teamId: string, requesterToken: string, since: string): Set<string>;
   decisionsOf(personToken: string): TopicDecisions;
   decideTopic(personToken: string, topic: string, allowed: boolean): void;
+  saveRoundUsage(roundId: string, usage: RoundUsage): void;
+  usageOfRound(roundId: string): RoundUsage | undefined;
+  usageSince(teamId: string, since: string): UsageTotals;
+  measuredUsage(rounds?: number): UsageTotals;
+}
+
+interface UsageRow {
+  needs: number;
+  calls: number;
+  input_tokens: number;
+  output_tokens: number;
+  input_chars: number;
+  measured: number;
+}
+
+interface UsageTotalsRow {
+  rounds: number;
+  needs: number;
+  calls: number;
+  input_tokens: number;
+  output_tokens: number;
+  input_chars: number;
 }
 
 interface RoundRow {
@@ -139,6 +179,7 @@ interface PartyRow {
 }
 
 const DEFAULT_PROPOSAL_LIMIT = 30;
+const MEASURED_ROUNDS = 20;
 const ACTIVE_ROUND: RoundStatus = 'en_curso';
 export const ROUND_TIME_LIMIT_MS = 10 * 60 * 1000;
 const TIMED_OUT = 'La ronda tardó demasiado y se dio por terminada.';
@@ -172,6 +213,15 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
       problem TEXT
     );
     CREATE INDEX IF NOT EXISTS agent_rounds_team ON agent_rounds (team_id, started_at);
+    CREATE TABLE IF NOT EXISTS agent_round_usage (
+      round_id TEXT PRIMARY KEY REFERENCES agent_rounds (id),
+      needs INTEGER NOT NULL,
+      calls INTEGER NOT NULL,
+      input_tokens INTEGER NOT NULL,
+      output_tokens INTEGER NOT NULL,
+      input_chars INTEGER NOT NULL,
+      measured INTEGER NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS agent_threads (
       id TEXT PRIMARY KEY,
       round_id TEXT NOT NULL REFERENCES agent_rounds (id),
@@ -249,6 +299,18 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
         .all(threadId) as unknown as MessageRow[]
     ).map((row) => ({ fromToken: row.from_token, fromName: row.from_name, text: row.text, createdAt: row.created_at }));
 
+  const USAGE_SUMS =
+    'COUNT(*) AS rounds, COALESCE(SUM(u.needs), 0) AS needs, COALESCE(SUM(u.calls), 0) AS calls, COALESCE(SUM(u.input_tokens), 0) AS input_tokens, COALESCE(SUM(u.output_tokens), 0) AS output_tokens, COALESCE(SUM(u.input_chars), 0) AS input_chars';
+
+  const toTotals = (row: UsageTotalsRow | undefined): UsageTotals => ({
+    rounds: Number(row?.rounds ?? 0),
+    needs: Number(row?.needs ?? 0),
+    calls: Number(row?.calls ?? 0),
+    inputTokens: Number(row?.input_tokens ?? 0),
+    outputTokens: Number(row?.output_tokens ?? 0),
+    inputChars: Number(row?.input_chars ?? 0),
+  });
+
   return {
     startRound(teamId, startedBy) {
       const deadline = new Date(Date.now() - ROUND_TIME_LIMIT_MS).toISOString();
@@ -294,6 +356,46 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
 
     teamIds() {
       return (db.prepare('SELECT id FROM teams ORDER BY created_at').all() as unknown as Array<{ id: string }>).map((row) => row.id);
+    },
+
+    saveRoundUsage(roundId, usage) {
+      db.prepare(
+        `INSERT INTO agent_round_usage (round_id, needs, calls, input_tokens, output_tokens, input_chars, measured) VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT (round_id) DO UPDATE SET needs = excluded.needs, calls = excluded.calls, input_tokens = excluded.input_tokens,
+           output_tokens = excluded.output_tokens, input_chars = excluded.input_chars, measured = excluded.measured`,
+      ).run(roundId, usage.needs, usage.calls, usage.inputTokens, usage.outputTokens, usage.inputChars, usage.measured ? 1 : 0);
+    },
+
+    usageOfRound(roundId) {
+      const row = db.prepare('SELECT needs, calls, input_tokens, output_tokens, input_chars, measured FROM agent_round_usage WHERE round_id = ?').get(roundId) as UsageRow | undefined;
+      if (!row) return undefined;
+      return {
+        needs: Number(row.needs),
+        calls: Number(row.calls),
+        inputTokens: Number(row.input_tokens),
+        outputTokens: Number(row.output_tokens),
+        inputChars: Number(row.input_chars),
+        measured: Number(row.measured) === 1,
+      };
+    },
+
+    usageSince(teamId, since) {
+      return toTotals(
+        db.prepare(`SELECT ${USAGE_SUMS} FROM agent_round_usage u JOIN agent_rounds r ON r.id = u.round_id WHERE r.team_id = ? AND r.started_at >= ?`).get(teamId, since) as UsageTotalsRow | undefined,
+      );
+    },
+
+    measuredUsage(rounds = MEASURED_ROUNDS) {
+      return toTotals(
+        db
+          .prepare(
+            `SELECT ${USAGE_SUMS} FROM (
+               SELECT u.* FROM agent_round_usage u JOIN agent_rounds r ON r.id = u.round_id
+               WHERE u.calls > 0 AND u.measured = 1 ORDER BY r.started_at DESC, r.rowid DESC LIMIT ?
+             ) u`,
+          )
+          .get(rounds) as UsageTotalsRow | undefined,
+      );
     },
 
     addThread(draft) {

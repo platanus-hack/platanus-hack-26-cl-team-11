@@ -8,11 +8,21 @@ const PROXY_PLACEHOLDER_KEY = 'via-proxy';
 const REQUEST_TIMEOUT_MS = 90_000;
 const MAX_RETRIES = 1;
 
+export interface ModelUsage {
+  inputTokens: number;
+  outputTokens: number;
+  measured: boolean;
+}
+
 export interface AgentRequest<Schema extends z.ZodType> {
   system: string;
   prompt: string;
   schema: Schema;
+  onUsage?: (usage: ModelUsage) => void;
 }
+
+export const APPROXIMATE_CHARS_PER_TOKEN = 3.3;
+export const approximateTokens = (text: string): number => Math.ceil(text.length / APPROXIMATE_CHARS_PER_TOKEN);
 
 export interface AgentModel {
   decide<Schema extends z.ZodType>(request: AgentRequest<Schema>): Promise<z.infer<Schema>>;
@@ -76,6 +86,7 @@ export function createClaudeModel(config: AgentModelConfig): AgentModel {
         if (failure instanceof Anthropic.APIError) console.error('Agent model call failed.', failure.status, failure.message);
         throw new AgentModelError(describeFailure(failure));
       }
+      request.onUsage?.({ inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens, measured: true });
       if (response.stop_reason === 'refusal') throw new AgentModelError('El modelo no quiso responder ese pedido.');
       if (response.stop_reason === 'max_tokens' || response.parsed_output === null) throw new AgentModelError(MODEL_FAILURE.incomplete);
       return response.parsed_output;

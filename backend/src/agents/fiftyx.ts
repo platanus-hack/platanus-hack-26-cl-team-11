@@ -1,6 +1,6 @@
 import * as z from 'zod/v4';
 import type { Fetch } from '../types.js';
-import { AgentModelError, MODEL_FAILURE, type AgentModel } from './model.js';
+import { AgentModelError, approximateTokens, MODEL_FAILURE, type AgentModel, type ModelUsage } from './model.js';
 
 export const FIFTYX_BASE_URL = 'https://api.ai.50x.energy/v1';
 export const FIFTYX_MODEL = 'deepseek-ai/DeepSeek-V4.1-Flash-1017';
@@ -77,6 +77,14 @@ const contentOf = (body: unknown): string => {
   return typeof content === 'string' ? content : '';
 };
 
+const usageOf = (body: unknown, messages: ChatMessage[], content: string): ModelUsage => {
+  const usage = (body as { usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } } | null)?.usage;
+  const input = usage?.prompt_tokens;
+  const output = usage?.completion_tokens;
+  if (typeof input === 'number' && typeof output === 'number') return { inputTokens: input, outputTokens: output, measured: true };
+  return { inputTokens: approximateTokens(messages.map((message) => message.content).join('')), outputTokens: approximateTokens(content), measured: false };
+};
+
 export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch): AgentModel {
   const limit = createLimiter(FIFTYX_MAX_PARALLEL_CALLS);
   let acceptsJsonSchema = true;
@@ -90,7 +98,7 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
-  const complete = async (messages: ChatMessage[], jsonSchema: unknown): Promise<string> => {
+  const complete = async (messages: ChatMessage[], jsonSchema: unknown, onUsage?: (usage: ModelUsage) => void): Promise<string> => {
     let response: Response;
     try {
       response = acceptsJsonSchema ? await send(messages, { type: 'json_schema', json_schema: { name: SCHEMA_NAME, strict: true, schema: jsonSchema } }) : await send(messages, { type: 'json_object' });
@@ -111,7 +119,9 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
       warnedAboutModel = true;
       console.warn(`50x answered with ${servedModel} instead of ${FIFTYX_MODEL}.`);
     }
-    return contentOf(body);
+    const content = contentOf(body);
+    onUsage?.(usageOf(body, messages, content));
+    return content;
   };
 
   return {
@@ -123,7 +133,7 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
         { role: 'user', content: request.prompt },
       ];
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-        const answer = await limit(() => complete(messages, jsonSchema));
+        const answer = await limit(() => complete(messages, jsonSchema, request.onUsage));
         const parsed = request.schema.safeParse(readJson(answer));
         if (parsed.success) return parsed.data;
         messages.push({ role: 'assistant', content: answer }, { role: 'user', content: `Tu respuesta no cumple el esquema:\n${z.prettifyError(parsed.error)}\nResponde de nuevo solo con el objeto JSON.` });

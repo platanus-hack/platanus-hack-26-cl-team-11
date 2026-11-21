@@ -8,7 +8,7 @@ import type { TeamStore } from '../teams/store.js';
 import type { JsonObject } from '../types.js';
 import { buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
 import { currentDigest, refreshDigests, type DigestStore } from './digest.js';
-import { AgentModelError, type AgentModel } from './model.js';
+import { AgentModelError, approximateTokens, type AgentModel, type ModelUsage } from './model.js';
 import {
   ContactPlan,
   contactPrompt,
@@ -23,7 +23,7 @@ import {
   type CollectedReply,
   type Teammate,
 } from './prompts.js';
-import type { AgentStore, Proposal, Round } from './store.js';
+import type { AgentStore, Proposal, Round, RoundUsage } from './store.js';
 
 export const MAX_NEEDS_PER_ROUND = 10;
 export const MIN_TEAM_SIZE = 2;
@@ -125,6 +125,28 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
   return { cards, openNeeds };
 }
 
+export function meteredModel(model: AgentModel): { model: AgentModel; usage: Omit<RoundUsage, 'needs'> } {
+  const usage = { calls: 0, inputTokens: 0, outputTokens: 0, inputChars: 0, measured: true };
+  const metered: AgentModel = {
+    async decide(request) {
+      let reported = false;
+      const count = (spent: ModelUsage) => {
+        reported = true;
+        usage.calls += 1;
+        usage.inputTokens += spent.inputTokens;
+        usage.outputTokens += spent.outputTokens;
+        usage.inputChars += request.system.length + request.prompt.length;
+        usage.measured &&= spent.measured;
+        request.onUsage?.(spent);
+      };
+      const answer = await model.decide({ ...request, onUsage: count });
+      if (!reported) count({ inputTokens: approximateTokens(request.system + request.prompt), outputTokens: approximateTokens(JSON.stringify(answer)), measured: false });
+      return answer;
+    },
+  };
+  return { model: metered, usage };
+}
+
 export const problemOf = (reason: unknown): string => (reason instanceof AgentModelError ? reason.message : UNEXPECTED_FAILURE);
 
 export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' | 'digests' | 'model'>, teamId: string): Promise<string | null> {
@@ -134,8 +156,12 @@ export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' 
   return failures.length > 0 ? problemOf(failures[0]) : null;
 }
 
-export async function runRound(deps: RoundDeps, round: Round, now: Date = new Date()): Promise<void> {
+export async function runRound(source: RoundDeps, round: Round, now: Date = new Date()): Promise<void> {
+  const meter = meteredModel(source.model);
+  const deps: RoundDeps = { ...source, model: meter.model };
+  let needs = 0;
   const finish = (status: 'lista' | 'fallida', problem: string | null) => {
+    deps.agents.saveRoundUsage(round.id, { needs, ...meter.usage });
     deps.agents.finishRound(round.id, status, problem);
     deps.onEvent?.(round.teamId, 'ronda_termina', { round: round.id, status });
   };
@@ -144,6 +170,7 @@ export async function runRound(deps: RoundDeps, round: Round, now: Date = new Da
     const unread = await refreshTeamDigests(deps, round.teamId);
     const { cards, openNeeds } = openNeedsOf(deps, round.teamId, now);
     if (cards.length < MIN_TEAM_SIZE) return finish('lista', TEAM_TOO_SMALL);
+    needs = openNeeds.length;
 
     const results = await inBatches(openNeeds, NEEDS_IN_PARALLEL, (openNeed) => resolveNeed(deps, round, openNeed, cards));
     const failures = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');

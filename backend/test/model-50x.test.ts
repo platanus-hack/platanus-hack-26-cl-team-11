@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as z from 'zod/v4';
 import { createFiftyXModel, FIFTYX_BASE_URL, FIFTYX_MAX_PARALLEL_CALLS, FIFTYX_MODEL, fiftyXConfigFrom, jsonSchemaOf } from '../src/agents/fiftyx.js';
-import { AgentModelError, MODEL_FAILURE } from '../src/agents/model.js';
+import { AgentModelError, MODEL_FAILURE, type ModelUsage } from '../src/agents/model.js';
 import type { Fetch } from '../src/types.js';
 
 const Reply = z.object({ help: z.string(), message: z.string() });
@@ -125,4 +125,18 @@ test('no more than four calls reach 50x at the same time', async () => {
   const decisions = await Promise.all(Array.from({ length: 12 }, () => model.decide(REQUEST)));
   assert.equal(decisions.length, 12);
   assert.equal(peak, FIFTYX_MAX_PARALLEL_CALLS);
+});
+
+test('each answer reports the tokens 50x says it spent, and approximates them when 50x does not say', async () => {
+  const counted = () => new Response(JSON.stringify({ model: FIFTYX_MODEL, choices: [{ message: { content: JSON.stringify(VALID) } }], usage: { prompt_tokens: 120, completion_tokens: 18 } }), { status: 200 });
+  const reported: ModelUsage[] = [];
+  await createFiftyXModel(CONFIG, fakeFetch([counted]).fetchImpl).decide({ ...REQUEST, onUsage: (usage) => reported.push(usage) });
+  assert.deepEqual(reported, [{ inputTokens: 120, outputTokens: 18, measured: true }]);
+
+  const guessed: ModelUsage[] = [];
+  await createFiftyXModel(CONFIG, fakeFetch([() => completion(JSON.stringify(VALID))]).fetchImpl).decide({ ...REQUEST, onUsage: (usage) => guessed.push(usage) });
+  assert.equal(guessed.length, 1);
+  assert.equal(guessed[0]?.measured, false);
+  assert.ok((guessed[0]?.inputTokens ?? 0) > 0);
+  assert.ok((guessed[0]?.outputTokens ?? 0) > 0);
 });
