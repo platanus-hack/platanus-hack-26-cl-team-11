@@ -32,3 +32,9 @@ El proceso `python3 tools/market/pilot.py` usa el monitor local y un checkout de
 ## Resultado del primer piloto
 
 A las 14:13:44 UTC se compraron 2.501 acciones de team-42 por 24 bananas, comisión incluida. El historial publicó un precio de 0,010618 inmediatamente después de la compra y 0,006033 a las 14:13:45.945, antes de nuestra venta. La venta de las 14:13:50 devolvió 12 bananas. La pérdida realizada del lote fue de 12 bananas. La cartola quedó con 979 en caja y 284 acciones de team-11, valorizadas en 9. El piloto alcanzó su límite de pérdida y detuvo las compras. El monitor público sigue recolectando precios. Los comprobantes figuran en [órdenes verificadas](MARKET-ORDERS.md).
+
+## Validación con demora de salida
+
+Tras el movimiento de team-42, se evaluó una variante de 15 bananas con un intervalo adicional de diez segundos antes de ejecutar la salida y un límite de impacto propio del 30%. En las dos mitades históricas registró +10 en 17 operaciones y +11 en 14 operaciones. Una sola operación aportó +54 en la segunda mitad. Exigir una subida en dos minutos consecutivos dio −5 y −11. La evidencia aún es insuficiente para atribuir una ventaja estable a esa señal.
+
+`python3 tools/market/forward.py` prueba la variante de 15 bananas contra las observaciones que llegan a partir de su arranque, con un intervalo de demora en cada lado. Lee la misma SQLite que el monitor y escribe las ventas simuladas en `forward.jsonl` junto a la base. Solo los recibos de la cartola del evento aparecen en la bitácora de órdenes verificadas.
