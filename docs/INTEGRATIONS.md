@@ -22,9 +22,9 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. Hoy 
 | Fuente | Cómo se conecta | Estado |
 |---|---|---|
 | Apple Health | Atajo de iOS que envía a una URL personal | **Probado con un iPhone real** el 21-nov-2026 con el Atajo mínimo: llega el sueño y se deriva la energía. El envío de varios días, los botones de la página y el Atajo compartido están construidos; el Atajo compartido falta probarlo en un iPhone |
-| GitHub | OAuth | Construido; falta crear la OAuth App y cargar sus credenciales |
-| Linear | OAuth | Construido; falta crear la aplicación OAuth y cargar sus credenciales |
-| Google Calendar | OAuth de Google | Construido; faltan credenciales de Google Cloud |
+| GitHub | OAuth | Aplicación creada y credenciales en Render (21-nov-2026). Abierta a cualquier cuenta. Falta probar la conexión con una cuenta real |
+| Linear | OAuth | Aplicación creada en el workspace `usevita`, pública para cualquier workspace, con credenciales en Render (21-nov-2026). Falta probar la conexión |
+| Google Calendar | OAuth de Google | Cliente creado en el proyecto `ronda-hack26` y publicado en producción sin verificar (21-nov-2026): entra cualquier cuenta de Google, con la advertencia de app no verificada y un tope de 100 personas. Falta probar la conexión |
 | Gmail | El mismo OAuth de Google | Construido; guarda solo asunto, remitente y fecha |
 | Granola | Llave personal pegada | Construido; Granola no ofrece OAuth para un servidor |
 | Google Health | El mismo OAuth de Google | No empezado |
@@ -32,9 +32,9 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. Hoy 
 
 Salvo Apple Health, ninguna fuente está probada contra el servicio real: las pruebas usan respuestas simuladas.
 
-### Aplicaciones OAuth por crear
+### Aplicaciones OAuth
 
-Cada una entrega un identificador y un secreto, que se cargan como variables en Render. Nunca van en el repo.
+Las tres están creadas desde el 21-nov-2026 y sus variables están cargadas en Render. Cada una tiene un identificador y un secreto. Nunca van en el repo. Las tres aceptan también el retorno a `http://localhost:8787` y `http://localhost:5173`, para probar en local.
 
 | Servicio | Dónde se crea | Dirección de retorno | Variables |
 |---|---|---|---|
@@ -277,7 +277,7 @@ Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cue
 - [x] **Dónde se despliega.** En Render, con HTTPS público. Detalle en [DEPLOY.md](DEPLOY.md).
 - [x] **Cifrado** de tokens y llaves. Hecho con AES-256-GCM; detalle en [ARCHITECTURE.md](ARCHITECTURE.md#credenciales).
 - [ ] **Base definitiva.** El backend usa SQLite en disco. Si se pasa a Postgres, cambian `backend/src/db.ts` y las tiendas de `teams/`, `board/`, `policy/`, `agents/` y `hub/`.
-- [ ] **Credenciales de cada aplicación OAuth.** Falta crear las tres aplicaciones y cargar sus variables en Render; ver «Aplicaciones OAuth por crear».
+- [x] **Credenciales de cada aplicación OAuth.** Las tres aplicaciones están creadas y sus variables cargadas en Render; ver «Aplicaciones OAuth».
 - [ ] **Probar el Atajo compartido de Apple Health en un iPhone** y cargar su link de iCloud en `HEALTH_SHORTCUT_URL`; ver «El Atajo compartido, ya armado».
 - [ ] **Probar cada fuente contra el servicio real.** Solo Apple Health está probada.
 
