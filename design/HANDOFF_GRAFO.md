@@ -1,6 +1,13 @@
-# Handoff: el grafo de agentes
+# Handoff: la visual del grafo de agentes
 
-Para el agente que va a trabajar **solo en el grafo**. Escrito el 21-nov-2026.
+Para el agente que va a trabajar **solo en cómo se ve y se mueve el grafo**. Escrito el 21-nov-2026.
+
+## Alcance
+
+- **Sí:** cómo se dibuja, se ordena, escala y se anima el grafo, y el componente de frontend que lo dibuja.
+- **No:** la lógica de los agentes, el backend, los conectores, las demás tarjetas de la pantalla,
+  los tokens de color o tipografía, el texto de la interfaz. Si el grafo necesita un dato que no
+  existe, usa datos de ejemplo marcados como tales y avisa; no toques el backend.
 
 ## Tu trabajo
 
@@ -10,11 +17,13 @@ Todo lo demás (tarjetas, colores, tipografía, layout) ya está cerrado y no se
 
 ## Lee primero, en este orden
 
-1. `AGENTS.md`: reglas 1, 2 y 3. Son obligatorias.
+1. `AGENTS.md`: reglas 1 a 4. Son obligatorias.
 2. `design/DESIGN.md`, completo. Sobre todo «Grafo de agentes (en trabajo)» y «Lo que no se hace».
 3. `design/reference.html` abierto en el navegador, y `design/reference.png`.
-4. `docs/DEMO.md`: el guion. El grafo aparece en los pasos 1, 2, 4 y 7.
-5. `docs/VISION.md` y `docs/AGENT_MODEL.md`: la tesis O(n²) → O(1), y que los agentes conversan
+4. `.agents/skills/stageshow/SKILL.md` y sus `references/motion.md` y `references/rehearse.md`.
+   La regla 4 te obliga a usar esta skill para toda animación de demo: el grafo animado lo es.
+5. `docs/DEMO.md`: el guion. El grafo aparece en los pasos 1, 2, 4 y 7.
+6. `docs/VISION.md` y `docs/AGENT_MODEL.md`: la tesis O(n²) → O(1), y que los agentes conversan
    uno a uno (ya no hay coordinador).
 
 ## Cómo está hoy
@@ -27,6 +36,9 @@ Todo lo demás (tarjetas, colores, tipografía, layout) ya está cerrado y no se
 - El degradado de las líneas activas es un `<linearGradient id="rd-live">` definido dentro del
   SVG, con coordenadas fijas.
 - En teléfono se achican las caras y se ocultan los estados y los chips.
+- `design/motion/` tiene escenas en HTML de otra sesión (`chat`, `health`, `calendars`, `help`,
+  `permission`). Al escribir esto estaban sin commitear y no las revisé: míralas antes de empezar
+  para no duplicar ni pisar ese trabajo, y coordina con quien las hizo por el hilo de correo.
 - `design/grafo-dirigido.mp4` es un video de apoyo de otra sesión con conversaciones sintéticas.
   No sigue esta dirección visual; sirve por el contenido, no por el look.
 
@@ -72,6 +84,9 @@ Esta sesión se equivocó cinco veces antes de acertar. Lo aprendido:
 
 ## Reglas técnicas
 
+- **Look: `design/DESIGN.md`. Oficio de la animación: Stageshow.** Filma el grafo con sus scripts
+  (`film.mjs --gate`, `jumps.mjs`) y revisa cada cuadro; deja el `REHEARSAL.md` que la skill pide.
+  Si chocan, gana `DESIGN.md`.
 - Colores, tipografías, pesos, degradados y sombras: solo tokens `--rd-*` de `design/tokens.css`.
   Si te falta uno, agrégalo ahí en un commit propio.
 - Clases nuevas del grafo van en `design/ronda.css` con prefijo `rd-`, y se anotan en la tabla de
