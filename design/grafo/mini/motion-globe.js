@@ -1,6 +1,7 @@
 const globeMotions = [
   {kind:'chat',a:0,b:1}, {kind:'calendars',a:1,b:2}, {kind:'health',a:3,b:4},
-  {kind:'permission',a:4,b:0}, {kind:'help',a:3,b:2}
+  {kind:'permission',a:4,b:0}, {kind:'help',a:3,b:2},
+  {kind:'checkin',a:0,b:3},{kind:'pulse',a:1,b:4},{kind:'guideline',a:0,b:2}
 ];
 
 const previousAnchors = new Map();

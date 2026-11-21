@@ -1,6 +1,6 @@
 // The movements are drawn in a 64 × 44 coordinate space in both viewers.
 window.RondaMotion = (() => {
-  const periods = {chat:5.8, calendars:9.8, health:6.7, permission:7.1, help:7.8};
+  const periods = {chat:5.8, calendars:9.8, health:6.7, permission:7.1, help:7.8, checkin:6.3, pulse:8.1, guideline:7.4};
   function ease(t,a,b) {
     const x=Math.min(1,Math.max(0,(t-a)/(b-a)));
     return x*x*(3-2*x);
@@ -130,6 +130,71 @@ window.RondaMotion = (() => {
       disk(c,0,1.3,6.4,'#21665e');disk(c,0,0,6.4,gradient(c,-6,12,'#73c9ad','#328d77'));
       line(c,'M-3.2 0l2.2 2.2 4.3-4.4','#fff',1.7);c.restore();}
   }
+  function checkin(c,t) {
+    // A three-position mood wheel settles into the chosen detent.
+    const turn=ease(t,.1,.52)-ease(t,.86,.99);
+    const press=ease(t,.53,.59)-ease(t,.63,.72);
+    shell(c,3,6,58,32,12,'#ffefc9','#eac88c','#b38d57');
+    box(c,7,10,50,23,8,gradient(c,10,23,'#a68551','#f8e8c6'));
+    c.save();c.beginPath();c.roundRect(8,11,48,20,7);c.clip();
+    for(let i=-1;i<=3;i++){
+      const x=32+21*i-16*turn, y=21.3+press;
+      const active=i===1;
+      disk(c,x,y+1.4,9.1,'#ae8755');
+      disk(c,x,y,8.6,gradient(c,y-9,18,active?'#fff4a4':'#fff2d7',active?'#f1b645':'#e7d1a6'));
+      disk(c,x-2.8,y-1.4,1,'#6b492e');disk(c,x+2.8,y-1.4,1,'#6b492e');
+      c.save();c.translate(x,y);line(c,active?'M-3 2q3 4 6 0':i===0?'M-2.7 2.8h5.4':'M-3 4q3-3 6 0','#765136',1.15);c.restore();
+    }
+    c.restore();
+    const pos=32+5*turn;
+    line(c,'M'+(pos-2.5)+' 34l2.5-2.4 2.5 2.4','#936d41',1.3);
+    if(turn>.8){c.save();c.globalAlpha=ease(t,.60,.72)-ease(t,.86,.97);disk(c,54,8.5,6,'#fff7d9');tick(c,54,8.5,1.15,'#9b6929');c.restore();}
+  }
+
+  function pulse(c,t) {
+    const reset=ease(t,.87,1);
+    shell(c,2,3,60,37,9,'#d5ece3','#9abdaf','#678d82');
+    box(c,7,7,50,22,5,'#73958a');
+    box(c,8,8,48,20,4,gradient(c,8,20,'#f7f0d6','#fffbe9'));
+    const cx=32,cy=28;
+    c.save();c.beginPath();c.rect(9,8,46,20);c.clip();
+    c.strokeStyle='#cdc6ae';c.lineWidth=.9;c.beginPath();c.arc(cx,cy,17,3.6,5.82);c.stroke();
+    for(let i=0;i<7;i++){
+      const angle=3.60+.37*i;
+      c.strokeStyle=i>4?'#ad6b55':'#879685';c.lineWidth=i%3===0?1.6:1;
+      c.beginPath();c.moveTo(cx+14.2*Math.cos(angle),cy+14.2*Math.sin(angle));
+      c.lineTo(cx+17.5*Math.cos(angle),cy+17.5*Math.sin(angle));c.stroke();
+    }
+    const sweep=ease(t,.46,.65)-reset+.06*(ease(t,.56,.63)-ease(t,.65,.74));
+    const angle=3.62+1.41*sweep;
+    c.strokeStyle='#b45842';c.lineWidth=1.7;c.lineCap='round';
+    c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+16.4*Math.cos(angle),cy+16.4*Math.sin(angle));c.stroke();
+    disk(c,cx,cy,3.3,'#506e63');disk(c,cx,cy-1,1.7,'#92ac99');c.restore();
+    for(let i=0;i<3;i++){
+      const lit=ease(t,.06+.16*i,.13+.16*i)-reset;
+      box(c,16+i*12,32,8,3.8,1.8,'#749789');
+      c.save();c.globalAlpha=lit;box(c,16+i*12,32,8,3.2,1.6,'#d9fff0');c.restore();
+    }
+  }
+
+  function guideline(c,t) {
+    const write=ease(t,.08,.49), pin=ease(t,.51,.68)-ease(t,.86,.98);
+    const ink=write*(1-ease(t,.89,1));
+    c.save();c.translate(32,21);c.rotate(-.065);c.translate(-32,-21);
+    shell(c,8,5,47,33,5,'#f0eafa','#cbbce5','#9b88b5');
+    box(c,11,7,41,28,3,'#d2bfcc');box(c,11,6,41,27,3,gradient(c,6,27,'#fffdf0','#f1e7cf'));
+    box(c,13,8,2,22,1,'#dccba4');
+    c.save();c.beginPath();c.rect(17,10,29*ink,18);c.clip();
+    line(c,'M18 14h19m-19 5h24m-24 5h13','#8e818a',1.6);c.restore();
+    c.save();c.globalAlpha=1-pin;c.translate(18+23*ink,22+Math.sin(write*10)*1.8);
+    c.rotate(.56);box(c,-1.9,-16,4,15,1,gradient(c,-16,15,'#c6815e','#e5ab70'));
+    c.fillStyle='#84644b';c.fill(new Path2D('M-1.9-1L0 3l2-4Z'));c.restore();
+    c.save();c.globalAlpha=pin;const y=7-5*(1-pin);
+    line(c,'M45 '+(y+2)+'l-2 5','#80657d',1.4);
+    disk(c,46,y+.9,4.5,'#91718e');disk(c,46,y,4.2,gradient(c,y-4,8,'#db9fbd','#a76693'));disk(c,44.8,y-1.2,1.1,'#f7d6e2');
+    c.restore();c.restore();
+  }
+
   function paint(c,kind,fraction,faces=[]) {
     c.save();
     if(kind==='calendars') window.paintRondaCalendar(c,12*(ease(fraction,0,.87)-ease(fraction,.91,1)));
@@ -137,6 +202,9 @@ window.RondaMotion = (() => {
     else if(kind==='health') health(c,fraction);
     else if(kind==='permission') permission(c,fraction);
     else if(kind==='help') help(c,fraction,faces);
+    else if(kind==='checkin') checkin(c,fraction);
+    else if(kind==='pulse') pulse(c,fraction);
+    else if(kind==='guideline') guideline(c,fraction);
     c.restore();
   }
   return {paint,periods};

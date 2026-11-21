@@ -18,8 +18,8 @@ const names = ["Mati", "Ian", "Lian", "Andrés", "Roberto"];
 const activities = mini.demo(people);
 const wide = [[458,72],[802,202],[680,421],[237,421],[113,202]];
 const phone = [[177,48],[310,169],[276,361],[76,361],[46,169]];
-const bends = [-.13, -.13, .09, -.13, .14];
-const anchors = [.50,.51,.50,.50,.50];
+const bends = [-.13, -.13, .09, -.13, .14, -.09, -.04, .09];
+const anchors = [.5,.51,.5,.5,.5,.65,.5,.65];
 const initial = {beat:0};
 async function choreography(a) {
   for (const [index, name] of ["pregunta","coincidencia","lectura","sello","encaje"].entries()) {
