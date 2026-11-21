@@ -63,6 +63,24 @@ En este orden.
 - Onboarding y cobertura en vacaciones.
 - Compatibilidad real con A2A. El formato de mensajes de [AGENT_MODEL.md](AGENT_MODEL.md) se puede llevar a A2A después; ahora no se implementa.
 
+## Estado
+
+Leído del código en `main` el 21-nov-2026 a las 10:45 (commit `9d023b3`). Los números son los de las tablas de arriba.
+
+| # | Pieza | Estado | Qué hay y qué falta |
+|---|---|---|---|
+| 1 | Agente personal con check-in por WhatsApp | Parcial | El check-in existe en el panel web (pestaña Tú: ánimo, bloqueo y nota) y queda en la memoria privada. No hay WhatsApp y la persona todavía no conversa con su agente. |
+| 2 | Política de compartir y aprobación | Parcial | Hay un permiso por señal en Ajustes, y el agente espera un «Permitir» antes de pedir ayuda con un bloqueo que está en «preguntar». Todo ocurre en el panel, no por WhatsApp. |
+| 3 | Agentes uno a uno, tablero y agregado | Construido, sin probar con el modelo real | Rondas 1:1 por equipo que terminan en propuestas, más tablero y pulso. Las pruebas usan un modelo falso. Según el último aviso de Ian, faltan las credenciales del modelo en Render. Los agentes todavía no publican en el tablero: lo usan las personas. |
+| 4 | Vista en vivo de la red | Diseño con datos simulados | El globo de `design/grafo/` no llama a la API. La ruta de agentes ya entrega las flechas reales ([API.md](API.md#agentes)). |
+| 5 | El agente que representa a su dueño | Parcial | El modelo nunca recibe un dato privado, y el agente responde solo si su persona puede, sin decir el motivo. Falta la escena en que otro agente insiste y el agente no cede. |
+| 6 | Preguntarle a la organización | No empezado | El tablero admite preguntas escritas por personas, pero ningún agente las reparte ni arma una respuesta. |
+| 7 | Pedido y oferta de ayuda | Parcial | La ronda llega hasta la propuesta y cada persona la acepta en el panel. Falta el mensaje de presentación. |
+| 8 | Del wearable a la acción | Parcial | El sueño real de un iPhone llega, se vuelve energía, y la energía cambia la disponibilidad que declara el agente. Falta verlo cambiar una respuesta con el modelo real. |
+| 9 | El equipo como experimento | No empezado | |
+| 10 | Detección de trabajo duplicado | No empezado | |
+| 11 | Organización simulada de 300 | Solo visual | El globo dibuja 300 personas. No hay una red sintética que resuelva un pedido. |
+
 ## Fuentes
 
 1. [The Next Web — entrevista al fundador de Emagen AI](https://thenextweb.com/news/yimao-zhou-emagen-ai-cagen-os-level-agent-interview)
