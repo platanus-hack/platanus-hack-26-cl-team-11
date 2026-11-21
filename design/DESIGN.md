@@ -167,7 +167,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-iconbutton`, `rd-iconbutton--bare` | Botón redondo de 36 px con un glifo («+» junto a un encabezado, «⋯» del menú). | Siempre con `aria-label`. |
 | `rd-button--small` | Botón píldora de 36 px para la acción de una fila. | Un solo verbo: «Conectar», «Cambiar», «Pausar». Va con `rd-button--quiet`. |
 | `rd-menu`, `rd-menu__item` | Menú de vidrio que se abre bajo el «⋯». | Se combina con `rd-glass`. |
-| `rd-tabbar`, `rd-tabbar__tab`, `rd-tabbar__name` | Barra flotante de pestañas, fija abajo al centro: solo íconos, la activa (`aria-current`) con fondo suave y el nombre aparece arriba al pasar el cursor o enfocar. | Es un `nav` con `rd-glass`. Sin degradado ni botón negro. El contenido deja espacio abajo para que no tape la última fila. |
+| `rd-tabbar`, `rd-tabbar__tab`, `rd-tabbar__name` | Barra flotante de pestañas, fija abajo al centro: solo íconos, la activa (`aria-current`) con fondo suave y el nombre aparece arriba al pasar el cursor o enfocar. | Es un `nav` con `rd-glass`. Sin degradado ni botón negro. El contenido deja espacio abajo para que no tape la última fila. En la app son cinco: Tú, Equipo, Globo, Fuentes y Ajustes. La del medio es «Globo»: abre `grafo/universo.html?embed` (sin su marca ni su nota; la app pone «demo con datos de prueba») y debajo va la mesa pública. Pedido de Mati del 21-nov. |
 
 ## Caras
 

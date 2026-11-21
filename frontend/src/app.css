@@ -46,6 +46,8 @@ body { margin: 0; }
 .rd-panel .app-you .rd-title { font-size: var(--rd-text-title); }
 .app-thread { padding: var(--rd-space-2) 0 var(--rd-space-4); }
 .app-world { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: var(--rd-radius-card); }
+.app-universe { display: block; width: 100%; height: min(78vh, 760px); border: 0; border-radius: var(--rd-radius-card); }
+@media (min-width: 960px) { .app-universe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
 .app-chat { min-height: 180px; padding: var(--rd-space-3) 0; }
 .app-chat > .rd-note { margin: 0; }
 .app-options { margin-top: var(--rd-space-2); }

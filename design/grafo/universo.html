@@ -25,6 +25,9 @@
   .uv-top .rd-nav > * { transition: background-color .45s var(--ease), color .45s var(--ease); }
   .uv-top .rd-nav b { display: inline-block; min-width: 2.1em; font-weight: var(--rd-weight); font-family: var(--rd-font-num); font-variant-numeric: tabular-nums; transition: opacity .3s ease; }
   .uv-top .rd-nav b:empty { display: none; }
+  /* ?embed: dentro de la app (pestaña Globo) la marca y la nota de datos de prueba las pone la app. */
+  .uv[data-embed] .uv-top { grid-template-columns: 1fr; justify-items: center; }
+  .uv[data-embed] .uv-top .rd-brand, .uv[data-embed] .uv-top .rd-tag { display: none; }
 
   /* Controles de quien presenta: ocultos por defecto (botón, tecla H, ?ui=1). */
   .uv-admin { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 4; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -480,6 +483,7 @@ function draw(T) {
 
 // ───────── Reloj ─────────
 const q = new URLSearchParams(location.search);
+if (q.has('embed')) root.setAttribute('data-embed', '');
 const SPEED = +(q.get('speed') || 1.6);
 let last = performance.now(), T = 0;
 function frame(now) {

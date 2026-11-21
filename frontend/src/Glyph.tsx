@@ -21,6 +21,7 @@ const PATHS = {
   agent: ['M12 3.5l2 6 6 2.5-6 2.5-2 6-2-6-6-2.5 6-2.5z'],
   file: ['M6.5 3.5h7l4 4v13h-11z', 'M13.5 3.5v4h4', 'M9 12.5h6', 'M9 16h6'],
   chat: ['M4 5.5h16v11H11l-4.5 3.5v-3.5H4z'],
+  globe: ['M12 4a8 8 0 1 1 0 16 8 8 0 0 1 0-16z', 'M4 12h16', 'M12 4c2.3 2.2 3.5 4.9 3.5 8s-1.2 5.8-3.5 8c-2.3-2.2-3.5-4.9-3.5-8s1.2-5.8 3.5-8z'],
 } as const;
 
 export type GlyphName = keyof typeof PATHS;

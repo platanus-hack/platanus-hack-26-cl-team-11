@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { applyFaceLook } from './faceLook';
+import { GlobeTab } from './GlobeTab';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchFaces, fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
 import { ONBOARDING_STEPS } from './OnboardingSection';
@@ -72,6 +73,7 @@ export function ConnectPage({ token }: { token: string }) {
     fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
     tu: <YouTab name={page.name} signals={signals} summary={summary} />,
     equipo: <TeamSection token={token} />,
+    globo: <GlobeTab active={tab === 'globo'} />,
     ajustes: <SettingsTab token={token} name={page.name} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };
 
