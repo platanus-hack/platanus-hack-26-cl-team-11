@@ -31,7 +31,7 @@ export function peopleRoutes({ db, store, config }: AppContext) {
       healthIngestPath: health?.kind === 'push' ? `/api/ingest/${health.ingestSlug}/${person.token}` : null,
       publicBaseUrl: config.publicBaseUrl,
       healthShortcut: config.healthShortcut ?? null,
-      login: { email: logins.emailOf(person.token) ?? null, available: config.oauth.google !== undefined },
+      login: { email: logins.loginOf(person.token)?.email ?? null, name: logins.loginOf(person.token)?.name ?? null, available: config.oauth.google !== undefined },
       sources: CONNECTORS.map((connector) => {
         const connection = connections.find((item) => item.source === connector.id);
         return {

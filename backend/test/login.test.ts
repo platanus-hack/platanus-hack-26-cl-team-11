@@ -24,7 +24,7 @@ function setup(options: { config?: Config } = {}) {
     const cookie = (started.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
     return app.request(`/api/oauth/google/callback?${new URLSearchParams({ code: 'codigo', state: location.searchParams.get('state') ?? '' })}`, { headers: { cookie } });
   };
-  const loginOf = async (token: string) => ((await (await app.request(`/api/people/${token}`)).json()) as { name: string; login: { email: string | null; available: boolean } });
+  const loginOf = async (token: string) => ((await (await app.request(`/api/people/${token}`)).json()) as { name: string; login: { email: string | null; name: string | null; available: boolean } });
   return { ctx, app, through, loginOf, signInAs: (email: string, name: string) => (account = { email, name }) };
 }
 
@@ -45,29 +45,62 @@ test('entering with Google creates your page the first time and brings you back 
   const page = first.headers.get('location') ?? '';
   assert.match(page, /^\/conectar\/[A-Za-z0-9_-]+$/);
   const token = page.split('/').at(-1) ?? '';
-  assert.deepEqual(await loginOf(token), { ...(await loginOf(token)), name: 'Ian Fry', login: { email: 'ian@vita.lat', available: true } });
+  assert.deepEqual(await loginOf(token), { ...(await loginOf(token)), name: 'Ian Fry', login: { email: 'ian@vita.lat', name: 'Ian Fry', available: true } });
 
   const again = await through('/api/login/google/start');
   assert.equal(again.headers.get('location'), page);
 });
 
-test('a page that already exists is associated with a Google account, and one account never opens two pages', async () => {
+test('a page that already exists is associated with a Google account, also when a login had already opened an empty page', async () => {
   const { ctx, through, loginOf, signInAs } = setup();
-  const ana = ctx.store.addPerson('Ana');
+  const ana = ctx.store.addPerson('Ana papita');
   const tomas = ctx.store.addPerson('Tomás');
+  ctx.teams.addMember(ctx.teams.createTeam('Vita').id, ana.token);
   signInAs('ana@vita.lat', 'Ana Pérez');
+
+  const fresh = await through('/api/login/google/start');
+  const emptyPage = fresh.headers.get('location') ?? '';
+  assert.notEqual(emptyPage, `/conectar/${ana.token}`);
 
   const linked = await through(`/api/people/${ana.token}/login/google/start`);
   assert.equal(linked.headers.get('location'), `/conectar/${ana.token}#ajustes`);
-  assert.equal((await loginOf(ana.token)).login.email, 'ana@vita.lat');
-  assert.equal((await loginOf(ana.token)).name, 'Ana');
-
-  const taken = await through(`/api/people/${tomas.token}/login/google/start`);
-  assert.match(decodeURIComponent(taken.headers.get('location') ?? ''), /ya está asociada a otra página de Montu/);
-  assert.equal((await loginOf(tomas.token)).login.email, null);
+  assert.deepEqual((await loginOf(ana.token)).login, { email: 'ana@vita.lat', name: 'Ana Pérez', available: true });
+  assert.equal((await loginOf(ana.token)).name, 'Ana papita');
 
   const back = await through('/api/login/google/start');
   assert.equal(back.headers.get('location'), `/conectar/${ana.token}`);
+
+  const taken = await through(`/api/people/${tomas.token}/login/google/start`);
+  assert.match(decodeURIComponent(taken.headers.get('location') ?? ''), /ya abre otra página tuya de Montu que tiene datos/);
+  assert.equal((await loginOf(tomas.token)).login.email, null);
+});
+
+test('entering with Google finds the page whose integrations already use that account, instead of opening a new one', async () => {
+  const { ctx, through, signInAs } = setup();
+  const ian = ctx.store.addPerson('Ian papita');
+  ctx.store.saveConnection(ian.token, 'granola', 'IAN@vita.lat', 'secreto');
+  ctx.store.saveEvent(ian.token, { source: 'apple_health', type: 'salud_diaria', occurredAt: '2026-11-21', summary: 'sueño 7.0 h', raw: {}, externalId: 'dia:2026-11-21' });
+  signInAs('ian@vita.lat', 'Ian Fry');
+
+  const first = await through('/api/login/google/start');
+  assert.equal(first.headers.get('location'), `/conectar/${ian.token}`);
+  assert.equal(ctx.store.findPerson(ian.token)?.name, 'Ian papita');
+});
+
+test('the session stays open on the device until the person closes it', async () => {
+  const { app, through } = setup();
+  const entered = await through('/api/login/google/start');
+  const token = (entered.headers.get('location') ?? '').split('/').at(-1) ?? '';
+  const cookie = (entered.headers.get('set-cookie') ?? '').split(',').map((part) => part.trim().split(';')[0] ?? '').find((part) => part.startsWith('montu_sesion=')) ?? '';
+  assert.ok(cookie.length > 'montu_sesion='.length);
+  assert.match(entered.headers.get('set-cookie') ?? '', /Max-Age=5184000/);
+
+  assert.deepEqual(await (await app.request('/api/session', { headers: { cookie } })).json(), { person: { token, name: 'Ian Fry' } });
+  assert.deepEqual(await (await app.request('/api/session')).json(), { person: null });
+  assert.deepEqual(await (await app.request('/api/session', { headers: { cookie: 'montu_sesion=falsa' } })).json(), { person: null });
+
+  const closed = await app.request('/api/session/logout', { method: 'POST', headers: { cookie } });
+  assert.match(closed.headers.get('set-cookie') ?? '', /montu_sesion=;/);
 });
 
 test('without Google configured there is no login to offer', async () => {

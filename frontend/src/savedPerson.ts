@@ -16,6 +16,14 @@ export function readSavedPerson(): SavedPerson | null {
   }
 }
 
+export function forgetSavedPerson(): void {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    return;
+  }
+}
+
 export function savePerson(person: SavedPerson): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(person));

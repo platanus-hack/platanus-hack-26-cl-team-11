@@ -30,7 +30,10 @@ const LOGIN_PROVIDER = 'google';
 const LOGIN_SCOPES = ['profile'];
 const LOGINS_PER_MINUTE = 30;
 const MAX_NAME_LENGTH = 80;
-const ACCOUNT_TAKEN = 'Esa cuenta de Google ya está asociada a otra página de Montu.';
+const ACCOUNT_TAKEN = 'Esa cuenta de Google ya abre otra página tuya de Montu que tiene datos. Entra con Google para volver a ella.';
+const SESSION_COOKIE = 'montu_sesion';
+const SESSION_DAYS = 60;
+const DAY_SECONDS = 86_400;
 
 const hashOf = (nonce: string) => createHash('sha256').update(nonce).digest('hex');
 const challengeOf = (verifier: string) => createHash('sha256').update(verifier).digest('base64url');
@@ -120,23 +123,67 @@ export function oauthRoutes(ctx: AppContext) {
     return c.redirect(authorizeUrl, 302);
   };
 
+  const sessionPlace = (requestUrl: string) => ({ path: '/', secure: baseUrlFor(requestUrl).startsWith('https:') });
+
+  const openSession = (c: Context, personToken: string) =>
+    setCookie(c, SESSION_COOKIE, vault.seal(JSON.stringify({ token: personToken })), { ...sessionPlace(c.req.url), httpOnly: true, sameSite: 'Lax', maxAge: SESSION_DAYS * DAY_SECONDS });
+
+  const sessionPerson = (c: Context) => {
+    const sealed = getCookie(c, SESSION_COOKIE);
+    if (!sealed) return undefined;
+    try {
+      const session = JSON.parse(vault.open(sealed)) as { token?: unknown } | null;
+      return typeof session?.token === 'string' ? store.findPerson(session.token) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const hasNothing = (personToken: string) =>
+    store.listConnections(personToken).length === 0 &&
+    Object.keys(store.syncBySource(personToken)).length === 0 &&
+    ctx.teams.teamsOf(personToken).length === 0 &&
+    ctx.assistants.assistantsOf(personToken).length === 0 &&
+    ctx.repo.tree(personToken).length === 0;
+
   const finishLogin = async (c: Context, state: OAuthState, code: string, nonce: string) => {
     const provider = findProvider(LOGIN_PROVIDER);
     const credentials = credentialsOf(LOGIN_PROVIDER);
     if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
     const tokens = await provider.exchange(code, credentials, redirectUriFor(c.req.url, LOGIN_PROVIDER), ctx.fetch, nonce);
     const profile = await googleProfile(tokens.accessToken, ctx.fetch);
+    const mappedToken = logins.personOf(profile.email);
+    const mapped = mappedToken ? store.findPerson(mappedToken) : undefined;
     const asking = state.token ? store.findPerson(state.token) : undefined;
+
     if (asking) {
-      const outcome = logins.link(profile.email, asking.token);
       const page = `/conectar/${asking.token}`;
-      return c.redirect(outcome === 'de_otra_persona' ? `${page}?aviso=${encodeURIComponent(ACCOUNT_TAKEN)}#ajustes` : `${page}#ajustes`, 302);
+      if (mapped && mapped.token !== asking.token && !hasNothing(mapped.token)) return c.redirect(`${page}?aviso=${encodeURIComponent(ACCOUNT_TAKEN)}#ajustes`, 302);
+      logins.assign(profile.email, asking.token, profile.name);
+      openSession(c, asking.token);
+      return c.redirect(`${page}#ajustes`, 302);
     }
-    const known = logins.personOf(profile.email);
-    const person = (known ? store.findPerson(known) : undefined) ?? store.addPerson((profile.name ?? profile.email.split('@')[0] ?? profile.email).slice(0, MAX_NAME_LENGTH));
-    logins.link(profile.email, person.token);
+
+    const connected = store.findPeopleByAccount(profile.email).flatMap((token) => store.findPerson(token) ?? [])[0];
+    const person =
+      (mapped && !hasNothing(mapped.token) ? mapped : undefined) ??
+      connected ??
+      mapped ??
+      store.addPerson((profile.name ?? profile.email.split('@')[0] ?? profile.email).slice(0, MAX_NAME_LENGTH));
+    logins.assign(profile.email, person.token, profile.name);
+    openSession(c, person.token);
     return c.redirect(`/conectar/${person.token}`, 302);
   };
+
+  routes.get('/session', (c) => {
+    const person = sessionPerson(c);
+    return c.json({ person: person ? { token: person.token, name: person.name } : null });
+  });
+
+  routes.post('/session/logout', (c) => {
+    deleteCookie(c, SESSION_COOKIE, sessionPlace(c.req.url));
+    return c.json({ ok: true });
+  });
 
   routes.get('/login', (c) => c.json({ google: credentialsOf(LOGIN_PROVIDER) !== undefined }));
 

@@ -21,6 +21,7 @@ export interface Store {
   findConnection(personToken: string, source: SourceId): Connection | undefined;
   listConnections(personToken: string): Connection[];
   listAllConnections(): Array<{ personToken: string; source: SourceId }>;
+  findPeopleByAccount(account: string): string[];
   updateSecret(personToken: string, source: SourceId, secret: string): void;
   markSynced(personToken: string, source: SourceId, error: string | null): void;
   removeConnection(personToken: string, source: SourceId): void;
@@ -199,6 +200,13 @@ export function openStore(db: DatabaseSync, vault: Vault): Store {
     listAllConnections() {
       const rows = db.prepare('SELECT person_token, source FROM connections ORDER BY person_token, source').all() as unknown as Array<{ person_token: string; source: SourceId }>;
       return rows.map((row) => ({ personToken: row.person_token, source: row.source }));
+    },
+
+    findPeopleByAccount(account) {
+      const rows = db
+        .prepare('SELECT person_token, COUNT(*) AS sources FROM connections WHERE lower(account) = lower(?) GROUP BY person_token ORDER BY sources DESC, MIN(connected_at)')
+        .all(account.trim()) as unknown as Array<{ person_token: string }>;
+      return rows.map((row) => row.person_token);
     },
 
     updateSecret(personToken, source, secret) {

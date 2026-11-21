@@ -10,7 +10,7 @@ import { LoginPage } from './LoginPage';
 import { MontuSplash, MontuStage } from './MontuLoader';
 import { RoomPage } from './RoomPage';
 import { RoomStart } from './RoomStart';
-import { fetchLoginOptions } from './api';
+import { fetchLoginOptions, fetchSession } from './api';
 
 function Backdrop({ children }: { children: ReactNode }) {
   return (
@@ -46,10 +46,19 @@ function Home() {
   const [google, setGoogle] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetchLoginOptions().then(
-      (options) => setGoogle(options.google),
-      () => setGoogle(false),
+    const options = fetchLoginOptions().then(
+      (found) => found.google,
+      () => false,
     );
+    fetchSession()
+      .then(
+        (session) => session.person,
+        () => null,
+      )
+      .then(async (person) => {
+        if (person) window.location.replace(`/conectar/${encodeURIComponent(person.token)}`);
+        else setGoogle(await options);
+      });
   }, []);
 
   if (google === null) return <Backdrop>{null}</Backdrop>;

@@ -19,9 +19,15 @@ En producción: `https://ronda-n8if.onrender.com/api`. En local: `http://localho
 |---|---|---|
 | `GET /api/login` | — | `{ google }`: si el servidor puede ofrecer el ingreso |
 | `GET /api/login/google/start` | — | 302 a Google. Al volver, lleva a la página de la persona de ese correo; si no existe, la crea con el nombre de la cuenta |
-| `GET /api/people/<token>/login/google/start` | — | 302 a Google. Al volver, asocia ese correo a esta página. Si el correo ya es de otra página, vuelve con un aviso y no cambia nada |
+| `GET /api/people/<token>/login/google/start` | — | 302 a Google. Al volver, asocia ese correo a esta página. Si el correo ya abre otra página que tiene datos, vuelve con un aviso y no cambia nada; si esa otra página está vacía, el correo pasa a esta |
+| `GET /api/session` | — | `{ person }`: `{ token, name }` de la sesión abierta en ese navegador, o `null` |
+| `POST /api/session/logout` | — | `{ ok }`. Cierra la sesión de ese navegador |
 
-El retorno usa la misma dirección que conectar Google (`/api/oauth/google/callback`) y pide solo el correo y el nombre. La página de la persona trae `login: { email, available }`.
+El retorno usa la misma dirección que conectar Google (`/api/oauth/google/callback`) y pide solo el correo y el nombre. La página de la persona trae `login: { email, name, available }`.
+
+Al entrar, el servidor elige la página en este orden: la que ese correo ya abre, si tiene datos; si no, una página que ya tenga una integración con ese mismo correo (Google Calendar, Gmail, Granola o Linear); si no, la página vacía que ese correo ya abría; y solo si no hay ninguna, crea una nueva. Así una persona que conectó sus fuentes antes de que existiera el ingreso vuelve a su página y no a una vacía.
+
+Entrar deja una cookie de sesión por 60 días (`montu_sesion`, cifrada y fuera del alcance de la página). Con la sesión abierta, la portada lleva directo a la página de la persona.
 
 ## Personas
 

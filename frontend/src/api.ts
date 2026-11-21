@@ -43,6 +43,7 @@ export interface HealthShortcut {
 
 export interface PersonLogin {
   email: string | null;
+  name?: string | null;
   available: boolean;
 }
 
@@ -475,3 +476,5 @@ export const disconnectWhatsApp = (token: string) => request<WhatsAppStatus>(wha
 export const GOOGLE_LOGIN_PATH = '/api/login/google/start';
 export const googleLinkPath = (token: string) => `${personPath(token)}/login/google/start`;
 export const fetchLoginOptions = () => request<{ google: boolean }>('/api/login');
+export const fetchSession = () => request<{ person: { token: string; name: string } | null }>('/api/session');
+export const closeSession = () => request<{ ok: boolean }>('/api/session/logout', post());
