@@ -219,6 +219,10 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
   coordinador», «payload», «sync»).
 - Horas en formato 24 h con dos puntos (`10:30`). Miles con punto (`44.850`).
 - Lo privado se dice: «No sale de tu agente.»
+- **El titular nombra la pantalla con una sola frase simple**: «Conexiones», «Tus conexiones»,
+  «Resumen», «Mapa». Nada de frases ingeniosas ni de dos tiempos («Conecta lo tuyo. Tu agente hace
+  el resto.», «Todo lo tuyo, en un solo mapa.»). Vale también para subtítulos, botones y tarjetas:
+  se dice qué es o qué pasa, sin eslogan.
 
 ## Movimiento
 
@@ -281,11 +285,17 @@ Cada punto es una dirección que Mati ya rechazó.
 - Copiar Montu: tarjetas gris opaco `#f5f5f7` sobre blanco, avatares de arcilla 3D, un color por
   persona. Ronda comparte con Montu solo el bento redondeado y los números tipo Apple Health.
 - Degradado morado genérico de «app de IA» en botones o fondos.
+- Frases ingeniosas como titular o subtítulo («Conecta lo tuyo. Tu agente hace el resto.»). El
+  titular es el nombre de la pantalla.
+- Glifos de trazo genéricos para una app que se conecta: va su ícono real. Nombre de una app
+  seguido de un tema («Granola» y debajo «Pitch» se lee «Granola Pitch»).
 
 ## Decisiones
 
 | Fecha | Decisión | Quién |
 |---|---|---|
+| 21-nov-2026 | Titulares de una sola frase simple que nombra la pantalla («Conexiones»). Sin frases ingeniosas de dos tiempos. | Mati |
+| 21-nov-2026 | Contexto personal (`contexto/`): íconos reales de cada app, superficies chunky (tarjeta blanca con canto, ícono como tecla, botón 3D). Mapa como esfera de puntos en 3D, sin cables. El primer mapa plano con cables: rechazado. | Mati |
 | 21-nov-2026 | Dirección «Aura»: luz tipo Apple Intelligence, vidrio, bento, red de agentes al centro. | Mati |
 | 21-nov-2026 | Se conserva de Montu: tarjetas bento redondeadas y números tipo Apple Health. | Mati |
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
@@ -314,6 +324,8 @@ un punto, todavía no lo revisó Mati en grande).
 | `faces/` | Caras del equipo. |
 | `caras/` | Página de prueba con alternativas de caras (`sabores.html`). Propuesta, no es producto. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
+| `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
+| `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (panel bento), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |
 | `archive/` | Direcciones descartadas. No usar. |
