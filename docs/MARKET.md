@@ -156,3 +156,23 @@ Cuatro analistas de solo lectura trabajaron sobre la cinta de 663 operaciones, l
 - Las compras siguen en pausa en el proceso que corre.
 - La versión nueva de `inventory.py` lee `trader.json`. Vende todo el domingo a las 15:00 UTC, o 45 minutos antes de un cierre publicado, y no compra en los 90 minutos previos. Con `cheap` bajo 1 compra solo equipos que cayeron bajo esa fracción de la mediana, que es donde otro acaba de vender. Acepta listas `only`, `skip` y `sell`, y guarda la cinta del socket en `feed-tape.jsonl`. Al partir releva al proceso anterior mediante `inventory.stop`.
 - No se hacen compras pensadas para activar la venta de otro participante.
+
+## Primera venta y segunda ronda de análisis · 15:30 UTC
+
+A las 15:24:00 UTC alguien empezó a comprar team-34 con órdenes de 10 bananas, una cada 0,6 segundos. El proceso vendió nuestro lote a las 15:24:07, después de la octava orden: 25 bananas netas contra 19 de costo, +6. La racha siguió 12 órdenes más, hasta 0,0217. El participante de los lotes de 33 vendió el suyo a las 15:24:18, 1,4 segundos después de la última orden, por 88 bananas. Vender al cruzar el umbral dejó cerca de 15 bananas sin cobrar.
+
+Cinco analistas de solo lectura revisaron por qué no hay más ganancia. Sus conclusiones:
+
+- En la última hora no hubo ninguna compra de 400 bananas o más. Las compras fuertes fueron a los equipos caros: 11 de 19. En los baratos hubo 3.
+- Entre las 14:20 y las 15:11 solo cuatro participantes aumentaron su caja. Las subidas grandes de la tabla son posiciones en team-9 valorizadas, sin vender.
+- Comprar un equipo después de su primera compra grande no paga: −18, −22 y −59 bananas con entradas de 20, 50 y 100 en 14 casos.
+- Mantener el equipo que va primero durante 30 a 120 minutos perdió en 9 de 11 inicios.
+- Comprar un equipo que otro acaba de botar bajo 0,7 veces la mediana rindió cerca de +12 por lote en 8 casos. Es poco dinero y es la única regla adicional que se sostiene.
+- La aritmética del proceso coincide con todos los recibos. La auditoría encontró cinco fallas que podían detenerlo: un error pasajero del sitio lo daba por sesión terminada, la conciliación podía pisar una orden recién ejecutada, un archivo de detención viejo lo cerraba al partir, una venta rechazada se reenviaba sin pausa y una compra de resultado incierto quedaba con costo equivocado.
+
+### Cambios en `inventory.py`
+
+- Mientras otros siguen comprando un equipo con órdenes chicas, el proceso espera. Vende cuando pasan 0,8 segundos sin compras (`quiet`), cuando alguien más vende, o de inmediato si la compra fue de 30 bananas o más (`strong`).
+- El umbral de venta quedó en 20% sobre el costo con un mínimo de 4 bananas.
+- `guard` y `patience`: si la caja más el valor de venta del inventario se mantiene bajo 912 durante 10 minutos, vende todo. Hoy esa suma es 943.
+- Las cinco fallas de la auditoría quedaron corregidas.

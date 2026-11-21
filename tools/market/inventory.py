@@ -28,9 +28,10 @@ STOP = DATA / "inventory.stop"
 TAPE = DATA / "feed-tape.jsonl"
 DEFAULTS = dict(buying=True, clip=20, clips=1, budget=300, floor=600, cheap=1.3,
                 gain=0.5, edge=4, pace=4, calm=180, rest=180, liquidate=False, only=[], skip=[], sell=[],
-                until="2026-11-22T15:00:00Z")
+                until="2026-11-22T15:00:00Z", quiet=0.8, strong=30, guard=0, patience=600)
 BOUNDS = dict(clip=(10, 66), clips=(1, 3), budget=(0, 700), floor=(300, 5000), cheap=(0.3, 2.0),
-              gain=(0.2, 9.0), edge=(2, 500), pace=(2, 600), calm=(0, 3600), rest=(30, 7200))
+              gain=(0.2, 9.0), edge=(2, 500), pace=(2, 600), calm=(0, 3600), rest=(30, 7200),
+              quiet=(0.3, 5.0), strong=(10, 2000), guard=(0, 5000), patience=(60, 7200))
 
 
 def settings():
@@ -74,6 +75,7 @@ class Book:
         self.price = {}
         self.trail = {}
         self.shares = {}
+        self.flow = {}
 
     def load(self, state):
         with self.lock:
@@ -109,10 +111,18 @@ class Book:
         self.shares = dict(held)
         if len(moved) == 1:
             pid, change = moved[0]
+            before = self.price.get(pid)
             row = dict(at=message.get("at"), team=self.slug.get(pid), shares=change,
-                       before=self.price.get(pid), after=message["prices"].get(pid))
+                       before=before, after=message["prices"].get(pid))
+            liquidity = self.market["liquidityB"]
+            bananas = liquidity * math.log1p(before * math.expm1(change / liquidity)) if before else 0
+            self.flow.setdefault(row["team"], deque(maxlen=60)).append((time.time(), change, bananas))
             with TAPE.open("a") as out:
                 out.write(json.dumps(row) + "\n")
+
+    def recent(self, team):
+        with self.lock:
+            return list(self.flow.get(team, ()))
 
     def record(self, prices):
         now = time.time()
@@ -170,8 +180,10 @@ class Account:
         if refresh or not self.csrf:
             status, data = self.call("GET", f"/{EVENT}/market", extra={"Accept": "text/html"})
             found = re.search(r'<meta name="csrf-token" content="([^"]+)"', data.decode(errors="replace"))
+            if status in (301, 302, 401, 403):
+                raise SessionEnded("the event session is no longer accepted")
             if status != 200 or not found:
-                raise SessionEnded("market page without a form token")
+                raise RuntimeError(f"market page unavailable, HTTP {status}")
             self.csrf, self.csrf_at = found.group(1), time.time()
         return self.csrf
 
@@ -179,9 +191,12 @@ class Account:
         status, data = self.call("GET", f"/api/market/portfolio?event={EVENT}")
         if status in (301, 302, 401, 403):
             raise SessionEnded("the event session is no longer accepted")
-        folio = json.loads(data)
+        try:
+            folio = json.loads(data)
+        except ValueError:
+            folio = {}
         if "cashBananas" not in folio:
-            raise SessionEnded("portfolio unavailable: " + str(folio.get("error", status)))
+            raise RuntimeError(f"portfolio unavailable, HTTP {status}")
         return folio
 
     def order(self, request):
@@ -220,6 +235,11 @@ class Desk:
         self.halted = None
         self.note = "starting"
         self.fills = 0
+        self.ours = deque(maxlen=60)
+        self.retry = {}
+        self.unknown = None
+        self.weak_since = None
+        self.forced = False
         self.config = settings()
         for line in self.ledger():
             self.absorb(line)
@@ -264,8 +284,11 @@ class Desk:
         """Server holdings are the truth. The ledger only supplies what each lot cost."""
         if self.paper:
             return
+        seen = self.fills
         folio = self.account.portfolio()
         with self.lock:
+            if self.fills != seen:
+                return
             self.cash = folio["cashBananas"]
             held = {self.book.slug.get(p["projectId"]): p["shares"] for p in folio["positions"] if p["shares"] > 0}
             held.pop(OWN_TEAM, None)
@@ -280,9 +303,16 @@ class Desk:
                 if lot and lot["shares"] == shares:
                     continue
                 worth = self.estimate(team, "sell", shares)[1]["cashDelta"]
-                cost = round(lot["cost"] * shares / lot["shares"]) if lot else max(1, worth)
+                lost = self.unknown if self.unknown and self.unknown["team"] == team and self.unknown["side"] == "buy" else None
+                if lost and (not lot or shares > lot["shares"]):
+                    cost = (lot["cost"] if lot else 0) + lost["size"] - 1
+                    clips = (lot["clips"] if lot else 0) + 1
+                else:
+                    cost = round(lot["cost"] * shares / lot["shares"]) if lot else max(1, worth)
+                    clips = lot["clips"] if lot else 1
                 print("Adopted server position:", team, shares, "cost", cost, flush=True)
-                self.lots[team] = dict(shares=shares, cost=cost, clips=lot["clips"] if lot else 1)
+                self.lots[team] = dict(shares=shares, cost=cost, clips=clips)
+            self.unknown = None
 
     def deadline(self):
         """When to sell everything: the configured time, or 45 minutes before a published close."""
@@ -293,7 +323,33 @@ class Desk:
         return limit
 
     def leaving(self):
-        return self.config["liquidate"] or time.time() >= self.deadline()
+        return self.config["liquidate"] or self.forced or time.time() >= self.deadline()
+
+    def riding(self, team, now):
+        """True while other players keep buying this team in small orders. A pause or a sale ends it."""
+        trades = [row for row in self.book.recent(team)
+                  if not any(mine == (team, row[1]) and abs(at - row[0]) < 10 for mine, at in self.ours)]
+        if not trades:
+            return False
+        at, shares, bananas = trades[-1]
+        return 0 < bananas < self.config["strong"] and now - at < self.config["quiet"]
+
+    def guard(self):
+        """Sell everything when cash plus the sale value of the lots stays under the floor for a while."""
+        with self.lock:
+            limit = self.config["guard"]
+            if not limit or self.forced or not self.lots:
+                self.weak_since = None
+                return
+            worth = sum(max(0, self.estimate(team, "sell", lot["shares"])[1]["cashDelta"])
+                        for team, lot in self.lots.items() if team in self.book.ids)
+            if self.cash + worth > limit:
+                self.weak_since = None
+            elif self.weak_since is None:
+                self.weak_since = time.time()
+            elif time.time() - self.weak_since >= self.config["patience"]:
+                self.forced = True
+                print("Guard reached, selling the inventory.", flush=True)
 
     def fresh(self, feed):
         return (feed.alive() or time.time() - self.book.checked < 6) and self.book.market \
@@ -323,14 +379,17 @@ class Desk:
                 line = dict(time=receipt["createdAt"], id=receipt["id"], team=team, side=side,
                             shares=receipt["shares"], fee=receipt["feeBananas"], price=receipt["priceAtTrade"],
                             cashDelta=result["newBalance"] - self.cash, cash=result["newBalance"], held=held)
+                self.ours.append(((team, receipt["shares"] if side == "buy" else -receipt["shares"]), time.time()))
                 self.write(line)
                 if side == "buy" and -line["cashDelta"] > size:
                     self.halted = "a purchase cost more than its order"
                 return line
             if result.get("uncertain"):
+                self.unknown = dict(team=team, side=side, size=size)
                 self.halted = "order outcome unknown, reconciling"
                 return None
             error = result.get("error", "unknown")
+            self.retry[team] = time.time() + (1 if error == "PRICE_MOVED" else 10)
             if error != "PRICE_MOVED" or "currentPriceAfter" not in result:
                 self.note = f"{side} {team} rejected: {error}"
                 if error in ("HACKERS_ONLY", "MARKET_NOT_OPEN"):
@@ -351,11 +410,14 @@ class Desk:
             if self.halted or not self.book.market:
                 return
             config = self.config
+            now = time.time()
             for team, lot in list(self.lots.items()):
-                if team not in self.book.ids or self.halted:
+                if team not in self.book.ids or self.halted or now < self.retry.get(team, 0):
                     continue
                 leave = self.leaving() or team in config["sell"]
                 floor = 1 if leave else max(lot["cost"] * (1 + config["gain"]), lot["cost"] + config["edge"])
+                if not leave and self.riding(team, now):
+                    continue
                 self.trade(team, "sell", lot["shares"], lambda est: est["cashDelta"] >= floor)
 
     def entry(self):
@@ -409,7 +471,7 @@ class Desk:
             return dict(time=datetime.now(timezone.utc).isoformat(timespec="seconds"), paper=self.paper,
                         cash=self.cash, lots=len(self.lots), committed=committed, sellableNow=worth,
                         realized=self.realized, fills=self.fills, feed=feed.alive(), halted=self.halted,
-                        note=self.note, config=self.config, detail=detail,
+                        note=self.note, config=self.config, detail=detail, sellOut=self.cash + worth,
                         exitAt=datetime.fromtimestamp(self.deadline(), timezone.utc).isoformat(timespec="seconds"))
 
 
@@ -417,6 +479,7 @@ def take_over(lock):
     """Hold the trading lock. A trader that already holds it is asked to stop through the stop file."""
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        STOP.unlink(missing_ok=True)
         return
     except BlockingIOError:
         print("Another trader is running. Asking it to stop.", flush=True)
@@ -457,7 +520,19 @@ def run(paper, cash, session=None):
 
     feed = Feed(on_message)
     feed.start()
-    polled = reported = checked = renewed = time.time()
+
+    def pulse():
+        while True:
+            time.sleep(0.1)
+            try:
+                if desk.lots and desk.fresh(feed):
+                    desk.exits()
+            except Exception as exc:
+                desk.note = "error: " + type(exc).__name__
+                time.sleep(2)
+
+    threading.Thread(target=pulse, daemon=True).start()
+    polled = reported = checked = renewed = guarded = time.time()
     while time.time() < END:
         time.sleep(1)
         now = time.time()
@@ -487,6 +562,9 @@ def run(paper, cash, session=None):
             if desk.fresh(feed):
                 desk.exits()
                 desk.entry()
+                if now - guarded >= 5:
+                    guarded = now
+                    desk.guard()
         except SessionEnded as exc:
             print("Stopped:", exc, flush=True)
             return

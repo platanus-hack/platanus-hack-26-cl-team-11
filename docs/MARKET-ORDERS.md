@@ -21,3 +21,4 @@ Cada fila corresponde a un recibo encontrado en la cartola posterior a la orden.
 | 2026-11-21T14:55:16.587Z | team-13 | buy | 2077 | 1 | -19 | 732 | — | 6056ef9f-2b02-4e80-a239-39f423760009 |
 | 2026-11-21T14:55:20.893Z | team-20 | buy | 2072 | 1 | -19 | 713 | — | 90c72bd9-c465-4f16-b558-4467d31d9a16 |
 | 2026-11-21T14:55:25.176Z | team-19 | buy | 2064 | 1 | -19 | 694 | — | e127d524-39e6-42ad-b7ed-563c00ee5d3c |
+| 2026-11-21T15:24:07.440Z | team-34 | sell | 2103 | 1 | +25 | 719 | — | 60cb0efb-bb37-429e-9d48-fbd64d36a150 |
