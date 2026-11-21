@@ -75,3 +75,19 @@ node "$skill_dir/scripts/film.mjs" "$page_url" --gate --states --states-for 1260
 node "$skill_dir/scripts/jumps.mjs" "$page_url" --ms 12500
 node "$skill_dir/scripts/layout.mjs" "$page_url" --width 390 --strict
 ```
+
+## Cruce de agendas · estudio individual
+
+[Abrir la pieza](minis.html?solo=calendars) · [Ver la propuesta quieta](minis.html?solo=calendars&still)
+
+Referencia de producto: las tarjetas, teclas de horario y superficies activas de AI Teammates en Vita Front
+(`equipo.scss`, `equipo-ui.scss`, `WorkProgress`). La escala horaria viene del ejemplo
+`calendar` de Stageshow y la entrada escalonada, de `payout-flow`. El selector avanza hasta
+las 10:30, las teclas de Ian y Lian bajan por turno y sale un comprobante con la propuesta.
+Regenerar la vista con `python3 design/grafo/mini/build.py --stage-only`.
+
+El ensayo de Stageshow a 1280 px, 390 px y por estados pasó el gate. El informe de geometría
+en movimiento quedó inconcluso por el desplazamiento continuo del papel. En el fotograma quieto
+pasó `layout --strict` a ambos anchos. Se revisaron la hoja de contacto, la pausa y reanudación
+en el mismo ciclo, la preferencia de movimiento reducido y la decodificación del favicon.
+El móvil se comprobó en Chrome emulado. La dirección visual está en revisión con Mati.

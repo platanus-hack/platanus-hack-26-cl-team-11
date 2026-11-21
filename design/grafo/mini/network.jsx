@@ -3,9 +3,13 @@ import {createRoot} from "react-dom/client";
 import {Stage} from "../../../.agents/skills/stageshow/kit/stage";
 import "./objects";
 import "./edges";
+import CalendarStudy, {calendarTimeline} from "./calendar-study";
 
 // A single Stageshow stage contains every exchange: the independent CSS loops
 // use the same pause switch. The compact composition moves nodes, not time.
+const query = new URLSearchParams(location.search);
+const calendarStudy = query.get("solo") === "calendars";
+const calendarPoster = calendarStudy && query.has("still");
 const mini = window.RondaGraphMinis;
 const people = Object.keys(window.rondaFaces);
 const names = ["Mati", "Ian", "Lian", "Andrés", "Roberto"];
@@ -71,6 +75,14 @@ function Network({layout,paused,poster}) {
     {exchanges.map(({item,spot},i)=><Activity key={item.kind} activity={item} spot={spot} index={i} paused={paused} poster={poster}/>)}
   </div>;
 }
+if (calendarStudy) {
+  document.body.classList.add("study-page");
+  document.title="Cruce de agendas · Ronda";
+  const favicon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="4" width="28" height="26" rx="6" fill="#016075"/><path d="M7 12h18M10 3v5m12-5v5m-11 12 4 4 7-8" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.querySelector('link[rel="icon"]').href="data:image/svg+xml,"+encodeURIComponent(favicon);
+  document.querySelector(".brand-note .rd-note").textContent="Calendarios";
+  document.querySelector("#example").setAttribute("aria-label","Cruce de agendas");
+}
 function App(){
   const [paused,setPaused]=useState(false);
   const [hidden,setHidden]=useState(document.hidden);
@@ -91,11 +103,15 @@ function App(){
   },[]);
   useLayoutEffect(()=>{
     const button=document.querySelector("#toggle");
-    button.hidden=reduced;
+    button.hidden=reduced || calendarPoster;
     button.dataset.paused=String(paused);
     button.querySelector("span").textContent=paused?"Reanudar":"Pausar";
     document.querySelector("#still").hidden=!reduced;
   },[paused,reduced]);
+  if (calendarStudy) return <Stage width={680} height={490} compact={{below:570,width:358,height:444}}
+    initial={initial} poster={initial} script={calendarTimeline} play="once" className="calendar-stage">
+    {()=> <CalendarStudy paused={paused||hidden||!visible} poster={reduced || calendarPoster}/>}
+  </Stage>;
   return <Stage width={920} height={542} compact={{below:620,width:358,height:456}}
     initial={initial} poster={initial} script={choreography} play="once" className="mini-stage">
     {(_,rect,layout)=><Network layout={layout} paused={paused||hidden||!visible} poster={reduced}/>}

@@ -29,6 +29,11 @@ page = f'''<!doctype html>
 </div></div><script>window.rondaFaces={json.dumps(faces)};</script><script>{js}</script></body></html>'''
 (DESIGN / "motion/minis.html").write_text(page)
 
+# The standalone studies also run alongside versions of the globe that use a
+# different renderer and have no embedding markers.
+if "--stage-only" in sys.argv:
+    sys.exit(0)
+
 # The canvas artifact runs its component in isolation. Inline the same small
 # renderer in its lifecycle, including the approved colors for that sandbox.
 tokens = "\n".join(line.strip() for line in (DESIGN / "tokens.css").read_text().splitlines() if line.strip().startswith("--rd-mini-"))
