@@ -18,12 +18,16 @@ const DemoThreads = (() => {
     return !runs.has(id) ? ambient : .8*time(id,reduced)/duration;
   }
   function tokenCount(event,t) {
-    const start=event.at+(event.type==='human' ? .15 : .7);
-    if(t<start) return 0;
-    return Math.min(event.tokens.length,1+Math.floor((t-start)/(event.end-start)*event.tokens.length));
+    const fraction=writingFraction(event,t);
+    return Math.ceil(fraction*event.tokens.length);
   }
   return {key,time,set,start,fraction,duration,tokenCount,paused:id=>runs.get(id)?.paused};
 })();
+
+function writingFraction(event,t) {
+  const start=event.at+(event.type==='human' ? .15 : .7);
+  return Math.max(0,Math.min(1,(t-start)/(event.end-start)));
+}
 
 function threadHit(point, from,to,control,extent,tolerance) {
   // Reject the control hull before sampling the rendered portion of the arc.
@@ -141,23 +145,13 @@ function mountThreadInspector(graph,initialKind) {
     header.append(node('strong','',event.type==='human'?'Tú, en persona':agent(event.author)));
     const bubble=node('p','thread-bubble'), dots=node('span','thread-dots');
     dots.setAttribute('aria-label','Escribiendo');dots.append(node('i'),node('i'),node('i'));
-    bubble.append(dots);column.append(header,bubble);el.append(face(event.author),column);
-    let count=0,word;
+    const stream=RondaStream.create(event.tokens.join(''));
+    bubble.append(dots,stream.el);column.append(header,bubble);el.append(face(event.author),column);
     return {update(t,animate){
-      const end=DemoThreads.tokenCount(event,t);
-      dots.hidden=end>0;
-      bubble.classList.toggle('streaming',end>0 && t<event.end+.35 && animate);
-      const changed=count<end;
-      while(count<end) {
-        const token=event.tokens[count++], value=token.trimEnd();
-        if(!word){word=node('span','thread-word');bubble.append(word);}
-        const fragment=node('span','thread-token',value==='[[x]]'?'dato privado':value);
-        if(value==='[[x]]') fragment.classList.add('thread-redaction');
-        if(animate && t<event.end && end-count<2) fragment.classList.add('arriving');
-        word.append(fragment);
-        if(/\s$/u.test(token)){bubble.append(' ');word=null;}
-      }
-      return changed;
+      const fraction=writingFraction(event,t);
+      dots.hidden=fraction>0;
+      bubble.classList.toggle('quiet',!animate);
+      stream.update(fraction,!animate || fraction>=1);
     }};
   }
   function row(event,animate) {
