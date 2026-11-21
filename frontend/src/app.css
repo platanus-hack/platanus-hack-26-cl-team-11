@@ -1,10 +1,27 @@
 body { margin: 0; }
 .app-main { display: flex; flex-direction: column; gap: var(--rd-space-4); max-width: 640px; padding: var(--rd-space-7) 0 var(--rd-space-11); }
-.app-source { display: flex; flex-direction: column; gap: var(--rd-space-3); padding: var(--rd-space-3) 0; }
-.app-source + .app-source { border-top: 1px solid var(--rd-hairline); }
+.app-main :disabled { opacity: 0.55; cursor: default; }
+.app-main select { max-width: 100%; }
+.app-source, .app-post { display: flex; flex-direction: column; gap: var(--rd-space-3); padding: var(--rd-space-3) 0; }
+.app-source + .app-source, .app-post { border-top: 1px solid var(--rd-hairline); }
 .app-source > .rd-row { padding: 0; }
 .app-text { display: flex; flex-direction: column; min-width: 0; }
 .app-title { font-size: var(--rd-text-name); font-weight: var(--rd-weight); }
 .app-grow { flex: 2 1 200px; }
 .app-off { opacity: 0.55; }
 .app-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.app-wrap { overflow-wrap: anywhere; }
+.app-body { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.app-split { flex-wrap: wrap; }
+.app-form { display: flex; flex-direction: column; gap: var(--rd-space-3); }
+.app-area { display: block; width: 100%; height: auto; min-height: 92px; padding: var(--rd-space-3) var(--rd-space-4); border-radius: var(--rd-radius-card); line-height: 1.4; resize: vertical; }
+.app-choice { padding: 0 var(--rd-space-3); }
+.app-check { display: flex; align-items: flex-start; gap: var(--rd-space-2); cursor: pointer; }
+.app-check input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: var(--rd-ink); }
+.app-people { display: flex; flex-wrap: wrap; gap: var(--rd-space-3) var(--rd-space-6); padding: var(--rd-space-2) 0; }
+.app-person { display: inline-flex; align-items: center; gap: var(--rd-space-3); min-width: 0; }
+.app-face { width: 40px; height: 40px; flex: 0 0 auto; background-image: url('../../design/faces/atlas/faces.png'); background-size: 800% 800%; }
+.app-head { display: flex; align-items: center; justify-content: space-between; gap: var(--rd-space-3); flex-wrap: wrap; }
+.app-reply { display: flex; align-items: center; gap: var(--rd-space-3); }
+.app-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: var(--rd-space-4); padding: var(--rd-space-2) 0; }
+.app-stats > * { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
