@@ -228,14 +228,14 @@ En cada propuesta, `parties` es `[{ name, role, answer, me }]`, con `role` en `p
 
 **Para dibujar el grafo:** cada elemento de `threads` es una flecha de `requesterName` a `helperName`, que es el sentido que fija [AGENT_MODEL.md](AGENT_MODEL.md): de quien necesita ayuda a quien puede darla. `help` dice si esa persona puede. Cómo corre una ronda está en [ARCHITECTURE.md](ARCHITECTURE.md#agentes).
 
-## Mesa pública
+## Agentes conversando (mesa pública)
 
-Una sola mesa para todas las personas de Montu. Nadie se inscribe: participa quien tenga algo publicado y no haya salido.
+Una sola conversación para todas las personas de Montu, sin inscribirse. Entran todas, menos las personas simuladas y quien eligió salir. En la pantalla se llama «Que conversen»; en el código y en las rutas sigue siendo `mesa` y la vuelta se llama `ronda`.
 
 | Ruta | Recibe | Responde |
 |---|---|---|
-| `GET /api/people/<token>/mesa` | — | El estado de la mesa para quien mira |
-| `POST /api/people/<token>/mesa/rounds` | — | 202 `{ id, status, startedAt }`. La ronda corre de fondo |
+| `GET /api/people/<token>/mesa` | — | El estado para quien mira |
+| `POST /api/people/<token>/mesa/rounds` | — | 202 `{ id, status, startedAt }`. Conversan de fondo |
 | `PUT /api/people/<token>/mesa/interval` | `{ "seconds": 60 }` o `{ "seconds": null }` | `{ intervalSeconds }` |
 | `PUT /api/people/<token>/mesa/membership` | `{ "member": false }` | `{ member }` |
 
@@ -243,7 +243,7 @@ Una sola mesa para todas las personas de Montu. Nadie se inscribe: participa qui
 
 - `events` son los pasos de la ronda, en orden: `ronda_empieza`, `pedido_busca`, `paso` (`tool`, `by`, `state` en `inicio` o `fin`), `hilo_abre`, `hilo_responde` (`help`), `propuesta_nace`, `pedido_cierra` (`outcome` en `propuesta`, `nadie`, `sin_ayuda` o `falla`) y `ronda_termina` (`calls`, `tokens`). Cada uno trae `from` (quien pide), `topic` y `text`.
 - `streams` son los mensajes que el modelo está escribiendo en ese momento: `{ kind: ask | reply, from, to, topic, chars, text }`.
-- `text` viene solo para las dos personas de la conversación (o las partes de la propuesta). El resto recibe `null` y, en `streams`, el largo en `chars`.
+- `text` viene para todos los que miran (decisión de Mati, 21-nov-2026). `people` son todas las personas de la mesa.
 
 `POST …/rounds` y `PUT …/interval` responden 403 a quien no opera la mesa. Opera quien entró con un correo de `MESA_OPERATORS`; si el servidor no tiene el ingreso con Google configurado, cualquiera. `POST …/rounds` responde 503 sin credenciales del modelo y 409 con una ronda en curso. `seconds` va de 10 a 86.400; `null` deja la mesa en manual.
 
@@ -251,12 +251,12 @@ Forma de `GET …/mesa`:
 
 | Campo | Contenido |
 |---|---|
-| `configured`, `operator`, `member`, `publishing` | Si hay modelo, si quien mira opera, si su agente está en la mesa y si tiene algo publicado |
+| `configured`, `operator`, `member`, `publishing` | Si hay modelo, si quien mira opera, si su agente está en la mesa y si su agente tiene algo de sus fuentes |
 | `intervalSeconds` | Cada cuántos segundos puede repetirse la ronda, o `null` si es manual |
 | `round` | La última ronda, igual que en `GET …/agents` |
 | `estimate` | Lo que gastaría una ronda ahora: `{ people, needs, digests, calls: { min, likely, max }, tokens: { input, output, total, max }, measured }`. `measured` es `true` cuando ya se calibró con rondas medidas |
 | `usage` | `{ lastRound: { calls, tokens, measured } o null, lastDayTokens, dailyCap }` |
-| `asks`, `threads`, `proposals` | Igual que en `GET …/agents`, para la mesa |
+| `asks`, `threads`, `proposals` | Como en `GET …/agents`, para la mesa. En `threads`, `messages` viene para todos |
 
 ## Panel del equipo (`/admin`)
 

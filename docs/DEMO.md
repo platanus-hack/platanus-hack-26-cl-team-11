@@ -44,14 +44,16 @@ Todo el recorrido está grabado: [demo/camino-feliz.mp4](demo/camino-feliz.mp4),
 
 Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales, y con una ronda real usando el Claude de la terminal (`AGENT_CLI=claude`). Con 50x corrió el 21-nov-2026: una ronda en local y una simulación de 4 personas en producción.
 
-## La mesa pública
+## Los agentes conversan en el globo
 
-1. En la pestaña «Globo» de tu página, arriba corre el universo de agentes: es una demo con datos de prueba.
-2. Debajo está la mesa pública, que es real. Muestra cuántos tokens gastaría una ronda ahora, antes de iniciarla.
-3. «Iniciar ronda» la corre una vez. «Repetir» fija cada cuánto puede correr sola; solo corre si alguien publicó algo nuevo.
-4. Al terminar muestra lo que gastó, las conversaciones entre agentes y, a cada persona, las propuestas que le llegaron.
+1. En la pestaña del medio, «Globo», el globo abre en vivo: están todas las personas que entraron a Montu.
+2. «Que conversen» hace que hasta 10 agentes salgan a conversar. Cada uno lleva lo último de las fuentes de su persona (Granola, Calendar, Linear, GitHub); quien no tiene nada conectado se presenta. Si alguien tiene un pedido de ayuda abierto, se conversa ese pedido primero.
+3. En el globo se enciende el arco de cada conversación, cada paso del agente abre su tarjeta y el texto se escribe mientras 50x lo genera. El texto lo ve todo el que mira.
+4. Al terminar, el panel dice quién ayuda a quién y sobre qué, y cuántos tokens se gastaron. Cada persona recibe sus propuestas por los avisos de siempre.
 
-Iniciar y cambiar el intervalo solo aparece para el equipo de Montu (`MESA_OPERATORS`). Probado en local el 21-nov-2026 con el Claude de la terminal: una ronda de 4 llamadas en 15 segundos, con 2 conversaciones y 1 propuesta. Falta la primera ronda en producción con 50x.
+Debajo del globo se ve cuánto costaría que conversen ahora y se elige si vuelven a conversar solos cada cierto tiempo. El botón y el intervalo solo aparecen para el equipo de Montu (`MESA_OPERATORS`). «Demo» vuelve a la demo guionada con 100 personas inventadas.
+
+Probado en local el 21-nov-2026 con 50x real y las 5 personas de `npm run seed`: 10 conversaciones, 4 propuestas y unos 23.000 tokens, con el texto escribiéndose en el globo. En producción corrió el mismo día con 10 conversaciones y 3 propuestas.
 
 ## Qué es real y qué puede ser simulado
 
