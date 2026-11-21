@@ -3,6 +3,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
 import { connectionRoutes } from './routes/connections.js';
 import { ingestRoutes } from './routes/ingest.js';
+import { oauthRoutes } from './routes/oauth.js';
 import { peopleRoutes } from './routes/people.js';
 import { ConnectorError } from './types.js';
 
@@ -19,6 +20,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', peopleRoutes(ctx));
   api.route('/', connectionRoutes(ctx));
   api.route('/', ingestRoutes(ctx));
+  api.route('/', oauthRoutes(ctx));
 
   return new Hono().route('/api', api);
 }

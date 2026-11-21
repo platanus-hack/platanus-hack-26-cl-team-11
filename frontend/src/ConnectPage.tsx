@@ -29,6 +29,7 @@ export function ConnectPage({ token }: { token: string }) {
   if (error && !page) return <h1 className="rd-hero">{error}</h1>;
   if (!page) return <p className="rd-note">Cargando…</p>;
 
+  const notice = new URLSearchParams(window.location.search).get('aviso');
   const ingestUrl = `${page.publicBaseUrl ?? window.location.origin}${page.healthIngestPath}`;
 
   return (
@@ -37,6 +38,7 @@ export function ConnectPage({ token }: { token: string }) {
         Hola, <span className="rd-gradient-text">{page.name}.</span>
       </h1>
       <p className="rd-note">Lo que conectes queda en tu memoria privada. Tú decides qué sale de ahí.</p>
+      {notice && <p className="rd-note">{notice}</p>}
 
       <section className="rd-card rd-glass">
         <span className="rd-label">Tus fuentes</span>
