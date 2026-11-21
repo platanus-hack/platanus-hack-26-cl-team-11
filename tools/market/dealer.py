@@ -3,6 +3,7 @@ import fcntl
 import getpass
 import http.cookiejar
 import json
+import math
 import os
 import shlex
 import time
@@ -84,7 +85,22 @@ class Dealer:
         est = quote(project["price"], m["liquidityB"], m["feeBps"], side, size)
         if side == "sell" and est["cashDelta"] < limit or side == "buy" and est["priceAfter"] > limit:
             raise ValueError("quote outside limit")
-        req = dict(projectId=pid, side=side, expectedPriceAfter=est["priceAfter"], slippageBps=0)
+        # Allow sub-basis-point differences between the server and local math.
+        # Keep even the worst accepted price inside the user's economic limit.
+        after_price = est["priceAfter"]
+        if side == "buy":
+            tolerance = min(5, max(0, math.floor(10000 * (limit / after_price - 1))))
+        else:
+            tolerance = 5
+            factor = math.exp(-size / m["liquidityB"])
+            while tolerance:
+                worst_after = after_price * (1 - tolerance / 10000)
+                worst_before = worst_after / (factor + worst_after * (1 - factor))
+                worst = quote(worst_before, m["liquidityB"], m["feeBps"], side, size)
+                if worst["cashDelta"] >= limit:
+                    break
+                tolerance -= 1
+        req = dict(projectId=pid, side=side, expectedPriceAfter=after_price, slippageBps=tolerance)
         req["bananas" if side == "buy" else "shares"] = size
         with self.pending.open("x") as f:
             json.dump(dict(request=req, cash=before["cashBananas"], shares=holdings.get(pid,0)), f)
