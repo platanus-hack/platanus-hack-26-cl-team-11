@@ -57,6 +57,12 @@
   .uv-ask { margin: 0; padding: 1.5px; border-radius: 18px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
   .uv-ask > div { display: flex; flex-direction: column; gap: 9px; padding: 13px 14px 12px; border-radius: 16.5px; background: var(--rd-glass-solid); }
   .uv-ask .rd-actions .rd-button { height: 36px; font-size: 14px; }
+  .uv-ask-foot { display: grid; }
+  .uv-ask-foot > * { grid-area: 1 / 1; transition: opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); }
+  .uv-ask-done { display: flex; align-items: center; font-size: 14px; font-weight: var(--rd-weight); color: var(--rd-ink); opacity: 0; }
+  .uv-ask[data-done] .rd-actions { opacity: 0; pointer-events: none; }
+  .uv-ask[data-done] .uv-ask-done { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .uv-ask-foot > * { transition: none; } }
   .uv-foot { display: flex; align-items: center; gap: 10px; padding: 12px 18px 16px; border-top: 1px solid var(--rd-hairline); }
   .uv-bar { flex: 1 1 auto; height: 4px; border-radius: 2px; background: var(--rd-fill-soft); overflow: hidden; }
   .uv-bar i { display: block; height: 100%; width: 0; background: var(--rd-ink); border-radius: 2px; }
@@ -163,9 +169,11 @@ function addItem(e) {
     inner.append(el('span', 'rd-label rd-gradient-text', 'Tu decisión'), el('span', 'rd-title', e.question));
     const note = el('span', 'rd-note', 'Tu agente espera tu respuesta. Nadie más ve esta pregunta.');
     const act = el('div', 'rd-actions'); const ok = el('button', 'rd-button', 'Aceptar'); ok.type = 'button'; const adj = el('button', 'rd-button rd-button--quiet', 'Ajustar'); adj.type = 'button'; act.append(ok, adj);
-    inner.append(note, act); node.append(inner);
+    const doneLine = el('span', 'uv-ask-done', '✓ Aceptado por ti'); doneLine.setAttribute('aria-hidden', 'true');
+    const foot = el('div', 'uv-ask-foot'); foot.append(act, doneLine);
+    inner.append(note, foot); node.append(inner);
     let accepted = false; ok.onclick = () => { accepted = true; };
-    upd = t => { const done = accepted || t >= e.end; if (done && !node.dataset.done) { node.dataset.done = '1'; note.textContent = '✓ Aceptado por ti'; act.remove(); } };
+    upd = t => { const done = accepted || t >= e.end; if (done && !node.dataset.done) { node.dataset.done = '1'; ok.disabled = adj.disabled = true; doneLine.removeAttribute('aria-hidden'); } };
   }
   RondaStream.append(feed, node);
   while (feed.children.length > 14) feed.firstElementChild.remove();
