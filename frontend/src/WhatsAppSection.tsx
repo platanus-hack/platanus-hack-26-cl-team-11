@@ -3,7 +3,6 @@ import { disconnectWhatsApp, fetchWhatsApp, startWhatsAppLink, type WhatsAppLink
 import { CopyButton } from './CopyButton';
 import { Item } from './Item';
 import { RowButton } from './RowButton';
-import { SectionHead } from './SectionHead';
 import { SourceLogo } from './SourceLogo';
 import { useAction } from './useAction';
 import { usePolling } from './usePolling';
@@ -45,16 +44,15 @@ export function WhatsAppSection({ token }: { token: string }) {
   );
 
   return (
-    <div className="app-block">
-      <SectionHead title="WhatsApp" />
+    <>
       <div className="rd-list">
-        <Item icon={<SourceLogo id="whatsapp" />} title="Hablar con tu agente" subtitle={subtitleOf(status, link)} end={action} />
+        <Item icon={<SourceLogo id="whatsapp" />} title="También por WhatsApp" subtitle={subtitleOf(status, link)} end={action} />
       </div>
       {error && (
         <p className="rd-note" role="alert">
           {error}
         </p>
       )}
-    </div>
+    </>
   );
 }

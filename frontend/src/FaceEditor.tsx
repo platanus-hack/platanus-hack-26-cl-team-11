@@ -189,7 +189,7 @@ export function FaceEditor({ token, name }: { token: string; name: string }) {
     <div className="app-block">
       <SectionHead
         first
-        title="Tu cara"
+        title="Tu agente"
         end={
           custom ? (
             <button className="rd-button rd-button--quiet rd-button--small" type="button" onClick={() => store(null)}>

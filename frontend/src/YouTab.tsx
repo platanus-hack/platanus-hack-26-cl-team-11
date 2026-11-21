@@ -37,7 +37,7 @@ export function YouTab({ token, active, name, signals, summary }: YouTabProps) {
       {signals && summary && <SummarySection signals={signals} summary={summary} />}
       <p className="rd-note">Esto lo ves solo tú.</p>
     </div>
-    <AgentTab token={token} active={active} />
+    <AgentTab token={token} name={name} active={active} />
     </>
   );
 }

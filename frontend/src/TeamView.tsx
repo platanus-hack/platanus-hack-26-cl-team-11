@@ -1,5 +1,4 @@
 import type { Team } from './api';
-import { BoardSection } from './BoardSection';
 import { RoundSection } from './RoundSection';
 import { TeamOverviewSection } from './TeamOverviewSection';
 
@@ -14,7 +13,6 @@ export function TeamView({ token, team, first }: TeamViewProps) {
     <>
       <TeamOverviewSection token={token} team={team} first={first} />
       <RoundSection token={token} teamId={team.id} />
-      <BoardSection token={token} teamId={team.id} />
     </>
   );
 }

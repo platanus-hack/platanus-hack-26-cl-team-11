@@ -53,6 +53,7 @@ body { margin: 0; }
 .app-mesa > .rd-actions + .rd-label { margin-top: var(--rd-space-3); }
 .app-mesa > .rd-note { margin: 0; }
 @media (min-width: 960px) { .app-universe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
+.app-block > .rd-thread--chat + .rd-list { margin-top: var(--rd-space-3); }
 .app-chat { min-height: 180px; padding: var(--rd-space-3) 0; }
 .app-chat > .rd-note { margin: 0; }
 .app-options { margin-top: var(--rd-space-2); }
