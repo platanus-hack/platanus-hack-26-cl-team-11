@@ -5,18 +5,14 @@ El producto corre en Render como un solo servicio web: el backend sirve la API y
 ## Cómo funciona
 
 ```
-push a main  →  Render instala, corre las pruebas y compila  →  si todo pasa, publica
+push a main  →  Render instala y compila  →  publica
 ```
 
-- **Las pruebas corren dentro de la compilación de Render.** El comando de compilación instala, corre las pruebas del backend, revisa tipos y compila el frontend. Si algo falla, la compilación falla y Render deja publicada la versión anterior.
-- **Render despliega en cada commit a `main`** (`autoDeployTrigger: commit`).
+- **Render despliega en cada commit a `main`** (`autoDeployTrigger: commit`). No hay chequeos previos: lo que llega a `main` se publica.
+- Si la compilación falla, Render deja publicada la versión anterior.
 - Para que un commit no despliegue, incluye `[skip render]` en el mensaje.
 
-### Por qué no GitHub Actions
-
-Las Actions de este repo no arrancan: GitHub las rechaza por un problema de pago de la cuenta dueña del repo (probado el 21-nov-2026). Por eso la puerta de calidad vive en Render. `.github/workflows/ci.yml` queda con los mismos chequeos, pero solo se lanza a mano; si se arregla el pago, se le devuelve el disparador en cada push y se cambia `autoDeployTrigger` a `checksPass`.
-
-El lint de diseño no corre en Render: lo aplica el chequeo previo a cada commit.
+Las pruebas se corren en local con `npm test` y `npm run type-check`. `.github/workflows/ci.yml` tiene esos mismos chequeos, pero solo se lanza a mano: las Actions de este repo no arrancan por un problema de pago de la cuenta dueña (probado el 21-nov-2026).
 
 ## Crear el servicio (una sola vez)
 
@@ -54,7 +50,7 @@ Las llaves nunca van en el repo ni en `render.yaml`.
 ## Probar el despliegue en local
 
 ```bash
-npm ci --include=dev && npm test && npm run type-check && npm run build
+npm ci --include=dev && npm run build
 PORT=10000 DATA_DIR=/tmp/ronda-data npm start
 ```
 
