@@ -106,6 +106,8 @@
 <script src="./mini/calendar-edge.js"></script>
 <script src="./mini/motion-paint.js"></script>
 <script src="./mini/motion-globe.js"></script>
+<script src="./hilo/edge.js"></script>
+<script src="./hilo/edge-globe.js"></script>
 <script>
 class DCLogic { constructor(p) { this.props = p || {}; } setState(o) { Object.assign(this.state, o); sync(); } }
 class Component extends DCLogic {
@@ -700,7 +702,7 @@ if (calendarPreview) {
   document.title = "Calendario en el globo · Ronda";
   document.getElementById("c").setAttribute("aria-label","Globo de agentes. Toca un arco para abrir su hilo simulado. Arrastra para girar.");
   g.people[2].status = "Libre desde las 10:30";
-  g.paintMotions=(ctx,points,control,t)=>paintGraphMotions(ctx,points,control,g.calendarZoom,t,g.reduced,g.team,'calendars',g.threadPhase);
+  g.paintMotions=(ctx,points,control,t)=>RondaEdgeGlobe.paint(ctx,points,control,g.calendarZoom,t,g.team,g.people,'calendars',g.reduced);
 }
 if (motionPreview) {
   g.people[2].status="Libre desde las 10:30";
@@ -710,8 +712,8 @@ if (motionPreview) {
     if (frozenAt===null) {frozenAt=g.nowT || 0;pause.textContent="Reanudar miniaturas";}
     else {offset+=(g.nowT || 0)-frozenAt;frozenAt=null;pause.textContent="Pausar miniaturas";}
   };
-  g.paintMotions=(ctx,points,control,t)=>paintGraphMotions(
-    ctx,points,control,g.calendarZoom,(frozenAt??t)-offset,g.reduced,g.team,motions,g.threadPhase
+  g.paintMotions=(ctx,points,control,t)=>RondaEdgeGlobe.paint(
+    ctx,points,control,g.calendarZoom,(frozenAt??t)-offset,g.team,g.people,motions,g.reduced
   );
   const motion=matchMedia("(prefers-reduced-motion: reduce)");
   const updatePause=()=>{pause.hidden=q.has("still") || motion.matches;};

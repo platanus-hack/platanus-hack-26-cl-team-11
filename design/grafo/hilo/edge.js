@@ -2,7 +2,7 @@
 // Depende de RondaMotion (../mini/motion-paint.js y calendar-edge.js) y de RondaTools.motionKind.
 // RondaEdge.state(events, t) dice qué pasa en el arco; RondaEdge.paint(ctx, arc, st, opts) lo dibuja.
 //   arc  = { from: {x,y}, to: {x,y}, control: {x,y} }   (curva cuadrática, como en el globo)
-//   opts = { size: 44, faces: [img, img] }               (size = ancho de la miniatura en px)
+//   opts = { size: 44, faces: [img, img], u: 0.5 }       (size = ancho de la miniatura; u = punto del arco)
 window.RondaEdge = (() => {
   const clamp = x => Math.max(0, Math.min(1, x));
   const ease = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
@@ -38,7 +38,7 @@ window.RondaEdge = (() => {
   function paint(ctx, arc, st, opts = {}) {
     const size = opts.size || 44, k = size / 64;
     const fromA = st.author === 1 ? arc.to : arc.from, toA = st.author === 1 ? arc.from : arc.to;
-    const mid = at(arc.from, arc.control, arc.to, 0.5);
+    const mid = at(arc.from, arc.control, arc.to, opts.u || 0.5);
     if (st.phase === 'typing') {
       // Pequeño: la píldora de puntos viaja del que escribe hacia el otro.
       const u = 0.28 + 0.44 * ease(st.p);
