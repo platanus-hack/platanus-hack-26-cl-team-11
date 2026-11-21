@@ -94,6 +94,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-chip`, `rd-chip--status`, `rd-dot` | Chip de vidrio y píldora de estado. | Frases cortas, sin punto final. |
 | `rd-face` (`--small`, `--tiny`), `rd-person` | Cara y nombre con estado. | Siempre juntos. |
 | `rd-graph`, `rd-node`, `rd-edge*` | El grafo de agentes. | **En trabajo**, ver abajo. |
+| `rd-input`, `rd-row`, `rd-code` | Campo de texto, fila de lista con divisor y bloque de código. | Para pantallas de configuración. El código usa `--rd-font-mono`, nada más lo usa. |
 | `rd-layout`, `rd-stack` | Dos columnas: contenido y columna de tarjetas de 392 px. | En teléfono queda una columna. |
 
 ## Caras
