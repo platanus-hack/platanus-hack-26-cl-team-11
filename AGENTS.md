@@ -101,6 +101,16 @@ Todo prototipo, prueba visual o propuesta va como un **HTML de prueba discreto d
 (por ejemplo `design/grafo/playground.html` o `design/grafo/hilo/*.html`), servido en local y
 commiteado. Si una pieza ya existía como artifact, se trae al repo y se deja de actualizar el artifact.
 
+## Regla 6: el panel demo es omnipotente
+
+`design/grafo/universo.html` (con `universo.js`) es la demo que muestra **todo** lo que existe en el
+grafo: 100 personas, grupos complejos de 3 a 5, cada herramienta de `RondaTools`, cada miniatura de
+`RondaMotion`, el streaming, permisos, datos privados y mensajes humanos. Cada vez que se agrega algo
+nuevo (una herramienta, una miniatura, un estado, un tipo de mensaje), se agrega también a esa demo
+(en `CATALOG` o en el generador de guiones de `universo.js`) y debe verse en toda su gloria dentro de
+una vuelta completa. El catálogo de la demo marca qué ya apareció; `?speed=8` recorre una vuelta en
+unos 20 segundos para comprobarlo.
+
 ## Commits
 
 - Un cambio, un commit. Mensaje `tipo: descripción` (`feat`, `fix`, `docs`, `chore`).

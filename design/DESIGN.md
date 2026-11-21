@@ -219,6 +219,9 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
   barrita de avance del tinte. Termina: check del tinte que se encoge hasta un punto. Los demás arcos
   con hilo muestran solo un punto chico que se puede tocar. La tarjeta grande vive solo en el hilo.
 - Duplas para revisar cada herramienta con su miniatura: `grafo/hilo/duplas.html` (tamaño ajustable).
+- **Panel demo omnipotente:** `grafo/universo.html` muestra todo junto: 100 personas, la cámara viaja
+  entre grupos complejos de 3 a 5 que conversan en vivo (cientos de temas), el hilo del grupo a la
+  derecha y el arco activo con su miniatura. Todo lo nuevo se agrega ahí (AGENTS.md, regla 6).
 
 ## Texto de la interfaz
 

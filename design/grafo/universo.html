@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · Universo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231e9bff'/%3E%3Cstop offset='.5' stop-color='%23e840d8'/%3E%3Cstop offset='1' stop-color='%23ff8a1f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Ccircle cx='20' cy='20' r='5' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<link rel="stylesheet" href="./hilo/stream.css">
+<link rel="stylesheet" href="./hilo/tools.css">
+<style>
+  /* PANEL DEMO OMNIPOTENTE (ver universo.js y AGENTS.md regla 6): todo lo nuevo aparece aquí. */
+  html, body { margin: 0; height: 100%; }
+  .uv { position: relative; height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 0; overflow: hidden; background: var(--rd-bg); }
+  .uv-stage { position: relative; min-width: 0; }
+  .uv-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .uv-top { position: absolute; left: 28px; right: 28px; top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; pointer-events: none; z-index: 2; }
+  .uv-top .rd-chip { pointer-events: auto; }
+  .uv-title { position: absolute; left: 28px; top: 78px; z-index: 2; pointer-events: none; }
+  .uv-title .rd-hero { font-size: clamp(30px, 3.4vw, 48px); }
+  .uv-count { display: flex; gap: 22px; margin-top: 14px; }
+  .uv-count .rd-stat { font-size: 30px; }
+  .uv-ctl { position: absolute; left: 28px; bottom: 24px; display: flex; gap: 8px; z-index: 2; }
+  .uv-ctl .rd-button { flex: 0 0 auto; height: 40px; padding: 0 18px; font-size: 14px; }
+  .uv-cat { position: absolute; left: 28px; right: 28px; bottom: 76px; z-index: 2; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .uv-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .uv-tag { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px 0 3px; border-radius: var(--rd-radius-pill); font-size: 11px; font-weight: var(--rd-weight); background: rgba(255,255,255,.55); color: var(--rd-faint); transition: background .4s ease, color .4s ease, transform .4s cubic-bezier(.25,.8,.25,1); }
+  .uv-tag i { width: 16px; height: 16px; border-radius: 5px; background: color-mix(in srgb, var(--t) 20%, white); transition: background .4s ease; }
+  .uv-tag[data-seen] { background: rgba(255,255,255,.92); color: var(--rd-ink); }
+  .uv-tag[data-seen] i { background: var(--t); }
+  .uv-tag[data-now] { transform: translateY(-2px); box-shadow: 0 0 0 1.5px var(--t), 0 8px 18px rgba(40,30,90,.12); }
+
+  /* Panel del hilo */
+  .uv-panel { position: relative; display: flex; flex-direction: column; margin: 16px 16px 16px 0; border-radius: var(--rd-radius-card); overflow: hidden; }
+  .uv-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 14px; border-bottom: 1px solid var(--rd-hairline); }
+  .uv-faces { display: flex; flex: 0 0 auto; }
+  .uv-faces span { width: 32px; height: 32px; margin-left: -9px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; transition: transform .5s cubic-bezier(.25,.8,.25,1); }
+  .uv-faces span:first-child { margin-left: 0; }
+  .uv-hcopy { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+  .uv-hcopy .rd-title { font-size: 19px; }
+  .uv-status { flex: 0 0 auto; }
+  .uv-feed { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; padding: 16px 16px 18px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px); mask-image: linear-gradient(to bottom, transparent 0, #000 70px); }
+  .uv-item { display: flex; gap: 8px; align-items: flex-start; }
+  .uv-item.mine { flex-direction: row-reverse; }
+  .uv-face { width: 26px; height: 26px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; flex: 0 0 auto; margin-top: 17px; }
+  .uv-col { display: flex; flex-direction: column; gap: 3px; min-width: 0; max-width: 86%; }
+  .uv-item.mine .uv-col { align-items: flex-end; }
+  .uv-who { font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); }
+  .uv-bubble { padding: 9px 13px; border-radius: 6px 18px 18px 18px; background: var(--rd-glass-solid); box-shadow: 0 6px 18px rgba(40,30,90,.07); font-size: 14px; line-height: 1.42; }
+  .uv-item.mine .uv-bubble { border-radius: 18px 6px 18px 18px; background: var(--rd-fill-soft); box-shadow: none; }
+  .uv-item.human .uv-bubble { background: #fff; border: 1.5px solid var(--rd-ink); }
+  .uv-tool { margin-left: 34px; }
+  .uv-tool > .rd-label { display: block; margin: 0 0 4px 4px; }
+  .uv-ask { margin-left: 34px; padding: 1.5px; border-radius: 18px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
+  .uv-ask > div { display: flex; flex-direction: column; gap: 9px; padding: 13px 14px 12px; border-radius: 16.5px; background: var(--rd-glass-solid); }
+  .uv-ask .rd-actions .rd-button { height: 36px; font-size: 14px; }
+  .uv-foot { display: flex; align-items: center; gap: 10px; padding: 12px 18px 16px; border-top: 1px solid var(--rd-hairline); }
+  .uv-bar { flex: 1 1 auto; height: 4px; border-radius: 2px; background: var(--rd-fill-soft); overflow: hidden; }
+  .uv-bar i { display: block; height: 100%; width: 0; background: var(--rd-ink); border-radius: 2px; }
+  @media (max-width: 900px) {
+    .uv { grid-template-columns: 1fr; grid-template-rows: 46vh 54vh; }
+    .uv-panel { margin: 0 10px 10px; }
+    .uv-title, .uv-cat { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .uv-tag, .uv-faces span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="uv rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <section class="uv-stage" aria-label="Universo de agentes">
+    <canvas id="c" role="img" aria-label="Globo de cien agentes. La cámara viaja entre grupos que conversan."></canvas>
+    <div class="uv-top">
+      <span class="rd-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda · Universo</span>
+      <span class="rd-chip rd-chip--status rd-glass"><span class="rd-dot"></span><span id="live">100 agentes en línea</span></span>
+    </div>
+    <div class="uv-title">
+      <h1 class="rd-hero">100 personas,<br><span class="rd-gradient-text">cientos de conversaciones.</span></h1>
+      <div class="uv-count">
+        <div><span class="rd-label">Grupos negociando</span><br><span class="rd-stat" id="ngroups">0</span></div>
+        <div><span class="rd-label">Temas en curso</span><br><span class="rd-stat" id="ntopics">0</span></div>
+        <div><span class="rd-label">Pares posibles</span><br><span class="rd-stat">4.950</span></div>
+      </div>
+    </div>
+    <div class="uv-cat" aria-label="Catálogo visto en esta vuelta">
+      <div class="uv-row" id="cat-tools"></div>
+      <div class="uv-row" id="cat-minis"></div>
+    </div>
+    <div class="uv-ctl">
+      <button type="button" class="rd-button" id="pause">Pausar</button>
+      <button type="button" class="rd-button rd-button--quiet" id="next">Siguiente grupo</button>
+    </div>
+  </section>
+  <aside class="uv-panel rd-glass" aria-label="Hilo del grupo">
+    <header class="uv-head">
+      <div class="uv-faces" id="hfaces"></div>
+      <div class="uv-hcopy"><span class="rd-label" id="hsub">Grupo</span><span class="rd-title" id="htopic">…</span></div>
+    </header>
+    <div class="uv-feed" id="feed" aria-live="polite"></div>
+    <footer class="uv-foot"><span class="rd-label" id="fstate">En curso</span><div class="uv-bar"><i id="fbar"></i></div><span class="rd-note" id="fclock">0 s</span></footer>
+  </aside>
+</div>
+<script src="./mini/calendar-edge.js"></script>
+<script src="./mini/motion-paint.js"></script>
+<script src="./hilo/stream.js"></script>
+<script src="./hilo/tools.js"></script>
+<script src="./hilo/edge.js"></script>
+<script src="./universo.js"></script>
+<script>
+// ───────── Datos ─────────
+const U = RondaUniverse, people = U.people(), POS = U.sphere();
+const GROUPS = U.groups(POS, 14, 7);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const faceUrl = p => p.face.startsWith('team:') ? '../faces/' + p.face.slice(5) + '.png' : null;
+const atlas = new Image(); atlas.src = '../faces/atlas/faces.png';
+const atlasBlur = new Image(); atlasBlur.src = '../faces/atlas/faces-blur.png';
+const teamImg = {}; people.slice(0, 5).forEach((p, i) => { const im = new Image(); im.src = faceUrl(p); teamImg[i] = im; });
+const tileCss = i => { const t = +people[i].face.slice(5); return { backgroundImage: 'url(../faces/atlas/faces.png)', backgroundSize: '800% 800%', backgroundPosition: (t % 8) * 100 / 7 + '% ' + Math.floor(t / 8) * 100 / 7 + '%' }; };
+const faceCss = i => i < 5 ? { backgroundImage: 'url(' + faceUrl(people[i]) + ')', backgroundSize: 'cover' } : tileCss(i);
+
+// ───────── Catálogo visible ─────────
+const catTools = document.getElementById('cat-tools'), catMinis = document.getElementById('cat-minis');
+const tagEls = {}, miniEls = {};
+U.CATALOG.forEach(c => { const f = RondaTools.FLAVORS[RondaTools.flavorOf(c.name)]; const el = document.createElement('span'); el.className = 'uv-tag'; el.style.setProperty('--t', f.tint); el.innerHTML = '<i></i>'; el.append(c.name); catTools.append(el); tagEls[c.name] = el; });
+U.motionKinds.forEach(k => { const el = document.createElement('span'); el.className = 'uv-tag'; el.style.setProperty('--t', RondaEdge.TINT[k]); el.innerHTML = '<i></i>'; el.append('miniatura · ' + k); catMinis.append(el); miniEls[k] = el; });
+
+// ───────── Hilo del grupo ─────────
+const feed = document.getElementById('feed');
+let current = null, gi = 0, clock = 0, paused = false, items = [];
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+function startGroup(i) {
+  gi = (i + GROUPS.length) % GROUPS.length;
+  const g = GROUPS[gi], sc = U.script(g, people, { ask: gi % 3 === 0 });
+  current = { g, events: sc.events, duration: sc.duration, shown: new Set() };
+  clock = 0; items = [];
+  [...feed.children].forEach(c => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-8px)' }], { duration: 320, fill: 'forwards' }).onfinish = () => c.remove());
+  const hf = document.getElementById('hfaces'); hf.replaceChildren(...g.members.map(m => { const s = el('span'); Object.assign(s.style, faceCss(m)); return s; }));
+  document.getElementById('htopic').textContent = g.topic;
+  document.getElementById('hsub').textContent = g.members.length + ' agentes · ' + people[g.members[0]].name + ' pide ayuda';
+  turnTo(g.members);
+}
+function addItem(e) {
+  const mine = e.from === current.g.members[0];
+  let node, upd;
+  if (e.type === 'message' || e.type === 'human') {
+    node = el('div', 'uv-item' + (mine ? ' mine' : '') + (e.type === 'human' ? ' human' : ''));
+    const f = el('span', 'uv-face'); Object.assign(f.style, faceCss(e.from));
+    const col = el('div', 'uv-col');
+    col.append(el('span', 'uv-who', e.type === 'human' ? people[e.from].name + ', en persona' : 'Agente de ' + people[e.from].name + ' → ' + people[e.to].name));
+    const b = el('div', 'uv-bubble'); const s = RondaStream.create(e.text); b.append(s.el); col.append(b);
+    node.append(f, col);
+    upd = t => s.update((t - e.at - 0.15) / Math.max(0.2, e.end - e.at - 0.15), t > e.end + 0.3);
+  } else if (e.type === 'call') {
+    node = el('div', 'uv-tool');
+    node.append(el('span', 'rd-label', 'Agente de ' + people[e.from].name + ' usa'));
+    const card = RondaTools.create(e); node.append(card.el);
+    upd = t => card.update(t);
+  } else if (e.type === 'ask') {
+    node = el('div', 'uv-ask'); const inner = el('div');
+    inner.append(el('span', 'rd-label rd-gradient-text', 'Tu decisión'), el('span', 'rd-title', e.question));
+    const note = el('span', 'rd-note', 'Tu agente espera tu respuesta. Nadie más ve esta pregunta.');
+    const act = el('div', 'rd-actions'); const ok = el('button', 'rd-button', 'Aceptar'); ok.type = 'button'; const adj = el('button', 'rd-button rd-button--quiet', 'Ajustar'); adj.type = 'button'; act.append(ok, adj);
+    inner.append(note, act); node.append(inner);
+    let accepted = false; ok.onclick = () => { accepted = true; };
+    upd = t => { const done = accepted || t >= e.end; if (done && !node.dataset.done) { node.dataset.done = '1'; note.textContent = '✓ Aceptado por ti'; act.remove(); } };
+  }
+  RondaStream.append(feed, node);
+  while (feed.children.length > 14) feed.firstElementChild.remove();
+  items.push({ e, upd });
+  if (e.type === 'call') { tagEls[e.name] && tagEls[e.name].setAttribute('data-seen', ''); const k = RondaTools.motionKind(e.name); miniEls[k] && miniEls[k].setAttribute('data-seen', ''); }
+}
+
+// ───────── Globo ─────────
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let W = 0, H = 0, yaw = 0, pitch = 0.15, tYaw = 0, tPitch = 0.15;
+function resize() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
+new ResizeObserver(resize).observe(cv); resize();
+function turnTo(members) {
+  const c = [0, 0, 0]; members.forEach(m => { c[0] += POS[m][0]; c[1] += POS[m][1]; c[2] += POS[m][2]; });
+  const l = Math.hypot(...c) || 1; c[0] /= l; c[1] /= l; c[2] /= l;
+  tYaw = -Math.atan2(c[0], c[2]); tPitch = Math.atan2(c[1], Math.hypot(c[0], c[2]));
+  while (tYaw - yaw > Math.PI) tYaw -= 2 * Math.PI; while (yaw - tYaw > Math.PI) tYaw += 2 * Math.PI;
+}
+const smooth = (a, b, x) => { const u = Math.max(0, Math.min(1, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
+const COLS = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
+function grad(x0, y0, x1, y1) { const g = ctx.createLinearGradient(x0, y0, x1, y1); COLS.forEach((c, i) => g.addColorStop(i / 4, c)); return g; }
+const AMB = GROUPS.map((g, i) => ({ g, off: i * 1.7 }));
+function draw(T) {
+  ctx.clearRect(0, 0, W, H);
+  const CX = W * 0.56, CY = H * 0.47, S = Math.min(W * 0.28, H * 0.27), D = 3.4;
+  const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const P = POS.map(v => { const x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy, y2 = v[1] * cp - z * sp, z2 = v[1] * sp + z * cp, f = D / (D - z2); return { x: CX + x * S * f, y: CY - y2 * S * f, z: z2, f, R: [x, y2, z2] }; });
+  const ctrl = (a, b) => { const A = P[a].R, B = P[b].R, m = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2], L = Math.hypot(...m), d = Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]), k = L > 0.45 ? (1 + 0.05 * d) / L : 1, f = D / (D - m[2] * k); const pm = { x: CX + m[0] * k * S * f, y: CY - m[1] * k * S * f }; return { x: 2 * pm.x - (P[a].x + P[b].x) / 2, y: 2 * pm.y - (P[a].y + P[b].y) / 2, z: m[2] }; };
+  // Neblina: todas las conversaciones posibles.
+  const haze = [new Path2D(), new Path2D()];
+  for (let a = 0; a < U.N; a++) for (let b = a + 1; b < U.N; b++) { const c = ctrl(a, b), h = c.z > -0.1 ? haze[0] : haze[1]; h.moveTo(P[a].x, P[a].y); h.quadraticCurveTo(c.x, c.y, P[b].x, P[b].y); }
+  ctx.lineWidth = 0.5; ctx.strokeStyle = 'rgba(70,70,150,0.035)'; ctx.stroke(haze[1]); ctx.strokeStyle = 'rgba(70,70,150,0.07)'; ctx.stroke(haze[0]);
+  // Vidrio.
+  const sr = S * 1.06, hg = ctx.createRadialGradient(CX - sr * 0.35, CY - sr * 0.45, 0, CX - sr * 0.35, CY - sr * 0.45, sr * 1.2);
+  hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(0.45, 'rgba(255,255,255,0.1)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.stroke();
+  // Grupos de fondo: tinta, con una luz que recorre.
+  const focusSet = new Set(current ? current.g.members : []);
+  let active = 0;
+  AMB.forEach(({ g, off }) => {
+    if (current && g === current.g) return;
+    const loc = (T + off) % 16; if (loc > 13) return; active++;
+    const [r, ...hs] = g.members, grow = smooth(0, 1.4, loc), fade = 1 - smooth(11.5, 13, loc);
+    hs.forEach((h, i) => { const c = ctrl(r, h); if (c.z < -0.35) return; const u = Math.max(0, Math.min(1, grow * 1.2 - i * 0.1)); const pa = P[r], pb = P[h];
+      ctx.save(); ctx.globalAlpha = fade * (c.z < 0 ? 0.4 : 0.85); ctx.strokeStyle = 'rgba(29,29,31,0.35)'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(pa.x, pa.y);
+      const N2 = 18; for (let s = 1; s <= N2; s++) { const v = s / N2 * u, w = 1 - v; ctx.lineTo(w * w * pa.x + 2 * w * v * c.x + v * v * pb.x, w * w * pa.y + 2 * w * v * c.y + v * v * pb.y); } ctx.stroke();
+      if (!reduced && u >= 1) { const v = ((T * 0.3 + i * 0.37) % 1), w = 1 - v; ctx.fillStyle = 'rgba(29,29,31,0.55)'; ctx.beginPath(); ctx.arc(w * w * pa.x + 2 * w * v * c.x + v * v * pb.x, w * w * pa.y + 2 * w * v * c.y + v * v * pb.y, 1.8, 0, 6.2832); ctx.fill(); }
+      ctx.restore(); });
+  });
+  document.getElementById('ngroups').textContent = active + 1;
+  document.getElementById('ntopics').textContent = (U.TOPICS.length - 37 + Math.floor(T / 3) % 30).toLocaleString('es-CL');
+  // Grupo en foco: degradado en las conversaciones que ya ocurrieron; el arco activo cuenta lo que pasa.
+  let activeEv = null;
+  if (current) {
+    const talked = new Map();
+    current.events.forEach(e => { if (clock >= e.at) talked.set(Math.min(e.from, e.to) + '-' + Math.max(e.from, e.to), [e.from, e.to]); if (clock >= e.at && clock < e.end + (e.type === 'call' ? 2.2 : 0.3)) activeEv = e; });
+    talked.forEach(([a, b]) => { const c = ctrl(a, b), pa = P[a], pb = P[b], g = grad(pa.x, pa.y, pb.x, pb.y);
+      ctx.save(); ctx.globalAlpha = 0.3; ctx.filter = 'blur(7px)'; ctx.strokeStyle = g; ctx.lineWidth = 11; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.quadraticCurveTo(c.x, c.y, pb.x, pb.y); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.quadraticCurveTo(c.x, c.y, pb.x, pb.y); ctx.stroke(); });
+  }
+  // Personas, de atrás hacia adelante, con niebla y desenfoque graduales.
+  const order = P.map((p, i) => i).sort((a, b) => P[a].z - P[b].z);
+  for (const i of order) {
+    const p = P[i], fog = smooth(0.45, -0.75, p.z), blur = smooth(0.3, -0.55, p.z), focus = focusSet.has(i);
+    const edge = 0.5 + 0.5 * Math.min(1, Math.abs(p.z) * 1.6), r = (focus ? 20 : 8.5) * p.f * (focus ? 1 : edge);
+    ctx.save(); ctx.globalAlpha = (1 - 0.5 * fog) * (current && !focus ? 0.85 : 1);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, r + (focus ? 3 : 1.5), 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.2832); ctx.clip();
+    if (i < 5) { if (teamImg[i].complete) { if (blur > 0.05) ctx.filter = 'blur(' + (blur * 2).toFixed(1) + 'px)'; ctx.drawImage(teamImg[i], p.x - r, p.y - r, r * 2, r * 2); } }
+    else { const t = +people[i].face.slice(5), sx = (t % 8) * 128 + 4, sy = Math.floor(t / 8) * 128 + 4;
+      if (blur > 0.05 && atlasBlur.complete) ctx.drawImage(atlasBlur, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2);
+      if (atlas.complete) { ctx.globalAlpha *= 1 - blur; ctx.drawImage(atlas, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2); } }
+    if (fog > 0.02) { ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(244,244,250,' + (0.5 * fog).toFixed(3) + ')'; ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2); }
+    ctx.restore();
+    if (focus) { const cg = ctx.createConicGradient ? ctx.createConicGradient(T * 0.6 + i, p.x, p.y) : grad(p.x - r, p.y, p.x + r, p.y); if (ctx.createConicGradient) COLS.concat([COLS[0]]).forEach((c, k) => cg.addColorStop(k / 5, c));
+      ctx.strokeStyle = cg; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(p.x, p.y, r + 5, 0, 6.2832); ctx.stroke();
+      ctx.save(); ctx.font = '600 13px -apple-system, system-ui, sans-serif'; ctx.fillStyle = '#1d1d1f'; ctx.textAlign = p.x >= CX ? 'left' : 'right'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(247,247,250,0.95)'; ctx.shadowBlur = 8;
+      if (i !== 0) ctx.fillText(people[i].name, p.x + (p.x >= CX ? r + 12 : -r - 12), p.y); ctx.restore(); }
+    if (i === 0) { ctx.save(); ctx.font = '600 13px -apple-system, system-ui, sans-serif'; ctx.fillStyle = '#1d1d1f'; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(247,247,250,0.95)'; ctx.shadowBlur = 8; ctx.globalAlpha = 1 - 0.6 * fog; ctx.fillText('Tú', p.x, p.y - r - 10); ctx.restore(); }
+  }
+  // Arco activo: la miniatura de la herramienta, los puntos al escribir, el check al terminar.
+  if (activeEv && current) {
+    const a = activeEv.from, b = activeEv.to, c = ctrl(a, b);
+    const evs = current.events.filter(e => (e.from === a && e.to === b) || (e.from === b && e.to === a)).map(e => Object.assign({}, e, { author: e.from === a ? 0 : 1, type: e.type === 'ask' ? 'message' : e.type }));
+    const st = RondaEdge.state(evs, clock);
+    RondaEdge.paint(ctx, { from: P[a], to: P[b], control: c }, st, { size: 52, u: 0.5, faces: [teamImg[a], teamImg[b]] });
+    Object.values(tagEls).forEach(x => x.removeAttribute('data-now')); Object.values(miniEls).forEach(x => x.removeAttribute('data-now'));
+    if (activeEv.type === 'call') { tagEls[activeEv.name] && tagEls[activeEv.name].setAttribute('data-now', ''); const k = RondaTools.motionKind(activeEv.name); miniEls[k] && miniEls[k].setAttribute('data-now', ''); }
+  }
+}
+
+// ───────── Reloj ─────────
+const SPEED = +(new URLSearchParams(location.search).get('speed') || 1);
+let last = performance.now(), T = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (!paused) { T += dt * SPEED; clock += reduced ? 99 : dt * SPEED; }
+  const k = 1 - Math.exp(-dt * 1.6); yaw += (tYaw + Math.sin(T * 0.12) * 0.08 - yaw) * k; pitch += (tPitch - 0.1 - pitch) * k;
+  if (current) {
+    current.events.forEach((e, idx) => { if (clock >= e.at && !current.shown.has(idx)) { current.shown.add(idx); addItem(e); } });
+    items.forEach(it => it.upd(clock));
+    const p = Math.min(1, clock / current.duration);
+    document.getElementById('fbar').style.width = (p * 100).toFixed(1) + '%';
+    document.getElementById('fclock').textContent = Math.floor(clock) + ' s';
+    const ended = clock >= current.duration;
+    document.getElementById('fstate').textContent = ended ? 'Acuerdo' : current.events.some(e => e.type === 'ask' && clock >= e.at && clock < e.end) ? 'Te espera' : 'Negociando';
+    if (clock > current.duration + 2.6) startGroup(gi + 1);
+  }
+  draw(T);
+  requestAnimationFrame(frame);
+}
+document.getElementById('pause').onclick = e => { paused = !paused; e.currentTarget.textContent = paused ? 'Seguir' : 'Pausar'; };
+document.getElementById('next').onclick = () => startGroup(gi + 1);
+const q = new URLSearchParams(location.search);
+startGroup(+(q.get('g') || 0));
+if (q.has('t')) { clock = +q.get('t'); T = clock; }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
