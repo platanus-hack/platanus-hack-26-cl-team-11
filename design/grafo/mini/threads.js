@@ -111,32 +111,10 @@ function mountThreadInspector(graph,initialKind) {
     }};
   }
   function tool(event,el) {
-    const card=node('details','thread-tool'), head=node('summary');
-    const glyph=node('span','tool-glyph');glyph.setAttribute('aria-hidden','true');
-    const copy=node('span','tool-copy');
-    const method=node('code');
-    const dot=event.name.indexOf('.')+1;
-    method.append(event.name.slice(0,dot),node('wbr'),event.name.slice(dot));
-    copy.append(node('b','',event.label),method);
-    const receipt=node('small','tool-receipt');
-    const caret=node('span','tool-caret','›');caret.setAttribute('aria-hidden','true');
-    head.append(glyph,copy,receipt,caret);card.append(head);
-    let result;
-    for(const [label,value] of [['Entrada',event.input],['Salida',event.output]]) {
-      const payload=node('details','thread-payload');
-      payload.append(node('summary','',label),node('pre','',JSON.stringify(value,null,2)));
-      card.append(payload);result=payload;
-    }
-    el.append(card);
-    let lastDone;
-    return {update(t){
-      const done=t>=event.end;
-      if(done===lastDone) return false;
-      lastDone=done;result.hidden=!done;
-      card.dataset.state=done?(event.privateResult?'private':'done'):'running';
-      receipt.textContent=done?event.receipt:'Consultando';
-      return true;
-    }};
+    const participants=[graph.people[thread.a].name,graph.people[thread.b].name];
+    const card=RondaTools.create({...event,participants});
+    el.append(card.el);
+    return {update(t){card.update(t);}};
   }
   function message(event,el) {
     const mine=event.author===0;
