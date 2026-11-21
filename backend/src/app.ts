@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
+import { agentRoutes } from './routes/agents.js';
 import { boardRoutes } from './routes/board.js';
 import { checkinRoutes } from './routes/checkins.js';
 import { connectionRoutes } from './routes/connections.js';
@@ -39,6 +40,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', boardRoutes(ctx));
   api.route('/', pulseRoutes(ctx));
   api.route('/', hubRoutes(ctx));
+  api.route('/', agentRoutes(ctx));
 
   return new Hono().route('/api', api);
 }
