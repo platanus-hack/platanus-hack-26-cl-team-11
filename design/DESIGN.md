@@ -136,9 +136,14 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
   - 5 personas: pentágono con caras, nombre y estado al costado (como la referencia).
   - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan.
     Con 300 las 44.850 líneas son una neblina de luz dentro del globo. Nunca una mancha oscura.
-- **Grupos negociando a la vez** (2 con 5 personas, 3 con 10, 6 con 50, 10 con 300), de 3 a 6
-  personas. Cada grupo conversa en dos rondas (AGENT_MODEL): primero quien pide ayuda habla con
-  cada ayudante; después los ayudantes cercanos se hablan entre sí.
+- **Grupos negociando a la vez** (2 con 5 personas, 3 con 10, 6 con 50, 10 con 300), de hasta 9
+  personas, en tres rondas: quien pide ayuda habla con sus ayudantes; cada ayudante suma a
+  alguien más; los ayudantes combinan sus respuestas. Algunos grupos comparten una persona que
+  hace de puente con otro grupo.
+- **Miniaturas** (las de `grafo/mini/motion-paint.js`): cada grupo tiene un tipo (chat, agenda,
+  salud, permiso, ayuda, check-in, pulso, propuesta) y su miniatura va sobre el primer hilo, en el
+  punto con más espacio entre caras. Solo la del grupo con color va a color; las neutras van en
+  escala de grises (máximo 2 con 50 personas y 3 con 300).
 - **A lo más un grupo con color a la vez** (Mati, 21-nov). Por defecto es el tuyo (Tú, Ian, Lian,
   con chips); si tocas otro, ese pasa a color y el tuyo a tinta. Los demás grupos van en tinta
   neutra: líneas grises finas y aro gris en sus miembros. El grupo con color lleva líneas con
@@ -249,6 +254,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Globo: grupos de hasta 9 en tres rondas con personas puente; miniaturas sobre los hilos (a color solo en el grupo con color). Hilo de chat diseñado en `grafo/hilo/`. | Mati |
 | 21-nov-2026 | Globo: grupos de 3 a 6 en dos rondas; a lo más un grupo con color; desenfoque gradual por profundidad; sin «burbuja» de acuerdo: hilos que se recogen, brillo y chip «Listo». | Mati |
 | 21-nov-2026 | Globo: cara en todos los nodos, nodos de atrás desenfocados bajo un velo de vidrio, varios grupos negociando con aro de grupo, tocar un grupo lo destaca, efectos de nacimiento y acuerdo. | Mati |
 | 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |

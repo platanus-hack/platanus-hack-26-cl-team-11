@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>Globo de agentes</title>
 <script src="./support.js"></script>
+<script src="./mini/calendar-edge.js"></script>
+<script src="./mini/motion-paint.js"></script>
 </head>
 <body>
 <x-dc>
@@ -187,13 +189,14 @@ class Component extends DCLogic {
   }
 
   buildGroups(n) {
-    var gs = [{ id: 'mia', mine: true, members: [0, 1, 2], edges: [[0, 1, 1, '¿Quién cubre las 11?'], [0, 2, 1], [1, 2, 2, 'Review antes de las 10:30']], topic: 'Cubrir la reunión de las 11', offset: 0 }];
-    gs.push({ id: 'planb', members: [3, 4], edges: [[3, 4, 1]], topic: 'Plan B para el cliente', offset: 5 });
+    var gs = [{ id: 'mia', mine: true, kind: 'calendars', members: [0, 1, 2], edges: [[0, 1, 1, '¿Quién cubre las 11?'], [0, 2, 1], [1, 2, 3, 'Review antes de las 10:30']], topic: 'Cubrir la reunión de las 11', offset: 0 }];
+    gs.push({ id: 'planb', kind: 'permission', members: [3, 4], edges: [[3, 4, 1]], topic: 'Plan B para el cliente', offset: 5 });
     var extra = n <= 5 ? 0 : n <= 10 ? 1 : n <= 50 ? 4 : 8;
-    var sizes = n <= 50 ? [4, 3, 4, 3] : [6, 4, 5, 4, 6, 3, 5, 4];
-    for (var e = 0; e < extra; e++) gs.push({ id: 'g' + e, seed: e, size: sizes[e], topic: this.TOPICS[e], offset: 1.9 * e + 2.4 });
+    var sizes = n <= 50 ? [5, 4, 6, 4] : [8, 5, 9, 4, 7, 5, 8, 4];
+    var KINDS = ['chat', 'help', 'health', 'checkin', 'pulse', 'guideline', 'calendars', 'permission'];
+    for (var e = 0; e < extra; e++) gs.push({ id: 'g' + e, seed: e, size: sizes[e], kind: KINDS[e], topic: this.TOPICS[e], offset: 1.9 * e + 2.4 });
     this.groups = gs;
-    if (n === 10) { gs[2].members = [5, 8, 7]; gs[2].edges = [[5, 8, 1], [5, 7, 1], [8, 7, 2]]; gs[2].fixed = true; }
+    if (n === 10) { gs[2].members = [5, 8, 7, 9]; gs[2].edges = [[5, 8, 1], [5, 7, 1], [8, 9, 2], [8, 7, 3]]; gs[2].fixed = true; }
     for (var j = 2; j < gs.length; j++) if (!gs[j].fixed) this.pickMembers(gs[j], n, Math.floor(((this.nowT || 0) + gs[j].offset) / this.PERIOD));
   }
 
@@ -201,10 +204,16 @@ class Component extends DCLogic {
     var used = {}, self = this, d2 = function (a, b) { return (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]) + (a[2] - b[2]) * (a[2] - b[2]); };
     for (var nn = 5; nn < n; nn++) for (var tq = 0; tq < 5; tq++) if (d2(this.target(tq, n), this.target(nn, n)) < (tq <= 2 ? 0.55 : 0.3)) used[nn] = 1;
     this.groups.forEach(function (o) { if (o !== g && o.members) o.members.forEach(function (m) { used[m] = 1; }); });
+    var bridge = null;
+    if (g.seed % 2 === 1) {
+      var prev = this.groups.filter(function (o) { return o.seed === g.seed - 1; })[0];
+      if (prev && prev.members && prev.members.length > 2) bridge = prev.members[prev.members.length - 1];
+    }
     var elig = [];
     for (var ei = 5; ei < n; ei++) if (!used[ei] && this.target(ei, n)[2] > 0.32) elig.push(ei);
     if (!elig.length) for (var ej = 5; ej < n; ej++) if (!used[ej]) elig.push(ej);
     var ang = (g.seed * 2.39996 + cycle * 1.1 + 0.6), dir = this.norm([Math.cos(ang) * 0.85, Math.sin(ang) * 0.85, 0.55]), bestD = -Infinity, start = elig[0];
+    if (bridge !== null) { start = bridge; elig = []; }
     for (var ek = 0; ek < elig.length; ek++) { var te = this.target(elig[ek], n), dd = te[0] * dir[0] + te[1] * dir[1] + te[2] * dir[2]; if (dd > bestD) { bestD = dd; start = elig[ek]; } }
     var c = this.target(start, n), cand = [];
     for (var i = 5; i < n; i++) if (i !== start && !used[i]) cand.push([i, d2(this.target(i, n), c)]);
@@ -216,9 +225,15 @@ class Component extends DCLogic {
       var ta = self.target(a, n), tb = self.target(b, n);
       return Math.atan2(ta[1] - base[1], ta[0] - base[0]) - Math.atan2(tb[1] - base[1], tb[0] - base[0]);
     });
-    var edges = helpers.map(function (h) { return [start, h, 1]; });
-    if (helpers.length >= 3) for (var hh = 0; hh < helpers.length - 1; hh += (helpers.length >= 5 ? 2 : 1)) edges.push([helpers[hh], helpers[hh + 1], 2]);
-    if (helpers.length === 2) edges.push([helpers[0], helpers[1], 2]);
+    var tier = Math.max(2, Math.ceil(helpers.length / 2)), first = helpers.slice(0, tier), second = helpers.slice(tier);
+    var edges = first.map(function (h) { return [start, h, 1]; });
+    second.forEach(function (sx) {
+      var ts = self.target(sx, n), best = first[0], bd = Infinity;
+      first.forEach(function (f) { var dd = d2(self.target(f, n), ts); if (dd < bd) { bd = dd; best = f; } });
+      edges.push([best, sx, 2]);
+    });
+    for (var hh = 0; hh < first.length - 1; hh++) edges.push([first[hh], first[hh + 1], 3]);
+    g.bridge = bridge;
     g.members = [start].concat(helpers);
     g.edges = edges;
     g.cycle = cycle;
@@ -227,15 +242,15 @@ class Component extends DCLogic {
   colored() { return this.state.focus || 'mia'; }
 
   phase(g, t) {
-    var full = { t1: 1, t2: 1, live: 1, agree: 0, alpha: 1 };
+    var full = { t1: 1, t2: 1, t3: 1, live: 1, agree: 0, alpha: 1 };
     if (g.mine || this.state.focus === g.id || this.reduced) return full;
     var P = this.PERIOD, tt = t + g.offset, local = tt % P, cycle = Math.floor(tt / P);
     if (g.seed !== undefined && !g.fixed && g.cycle !== cycle) this.pickMembers(g, this.state.n, cycle);
     var ease = function (x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); };
-    if (local < 3) return { t1: ease(local / 1.3), t2: ease((local - 1.4) / 1.3), live: local > 1.3 ? 1 : 0, agree: 0, alpha: 1 };
+    if (local < 4) return { t1: ease(local / 1.2), t2: ease((local - 1.2) / 1.2), t3: ease((local - 2.4) / 1.2), live: local > 1.2 ? 1 : 0, agree: 0, alpha: 1 };
     if (local < 11) return full;
-    if (local < 13.6) return { t1: 1, t2: 1, live: 0, agree: (local - 11) / 2.6, alpha: 1 };
-    return { t1: 0, t2: 0, live: 0, agree: 0, alpha: 0 };
+    if (local < 13.6) return { t1: 1, t2: 1, t3: 1, live: 0, agree: (local - 11) / 2.6, alpha: 1 };
+    return { t1: 0, t2: 0, t3: 0, live: 0, agree: 0, alpha: 0 };
   }
 
   click(m) {
@@ -351,7 +366,7 @@ class Component extends DCLogic {
       G.members.forEach(function (m) { if (m < n && on > 0.02) member[m] = Math.max(member[m] || 0, on); });
       if ((self.colorK[G.id] || 0) > 0.02) G.members.forEach(function (m) { inColored[m] = Math.max(inColored[m] || 0, self.colorK[G.id] * on); });
       if (this.state.focus === G.id) G.members.forEach(function (m) { focusSet[m] = 1; });
-      G.edges.forEach(function (e) { var u = e[2] === 1 ? ph.t1 : ph.t2; if (u > 0.8 && u < 1) pop[e[1]] = Math.max(pop[e[1]] || 0, Math.sin((u - 0.8) / 0.2 * Math.PI)); });
+      G.edges.forEach(function (e) { var u = [ph.t1, ph.t2, ph.t3][e[2] - 1]; if (u > 0.8 && u < 1) pop[e[1]] = Math.max(pop[e[1]] || 0, Math.sin((u - 0.8) / 0.2 * Math.PI)); });
     }
     var liveKey = {};
     this.groups.forEach(function (G) { G.edges.forEach(function (e) { liveKey[Math.min(e[0], e[1]) + '-' + Math.max(e[0], e[1])] = 1; }); });
@@ -478,8 +493,8 @@ class Component extends DCLogic {
         for (var ei = 0; ei < Gr.edges.length; ei++) {
           var E = Gr.edges[ei], A = E[0], B = E[1];
           if (A >= count || B >= count || self.vis[A] < 0.3 || self.vis[B] < 0.3) continue;
-          var grow = E[2] === 1 ? ph2.t1 : ph2.t2;
-          var pull = E[2] === 2 ? smooth(0, 0.4, ag) : smooth(0.25, 0.8, ag);
+          var grow = [ph2.t1, ph2.t2, ph2.t3][E[2] - 1];
+          var pull = E[2] === 3 ? smooth(0, 0.3, ag) : E[2] === 2 ? smooth(0.2, 0.55, ag) : smooth(0.45, 0.85, ag);
           var vis = Math.min(grow, 1 - pull);
           if (vis <= 0.001) continue;
           var c2 = ctrl(A, B), pa = P[A], pb = P[B];
@@ -488,10 +503,10 @@ class Component extends DCLogic {
           if (colK > 0.01) {
             var grd = self.grad(ctx, pa.x, pa.y, pb.x, pb.y);
             ctx.save(); ctx.globalAlpha = 0.3 * gAlpha * depthK * colK; ctx.filter = 'blur(7px)'; ctx.strokeStyle = grd; ctx.lineWidth = 12; ctx.stroke(path); ctx.restore();
-            ctx.globalAlpha = gAlpha * depthK * colK; ctx.strokeStyle = grd; ctx.lineWidth = E[2] === 2 ? 2.6 : 3.5; ctx.stroke(path);
+            ctx.globalAlpha = gAlpha * depthK * colK; ctx.strokeStyle = grd; ctx.lineWidth = E[2] === 1 ? 3.5 : 2.4; ctx.stroke(path);
           }
           if (colK < 0.99) {
-            ctx.globalAlpha = gAlpha * depthK * (1 - colK); ctx.strokeStyle = 'rgba(29,29,31,0.34)'; ctx.lineWidth = E[2] === 2 ? 1 : 1.4; ctx.stroke(path);
+            ctx.globalAlpha = gAlpha * depthK * (1 - colK); ctx.strokeStyle = 'rgba(29,29,31,0.34)'; ctx.lineWidth = E[2] === 1 ? 1.4 : 0.95; ctx.stroke(path);
           }
           if (grow < 1 && grow > 0) {
             var tip = at(pa, c2, pb, grow);
@@ -520,7 +535,7 @@ class Component extends DCLogic {
             ctx.beginPath(); ctx.arc(bead.x, bead.y, colK > 0.5 ? 2.6 : 1.8, 0, 6.2832); ctx.fill();
           }
           ctx.globalAlpha = 1;
-          if (!self.paintMotions && E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
+          if (E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, ei === 0 && window.RondaMotion ? 0.3 : 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
         }
         var req = Gr.members[0];
         if (ag > 0.45 && req < count) blooms.push([req, smooth(0.45, 1, ag), colK, gAlpha]);
@@ -538,6 +553,35 @@ class Component extends DCLogic {
       drawFace(order[oi]);
     }
     if (!drawnGroups) drawGroups();
+
+    if (window.RondaMotion && !this.reduced) {
+      var minis = 0, mw = n <= 10 ? 60 : n <= 50 ? 54 : 48;
+      for (var mg = 0; mg < this.groups.length; mg++) {
+        var MG = this.groups[mg], mph = phases[MG.id], mcol = this.colorK[MG.id] || 0;
+        if (!MG.kind || mph.t1 < 0.95 || mph.alpha < 0.05) continue;
+        var e0 = MG.edges[0]; if (e0[0] >= count || e0[1] >= count) continue;
+        var cm = ctrl(e0[0], e0[1]);
+        if (cm.z < 0.05 && mcol < 0.5) continue;
+        if (mcol < 0.5 && minis >= (n > 50 ? 3 : 2)) continue;
+        var bestU = 0.5, bestRoom = -Infinity;
+        [0.5, 0.58, 0.42, 0.66, 0.34].forEach(function (uu) {
+          var sp0 = at(P[e0[0]], cm, P[e0[1]], uu), room = Infinity;
+          for (var fq = 0; fq < count; fq++) { var pq = P[fq]; if (pq.z < -0.1 || pq.r < 3) continue; room = Math.min(room, Math.hypot(sp0.x - pq.x, sp0.y - pq.y) - pq.r); }
+          if (MG.mine) { var chipPt = at(P[e0[0]], cm, P[e0[1]], 0.3); room = Math.min(room, Math.hypot(sp0.x - chipPt.x, sp0.y - chipPt.y) - 40); }
+          if (room > bestRoom + 2) { bestRoom = room; bestU = uu; }
+        });
+        var spot = at(P[e0[0]], cm, P[e0[1]], bestU), fade = (1 - smooth(0, 0.35, mph.agree)) * (1 - 0.6 * fogOf(cm.z));
+        if (this.dimK > 0.01 && this.state.focus !== MG.id && !MG.mine) fade *= 1 - 0.7 * this.dimK;
+        if (fade < 0.02) continue;
+        var period = window.RondaMotion.periods[MG.kind] || 7, frac = (t / period + mg * 0.27) % 1;
+        ctx.save(); ctx.globalAlpha = fade * (mcol > 0.5 ? 1 : 0.85);
+        if (mcol < 0.5) ctx.filter = 'grayscale(1) contrast(0.9)';
+        ctx.translate(spot.x, spot.y - (MG.mine ? 0 : 4)); ctx.scale(mw / 64, mw / 64); ctx.translate(-32, -22);
+        try { window.RondaMotion.paint(ctx, MG.kind, frac, [this.photo(e0[0]), this.photo(e0[1])]); } catch (err) {}
+        ctx.restore();
+        if (mcol < 0.5) minis++;
+      }
+    }
 
     blooms.forEach(function (bl) {
       var pp = P[bl[0]], u = bl[1], r = pp.r, env = Math.sin(Math.min(1, u * 1.15) * Math.PI);
@@ -572,13 +616,25 @@ class Component extends DCLogic {
     }
     ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 
-    if (this.paintMotions) this.motionSpots=this.paintMotions(ctx,P,ctrl,t);
     chips.forEach(function (c) { if (c[3] > 0.01) { ctx.globalAlpha = c[3]; self.chip(ctx, c[0], c[1], c[2]); ctx.globalAlpha = 1; } });
 
     if (this.hover >= 0 && count > 1) {
       var hv = P[this.hover], conv = (n - 1).toLocaleString('es-CL') + (n - 1 === 1 ? ' conversación posible' : ' conversaciones posibles');
       this.chip(ctx, this.people[this.hover].name + ' · ' + conv, hv.x, hv.y + hv.r + 26);
     }
+  }
+
+  photo(id) {
+    if (id < 5) return this.team[id];
+    this.photos = this.photos || {};
+    var tile = this.people[id].tile;
+    if (this.photos[tile]) return this.photos[tile];
+    if (!this.atlas || !this.atlas.complete || !this.atlas.naturalWidth) return null;
+    try {
+      var c = document.createElement('canvas'); c.width = c.height = 96;
+      c.getContext('2d').drawImage(this.atlas, (tile % 8) * 128 + 4, Math.floor(tile / 8) * 128 + 4, 120, 120, 0, 0, 96, 96);
+      var im = new Image(); im.src = c.toDataURL('image/png'); this.photos[tile] = im; return im;
+    } catch (err) { return null; }
   }
 
   done(ctx) {
