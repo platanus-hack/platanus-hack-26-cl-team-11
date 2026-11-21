@@ -7,6 +7,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      addEventListener(
+        'error',
+        function (event) {
+          var source = event.target && (event.target.src || event.target.href);
+          if (!source || source.indexOf('/assets/') < 0) return;
+          try {
+            if (Date.now() - Number(sessionStorage.getItem('montu-recarga')) < 30000) return;
+            sessionStorage.setItem('montu-recarga', String(Date.now()));
+          } catch (failure) {
+            return;
+          }
+          location.reload();
+        },
+        true,
+      );
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
