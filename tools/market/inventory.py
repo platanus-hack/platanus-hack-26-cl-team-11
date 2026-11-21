@@ -413,11 +413,32 @@ class Desk:
                         exitAt=datetime.fromtimestamp(self.deadline(), timezone.utc).isoformat(timespec="seconds"))
 
 
-def run(paper, cash):
+def take_over(lock):
+    """Hold the trading lock. A trader that already holds it is asked to stop through the stop file."""
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return
+    except BlockingIOError:
+        print("Another trader is running. Asking it to stop.", flush=True)
+    STOP.write_text("handover")
+    try:
+        for _ in range(30):
+            time.sleep(1)
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return
+            except BlockingIOError:
+                continue
+        raise SystemExit("The other trader did not stop. Close its window and start again.")
+    finally:
+        STOP.unlink(missing_ok=True)
+
+
+def run(paper, cash, session=None):
     book = Book()
     book.load(read_json("state"))
     name = "paper" if paper else "inventory"
-    account = None if paper else Account(getpass.getpass("Event session: ").strip())
+    account = None if paper else Account(session)
     desk = Desk(book, account, DATA / f"{name}-orders.jsonl", cash if paper else None)
     if paper and desk.cash is None:
         desk.cash = cash
@@ -496,6 +517,7 @@ if __name__ == "__main__":
     if args.paper:
         run(True, args.cash)
     else:
+        secret = getpass.getpass("Event session: ").strip()
         with (DATA / "dealer.lock").open("a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            run(False, None)
+            take_over(lock)
+            run(False, None, secret)
