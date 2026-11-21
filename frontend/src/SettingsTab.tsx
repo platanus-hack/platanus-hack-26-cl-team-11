@@ -10,8 +10,6 @@ import { SectionHead } from './SectionHead';
 import { SIGNAL_GROUPS } from './signalGroups';
 import { usePolicy } from './usePolicy';
 
-const pulseStatus = (included: boolean) => (included ? 'Activo' : 'En pausa');
-
 export function SettingsTab({ token }: { token: string }) {
   const { policy, busy, problem, change } = usePolicy(token);
   const [openKey, setOpenKey] = useState<SignalKey | null>(null);
@@ -21,7 +19,6 @@ export function SettingsTab({ token }: { token: string }) {
     <>
       <div className="app-block">
         <SectionHead first title="Permisos" />
-        <p className="rd-note">Tus datos crudos no salen de aquí. Eliges qué frases de tu agente pueden salir.</p>
         {!policy && !problem && <p className="rd-note">Cargando…</p>}
         {problem && (
           <p className="rd-note" role="alert">
@@ -44,7 +41,7 @@ export function SettingsTab({ token }: { token: string }) {
       </div>
 
       <div className="app-block">
-        <SectionHead title="Pulso del equipo" status={policy ? pulseStatus(policy.includeInPulse) : undefined} live={policy?.includeInPulse} />
+        <SectionHead title="Pulso del equipo" />
         <div className="rd-list">
           <Item
             icon={

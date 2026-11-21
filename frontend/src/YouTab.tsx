@@ -19,7 +19,7 @@ export function YouTab({ token, name, signals, sources, onSaved }: YouTabProps) 
       <div className="app-block">
         <SectionHead first title="Tú" />
         <div className="rd-list">
-          <Item icon={<Face name={name} />} title={name} subtitle="Tu memoria es privada. Tú decides qué sale." />
+          <Item icon={<Face name={name} />} title={name} />
         </div>
       </div>
       <CheckinSection token={token} onSaved={onSaved} />

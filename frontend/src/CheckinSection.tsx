@@ -22,7 +22,6 @@ function lastText(last: LastCheckin) {
   return `Último check-in: ${formatWhen(last.entry.at)} · ${MOOD_LABEL[last.entry.mood]}`;
 }
 
-const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
 
 export function CheckinSection({ token, onSaved }: { token: string; onSaved: () => void }) {
   const [mood, setMood] = useState<Mood | null>(null);
@@ -56,11 +55,10 @@ export function CheckinSection({ token, onSaved }: { token: string; onSaved: () 
     });
   }
 
-  const doneToday = last.state === 'ready' && last.entry !== null && isToday(last.entry.at);
 
   return (
     <div className="app-block">
-      <SectionHead title="Tu check-in de hoy" status={doneToday ? 'Hecho hoy' : undefined} live />
+      <SectionHead title="Tu check-in de hoy" />
       <form className="app-form" onSubmit={submit}>
         <div className="rd-actions" role="group" aria-label="Cómo llegas hoy">
           {MOODS.map((option) => (

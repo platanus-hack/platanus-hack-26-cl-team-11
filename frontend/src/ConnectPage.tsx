@@ -24,7 +24,7 @@ export function ConnectPage({ token }: { token: string }) {
 
   if (!page) {
     return (
-      <div className="app-column">
+      <div className="app-column rd-panel">
         <TopBar token={token} />
         <main className="app-tab">{error ? <h1 className="rd-title">{error}</h1> : <p className="rd-note">Cargando…</p>}</main>
       </div>
@@ -42,7 +42,7 @@ export function ConnectPage({ token }: { token: string }) {
   };
 
   return (
-    <div className="app-column">
+    <div className="app-column rd-panel">
       <TopBar token={token} />
       <main>
         {error && (

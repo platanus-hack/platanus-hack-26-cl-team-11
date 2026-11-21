@@ -23,7 +23,6 @@ export function SignalsSection({ signals, sources }: { signals: Signals; sources
           />
         ))}
       </div>
-      <p className="rd-note">Tus datos crudos no salen de aquí. Lo que puede salir son estas frases, según el permiso que elijas.</p>
     </div>
   );
 }

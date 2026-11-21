@@ -1,7 +1,6 @@
 import type { Team } from './api';
 import { CopyButton } from './CopyButton';
 import { Face } from './Face';
-import { countOf } from './format';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
 import { ItemIcon } from './ItemIcon';
@@ -18,7 +17,7 @@ interface TeamMembersProps {
 export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) {
   return (
     <div className="app-block">
-      <SectionHead first={first} title={team.name} status={countOf(team.members.length, 'persona', 'personas')} />
+      <SectionHead first={first} title={team.name} />
       <div className="rd-list">
         {team.members.map((name, position) => (
           <Item key={position} icon={<Face name={name} />} title={name} />
