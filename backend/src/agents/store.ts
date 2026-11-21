@@ -97,6 +97,7 @@ export interface AgentStore {
   startRound(teamId: string, startedBy: string | null): Round | null;
   finishRound(roundId: string, status: RoundStatus, problem: string | null): void;
   latestRound(teamId: string): Round | undefined;
+  recentRounds(teamId: string, limit: number): Round[];
   failRoundsStartedBefore(instant: string, problem: string): void;
   teamIds(): string[];
   addThread(draft: ThreadDraft): string;
@@ -342,6 +343,11 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
     latestRound(teamId) {
       const row = db.prepare('SELECT * FROM agent_rounds WHERE team_id = ? ORDER BY started_at DESC, rowid DESC LIMIT 1').get(teamId) as RoundRow | undefined;
       return row ? toRound(row) : undefined;
+    },
+
+    recentRounds(teamId, limit) {
+      const rows = db.prepare('SELECT * FROM agent_rounds WHERE team_id = ? ORDER BY started_at DESC, rowid DESC LIMIT ?').all(teamId, limit) as unknown as RoundRow[];
+      return rows.map(toRound);
     },
 
     failRoundsStartedBefore(instant, problem) {

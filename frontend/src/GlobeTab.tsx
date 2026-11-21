@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { fetchGlobeMode } from './api';
 import { MesaSection } from './MesaSection';
 
 const DEMO_PATH = '/design/grafo/universo.html?embed&v=7';
@@ -20,6 +21,13 @@ export function GlobeTab({ token, active }: { token: string; active: boolean }) 
   useEffect(() => {
     if (active) setOpened(true);
   }, [active]);
+
+  useEffect(() => {
+    fetchGlobeMode().then(
+      (found) => setMode(found.mode),
+      () => undefined,
+    );
+  }, []);
 
   const showRound = useCallback((startedHere: boolean) => {
     setMode('mesa');

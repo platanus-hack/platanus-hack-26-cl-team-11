@@ -551,3 +551,39 @@ export interface FaceLook {
 export const fetchFace = (token: string) => request<{ face: FaceLook | null }>(`${personPath(token)}/face`);
 export const saveFace = (token: string, face: FaceLook | null) => request<{ face: FaceLook | null }>(`${personPath(token)}/face`, put({ face }));
 export const fetchFaces = (token: string) => request<{ faces: { name: string; face: FaceLook }[] }>(`${personPath(token)}/faces`);
+
+export type GlobeMode = 'mesa' | 'demo';
+
+export interface AdminRound {
+  id: string;
+  status: 'en_curso' | 'lista' | 'fallida';
+  startedAt: string;
+  finishedAt: string | null;
+  problem: string | null;
+  startedBy: string | null;
+  threads: number;
+  tokens: number;
+  calls: number;
+}
+
+export interface AdminView {
+  globeMode: GlobeMode;
+  configured: boolean;
+  intervalSeconds: number | null;
+  usage: { lastDayTokens: number; dailyCap: number };
+  people: Array<{ name: string; member: boolean; publishing: boolean }>;
+  rounds: AdminRound[];
+}
+
+export interface AdminRoundDetail {
+  round: AdminRound;
+  threads: Array<Omit<AgentThread, 'mine' | 'messages'> & { messages: AgentMessage[] }>;
+  proposals: Array<{ id: string; topic: string; text: string }>;
+}
+
+const adminPath = (token: string) => `/api/admin/${encodeURIComponent(token)}`;
+
+export const fetchGlobeMode = () => request<{ mode: GlobeMode }>('/api/mesa/globe');
+export const fetchAdmin = (token: string) => request<AdminView>(adminPath(token));
+export const setGlobeMode = (token: string, mode: GlobeMode) => request<{ globeMode: GlobeMode }>(`${adminPath(token)}/globe`, put({ mode }));
+export const fetchAdminRound = (token: string, roundId: string) => request<AdminRoundDetail>(`${adminPath(token)}/rounds/${encodeURIComponent(roundId)}`);

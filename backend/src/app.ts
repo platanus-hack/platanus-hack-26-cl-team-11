@@ -3,6 +3,7 @@ import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
 import { duelRoutes } from './duels/routes.js';
+import { adminRoutes } from './routes/admin.js';
 import { agentDoorRoutes } from './routes/agentDoor.js';
 import { agentRoutes } from './routes/agents.js';
 import { assistantRoutes, joinDocRoutes } from './routes/assistants.js';
@@ -58,6 +59,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', agentRoutes(ctx));
   api.route('/', roomRoutes(ctx));
   api.route('/', mesaRoutes(ctx));
+  api.route('/', adminRoutes(ctx));
   api.route('/', assistantRoutes(ctx));
   api.route('/', repoRoutes(ctx));
   api.route('/', simRoutes(ctx));

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import markUrl from '../../design/logo/montu-mark.svg';
+import { AdminPage } from './AdminPage';
 import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
@@ -80,6 +81,12 @@ function Home() {
 function Screen() {
   const [, section, token] = window.location.pathname.split('/');
   if (section === 'duelos') return <Shell wide><DuelsPage /></Shell>;
+  if (section === 'admin')
+    return (
+      <Shell>
+        <AdminPage token={token || undefined} />
+      </Shell>
+    );
   if (section === 'contexto' && token)
     return (
       <Shell wide>

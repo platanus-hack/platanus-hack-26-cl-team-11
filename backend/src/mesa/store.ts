@@ -8,7 +8,12 @@ export const MAX_INTERVAL_SECONDS = 86_400;
 export const DEFAULT_MESA_DAILY_TOKEN_CAP = 3_000_000;
 export const DEFAULT_MESA_OPERATORS: readonly string[] = ['mati@vita.lat', 'ian@vita.lat', 'lian@vita.lat', 'robert@getvita.ai', 'andres@getvita.ai'];
 
+export const GLOBE_MODES = ['mesa', 'demo'] as const;
+export type GlobeMode = (typeof GLOBE_MODES)[number];
+export const isGlobeMode = (value: unknown): value is GlobeMode => typeof value === 'string' && (GLOBE_MODES as readonly string[]).includes(value);
+
 const INTERVAL_KEY = 'interval_seconds';
+const GLOBE_KEY = 'globe_mode';
 const FINGERPRINT_KEY = 'last_fingerprint';
 
 export interface MesaStore {
@@ -16,6 +21,8 @@ export interface MesaStore {
   setIntervalSeconds(seconds: number | null): void;
   fingerprint(): string | null;
   saveFingerprint(fingerprint: string): void;
+  globeMode(): GlobeMode;
+  setGlobeMode(mode: GlobeMode): void;
   hasLeft(personToken: string): boolean;
   setLeft(personToken: string, left: boolean): void;
 }
@@ -53,6 +60,13 @@ export function openMesaStore(db: DatabaseSync, now: () => Date = () => new Date
 
     fingerprint: () => read(FINGERPRINT_KEY),
     saveFingerprint: (fingerprint) => void write(FINGERPRINT_KEY, fingerprint),
+
+    globeMode() {
+      const mode = read(GLOBE_KEY);
+      return isGlobeMode(mode) ? mode : 'mesa';
+    },
+
+    setGlobeMode: (mode) => void write(GLOBE_KEY, mode),
 
     hasLeft(personToken) {
       return db.prepare('SELECT 1 FROM mesa_left WHERE person_token = ?').get(personToken) !== undefined;
