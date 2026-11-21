@@ -15,9 +15,9 @@ files=$(printf '%s\n' "$files" | grep -E '\.(css|scss|sass|less|html?|jsx|tsx|vu
 [ -z "$files" ] && { echo "design/lint: sin archivos de UI que revisar."; exit 0; }
 
 fail=0
-check() { # $1 = regex, $2 = mensaje
+check() { # $1 = regex, $2 = mensaje, $3 = (opcional) regex de lo que sí está permitido
   local out
-  out=$(printf '%s\n' "$files" | while IFS= read -r f; do [ -f "$f" ] && grep -nHE "$1" "$f" 2>/dev/null; done | grep -v 'rd-lint-ok' | head -15)
+  out=$(printf '%s\n' "$files" | while IFS= read -r f; do [ -f "$f" ] && grep -nHE "$1" "$f" 2>/dev/null; done | grep -v 'rd-lint-ok' | grep -vE "${3:-^\$never\$}" | head -15)
   if [ -n "$out" ]; then
     fail=1
     printf '\n✗ %s\n%s\n' "$2" "$out"
@@ -26,7 +26,7 @@ check() { # $1 = regex, $2 = mensaje
 
 check '#[0-9a-fA-F]{3,8}\b'                                   'Color escrito a mano. Usa un token: var(--rd-*) de design/tokens.css.'
 check '\b(rgba?|hsla?|oklch|oklab)\('                         'Color escrito a mano. Usa un token: var(--rd-*) de design/tokens.css.'
-check 'font-family[[:space:]]*:[[:space:]]*[^v;]|font-family[[:space:]]*:[[:space:]]*var\(--[^r]' 'Tipografía escrita a mano. Usa var(--rd-font), var(--rd-font-num) o var(--rd-font-mono).'
+check 'font-family[[:space:]]*:' 'Tipografía escrita a mano. Usa var(--rd-font), var(--rd-font-num) o var(--rd-font-mono).' 'font-family[[:space:]]*:[[:space:]]*(var\(--rd-font(-num|-mono)?\)|inherit)[[:space:]]*[;}]'
 check 'font-weight[[:space:]]*:[[:space:]]*(bold|[789]00)'    'Peso prohibido. El único peso fuerte es var(--rd-weight) (600).'
 check '(linear|radial|conic)-gradient\('                      'Degradado escrito a mano. Solo var(--rd-gradient), y solo donde DESIGN.md lo permite.'
 check 'font-style[[:space:]]*:[[:space:]]*italic'             'Cursiva prohibida.'
