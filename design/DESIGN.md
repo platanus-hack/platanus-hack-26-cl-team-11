@@ -125,9 +125,9 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 - Un globo de vidrio en 3D, dibujado en `<canvas>` con perspectiva propia (sin librerías). Las
   personas viven sobre la esfera; cada conversación posible es un arco que pasa por encima de la
   superficie.
-- **Profundidad:** lo que queda detrás del globo se dibuja primero, desenfocado y tenue; encima va
-  un velo de vidrio (relleno claro, brillo que se desplaza lento y borde blanco) y recién después lo
-  de adelante. Así los nodos de atrás nunca se confunden con los de adelante.
+- **Profundidad gradual** (nunca «sí/no»): cada cara se desenfoca, se aclara con niebla y pierde
+  sombra de forma continua según su profundidad (`smoothstep` sobre z); los nombres también se
+  desvanecen. Encima del fondo va el brillo del vidrio, que se desplaza lento, y un borde blanco.
 - **Toda persona tiene cara.** El equipo usa sus Vita Faces (`faces/*.png`); el resto sale de un
   atlas de 64 Vita Faces compuestas con las piezas de `vita-front` (`faces/atlas/faces.png`, 8 × 8
   de 128 px) y su gemelo desenfocado para el fondo (`faces/atlas/faces-blur.png`). Cerca del borde
@@ -136,13 +136,19 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
   - 5 personas: pentágono con caras, nombre y estado al costado (como la referencia).
   - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan.
     Con 300 las 44.850 líneas son una neblina de luz dentro del globo. Nunca una mancha oscura.
-- **Grupos negociando a la vez** (2 con 5 personas, 3 con 10, 6 con 50, 10 con 300). Tu grupo
-  (Tú, Ian, Lian) siempre está activo y con chips; los demás nacen, negocian y cierran solos:
-  - nace: las líneas se dibujan desde quien pide ayuda, con una punta de luz;
-  - negocia: degradado, halo y luz que recorre la línea;
-  - acuerdo: la línea destella en blanco y sale un anillo con degradado y chispas; luego se apaga y
-    el grupo reaparece en otra parte del globo.
-  - Cada miembro de un grupo activo lleva un **aro con degradado** (la indicación de grupo).
+- **Grupos negociando a la vez** (2 con 5 personas, 3 con 10, 6 con 50, 10 con 300), de 3 a 6
+  personas. Cada grupo conversa en dos rondas (AGENT_MODEL): primero quien pide ayuda habla con
+  cada ayudante; después los ayudantes cercanos se hablan entre sí.
+- **A lo más un grupo con color a la vez** (Mati, 21-nov). Por defecto es el tuyo (Tú, Ian, Lian,
+  con chips); si tocas otro, ese pasa a color y el tuyo a tinta. Los demás grupos van en tinta
+  neutra: líneas grises finas y aro gris en sus miembros. El grupo con color lleva líneas con
+  degradado y halo, y un aro con degradado que gira lento en cada miembro.
+- **Vida de un grupo** (los neutros; el de color se queda negociando):
+  - nace: los hilos salen de quien pide ayuda con una punta de luz; cada cara se acerca un poco
+    cuando su hilo la alcanza; luego aparecen los hilos de la segunda ronda;
+  - negocia: una estela suave recorre cada hilo (blanca en el de color, tinta en los neutros);
+  - acuerdo: los hilos se recogen hacia quien pidió ayuda, que se ilumina suave, y aparece un chip
+    «Listo» con check; después el grupo se apaga y reaparece en otro sector del globo.
 - **Interacción:**
   - Arrastrar gira el globo (con inercia; a los 4 s sin tocarlo vuelve solo).
   - Pasar el cursor por una persona enciende sus n − 1 conversaciones y un chip con su nombre.
@@ -243,6 +249,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Globo: grupos de 3 a 6 en dos rondas; a lo más un grupo con color; desenfoque gradual por profundidad; sin «burbuja» de acuerdo: hilos que se recogen, brillo y chip «Listo». | Mati |
 | 21-nov-2026 | Globo: cara en todos los nodos, nodos de atrás desenfocados bajo un velo de vidrio, varios grupos negociando con aro de grupo, tocar un grupo lo destaca, efectos de nacimiento y acuerdo. | Mati |
 | 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |
 
