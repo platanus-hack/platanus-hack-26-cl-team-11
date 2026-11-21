@@ -1,7 +1,10 @@
+import { Face } from './Face';
 import { Glyph } from './Glyph';
 import { TABS, type TabId } from './tabs';
 
-export function TabBar({ active, onSelect }: { active: TabId; onSelect: (tab: TabId) => void }) {
+const YOU: TabId = 'tu';
+
+export function TabBar({ active, name, onSelect }: { active: TabId; name: string; onSelect: (tab: TabId) => void }) {
   return (
     <nav className="rd-tabbar rd-glass" aria-label="Secciones">
       {TABS.map((tab) => (
@@ -13,7 +16,7 @@ export function TabBar({ active, onSelect }: { active: TabId; onSelect: (tab: Ta
           aria-current={active === tab.id ? 'page' : undefined}
           onClick={() => onSelect(tab.id)}
         >
-          <Glyph name={tab.glyph} />
+          {tab.id === YOU ? <Face name={name} size="tab" /> : <Glyph name={tab.glyph} />}
           <span className="rd-tabbar__name" aria-hidden="true">
             {tab.name}
           </span>

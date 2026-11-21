@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
+import { applyFaceLook } from './faceLook';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
-import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
+import { fetchFaces, fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
 import { ONBOARDING_STEPS } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
 import { AGENT } from './SourcesOrbit';
@@ -40,6 +41,18 @@ export function ConnectPage({ token }: { token: string }) {
     if (name) savePerson({ token, name });
   }, [token, name]);
 
+  useEffect(() => {
+    let alive = true;
+    fetchFaces(token)
+      .then(({ faces }) => {
+        if (alive) for (const { name: person, face } of faces) applyFaceLook(person, face);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [token]);
+
   if (!page) {
     return (
       <div className="app-column rd-panel">
@@ -61,7 +74,7 @@ export function ConnectPage({ token }: { token: string }) {
     tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
     agente: <AgentTab token={token} active={tab === 'agente'} />,
     equipo: <TeamSection token={token} />,
-    ajustes: <SettingsTab token={token} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
+    ajustes: <SettingsTab token={token} name={page.name} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };
 
   return (
@@ -79,7 +92,7 @@ export function ConnectPage({ token }: { token: string }) {
           </section>
         ))}
       </main>
-      <TabBar active={tab} onSelect={select} />
+      <TabBar active={tab} name={page.name} onSelect={select} />
     </div>
   );
 }

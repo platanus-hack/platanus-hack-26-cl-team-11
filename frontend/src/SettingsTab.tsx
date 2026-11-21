@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { googleLinkPath, type OnboardingStep, type OnboardingStepId, type SignalKey, type PersonLogin } from './api';
 import { CopyButton } from './CopyButton';
+import { FaceEditor } from './FaceEditor';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
 import { OnboardingSection } from './OnboardingSection';
@@ -15,12 +16,13 @@ import { WhatsAppSection } from './WhatsAppSection';
 
 interface SettingsTabProps {
   token: string;
+  name: string;
   login: PersonLogin | null;
   firstSteps: OnboardingStep[];
   onOpenStep: (step: OnboardingStepId) => void;
 }
 
-export function SettingsTab({ token, login, firstSteps, onOpenStep }: SettingsTabProps) {
+export function SettingsTab({ token, name, login, firstSteps, onOpenStep }: SettingsTabProps) {
   const { policy, busy, problem, change } = usePolicy(token);
   const [openKey, setOpenKey] = useState<SignalKey | null>(null);
   const link = window.location.origin + window.location.pathname;
@@ -29,8 +31,10 @@ export function SettingsTab({ token, login, firstSteps, onOpenStep }: SettingsTa
     <>
       <OnboardingSection steps={firstSteps} onOpen={onOpenStep} />
 
+      <FaceEditor token={token} name={name} />
+
       <div className="app-block">
-        <SectionHead first title="Permisos" />
+        <SectionHead title="Permisos" />
         {!policy && !problem && <p className="rd-note">Cargando…</p>}
         {problem && (
           <p className="rd-note" role="alert">

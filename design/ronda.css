@@ -303,6 +303,11 @@ button.rd-item, a.rd-item { cursor: pointer; }
 .rd-seg > button { height: 34px; padding: 0 14px; border: 0; border-radius: 12px; background: none; color: var(--rd-muted); font-family: inherit; font-size: 14px; font-weight: var(--rd-weight); cursor: pointer; transition: color 0.15s ease, transform 0.12s ease; }
 .rd-seg > button[aria-pressed='true'] { background: #fff; color: var(--rd-ink); transform: translateY(-1px); box-shadow: 0 3px 0 #d2cdea, 0 8px 14px rgba(40, 30, 90, 0.08); }
 .rd-seg > button:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
+.rd-seg--wrap { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; }
+.rd-tones { display: flex; flex-wrap: wrap; gap: var(--rd-space-2); }
+.rd-tone { width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; box-shadow: var(--rd-shadow-face-small); transition: transform 0.12s ease, box-shadow 0.15s ease; -webkit-tap-highlight-color: transparent; }
+.rd-tone[aria-pressed='true'] { transform: translateY(-1px); box-shadow: 0 0 0 3px var(--rd-bg), 0 0 0 5px var(--rd-ink); }
+.rd-tone:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 5px; }
 @media (prefers-reduced-motion: reduce) { .rd-seg > button { transition: none; } }
 
 /* ---- Cómo vienes: una tarjeta de vidrio por señal, con un solo tinte y un aro que se llena ---- */

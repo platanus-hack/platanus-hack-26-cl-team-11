@@ -478,3 +478,20 @@ export const googleLinkPath = (token: string) => `${personPath(token)}/login/goo
 export const fetchLoginOptions = () => request<{ google: boolean }>('/api/login');
 export const fetchSession = () => request<{ person: { token: string; name: string } | null }>('/api/session');
 export const closeSession = () => request<{ ok: boolean }>('/api/session/logout', post());
+
+export type FaceKind = 'capsula' | 'ovalo' | 'cuenta' | 'almendra' | 'huevo' | 'arco';
+export type FaceSizeChoice = 'chica' | 'media' | 'grande';
+
+export interface FaceLook {
+  kind: FaceKind;
+  size: FaceSizeChoice;
+  glasses: 'redondo' | 'suave' | 'pantos' | 'ceja' | null;
+  brow: 'plana' | 'arco' | 'alzada' | null;
+  mark: 'lunar' | 'pecas' | null;
+  lashes: boolean;
+  tone: number;
+}
+
+export const fetchFace = (token: string) => request<{ face: FaceLook | null }>(`${personPath(token)}/face`);
+export const saveFace = (token: string, face: FaceLook | null) => request<{ face: FaceLook | null }>(`${personPath(token)}/face`, put({ face }));
+export const fetchFaces = (token: string) => request<{ faces: { name: string; face: FaceLook }[] }>(`${personPath(token)}/faces`);

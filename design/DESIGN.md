@@ -138,6 +138,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-top`, `rd-nav`, `rd-tag` | El marco estándar: barra con marca, pestañas (la activa con `aria-current`) y aviso. | Ver «La página estándar». Los nombres `cx-top`, `cx-nav` y `cx-tag` de `contexto/` son los mismos estilos. |
 | `rd-pagehead`, `rd-pagetitle`, `rd-pagesub` | Encabezado de página: el titular de una frase y su línea gris. | Un titular por pantalla. Iguales a `cx-head`, `cx-title` y `cx-sub`. |
 | `rd-seg` | Selector con relieve: hueco y tecla levantada. | Botones con `aria-pressed`. Para velocidad, tamaño o filtro; no para navegar. |
+| `rd-seg--wrap`, `rd-tones`, `rd-tone` | Editor de «Tu cara» (Ajustes): selectores que bajan de línea en el teléfono y la fila de luces, cada una una gota con la mezcla de `RondaLuz.css`. | La luz elegida lleva aro de tinta. Pedido de Mati del 21-nov, pendiente de revisión. |
 | `rd-hero`, `rd-title`, `rd-label`, `rd-note` | Texto. | Ver tabla de tipografía. |
 | `rd-gradient-text` | Texto con degradado. | Solo en los cuatro lugares permitidos. |
 | `rd-glass` | Superficie de vidrio. | Se combina con `rd-card` o `rd-chip`. |
@@ -181,6 +182,7 @@ nariz ni pelo. Para verlas y probarlas: `caras/caras.html`.
       cara.set('activa');
 
   En React la envuelve `frontend/src/Face.tsx`: `<Face name="Camila Rojas" state="activa" />`.
+- **Cada persona puede elegir su propia cara** en Ajustes → «Tu cara» (ojos, tamaño, anteojos, ceja, pestañas, detalle y luz). Se guarda en el backend (`/api/people/:token/face`), la app la registra con `RondaCaras.customize(nombre, …)` y la ve todo su equipo (`/faces`). En la barra de pestañas, «Tú» es tu cara (Mati, 21-nov).
 - **El mismo nombre da siempre la misma cara y los mismos colores**, en cualquier pantalla y sin
   guardar nada. Una persona nueva no requiere componer ni exportar nada.
 - **El equipo** (mati, ian, lian, andres, roberto) tiene ojos y tonos fijos, escritos en `TEAM` y
