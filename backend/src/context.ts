@@ -1,8 +1,10 @@
 import { mkdirSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createVault, type Vault } from './crypto.js';
 import { openStore, type Store } from './db.js';
+import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
 export interface Config {
@@ -11,7 +13,9 @@ export interface Config {
 }
 
 export interface AppContext {
+  db: DatabaseSync;
   store: Store;
+  teams: TeamStore;
   vault: Vault;
   fetch: Fetch;
   config: Config;
@@ -29,9 +33,13 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
   const inMemory = location === ':memory:';
   if (!inMemory) mkdirSync(location, { recursive: true });
   const vault = createVault(inMemory ? null : location);
+  const db = new DatabaseSync(inMemory ? ':memory:' : join(location, 'ronda.db'));
+  const store = openStore(db, vault);
   return {
+    db,
     vault,
-    store: openStore(inMemory ? ':memory:' : join(location, 'ronda.db'), vault),
+    store,
+    teams: openTeamStore(db),
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),
   };

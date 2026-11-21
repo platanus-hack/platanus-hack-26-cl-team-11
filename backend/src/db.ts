@@ -1,4 +1,4 @@
-import { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from 'node:sqlite';
 import { randomBytes } from 'node:crypto';
 import type { Vault } from './crypto.js';
 import type { Connection, EventDraft, Person, SourceId, StoredEvent } from './types.js';
@@ -52,8 +52,7 @@ const toEvent = (row: EventRow): StoredEvent => ({
   receivedAt: row.received_at,
 });
 
-export function openStore(file: string, vault: Vault): Store {
-  const db = new DatabaseSync(file);
+export function openStore(db: DatabaseSync, vault: Vault): Store {
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS people (
