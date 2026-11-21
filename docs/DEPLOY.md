@@ -20,6 +20,16 @@ Las pruebas se corren en local con `npm test` y `npm run type-check`. `.github/w
 2. Render lee `render.yaml` y propone un servicio `ronda` con un disco de 1 GB. Confirma.
 3. Al terminar el primer despliegue, la dirección queda como `https://<nombre>.onrender.com`.
 
+### Acceso al repositorio privado y créditos de la hack
+
+El repositorio pertenece a `m5b6`. Los créditos están en el workspace de Ian. Son dos comprobaciones distintas.
+
+1. En la [instalación de Render de m5b6](https://github.com/settings/installations/31963285), deja marcada **Only select repositories**. Busca `m5b6/platanus-hack-26`, agrégalo a la selección existente y guarda. Vuelve a abrir la instalación y comprueba que el repo figura en la lista.
+2. En el workspace con créditos, Ian abre **New → Blueprint** y busca el repo en la lista de GitHub. Si aparece, revisa `main`, `render.yaml`, el cargo estimado y el disco de 1 GB antes de aplicar. Si no aparece, comprueba qué credencial de GitHub está vinculada a ese workspace. El enlace «Public Git Repository» requiere un repo público.
+3. Tras el primer deploy, copia desde Render la URL del servicio y el SHA marcado como **Live**. Abre la portada y confirma que `GET /api/health` devuelve HTTP 200 con `{"ok":true}`. Registra en el hilo del equipo la URL, el SHA y el resultado.
+
+El 21 de noviembre se comprobó en local el commit `55c9077` con Node 22.23.1. Pasaron las 84 pruebas y el chequeo de tipos. Con los comandos del Blueprint, el proceso sirvió la portada «Ronda» y la respuesta de salud esperada. En la revisión inicial de GitHub, la app ya estaba instalada con cinco repositorios seleccionados y Ronda faltaba en la lista.
+
 El servicio usa un plan pagado porque el disco persistente no existe en el plan gratuito.
 
 ## Variables
