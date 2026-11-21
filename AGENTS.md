@@ -20,6 +20,11 @@ Somos varias personas y varios agentes sobre el mismo repo al mismo tiempo. Lo q
 - Si el push falla porque alguien pusheó antes: `git pull --rebase origin main` y `git push` otra vez.
   Si el rebase da conflicto, se resuelve en el momento conservando el trabajo de la otra persona.
 - Nunca `git push --force`, nunca `git reset --hard` sobre commits ya pusheados, nunca `--no-verify`.
+- **Todo cambio, hasta un botón, termina desplegado y verificado en prod (Render)** (Mati, 21-nov).
+  El push a `main` despliega solo si el commit toca una ruta del `buildFilter` de `render.yaml`.
+  Antes de decir «listo», comprueba en `https://ronda-n8if.onrender.com` que llegó tu cambio: un texto
+  nuevo dentro de `assets/index-*.js`, o que tu ruta de API responda JSON (lo que no existe cae en el
+  `index.html`). Un 200 no basta.
 - Un turno no termina con cambios sin commitear ni commits sin pushear. En Claude Code lo verifica
   el hook `.claude/hooks/require-pushed.sh`.
 - Si no se puede pushear (sin red, conflicto que no sabes resolver), dilo con el error exacto.
