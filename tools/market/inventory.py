@@ -1,7 +1,8 @@
 """Hold small lots across the cheapest teams and sell each lot into a buying spike.
 
 Live mode asks for the event session at a hidden prompt. `--paper` needs no session.
-Tunables live in inventory.json next to the observations and are re-read while running.
+Tunables live in trader.json next to the observations and are re-read while running.
+At `until`, or 45 minutes before a published close, it sells everything it holds.
 """
 import argparse
 import fcntl
@@ -22,11 +23,12 @@ from monitor import DATA, END, quote, read_json
 
 MARKET_ID = "dc7d3432-3ee8-4631-9c2a-ef8ed5eede67"
 OWN_TEAM = "team-11"
-SETTINGS = DATA / "inventory.json"
+SETTINGS = DATA / "trader.json"
 STOP = DATA / "inventory.stop"
 TAPE = DATA / "feed-tape.jsonl"
 DEFAULTS = dict(buying=True, clip=20, clips=1, budget=300, floor=600, cheap=1.3,
-                gain=0.5, edge=4, pace=4, calm=180, rest=180, liquidate=False, only=[], skip=[], sell=[])
+                gain=0.5, edge=4, pace=4, calm=180, rest=180, liquidate=False, only=[], skip=[], sell=[],
+                until="2026-11-22T15:00:00Z")
 BOUNDS = dict(clip=(10, 66), clips=(1, 3), budget=(0, 700), floor=(300, 5000), cheap=(0.3, 2.0),
               gain=(0.2, 9.0), edge=(2, 500), pace=(2, 600), calm=(0, 3600), rest=(30, 7200))
 
@@ -45,7 +47,13 @@ def settings():
             values[name] = min(high, max(low, value))
         elif name in ("only", "skip", "sell") and isinstance(value, list):
             values[name] = [team for team in value if isinstance(team, str) and re.fullmatch(r"team-\d+", team) and team != OWN_TEAM]
+        elif name == "until" and isinstance(value, str):
+            values[name] = value
     values["clip"], values["clips"] = int(values["clip"]), int(values["clips"])
+    try:
+        values["deadline"] = datetime.fromisoformat(values["until"].replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        values["deadline"] = datetime.fromisoformat(DEFAULTS["until"].replace("Z", "+00:00")).timestamp()
     return values
 
 
@@ -276,6 +284,17 @@ class Desk:
                 print("Adopted server position:", team, shares, "cost", cost, flush=True)
                 self.lots[team] = dict(shares=shares, cost=cost, clips=lot["clips"] if lot else 1)
 
+    def deadline(self):
+        """When to sell everything: the configured time, or 45 minutes before a published close."""
+        close = (self.book.market or {}).get("closesAt")
+        limit = self.config["deadline"]
+        if close:
+            limit = min(limit, datetime.fromisoformat(close.replace("Z", "+00:00")).timestamp() - 2700)
+        return limit
+
+    def leaving(self):
+        return self.config["liquidate"] or time.time() >= self.deadline()
+
     def fresh(self, feed):
         return (feed.alive() or time.time() - self.book.checked < 6) and self.book.market \
             and self.book.market["status"] == "open" and self.book.market["id"] == MARKET_ID
@@ -335,7 +354,7 @@ class Desk:
             for team, lot in list(self.lots.items()):
                 if team not in self.book.ids or self.halted:
                     continue
-                leave = config["liquidate"] or team in config["sell"]
+                leave = self.leaving() or team in config["sell"]
                 floor = 1 if leave else max(lot["cost"] * (1 + config["gain"]), lot["cost"] + config["edge"])
                 self.trade(team, "sell", lot["shares"], lambda est: est["cashDelta"] >= floor)
 
@@ -343,13 +362,13 @@ class Desk:
         with self.lock:
             config = self.config
             now = time.time()
-            if self.halted or config["liquidate"] or not config["buying"] or now - self.last_buy < config["pace"]:
+            if self.halted or self.leaving() or not config["buying"] or now - self.last_buy < config["pace"]:
+                return
+            if now >= self.deadline() - 5400:
+                self.note = "no purchases in the 90 minutes before the exit time"
                 return
             if not self.book.covered(config["calm"]):
                 self.note = "watching prices before the first purchase"
-                return
-            if now > END - 1800:
-                self.note = "no purchases in the last half hour"
                 return
             committed = sum(lot["cost"] for lot in self.lots.values())
             clip = config["clip"]
@@ -390,7 +409,8 @@ class Desk:
             return dict(time=datetime.now(timezone.utc).isoformat(timespec="seconds"), paper=self.paper,
                         cash=self.cash, lots=len(self.lots), committed=committed, sellableNow=worth,
                         realized=self.realized, fills=self.fills, feed=feed.alive(), halted=self.halted,
-                        note=self.note, config=self.config, detail=detail)
+                        note=self.note, config=self.config, detail=detail,
+                        exitAt=datetime.fromtimestamp(self.deadline(), timezone.utc).isoformat(timespec="seconds"))
 
 
 def run(paper, cash):
@@ -456,7 +476,7 @@ def run(paper, cash):
         if desk.halted in ("HACKERS_ONLY", "MARKET_NOT_OPEN", "unknown project in portfolio", "a purchase cost more than its order"):
             print("Stopped:", desk.halted, flush=True)
             return
-        if desk.config["liquidate"] and not desk.lots:
+        if desk.leaving() and not desk.lots:
             print("Inventory sold.", flush=True)
             return
         if now - reported >= 30:
