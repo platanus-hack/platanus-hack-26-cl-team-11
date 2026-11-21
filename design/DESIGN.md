@@ -272,9 +272,11 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado por Codex en
 `grafo/globo.html`). Especificación completa: `grafo/hilo/README.md`.
 
-- **Streaming** (`grafo/hilo/stream.js`, regla `Stream` de Stageshow): todas las palabras se ponen
-  desde el inicio en su lugar final, ocultas; cada una se enciende con opacidad y un desenfoque de
-  3 px en 0,35 s. La burbuja nunca cambia de tamaño mientras se escribe. Cursor de tinta al final.
+- **Streaming** (`grafo/hilo/stream.js`, regla `Stream` de Stageshow): todas las letras se ponen
+  desde el inicio en su lugar final, invisibles; una «cabeza» avanza por el texto y las letras se
+  encienden con una cola de opacidad de 7 letras. El ritmo pausa tras coma y punto. Sin cursor y sin
+  palabras que saltan. Antes de escribir, tres puntos dentro de la burbuja. La burbuja nunca cambia
+  de tamaño mientras se escribe.
   El dato privado es un marcador «dato privado» con candado; el valor original nunca llega.
 - **Llamadas a herramienta** (`grafo/hilo/tools.js`): una tarjeta chunky por conector (Calendario,
   Tu política, Equipo, Pulso del equipo, Permisos, Presentaciones, Tablero, GitHub, Granola,
@@ -293,9 +295,15 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
   barrita de avance del tinte. Termina: check del tinte que se encoge hasta un punto. Los demás arcos
   con hilo muestran solo un punto chico que se puede tocar. La tarjeta grande vive solo en el hilo.
 - Duplas para revisar cada herramienta con su miniatura: `grafo/hilo/duplas.html` (tamaño ajustable).
-- **Panel demo omnipotente:** `grafo/universo.html` muestra todo junto: 100 personas, la cámara viaja
-  entre grupos complejos de 3 a 5 que conversan en vivo (cientos de temas), el hilo del grupo a la
-  derecha y el arco activo con su miniatura. Todo lo nuevo se agrega ahí (AGENTS.md, regla 6).
+- **Panel demo omnipotente:** `grafo/universo.html` muestra todo junto en una vuelta de tres pasos:
+  (1) **Uno a uno**: las 4.950 conversaciones entre pares destellan en el globo y el panel lista lo
+  que saca cada par; se forman los grupos. (2) **Grupos**: la cámara viaja por 6 grupos de 3 a 5 que
+  conversan en vivo, con el hilo a la derecha y la miniatura de la herramienta flotando fuera del
+  arco, atada con una línea punteada. (3) **Tu semana**: tarjeta de cierre con cifras y calendario
+  Lun–Vie de los acuerdos; el panel los lista con check. Globo grande con la luz de lava
+  (`luz/luz.js`, `?luz=0` la apaga). Sin titular ni contadores fijos. Los controles y el catálogo de
+  herramientas están ocultos por defecto (tecla H o `?ui=1`). Todo lo nuevo se agrega ahí
+  (AGENTS.md, regla 6).
 
 ## Texto de la interfaz
 
@@ -397,6 +405,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
 | 21-nov-2026 | Grafo: menos cosas. Un solo arco activo a la vez, con la miniatura de la herramienta en uso, sincronizada con su tarjeta en el hilo; los demás arcos, un punto chico. Sin Claude Artifacts: prototipos en `design/`. | Mati |
+| 21-nov-2026 | Universo: sin titular ni contadores, globo más grande con luz de lava, ronda uno a uno antes de los grupos, controles y catálogo ocultables, chat rediseñado, streaming por letra sin cursor y final «Tu semana, coordinada». | Mati |
 | 21-nov-2026 | Hilo: streaming sin reacomodo (Stream de Stageshow) y tarjetas de herramienta chunky con escena y tinte por conector (el tinte solo vive en la tarjeta). | Mati |
 | 21-nov-2026 | Globo: grupos de hasta 9 en tres rondas con personas puente; miniaturas sobre los hilos (a color solo en el grupo con color). Hilo de chat diseñado en `grafo/hilo/`. | Mati |
 | 21-nov-2026 | Globo: grupos de 3 a 6 en dos rondas; a lo más un grupo con color; desenfoque gradual por profundidad; sin «burbuja» de acuerdo: hilos que se recogen, brillo y chip «Listo». | Mati |

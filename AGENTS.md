@@ -108,8 +108,10 @@ grafo: 100 personas, grupos complejos de 3 a 5, cada herramienta de `RondaTools`
 `RondaMotion`, el streaming, permisos, datos privados y mensajes humanos. Cada vez que se agrega algo
 nuevo (una herramienta, una miniatura, un estado, un tipo de mensaje), se agrega también a esa demo
 (en `CATALOG` o en el generador de guiones de `universo.js`) y debe verse en toda su gloria dentro de
-una vuelta completa. El catálogo de la demo marca qué ya apareció; `?speed=8` recorre una vuelta en
-unos 20 segundos para comprobarlo.
+una vuelta completa. La vuelta es: ronda uno a uno, 6 grupos y el final «Tu semana». El catálogo
+de la demo (oculto por defecto; tecla H o `?ui=1`) marca qué ya apareció; `?speed=8&ui=1` recorre una
+vuelta en unos 25 segundos para comprobarlo (hoy: 15/15 herramientas, 8/8 miniaturas). Para saltar a
+un momento: `?s=0` uno a uno, `?s=1..6` un grupo, `?s=7` la semana, y `&t=` el segundo.
 
 ## Commits
 

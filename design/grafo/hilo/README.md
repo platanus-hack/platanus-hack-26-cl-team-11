@@ -27,10 +27,11 @@ al dueño) y `human` (mensaje escrito por la persona, no por su agente).
 - **Mensaje humano** (`human`): a la derecha, burbuja blanca con borde de 1,5 px `--rd-ink`,
   y el autor dice «Tú, en persona». Aparece casi sin «escribiendo».
 - **Antes de escribir:** tres puntos de 6 px que suben y bajan (0,7 s para agentes).
-- **Streaming:** cada token entra en 450 ms con `opacity 0 → 1`, `blur(5px) → 0` y
-  `translateY(4px) → 0` (ease-out cúbica). Los tokens se reparten de forma pareja entre `at`
-  y `end`. Un cursor de 2 px `--rd-ink` parpadea al final mientras escribe y 350 ms después.
-  Nada de degradado en el texto.
+- **Streaming:** por letra. Una cabeza continua avanza entre `at` y `end`; cada letra pasa de
+  opacidad 0 a 1 en una cola de 7 letras detrás de la cabeza. El ritmo no es parejo: pausa tras
+  coma (×4) y punto (×7) y ráfagas suaves. Sin cursor. Las letras de una palabra no se separan en
+  el salto de línea. API igual que antes: `RondaStream.create(text)` → `{ el, update(fraction, done),
+  finish() }`. Nada de degradado en el texto.
 - Cada evento entra con `opacity`, `translateY(10px)` y escala 0,985 → 1 en 500 ms, con el
   origen en su esquina de abajo.
 
