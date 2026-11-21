@@ -94,6 +94,13 @@ filman la animación y revisan cada cuadro.
 - La skill no se edita a mano. Se actualiza con
   `npx skills add benjitaylor/skills --skill stageshow -a claude-code -a codex -y`.
 
+## Regla 5: nada de Claude Artifacts; prototipos como HTML de prueba en el repo
+
+Mati, 21-nov-2026: no se usan Claude Artifacts (canvas de diseño, `/design`) para este proyecto.
+Todo prototipo, prueba visual o propuesta va como un **HTML de prueba discreto dentro de `design/`**
+(por ejemplo `design/grafo/playground.html` o `design/grafo/hilo/*.html`), servido en local y
+commiteado. Si una pieza ya existía como artifact, se trae al repo y se deja de actualizar el artifact.
+
 ## Commits
 
 - Un cambio, un commit. Mensaje `tipo: descripción` (`feat`, `fix`, `docs`, `chore`).
