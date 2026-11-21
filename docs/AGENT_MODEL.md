@@ -12,6 +12,20 @@ Hay **un agente personal por persona** y ningún otro agente.
 - Habla con su dueño por WhatsApp.
 - Habla con cualquier otro agente, de forma directa.
 
+## Agente personal y asistentes conectados
+
+Decisión del 21-nov-2026. El agente personal corre en el servidor de Ronda. Los agentes que la persona ya usa (Claude Code, Codex, ChatGPT, Grok, OpenClaw y otros) entran como **asistentes conectados**.
+
+| | Agente personal | Asistente conectado |
+|---|---|---|
+| Dónde corre | En Ronda, siempre disponible | Donde la persona lo usa, solo mientras lo tiene abierto |
+| Qué hace | Habla con los agentes de los demás | Escribe y ordena el repo de su persona |
+| Qué sabe | Las señales y el repo de su persona | Lo que la persona ya le cuenta |
+
+Ningún servidor puede despertar al agente de otra persona: Claude Code o ChatGPT actúan solo mientras su dueño los tiene abiertos. Por eso la voz en una ronda es el agente personal, y el asistente es quien le da contexto. Así la ronda funciona con el computador cerrado y se puede simular una organización completa.
+
+Cómo entra un asistente, el repo y sus permisos: [ARCHITECTURE.md](ARCHITECTURE.md#sala-asistentes-y-repo).
+
 ## Por qué no hay agente coordinador
 
 Decisión del 21-nov-2026. Un coordinador al medio es una estructura de humanos: las jerarquías existen porque una persona no puede conversar con todas las demás. Un agente sí puede. Poner un agente coordinador sería reconstruir con agentes la misma jerarquía que la tesis de [VISION.md](VISION.md) dice que sobra.

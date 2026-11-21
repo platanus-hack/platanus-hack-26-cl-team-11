@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
+import { cardDepsFrom, roundDepsFrom } from '../agents/deps.js';
 import { cardFor, runRound } from '../agents/round.js';
 import { isPartyDecision, type Proposal, type Thread } from '../agents/store.js';
 import type { AppContext } from '../context.js';
-import { openPolicyStore } from '../policy/store.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
@@ -18,9 +18,9 @@ const INVALID_ALLOW = { error: 'El permiso debe ser verdadero o falso.' } as con
 const MAX_TOPIC_LENGTH = 500;
 
 export function agentRoutes(ctx: AppContext) {
-  const { db, store, teams, agents } = ctx;
+  const { store, teams, agents } = ctx;
   const routes = new Hono();
-  const policies = openPolicyStore(db);
+  const cardDeps = cardDepsFrom(ctx);
 
   const viewThread = (thread: Thread, viewerToken: string) => {
     const mine = viewerToken === thread.requesterToken || viewerToken === thread.helperToken;
@@ -54,7 +54,7 @@ export function agentRoutes(ctx: AppContext) {
     const teamId = c.req.param('teamId');
     if (!teams.isMember(teamId, person.token)) return c.json(NOT_A_MEMBER, 403);
     const round = agents.latestRound(teamId);
-    const card = cardFor({ store, policies, agents }, person, new Date());
+    const card = cardFor(cardDeps, person, new Date());
     return c.json({
       configured: ctx.model !== null,
       round: round ? { id: round.id, status: round.status, startedAt: round.startedAt, finishedAt: round.finishedAt, problem: round.problem } : null,
@@ -75,7 +75,7 @@ export function agentRoutes(ctx: AppContext) {
     if (!ctx.model) return c.json(NOT_CONFIGURED, 503);
     const round = agents.startRound(teamId, person.token);
     if (!round) return c.json(ROUND_RUNNING, 409);
-    void runRound({ store, teams, policies, agents, model: ctx.model }, round);
+    void runRound(roundDepsFrom(ctx, ctx.model), round);
     return c.json({ id: round.id, status: round.status, startedAt: round.startedAt }, 202);
   });
 

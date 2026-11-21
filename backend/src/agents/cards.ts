@@ -22,14 +22,22 @@ export interface TopicDecisions {
   denied: ReadonlySet<string>;
 }
 
+export interface RepoKnowledge {
+  workingOn: string[];
+  needs: Need[];
+  expertise: string[];
+}
+
 export interface CardSource {
   token: string;
   name: string;
   signals: Signals;
   decisions: TopicDecisions;
+  repo?: RepoKnowledge;
 }
 
 export const MAX_NEEDS_PER_PERSON = 2;
+const MAX_EXPERTISE = 12;
 
 export const topicKeyOf = (topic: string) => topic.trim().toLocaleLowerCase('es');
 
@@ -48,8 +56,13 @@ function availabilityOf(signals: Signals): Availability {
   return total < 0 ? 'baja' : total > 0 ? 'alta' : 'normal';
 }
 
-export function buildCard({ token, name, signals, decisions }: CardSource): AgentCard {
-  const statements: string[] = [];
+const mergeTopics = (first: string[], second: string[]): string[] => {
+  const seen = new Set<string>();
+  return [...first, ...second].filter((topic) => !seen.has(topicKeyOf(topic)) && Boolean(seen.add(topicKeyOf(topic)))).slice(0, MAX_EXPERTISE);
+};
+
+export function buildCard({ token, name, signals, decisions, repo }: CardSource): AgentCard {
+  const statements: string[] = [...(repo?.workingOn ?? [])];
   if (signals.visibility.energy === 'siempre' && signals.energy.level !== 'sin_datos') statements.push(signals.energy.statement);
   if (signals.visibility.load === 'siempre' && signals.load.level !== 'sin_datos') statements.push(signals.load.statement);
 
@@ -62,13 +75,17 @@ export function buildCard({ token, name, signals, decisions }: CardSource): Agen
     if (blocker.visibility === 'siempre' || decisions.released.has(key)) needs.push(need);
     else pendingAsks.push(need);
   }
+  for (const need of repo?.needs ?? []) {
+    const key = topicKeyOf(need.topic);
+    if (!decisions.denied.has(key) && !needs.some((known) => topicKeyOf(known.topic) === key)) needs.push(need);
+  }
 
   const openNeeds = needs.slice(0, MAX_NEEDS_PER_PERSON);
   return {
     token,
     name,
     statements: [...statements, ...openNeeds.map((need) => need.statement)],
-    expertise: signals.visibility.expertise === 'siempre' ? signals.expertise : [],
+    expertise: mergeTopics(signals.visibility.expertise === 'siempre' ? signals.expertise : [], repo?.expertise ?? []),
     availability: availabilityOf(signals),
     needs: openNeeds,
     pendingAsks,

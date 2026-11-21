@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { openDigestStore, type DigestStore } from './agents/digest.js';
 import { createFiftyXModel, fiftyXConfigFrom } from './agents/fiftyx.js';
 import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agents/model.js';
 import { openAgentStore, type AgentStore } from './agents/store.js';
@@ -30,6 +31,7 @@ export interface AppContext {
   rooms: RoomStore;
   assistants: AssistantStore;
   repo: RepoStore;
+  digests: DigestStore;
   model: AgentModel | null;
   vault: Vault;
   fetch: Fetch;
@@ -87,6 +89,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     rooms: openRoomStore(db),
     assistants: openAssistantStore(db),
     repo: openRepoStore(db),
+    digests: openDigestStore(db),
     model: options.model === undefined ? modelFrom(process.env, options.fetch ?? fetch) : options.model,
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),

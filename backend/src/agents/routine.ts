@@ -1,7 +1,7 @@
 import type { AppContext } from '../context.js';
-import { openPolicyStore } from '../policy/store.js';
 import { dayKeyOf, DEFAULT_TIME_ZONE } from '../signals.js';
-import { MIN_TEAM_SIZE, openNeedsOf, runRound } from './round.js';
+import { roundDepsFrom } from './deps.js';
+import { MIN_TEAM_SIZE, openNeedsOf, refreshTeamDigests, runRound } from './round.js';
 
 const DEFAULT_INTERVAL_MS = 10 * 60 * 1000;
 const INTERRUPTED = 'La ronda se interrumpió porque el servidor se reinició.';
@@ -10,15 +10,16 @@ const hourFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: DEFAULT_TIME_
 const localHourOf = (instant: Date) => Number(hourFormatter.format(instant));
 
 export async function runDueRounds(ctx: AppContext, now: Date = new Date()): Promise<number> {
-  const { model, agents, store, teams } = ctx;
+  const { model, agents } = ctx;
   const roundHour = ctx.config.agentRoundHour ?? null;
   if (!model || roundHour === null || localHourOf(now) < roundHour) return 0;
-  const deps = { store, teams, agents, policies: openPolicyStore(ctx.db), model };
+  const deps = roundDepsFrom(ctx, model);
   const today = dayKeyOf(now);
   let started = 0;
   for (const teamId of agents.teamIds()) {
     const latest = agents.latestRound(teamId);
     if (latest && dayKeyOf(new Date(latest.startedAt)) === today) continue;
+    await refreshTeamDigests(deps, teamId);
     const { cards, openNeeds } = openNeedsOf(deps, teamId, now);
     if (cards.length < MIN_TEAM_SIZE || openNeeds.length === 0) continue;
     const round = agents.startRound(teamId, null);

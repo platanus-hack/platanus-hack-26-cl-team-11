@@ -145,12 +145,13 @@ El 21-nov-2026 tres revisores independientes revisaron el backend, con un verifi
 Cada persona tiene un agente y no hay coordinador ([AGENT_MODEL.md](AGENT_MODEL.md)). Los agentes conversan en **rondas**, una por equipo.
 
 ```
-señales + permisos  →  ficha  →  pedido  →  conversación 1:1  →  propuesta  →  cada persona acepta
+señales + permisos + repo  →  ficha  →  pedido  →  conversación 1:1  →  propuesta  →  cada persona acepta
 ```
 
 | Paso | Qué pasa | Dónde |
 |---|---|---|
-| Ficha | Lo que el agente puede decir de su persona: las frases con permiso «siempre», sus temas y una disponibilidad (alta, normal, baja) | `agents/cards.ts`, sin modelo |
+| Lectura del repo | El modelo lee los archivos del repo que la persona dejó en «siempre» y devuelve en qué trabaja, qué ayuda necesita y qué temas maneja. Se hace una vez por versión del repo | `agents/digest.ts`, modelo |
+| Ficha | Lo que el agente puede decir de su persona: las frases con permiso «siempre», lo que salió del repo, sus temas y una disponibilidad (alta, normal, baja) | `agents/cards.ts`, sin modelo |
 | Pedido | Cada bloqueo que se puede contar es un pedido de ayuda. Uno con permiso «preguntar» espera a que su dueño lo permita | `agents/cards.ts`, sin modelo |
 | A quién escribir | El agente de quien pide elige hasta 3 compañeros y le escribe al agente de cada uno | modelo |
 | Respuesta | El agente de cada compañero responde si su persona puede ayudar: sí, parcial o no | modelo |
@@ -159,7 +160,7 @@ señales + permisos  →  ficha  →  pedido  →  conversación 1:1  →  propu
 
 Reglas:
 
-- **El modelo nunca ve un dato privado.** Solo recibe la ficha. El sueño, la carga, el ánimo y la nota del check-in no entran a ningún mensaje al modelo; de energía y carga sale solo la disponibilidad, y con permiso «nunca» ni eso.
+- **El modelo nunca ve un dato privado.** Recibe la ficha y los archivos del repo en «siempre». Un archivo en «preguntar» o en «nunca» no llega al modelo; el de «preguntar» espera a que la persona lo cambie. El sueño, la carga, el ánimo y la nota del check-in no entran a ningún mensaje al modelo; de energía y carga sale solo la disponibilidad, y con permiso «nunca» ni eso.
 - **Nada se compromete sin la persona.** El agente propone; cada persona acepta o no.
 - **La conversación la leen solo sus dos dueños.** El resto del equipo ve quién le escribió a quién y, cuando se acuerda, la propuesta.
 - **Un tema con propuesta abierta o acordada en los últimos 7 días no se vuelve a pedir.**
@@ -217,6 +218,7 @@ Reglas:
 - **Cada archivo lleva un permiso**: `siempre`, `preguntar` (por defecto) o `nunca`. El asistente lo propone al crear el archivo. Después solo lo cambia la persona; una nueva versión del asistente no lo toca.
 - **Lo que se revisa en código es forma, no significado**: la ruta, 8 KB por archivo, 20 archivos por cambio, 200 por repo y formatos conocidos de credenciales. Un cambio que rompe una regla no guarda nada.
 - **Cada cambio deja un registro** en el servidor de contexto, bajo el asistente que lo hizo, y avisa a las salas de la persona.
+- **Una ronda también deja registro en la sala**: empieza, se abre un hilo, llega la respuesta, nace una propuesta, termina. La pantalla ve quién le escribe a quién y el tema, nunca el texto.
 
 ## Servidor de contexto (datos de prueba)
 

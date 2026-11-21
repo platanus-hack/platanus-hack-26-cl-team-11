@@ -49,7 +49,7 @@ export interface RepoStore {
   remove(personToken: string, path: string, by: string): boolean;
   log(personToken: string, limit: number): RepoCommit[];
   version(personToken: string): number;
-  readable(personToken: string): RepoFile[];
+  shared(personToken: string): RepoFile[];
 }
 
 interface FileRow {
@@ -189,6 +189,6 @@ export function openRepoStore(db: DatabaseSync, now: () => Date = () => new Date
       return Number(row?.last ?? 0);
     },
 
-    readable: (personToken) => files(personToken).filter((file) => file.share !== 'nunca'),
+    shared: (personToken) => files(personToken).filter((file) => file.share === 'siempre'),
   };
 }

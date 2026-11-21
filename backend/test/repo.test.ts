@@ -89,7 +89,7 @@ test('the person decides who sees each file, and her assistant cannot change tha
   await commit({ message: 'Estado al día', files: [{ path: 'estado.md', content: 'Semana más liviana.', share: 'siempre' }] });
   const file = ctx.repo.read(ana.token, 'estado.md');
   assert.deepEqual({ content: file?.content, share: file?.share }, { content: 'Semana más liviana.', share: 'nunca' });
-  assert.deepEqual(ctx.repo.readable(ana.token), []);
+  assert.deepEqual(ctx.repo.shared(ana.token), []);
 
   await commit({ message: 'Borra y agrega', delete: ['estado.md'], files: [{ path: 'sabe.md', content: '- OAuth de Google', share: 'siempre' }] });
   assert.deepEqual(

@@ -73,6 +73,7 @@ export const replyPrompt = (helper: AgentCard, requesterName: string, need: Need
     'Esta es la ficha de tu persona:',
     asData({ frases: helper.statements, temas: helper.expertise, disponibilidad: helper.availability }),
     'Decide si tu persona puede ayudar: «si» si conoce el tema y tiene disponibilidad, «parcial» si puede orientar pero no hacerse cargo, «no» si no conoce el tema o no tiene disponibilidad.',
+    'Si la disponibilidad es «desconocida», decide solo por el tema.',
     'Responde al otro agente en una o dos frases. Tu persona todavía no aceptó nada: no comprometas horas ni fechas.',
   ].join('\n\n');
 

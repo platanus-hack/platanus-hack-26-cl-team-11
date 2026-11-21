@@ -1,8 +1,13 @@
+import { publicIdOf } from '../codes.js';
 import type { Store } from '../db.js';
 import { withChosenVisibility, type PolicyStore } from '../policy/store.js';
 import { deriveSignals } from '../signals.js';
+import type { RepoStore } from '../repo/store.js';
+import type { RoomEventType } from '../rooms/store.js';
 import type { TeamStore } from '../teams/store.js';
+import type { JsonObject } from '../types.js';
 import { buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
+import { currentDigest, refreshDigests, type DigestStore } from './digest.js';
 import { AgentModelError, type AgentModel } from './model.js';
 import {
   ContactPlan,
@@ -37,6 +42,9 @@ export interface RoundDeps {
   policies: PolicyStore;
   agents: AgentStore;
   model: AgentModel;
+  repo?: RepoStore;
+  digests?: DigestStore;
+  onEvent?: (teamId: string, type: RoomEventType, payload: JsonObject) => void;
 }
 
 interface OpenNeed {
@@ -44,9 +52,10 @@ interface OpenNeed {
   need: Need;
 }
 
-export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents'>, member: { token: string; name: string }, now: Date): AgentCard {
+export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents' | 'repo' | 'digests'>, member: { token: string; name: string }, now: Date): AgentCard {
   const signals = withChosenVisibility(deriveSignals(deps.store.listSignalEvents(member.token, now), now), deps.policies.chosen(member.token));
-  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token) });
+  const repo = deps.repo && deps.digests ? currentDigest({ repo: deps.repo, digests: deps.digests }, member.token) : undefined;
+  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo });
 }
 
 async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
@@ -73,11 +82,14 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
       const helper = (byId.get(teammateId) as Teammate).card;
       const threadId = deps.agents.addThread({ roundId: round.id, requesterToken: requester.token, helperToken: helper.token, topic: need.topic });
       deps.agents.addMessage(threadId, requester.token, message);
+      const arc = { thread: threadId, from: publicIdOf(requester.token), to: publicIdOf(helper.token), topic: need.topic };
+      deps.onEvent?.(round.teamId, 'hilo_abre', arc);
       const reply = await deps.model.decide({ system: systemFor(helper.name), prompt: replyPrompt(helper, requester.name, need, message), schema: HelpReply });
       const help = reply.help.trim().toLowerCase();
       if (!isHelpAnswer(help)) throw new AgentModelError(INCOMPLETE_REPLY);
       deps.agents.addMessage(threadId, helper.token, reply.message.trim());
       deps.agents.setThreadHelp(threadId, help);
+      deps.onEvent?.(round.teamId, 'hilo_responde', { ...arc, help });
       return { id: teammateId, name: helper.name, help, message: reply.message.trim() };
     }),
   );
@@ -95,9 +107,10 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
   if (helperTokens.length === 0 || !text) return;
 
   deps.agents.addProposal({ roundId: round.id, teamId: round.teamId, requesterToken: requester.token, helperTokens, topic: need.topic, text });
+  deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic });
 }
 
-export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
+export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
   const cards = deps.teams.membersOf(teamId).map((member) => cardFor(deps, member, now));
   const since = new Date(now.getTime() - ACTIVE_PROPOSAL_DAYS * DAY_MS).toISOString();
   const openNeeds = cards
@@ -109,10 +122,20 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
   return { cards, openNeeds };
 }
 
+export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' | 'digests' | 'model'>, teamId: string): Promise<void> {
+  if (deps.repo && deps.digests) await refreshDigests({ repo: deps.repo, digests: deps.digests, model: deps.model }, deps.teams.membersOf(teamId));
+}
+
 export async function runRound(deps: RoundDeps, round: Round, now: Date = new Date()): Promise<void> {
+  const finish = (status: 'lista' | 'fallida', problem: string | null) => {
+    deps.agents.finishRound(round.id, status, problem);
+    deps.onEvent?.(round.teamId, 'ronda_termina', { round: round.id, status });
+  };
   try {
+    deps.onEvent?.(round.teamId, 'ronda_empieza', { round: round.id });
+    await refreshTeamDigests(deps, round.teamId);
     const { cards, openNeeds } = openNeedsOf(deps, round.teamId, now);
-    if (cards.length < MIN_TEAM_SIZE) return deps.agents.finishRound(round.id, 'lista', TEAM_TOO_SMALL);
+    if (cards.length < MIN_TEAM_SIZE) return finish('lista', TEAM_TOO_SMALL);
 
     const results = await inBatches(openNeeds, NEEDS_IN_PARALLEL, (openNeed) => resolveNeed(deps, round, openNeed, cards));
     const failures = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
@@ -121,9 +144,9 @@ export async function runRound(deps: RoundDeps, round: Round, now: Date = new Da
     const firstReason: unknown = failures[0]?.reason;
     const problem = failures.length === 0 ? null : firstReason instanceof AgentModelError ? firstReason.message : UNEXPECTED_FAILURE;
     const everyNeedFailed = openNeeds.length > 0 && failures.length === openNeeds.length;
-    deps.agents.finishRound(round.id, everyNeedFailed ? 'fallida' : 'lista', problem);
+    finish(everyNeedFailed ? 'fallida' : 'lista', problem);
   } catch (failure) {
     console.error('Agent round failed.', failure);
-    deps.agents.finishRound(round.id, 'fallida', UNEXPECTED_FAILURE);
+    finish('fallida', UNEXPECTED_FAILURE);
   }
 }

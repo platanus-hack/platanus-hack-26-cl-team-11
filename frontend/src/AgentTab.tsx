@@ -126,7 +126,7 @@ export function AgentTab({ token }: { token: string }) {
             ))}
           </div>
         )}
-        <p className="rd-note">Lo que dejes en «Privado» no sale de tu repo ni llega a un modelo.</p>
+        <p className="rd-note">Tu agente usa solo lo que está en «Se comparte». Lo que está en «Te pregunta antes» espera a que tú lo cambies, y lo «Privado» no sale de tu repo ni llega a un modelo.</p>
       </div>
     </>
   );

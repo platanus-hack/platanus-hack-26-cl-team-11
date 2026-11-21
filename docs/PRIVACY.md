@@ -22,6 +22,16 @@ Cada persona configura con su agente, en lenguaje natural, qué se comparte. Cad
 
 Valor por defecto para toda persona nueva: trabajo en **Siempre**; ánimo, energía y carga en **Preguntar antes**; salud y datos del wearable en **Nunca** como dato crudo.
 
+## El repo: un permiso por archivo
+
+El asistente de cada persona escribe su contexto como archivos. Cada archivo lleva uno de los tres estados:
+
+- **Siempre:** el agente personal puede usarlo al hablar con otros agentes.
+- **Preguntar antes:** espera. No se usa ni llega a un modelo hasta que la persona lo cambie. Es el estado por defecto.
+- **Nunca:** no sale del repo.
+
+El asistente propone el estado al crear el archivo. Después solo lo cambia la persona. Antes de escribir por primera vez, el asistente le muestra a su dueño la lista de archivos y espera su sí. El servidor rechaza un archivo que parezca contener una llave o una contraseña.
+
 ## Entre agentes: usar no es contar
 
 Sin coordinador, los agentes se hablan uno a uno, así que un agente puede enterarse de algo sobre la persona de otro («energía baja esta semana»). La regla:

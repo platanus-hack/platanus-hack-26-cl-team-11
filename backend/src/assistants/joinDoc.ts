@@ -68,7 +68,7 @@ Write needs so another agent can match them: "Necesita a alguien que conozca el 
 \`share\` decides who may use a file:
 
 - \`siempre\`: ${ownerName}'s agent may use it when it talks to teammates' agents.
-- \`preguntar\`: Ronda asks ${ownerName} before each use. This is the default.
+- \`preguntar\`: it waits. Ronda does not use the file until ${ownerName} says yes on their Ronda page. This is the default.
 - \`nunca\`: private. It never leaves the repo and is never sent to a model.
 
 \`share\` counts when a file is created. After that only ${ownerName} changes it.
