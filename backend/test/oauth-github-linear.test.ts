@@ -145,7 +145,7 @@ test('start redirects to Linear with the client, the scopes, consent and the cal
 });
 
 test('GitHub joins several scopes with spaces and Linear with commas', () => {
-  const input = { redirectUri: 'https://ronda.test/cb', state: 's' };
+  const input = { redirectUri: 'https://ronda.test/cb', state: 's', codeChallenge: 'c' };
   const githubUrl = new URL(github.authorizeUrl({ ...input, credentials: githubCredentials, scopes: ['read:user', 'repo'] }));
   const linearUrl = new URL(linear.authorizeUrl({ ...input, credentials: linearCredentials, scopes: ['read', 'issues:create'] }));
   assert.equal(githubUrl.searchParams.get('scope'), 'read:user repo');
@@ -269,7 +269,7 @@ test('a GitHub answer of HTTP 200 with an error is a failure and stores nothing'
 
 test('GitHub token failures are short Spanish errors that never carry a secret', async () => {
   const answering = (body: unknown, status = 200) => fakeFetch({ [GITHUB_TOKEN_URL]: () => Response.json(body, { status }) });
-  const exchange = (fetchImpl: Fetch) => github.exchange('code-1', githubCredentials, 'https://ronda.test/cb', fetchImpl);
+  const exchange = (fetchImpl: Fetch) => github.exchange('code-1', githubCredentials, 'https://ronda.test/cb', fetchImpl, 'verifier');
 
   await assert.rejects(exchange(answering({ error: 'incorrect_client_credentials' })), { message: 'GitHub rechazó las credenciales del servidor.', status: 500 });
   await assert.rejects(exchange(answering({ error: 'bad_verification_code' })), { message: 'GitHub no aceptó la autorización. Vuelve a conectar tu cuenta.', status: 400 });
@@ -330,7 +330,7 @@ test('a provider without credentials refuses to start and is reported as not con
   assert.equal(sources.linear?.configured, true);
   assert.equal(sources.google_calendar?.configured, false);
   assert.equal(sources.gmail?.configured, false);
-  assert.equal(sources.granola?.configured, true);
+  assert.equal(sources.granola?.configured, false);
   assert.equal(sources.apple_health?.configured, true);
 });
 

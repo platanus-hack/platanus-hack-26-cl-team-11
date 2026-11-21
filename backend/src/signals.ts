@@ -266,9 +266,9 @@ function meetingsOn(events: StoredEvent[], today: string, timeZone: string): Mee
     if (!isRecord(schedule)) continue;
     const start = instantOf(schedule.scheduled_start_time);
     const end = instantOf(schedule.scheduled_end_time);
-    if (start === null || end === null || dayKeyOf(new Date(start), timeZone) !== today || minutesByStart.has(start)) continue;
+    if (start === null || dayKeyOf(new Date(start), timeZone) !== today || minutesByStart.has(start)) continue;
     sources.add('granola');
-    minutesByStart.set(start, Math.max(0, (end - start) / MINUTE_MS));
+    minutesByStart.set(start, end === null ? 0 : Math.max(0, (end - start) / MINUTE_MS));
   }
 
   if (sources.size === 0) return null;

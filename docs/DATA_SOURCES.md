@@ -38,7 +38,7 @@ Estado al 21-nov-2026. El cálculo está en `backend/src/signals.ts`.
 |---|---|---|
 | Energía | La última noche de sueño que llega de Apple Health, comparada con el promedio de la propia persona y ajustada por el ánimo del último check-in. Con menos de 3 noches previas usa umbrales fijos: menos de 6 h es baja; 7,5 h o más es alta | Recuperación y variabilidad cardíaca |
 | Ánimo | No es una señal propia. El ánimo del check-in solo sube o baja la energía | Sacarlo como señal |
-| Carga | Las reuniones de hoy en Google Calendar, las notas de Granola que traen su horario, y las tareas de Linear en curso o que vencen dentro de 7 días | El check-in no entra en la carga |
+| Carga | Las reuniones de hoy en Google Calendar, las reuniones de Granola (cuentan como reunión del día, sin duración), y las tareas de Linear en curso o que vencen dentro de 7 días | El check-in no entra en la carga |
 | Bloqueos | El bloqueo dicho en un check-in de los últimos 7 días, y cada tarea de Linear en curso sin cambios hace 3 días o más | Los pull requests detenidos no cuentan |
 | Experiencia | Los repos de GitHub con actividad y las palabras que se repiten en títulos de pull requests y de tareas de Linear | Las reuniones no aportan temas |
 | Compromisos | No construida | Todo |

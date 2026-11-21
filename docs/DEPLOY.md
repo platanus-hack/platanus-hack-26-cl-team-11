@@ -46,6 +46,7 @@ render deploys create srv-dc0j2qrm8hqs73emf3ig   # volver a desplegar a mano
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | A mano, en el panel de Render | Activan Google Calendar y Gmail |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | A mano, en el panel de Render | Activan GitHub |
 | `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET` | A mano, en el panel de Render | Activan Linear |
+| `GRANOLA_CLIENT_ID`, `GRANOLA_CLIENT_SECRET` | A mano. Salen de registrar el cliente en `https://mcp-auth.granola.ai/oauth2/register` con la dirección de retorno `/api/oauth/granola/callback` | Activan Granola |
 | `PUBLIC_BASE_URL` | Opcional | Solo con dominio propio. Sin ella se usa `RENDER_EXTERNAL_URL`, que Render define solo |
 | `HEALTH_SHORTCUT_URL` | A mano, en el panel de Render. No es secreta | El link de iCloud del Atajo compartido de Apple Health. Con ella, la fila de Apple Health muestra «Agregar Atajo» y «Enviar datos». Sin ella se ve solo la dirección personal |
 | `HEALTH_SHORTCUT_NAME` | Opcional | El nombre exacto del Atajo en el teléfono. Por defecto, `Ronda Salud` |

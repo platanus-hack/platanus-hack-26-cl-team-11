@@ -26,7 +26,7 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. Hoy 
 | Linear | OAuth | Aplicación creada en el workspace `usevita`, pública para cualquier workspace, con credenciales en Render (21-nov-2026). Falta probar la conexión |
 | Google Calendar | OAuth de Google | Cliente creado en el proyecto `ronda-hack26` y publicado en producción sin verificar (21-nov-2026): entra cualquier cuenta de Google, con la advertencia de app no verificada y un tope de 100 personas. Falta probar la conexión |
 | Gmail | El mismo OAuth de Google | Construido; guarda solo asunto, remitente y fecha |
-| Granola | Llave personal pegada | Construido; Granola no ofrece OAuth para un servidor |
+| Granola | OAuth, por su servidor MCP | Construido. Un botón «Conectar», sin llave. Funciona en el plan gratis de Granola, con los últimos 30 días. Falta probarlo con una cuenta real |
 | Google Health | El mismo OAuth de Google | No empezado |
 | Whoop | — | Fuera de la hack |
 
@@ -267,7 +267,7 @@ Cobertura resultante: iPhone por el Atajo; Fitbit y Pixel Watch por Google; un A
 ## Las demás fuentes
 
 - **Google Calendar y Gmail.** Un solo OAuth. Una app sin verificar solo admite usuarios de prueba agregados a mano. De Gmail se guarda asunto y remitente, no el cuerpo.
-- **Granola.** API REST con llave personal. Crear la llave exige plan Business. Su MCP usa OAuth por navegador y no sirve desde un servidor.
+- **Granola.** Se conecta por OAuth contra su servidor MCP (`https://mcp.granola.ai/mcp`), que acepta registrar un cliente por programa y pide PKCE. Ronda quedó registrada como cliente el 21-nov-2026, con la dirección de retorno de producción. El servidor llama a la herramienta `search_meetings` y guarda una nota por reunión: título, hora, cantidad de asistentes y link. No pide transcripciones ni resúmenes. Antes se conectaba con una llave de su API REST, que exige plan Business; esa forma se quitó.
 - **GitHub.** OAuth App.
 
 Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cuenta y no sirven para el producto: cada persona autoriza sus cuentas contra nuestro backend.

@@ -23,6 +23,7 @@ interface OAuthState {
 }
 
 const hashOf = (nonce: string) => createHash('sha256').update(nonce).digest('hex');
+const challengeOf = (verifier: string) => createHash('sha256').update(verifier).digest('base64url');
 
 const sameHash = (left: string, right: string) => {
   const leftBytes = Buffer.from(left);
@@ -105,6 +106,7 @@ export function oauthRoutes(ctx: AppContext) {
       redirectUri: redirectUriFor(c.req.url, providerId),
       scopes: [...new Set(connectorsOf(providerId).flatMap((connector) => connector.scopes))],
       state: vault.seal(JSON.stringify({ token: person.token, provider: providerId, at: Date.now(), nonce: hashOf(nonce) } satisfies OAuthState)),
+      codeChallenge: challengeOf(nonce),
     });
     setCookie(c, cookieNameOf(providerId), nonce, { ...cookiePlaceOf(c.req.url, providerId), httpOnly: true, sameSite: 'Lax', maxAge: STATE_TTL_MS / 1000 });
     return c.redirect(authorizeUrl, 302);
@@ -129,7 +131,7 @@ export function oauthRoutes(ctx: AppContext) {
     if (!credentials) return c.json(missingCredentials(providerId), 500);
 
     try {
-      const tokens = await provider.exchange(code, credentials, redirectUriFor(c.req.url, providerId), ctx.fetch);
+      const tokens = await provider.exchange(code, credentials, redirectUriFor(c.req.url, providerId), ctx.fetch, nonce);
       const account = await provider.identify(tokens.accessToken, ctx.fetch);
       for (const connector of connectorsOf(providerId)) {
         store.saveConnection(person.token, connector.id, account, JSON.stringify(tokens));

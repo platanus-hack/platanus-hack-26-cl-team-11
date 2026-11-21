@@ -1,72 +1,73 @@
-import type { EventDraft, KeyConnector } from '../types.js';
-import { getJson } from './http.js';
+import { callGranolaTool } from '../oauth/granola.js';
+import type { EventDraft, OAuthConnector } from '../types.js';
 
-const BASE = 'https://public-api.granola.ai/v1';
-const MAX_NOTES_PER_PULL = 20;
+const MEETINGS_PER_PAGE = 100;
+const MAX_PAGES = 3;
+const NOTE_URL = 'https://notes.granola.ai/d/';
+const UNTITLED = 'Reunión sin título';
+const MEETING_BLOCK = /<meeting\s([^>]*)>([\s\S]*?)<\/meeting>/g;
+const ATTRIBUTE = /([a-z_]+)="([^"]*)"/g;
+const PARTICIPANT_TOTAL = /<known_participants[^>]*\btotal="(\d+)"/;
+const NEXT_CURSOR = /<pagination[^>]*\bhas_more="true"[^>]*\bnext_cursor="([^"]+)"/;
+const XML_ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'", '&#39;': "'" };
+const XML_ENTITY = /&(?:amp|lt|gt|quot|apos|#39);/g;
 
-interface GranolaUser {
-  name: string | null;
-  email: string;
+const decoded = (text: string) => text.replace(XML_ENTITY, (entity) => XML_ENTITIES[entity] ?? entity);
+
+const attributesOf = (tag: string): Record<string, string> => Object.fromEntries([...tag.matchAll(ATTRIBUTE)].map((match) => [match[1] ?? '', decoded(match[2] ?? '')]));
+
+export function meetingsIn(listing: string): EventDraft[] {
+  const drafts: EventDraft[] = [];
+  for (const block of listing.matchAll(MEETING_BLOCK)) {
+    const attributes = attributesOf(block[1] ?? '');
+    const id = attributes.id;
+    const startedAt = attributes.meeting_at ?? attributes.created_at;
+    if (!id || !startedAt || Number.isNaN(Date.parse(startedAt))) continue;
+    const title = attributes.title?.trim() || null;
+    const total = PARTICIPANT_TOTAL.exec(block[2] ?? '')?.[1];
+    const people = total === undefined ? null : Number(total);
+    drafts.push({
+      source: 'granola',
+      type: 'nota_de_reunion',
+      externalId: id,
+      occurredAt: startedAt,
+      summary: people === null ? (title ?? UNTITLED) : `${title ?? UNTITLED} · ${people} ${people === 1 ? 'asistente' : 'asistentes'}`,
+      raw: {
+        id,
+        title,
+        web_url: `${NOTE_URL}${id}`,
+        attendees: people,
+        organizer: attributes.organizer ?? null,
+        calendar_event: { scheduled_start_time: startedAt, scheduled_end_time: null },
+      },
+    });
+  }
+  return drafts;
 }
 
-interface GranolaNoteSummary {
-  id: string;
-  title: string | null;
-  owner: GranolaUser;
-  created_at: string;
-}
-
-interface GranolaList {
-  notes: GranolaNoteSummary[];
-  hasMore: boolean;
-  cursor: string | null;
-}
-
-interface GranolaNote extends GranolaNoteSummary {
-  web_url: string;
-  attendees: GranolaUser[];
-  summary_text: string;
-  calendar_event: { scheduled_start_time: string | null; scheduled_end_time: string | null } | null;
-}
-
-const headers = (secret: string) => ({ authorization: `Bearer ${secret}`, accept: 'application/json' });
-
-export const granola: KeyConnector = {
+export const granola: OAuthConnector = {
   id: 'granola',
   label: 'Granola',
-  how: 'Llave personal',
-  kind: 'key',
-  async identify(secret, fetchImpl) {
-    const list = await getJson<GranolaList>(fetchImpl, `${BASE}/notes?page_size=1`, headers(secret), 'Granola');
-    return list.notes[0]?.owner.email ?? 'cuenta de Granola';
-  },
+  how: 'Cuenta de Granola',
+  kind: 'oauth',
+  provider: 'granola',
+  scopes: ['openid', 'email', 'profile', 'offline_access'],
 
-  async pull(secret, _account, since, fetchImpl) {
-    const list = await getJson<GranolaList>(
-      fetchImpl,
-      `${BASE}/notes?page_size=${MAX_NOTES_PER_PULL}&created_after=${encodeURIComponent(since.toISOString())}`,
-      headers(secret),
-      'Granola',
-    );
+  async pull(accessToken, _account, since, fetchImpl) {
     const drafts: EventDraft[] = [];
-    for (const item of list.notes) {
-      const note = await getJson<GranolaNote>(fetchImpl, `${BASE}/notes/${item.id}`, headers(secret), 'Granola');
-      const people = note.attendees.length;
-      drafts.push({
-        source: 'granola',
-        type: 'nota_de_reunion',
-        externalId: note.id,
-        occurredAt: note.calendar_event?.scheduled_start_time ?? note.created_at,
-        summary: `${note.title ?? 'Reunión sin título'} · ${people} ${people === 1 ? 'asistente' : 'asistentes'}`,
-        raw: {
-          id: note.id,
-          title: note.title,
-          web_url: note.web_url,
-          attendees: note.attendees,
-          summary_text: note.summary_text,
-          calendar_event: note.calendar_event,
-        },
+    let cursor: string | null = null;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const listing: string = await callGranolaTool(fetchImpl, accessToken, 'search_meetings', {
+        from_date: since.toISOString(),
+        limit: MEETINGS_PER_PAGE,
+        attended_only: true,
+        include_shared: false,
+        max_participants: 0,
+        ...(cursor ? { cursor } : {}),
       });
+      drafts.push(...meetingsIn(listing));
+      cursor = NEXT_CURSOR.exec(listing)?.[1] ?? null;
+      if (!cursor) break;
     }
     return drafts;
   },

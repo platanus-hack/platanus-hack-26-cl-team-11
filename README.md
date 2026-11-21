@@ -75,7 +75,7 @@ Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y d
 |---|---|
 | Apple Health | Probado con un iPhone real |
 | GitHub, Linear, Google Calendar y Gmail | OAuth listo; faltan las credenciales de cada aplicación |
-| Granola | Se conecta con llave; probado solo con respuestas simuladas |
+| Granola | OAuth listo, por el servidor MCP de Granola; probado solo con respuestas simuladas |
 
 En producción: https://ronda-n8if.onrender.com
 

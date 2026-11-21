@@ -360,10 +360,10 @@ test('Google failures surface as short Spanish connector errors', async () => {
     throw new Error('offline');
   }) as unknown as Fetch;
 
-  await assert.rejects(google.exchange('code', credentials, 'https://ronda.test/cb', failing(400)), (failure) => failure instanceof ConnectorError && failure.status === 400);
+  await assert.rejects(google.exchange('code', credentials, 'https://ronda.test/cb', failing(400), 'verifier'), (failure) => failure instanceof ConnectorError && failure.status === 400);
   await assert.rejects(google.refresh('refresh', credentials, failing(400)), { message: 'Google no aceptó la autorización. Vuelve a conectar tu cuenta.' });
   await assert.rejects(google.refresh('refresh', credentials, failing(503)), { message: 'Google respondió 503.' });
-  await assert.rejects(google.exchange('code', credentials, 'https://ronda.test/cb', offline), { message: 'No se pudo contactar a Google.' });
+  await assert.rejects(google.exchange('code', credentials, 'https://ronda.test/cb', offline, 'verifier'), { message: 'No se pudo contactar a Google.' });
   await assert.rejects(google.identify('access', failing(401)), { message: 'Google dio por vencido el acceso. Vuelve a conectar tu cuenta.' });
   await assert.rejects(google.identify('access', fakeFetch({ 'https://': () => Response.json({ sub: '1' }) })), ConnectorError);
 });
