@@ -483,8 +483,9 @@ class Component extends DCLogic {
         ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + (r > 14 ? 3 : 1.5), 0, 6.2832); ctx.fill(); ctx.restore();
       } else { ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + 1.2, 0, 6.2832); ctx.fill(); }
       ctx.save(); ctx.beginPath(); ctx.arc(pp.x, pp.y, r, 0, 6.2832); ctx.clip();
-      if (id < 5) {
-        var im = self.team[id];
+      var own = self.people[id].image || (id < 5 && self.people[id].tile === undefined ? self.team[id] : null);
+      if (own) {
+        var im = own;
         if (im.complete && im.naturalWidth) { if (blur > 0.02) ctx.filter = 'blur(' + (blur * Math.max(1.2, r * 0.14)).toFixed(2) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
       } else {
         var tile = self.people[id].tile, sx0 = (tile % 8) * 128 + 4, sy0 = Math.floor(tile / 8) * 128 + 4;
@@ -660,7 +661,8 @@ class Component extends DCLogic {
 
   faceStyle(id) {
     var base = { display: 'block', width: '36px', height: '36px', borderRadius: '50%', flex: '0 0 auto', boxShadow: '0 0 0 2px rgba(255,255,255,0.95), 0 6px 14px rgba(40,30,90,0.14)' };
-    if (id < 5) return Object.assign(base, { backgroundImage: 'url(' + this.TEAM_SRC[id] + ')', backgroundSize: 'cover' });
+    if (this.people[id].image) return Object.assign(base, { backgroundImage: 'url(' + this.people[id].image.src + ')', backgroundSize: 'cover' });
+    if (id < 5 && this.people[id].tile === undefined) return Object.assign(base, { backgroundImage: 'url(' + this.TEAM_SRC[id] + ')', backgroundSize: 'cover' });
     var tile = this.people[id].tile;
     return Object.assign(base, { backgroundImage: 'url(' + this.ATLAS + ')', backgroundSize: '800% 800%', backgroundPosition: ((tile % 8) * 100 / 7) + '% ' + (Math.floor(tile / 8) * 100 / 7) + '%' });
   }

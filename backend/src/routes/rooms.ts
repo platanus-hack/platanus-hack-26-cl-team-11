@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { publicIdOf } from '../codes.js';
 import type { AppContext } from '../context.js';
+import { openFaceStore } from '../faces.js';
 import { rateLimit } from '../rateLimit.js';
 import type { Room } from '../rooms/store.js';
 import { asObject, NOT_FOUND } from './shared.js';
@@ -13,19 +14,24 @@ const MAX_ROOM_PEOPLE = 400;
 const MAX_EVENTS_PER_READ = 200;
 const JOINS_PER_MINUTE = 120;
 
-export function roomRoutes({ store, teams, rooms, assistants, agents, sim }: AppContext) {
+export function roomRoutes({ db, store, teams, rooms, assistants, agents, sim }: AppContext) {
   const routes = new Hono();
+  const faces = openFaceStore(db);
   const limited = rateLimit(JOINS_PER_MINUTE);
 
   const nameFrom = (value: unknown) => (typeof value === 'string' ? value.trim().slice(0, MAX_NAME_LENGTH) : '');
 
-  const peopleOf = (room: Pick<Room, 'teamId'>) =>
-    teams.membersOf(room.teamId).map((member) => ({
+  const peopleOf = (room: Pick<Room, 'teamId'>) => {
+    const members = teams.membersOf(room.teamId);
+    const chosenFaces = faces.many(members.map((member) => member.token));
+    return members.map((member) => ({
       id: publicIdOf(member.token),
       name: member.name,
       assistants: assistants.assistantsOf(member.token).map((assistant) => assistant.kind),
       synthetic: sim.isSynthetic(member.token),
+      face: chosenFaces.get(member.token) ?? null,
     }));
+  };
 
   const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
 

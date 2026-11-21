@@ -41,6 +41,78 @@
   var live = { people: [], threads: [] };
   var seen = '';
 
+  // Cada persona real sale con su cara: la que eligió en Ajustes o la que le da su nombre. Se dibuja una vez y queda como imagen.
+  var PORTRAIT_PX = 256, PORTRAIT_SETTLE_MS = 450, MAX_PORTRAITS = 60;
+  var EYE_SIZES = { chica: 4.2, media: 5.2, grande: 6.4 }, EYE_SPACINGS = { juntos: 11.6, normal: 13.6, separados: 16 };
+  var EYE_LIDS = { despiertos: 0, tranquilos: 0.22, sueno: 0.34 }, EYE_TILTS = { rectos: 0, arriba: 4, abajo: -4 };
+  var portraits = {}, portraitQueue = Promise.resolve(), carasLoading = null;
+
+  var loadCaras = function () {
+    if (!carasLoading) carasLoading = new Promise(function (resolve, reject) {
+      if (window.RondaCaras) { resolve(); return; }
+      var script = document.createElement('script');
+      script.src = '../faces/caras.js';
+      script.onload = function () { resolve(); };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return carasLoading;
+  };
+
+  var imageFrom = function (source) {
+    return new Promise(function (resolve, reject) {
+      var image = new Image();
+      image.onload = function () { resolve(image); };
+      image.onerror = reject;
+      image.src = source;
+    });
+  };
+
+  var drawPortrait = function (person) {
+    var caras = window.RondaCaras, look = person.face;
+    if (look) caras.customize(person.name, {
+      recipe: { kind: look.kind, a: EYE_SIZES[look.size], gap: EYE_SPACINGS[look.spacing] || EYE_SPACINGS.normal, lid: EYE_LIDS[look.lid] || 0, tilt: EYE_TILTS[look.tilt] || 0, glasses: look.glasses, brow: look.brow, mark: look.mark, lashes: look.lashes },
+      palette: caras.paletteFromTone(look.tone, look.mix || 'armonica')
+    });
+    var node = document.createElement('div');
+    node.style.cssText = 'position:fixed;left:0;top:0;width:' + PORTRAIT_PX + 'px;height:' + PORTRAIT_PX + 'px;opacity:0.01;pointer-events:none;z-index:-1';
+    document.body.appendChild(node);
+    var face = caras.mount(node, person.name, { size: PORTRAIT_PX, rest: true, interactive: false, enter: false });
+    return new Promise(function (resolve) { setTimeout(resolve, PORTRAIT_SETTLE_MS); }).then(function () {
+      var tokens = getComputedStyle(document.documentElement);
+      var canvas = document.createElement('canvas');
+      canvas.width = canvas.height = PORTRAIT_PX;
+      var ctx = canvas.getContext('2d');
+      var lava = node.querySelector('.rd-cara__gota > canvas');
+      if (lava && lava.width > 2) ctx.drawImage(lava, 0, 0, PORTRAIT_PX, PORTRAIT_PX);
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = getComputedStyle(node).getPropertyValue('--rd-cara-luz').trim() || tokens.getPropertyValue('--rd-g2').trim();
+      ctx.fillRect(0, 0, PORTRAIT_PX, PORTRAIT_PX);
+      ctx.globalCompositeOperation = 'source-over';
+      var eyes = node.querySelector('.rd-cara__gota > svg').cloneNode(true);
+      eyes.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      eyes.setAttribute('width', PORTRAIT_PX);
+      eyes.setAttribute('height', PORTRAIT_PX);
+      eyes.setAttribute('style', 'color:' + tokens.getPropertyValue('--rd-ink').trim());
+      var shared = document.getElementById('rd-cara-defs');
+      var defs = shared ? shared.innerHTML.replace(/var\((--[a-z0-9-]+)\)/g, function (match, name) { return tokens.getPropertyValue(name).trim(); }) : '';
+      var markup = new XMLSerializer().serializeToString(eyes).replace(/^(<svg[^>]*>)/, '$1' + defs);
+      return imageFrom('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup)).then(function (drawn) {
+        ctx.drawImage(drawn, 0, 0, PORTRAIT_PX, PORTRAIT_PX);
+        return imageFrom(canvas.toDataURL('image/png'));
+      });
+    }).finally(function () { face.destroy(); node.remove(); });
+  };
+
+  var portraitOf = function (person) {
+    var key = person.id + '|' + person.name + '|' + JSON.stringify(person.face || null);
+    if (!portraits[key]) {
+      portraits[key] = portraitQueue.then(loadCaras).then(function () { return drawPortrait(person); }).catch(function () { return null; });
+      portraitQueue = portraits[key];
+    }
+    return portraits[key];
+  };
+
   var tileOf = function (id) {
     var hash = 0;
     for (var i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) % ATLAS_FACES;
@@ -72,14 +144,18 @@
 
   var apply = function (state) {
     var next = JSON.stringify([
-      state.people.map(function (person) { return [person.id, person.name, person.assistants.join(' ')]; }),
+      state.people.map(function (person) { return [person.id, person.name, person.assistants.join(' '), person.face || null]; }),
       state.threads.map(function (thread) { return [thread.id, thread.help]; })
     ]);
     if (next === seen) return;
     seen = next;
     live = state;
     state.people.slice(0, g.MAX).forEach(function (person, index) {
-      g.people[index] = { name: person.name, status: statusOf(person), tile: tileOf(person.id) };
+      g.people[index] = { name: person.name, status: statusOf(person), tile: tileOf(person.id), pid: person.id, image: null };
+      if (person.synthetic || index >= MAX_PORTRAITS) return;
+      portraitOf(person).then(function (image) {
+        if (image && g.people[index] && g.people[index].pid === person.id) g.people[index].image = image;
+      });
     });
     var count = Math.max(1, Math.min(g.MAX, state.people.length));
     if (count !== g.state.n) g.setN(count, false);
