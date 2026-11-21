@@ -5,7 +5,7 @@ import { asObject, NOT_FOUND } from './shared.js';
 const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
 const REQUEST_NOT_FOUND = { error: 'Esa solicitud no existe.' } as const;
 
-export function teamRoutes({ store, teams }: AppContext) {
+export function teamRoutes({ store, teams, rooms }: AppContext) {
   const routes = new Hono();
 
   routes.post('/people/:token/teams', async (c) => {
@@ -47,6 +47,7 @@ export function teamRoutes({ store, teams }: AppContext) {
         const members = teams.membersOf(team.id);
         return {
           ...team,
+          roomCode: rooms.roomOfTeam(team.id)?.code ?? null,
           members: members.map((member) => member.name),
           requests: teams.joinRequestsOf(team.id).map((request) => ({
             id: request.id,

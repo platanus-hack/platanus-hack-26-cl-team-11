@@ -102,9 +102,11 @@ export function RoomPage({ code }: { code: string }) {
             <span className="rd-stat">{withAssistant}</span>
           </div>
         </section>
-        <a className="rd-button rd-button--quiet app-link" href={`/design/grafo/sala.html?sala=${encodeURIComponent(state.code)}`}>
-          Ver la sala en el globo
-        </a>
+        <div className="rd-actions">
+          <a className="rd-button rd-button--quiet app-link" href={`/design/grafo/sala.html?sala=${encodeURIComponent(state.code)}`}>
+            Ver la sala en el globo
+          </a>
+        </div>
         <section className="rd-card rd-glass">
           <span className="rd-label">Simulación</span>
           <p className="rd-note">Suma {SIMULATED_PEOPLE} personas inventadas, cada una con su repo, y sus agentes conversan.</p>

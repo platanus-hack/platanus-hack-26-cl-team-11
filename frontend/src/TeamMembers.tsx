@@ -25,18 +25,33 @@ export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) 
         {team.requests.map((request) => (
           <JoinRequestRow key={request.id} token={token} teamId={team.id} request={request} onChange={onChange} />
         ))}
-        <Item
-          icon={
-            <ItemIcon>
-              <Glyph name="key" />
-            </ItemIcon>
-          }
-          title="Código para entrar"
-          subtitle={team.joinCode}
-          end={<CopyButton text={team.joinCode} label="Copiar el código" />}
-        />
+        {team.roomCode ? (
+          <Item
+            icon={
+              <ItemIcon>
+                <Glyph name="map" />
+              </ItemIcon>
+            }
+            title="Pantalla de la sala"
+            subtitle="El QR para entrar y quiénes están"
+            href={`/sala/${encodeURIComponent(team.roomCode)}`}
+          />
+        ) : (
+          <Item
+            icon={
+              <ItemIcon>
+                <Glyph name="key" />
+              </ItemIcon>
+            }
+            title="Código para entrar"
+            subtitle={team.joinCode}
+            end={<CopyButton text={team.joinCode} label="Copiar el código" />}
+          />
+        )}
       </div>
-      <p className="rd-note">Comparte el código solo con quienes son parte del equipo. Cada ingreso lo aprueba todo el equipo.</p>
+      <p className="rd-note">
+        {team.roomCode ? 'Es una sala abierta: entra quien escanea su QR.' : 'Comparte el código solo con quienes son parte del equipo. Cada ingreso lo aprueba todo el equipo.'}
+      </p>
     </div>
   );
 }

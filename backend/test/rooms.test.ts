@@ -91,8 +91,9 @@ test('the room screen sees who is in and what happened, and never a personal lin
 test('a room is a team: its people can start rounds together and existing teams still ask for approval', async () => {
   const { ctx, app, room } = await setup();
   const ana = (await (await app.request(`/api/rooms/${room.code}/join`, json({ name: 'Ana' }))).json()) as Joined;
-  const teams = (await (await app.request(`/api/people/${ana.token}/teams`)).json()) as { teams: Array<{ id: string; name: string; joinCode: string }> };
+  const teams = (await (await app.request(`/api/people/${ana.token}/teams`)).json()) as { teams: Array<{ id: string; name: string; joinCode: string; roomCode: string | null }> };
   assert.equal(teams.teams[0]?.name, 'Platanus Hack');
+  assert.equal(teams.teams[0]?.roomCode, room.code);
 
   const tomas = ctx.store.addPerson('Tomás');
   const viaTeamCode = await app.request(`/api/people/${tomas.token}/teams/join`, json({ joinCode: teams.teams[0]?.joinCode }));

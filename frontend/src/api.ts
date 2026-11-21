@@ -141,6 +141,7 @@ export interface JoinRequest {
 
 export interface Team extends TeamSummary {
   joinCode: string;
+  roomCode: string | null;
   members: string[];
   requests: JoinRequest[];
 }
