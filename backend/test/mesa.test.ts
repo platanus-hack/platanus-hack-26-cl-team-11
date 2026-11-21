@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type * as z from 'zod/v4';
+import { cardDepsFrom } from '../src/agents/deps.js';
 import type { RoundEstimate } from '../src/agents/estimate.js';
+import { cardFor } from '../src/agents/round.js';
 import type { AgentModel, AgentRequest } from '../src/agents/model.js';
 import { ContactPlan, HelpReply, ProposalDraft } from '../src/agents/prompts.js';
 import { createApp } from '../src/app.js';
@@ -327,4 +329,19 @@ test('while the model writes, the live view carries the words to the two people 
   release();
   await settled('Ana');
   assert.deepEqual((await live('Ana')).streams, []);
+});
+
+test('someone with only a calendar connected joins the conversation, and their agent knows what is on it', async () => {
+  const { ctx, app } = setup();
+  const solo = ctx.store.addPerson('Solo calendario');
+  const calendarOnly = async () => (await (await app.request(`/api/people/${solo.token}/mesa`)).json()) as MesaView;
+  assert.equal((await calendarOnly()).publishing, false);
+
+  ctx.store.saveEvent(solo.token, { source: 'google_calendar', type: 'reunion', occurredAt: new Date().toISOString(), summary: 'Revisión del pitch con Platanus · 45 min', raw: {}, externalId: 'cal-1' });
+  assert.equal((await calendarOnly()).publishing, true);
+  const card = cardFor(cardDepsFrom(ctx), solo, new Date());
+  assert.ok(card.statements.includes('En su calendario: Revisión del pitch con Platanus · 45 min'));
+
+  ctx.store.saveEvent(solo.token, { source: 'apple_health', type: 'salud_diaria', occurredAt: new Date().toISOString(), summary: '6 h de sueño', raw: {}, externalId: 'dia-1' });
+  assert.ok(!cardFor(cardDepsFrom(ctx), solo, new Date()).statements.some((line) => line.includes('sueño')));
 });

@@ -34,6 +34,7 @@ export interface CardSource {
   signals: Signals;
   decisions: TopicDecisions;
   repo?: RepoKnowledge;
+  recent?: string[];
 }
 
 export const MAX_NEEDS_PER_PERSON = 2;
@@ -61,8 +62,9 @@ const mergeTopics = (first: string[], second: string[]): string[] => {
   return [...first, ...second].filter((topic) => !seen.has(topicKeyOf(topic)) && Boolean(seen.add(topicKeyOf(topic)))).slice(0, MAX_EXPERTISE);
 };
 
-export function buildCard({ token, name, signals, decisions, repo }: CardSource): AgentCard {
+export function buildCard({ token, name, signals, decisions, repo, recent = [] }: CardSource): AgentCard {
   const statements: string[] = [...(repo?.workingOn ?? [])];
+  if (signals.visibility.expertise !== 'nunca') statements.push(...recent);
   if (signals.visibility.expertise === 'siempre') statements.push(...signals.focus);
   if (signals.visibility.energy === 'siempre' && signals.energy.level !== 'sin_datos') statements.push(signals.energy.statement);
   if (signals.visibility.load === 'siempre' && signals.load.level !== 'sin_datos') statements.push(signals.load.statement);

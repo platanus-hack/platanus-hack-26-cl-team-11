@@ -5,7 +5,7 @@ import { deriveSignals } from '../signals.js';
 import type { RepoStore } from '../repo/store.js';
 import type { RoomEventType } from '../rooms/store.js';
 import type { TeamStore } from '../teams/store.js';
-import type { JsonObject } from '../types.js';
+import type { JsonObject, StoredEvent } from '../types.js';
 import { buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
 import { currentDigest, refreshDigests, type DigestStore } from './digest.js';
 import { AgentModelError, approximateTokens, type AgentModel, type ModelUsage } from './model.js';
@@ -67,10 +67,37 @@ interface OpenNeed {
   need: Need;
 }
 
+const RECENT_WORK_DAYS = 7;
+const MAX_RECENT_WORK = 6;
+const WORK_SOURCE_LABEL: Partial<Record<string, string>> = {
+  google_calendar: 'En su calendario',
+  granola: 'Reunión',
+  linear: 'Tarea en Linear',
+  github: 'En GitHub',
+};
+
+export function recentWorkOf(events: StoredEvent[], now: Date): string[] {
+  const since = now.getTime() - RECENT_WORK_DAYS * DAY_MS;
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  for (const event of events) {
+    const label = WORK_SOURCE_LABEL[event.source];
+    const at = Date.parse(event.occurredAt);
+    if (!label || !event.summary || Number.isNaN(at) || at < since || at > now.getTime() + RECENT_WORK_DAYS * DAY_MS) continue;
+    const line = `${label}: ${event.summary}`;
+    if (seen.has(line)) continue;
+    seen.add(line);
+    lines.push(line);
+    if (lines.length >= MAX_RECENT_WORK) break;
+  }
+  return lines;
+}
+
 export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents' | 'repo' | 'digests'>, member: { token: string; name: string }, now: Date): AgentCard {
-  const signals = withChosenVisibility(deriveSignals(deps.store.listSignalEvents(member.token, now), now), deps.policies.chosen(member.token));
+  const events = deps.store.listSignalEvents(member.token, now);
+  const signals = withChosenVisibility(deriveSignals(events, now), deps.policies.chosen(member.token));
   const repo = deps.repo && deps.digests ? currentDigest({ repo: deps.repo, digests: deps.digests }, member.token) : undefined;
-  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo });
+  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo, recent: recentWorkOf(events, now) });
 }
 
 export async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
