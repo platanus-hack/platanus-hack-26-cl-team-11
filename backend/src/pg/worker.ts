@@ -18,6 +18,12 @@ interface Backend {
 const INT8 = 20;
 const NUMERIC = 1700;
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1'];
+const CONNECT_TIMEOUT_MS = 10_000;
+const QUERY_TIMEOUT_MS = 25_000;
+const SQL_STATE = /^[0-9A-Z]{5}$/;
+const CONNECTION_LOST_CLASSES = ['08', '57'];
+const TRANSACTION_START = /^\s*BEGIN\b/i;
+const TRANSACTION_END = /^\s*(COMMIT|ROLLBACK)\s*;?\s*$/i;
 
 pg.types.setTypeParser(INT8, Number);
 pg.types.setTypeParser(NUMERIC, Number);
@@ -33,11 +39,18 @@ function needsEncryption(url: string): boolean {
 
 function postgresBackend(url: string): Backend {
   let client: pg.Client | null = null;
+  let inTransaction = false;
   const binary = (value: SqlValue) => (value instanceof Uint8Array ? Buffer.from(value) : value);
 
   const connected = async () => {
     if (client) return client;
-    const fresh = new pg.Client({ connectionString: url, keepAlive: true, ssl: needsEncryption(url) ? { rejectUnauthorized: false } : undefined });
+    const fresh = new pg.Client({
+      connectionString: url,
+      keepAlive: true,
+      connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
+      query_timeout: QUERY_TIMEOUT_MS,
+      ssl: needsEncryption(url) ? { rejectUnauthorized: false } : undefined,
+    });
     const lost = () => {
       if (client !== fresh) return;
       client = null;
@@ -50,14 +63,44 @@ function postgresBackend(url: string): Backend {
     return fresh;
   };
 
+  const discardUnlessServerRefused = (failure: unknown) => {
+    const code = (failure as { code?: unknown }).code;
+    const refusedByServer = typeof code === 'string' && SQL_STATE.test(code) && !CONNECTION_LOST_CLASSES.includes(code.slice(0, 2));
+    if (refusedByServer) return false;
+    const broken = client;
+    client = null;
+    backend.schema = '';
+    broken?.end().catch(() => undefined);
+    return true;
+  };
+
+  const send = async (sql: string, params?: SqlValue[]) => {
+    const open = await connected();
+    return params ? open.query(sql, params.map(binary)) : open.query(sql);
+  };
+
+  const run = async (sql: string, params?: SqlValue[]) => {
+    try {
+      const result = await send(sql, params);
+      if (!params) inTransaction = TRANSACTION_START.test(sql) ? true : TRANSACTION_END.test(sql) ? false : inTransaction;
+      return result;
+    } catch (failure) {
+      const connectionLost = discardUnlessServerRefused(failure);
+      const wasInTransaction = inTransaction;
+      if (connectionLost) inTransaction = false;
+      if (!connectionLost || wasInTransaction) throw failure;
+      return send(sql, params);
+    }
+  };
+
   const backend: Backend = {
     schema: null,
     async query(sql, params) {
-      const result = await (await connected()).query(sql, params.map(binary));
+      const result = await run(sql, params);
       return { rows: result.rows as Row[], affected: result.rowCount ?? 0 };
     },
     async script(sql) {
-      await (await connected()).query(sql);
+      await run(sql);
     },
     async close() {
       const open = client;
