@@ -19,6 +19,6 @@ export const roundDepsFrom = (ctx: AppContext, model: AgentModel): RoundDeps => 
   model,
   onProposal: (proposal) => ctx.whatsapp.proposalCreated(proposal),
   onEvent: (teamId, type, payload) => {
-    if (ctx.rooms.roomOfTeam(teamId)) ctx.rooms.record(teamId, type, payload);
+    if (type !== 'paso' && ctx.rooms.roomOfTeam(teamId)) ctx.rooms.record(teamId, type, payload);
   },
 });

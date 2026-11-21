@@ -2,7 +2,7 @@ import type { DatabaseSync } from '../pg/database.js';
 import { normalizeCode, randomCode } from '../codes.js';
 import type { JsonObject } from '../types.js';
 
-export const ROOM_EVENT_TYPES = ['persona_entra', 'asistente_conecta', 'repo_cambia', 'ronda_empieza', 'pedido_busca', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'] as const;
+export const ROOM_EVENT_TYPES = ['persona_entra', 'asistente_conecta', 'repo_cambia', 'ronda_empieza', 'pedido_busca', 'paso', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'] as const;
 export type RoomEventType = (typeof ROOM_EVENT_TYPES)[number];
 
 const ROOM_CODE_LENGTH = 6;

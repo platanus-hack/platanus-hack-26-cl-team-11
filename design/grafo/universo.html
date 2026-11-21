@@ -296,7 +296,7 @@ function addItem(e) {
   } else if (e.type === 'call') {
     node = el('div', 'uv-tool');
     const who = el('div', 'uv-tool-who'); const f = el('span', 'uv-face'); Object.assign(f.style, faceCss(e.from));
-    const nm = el('span'); nm.append(el('b', '', 'Agente de ' + people[e.from].name), ' usa una herramienta'); who.append(f, nm);
+    const nm = el('span'); nm.append(el('b', '', e.who || 'Agente de ' + people[e.from].name), e.does || ' usa una herramienta'); who.append(f, nm);
     const card = RondaTools.create(e); node.append(who, card.el);
     upd = t => card.update(t);
   } else if (e.type === 'ask') {
@@ -310,7 +310,7 @@ function addItem(e) {
     let accepted = false; ok.onclick = () => { accepted = true; };
     upd = t => { const done = accepted || t >= e.end; if (done && !node.dataset.done) { node.dataset.done = '1'; ok.disabled = adj.disabled = true; doneLine.removeAttribute('aria-hidden'); } };
   }
-  push(node); items.push({ e, upd }); upd(clock);
+  push(node); items.push({ e, upd }); e.node = node; upd(clock);
   if (e.type === 'call') { tagEls[e.name] && tagEls[e.name].setAttribute('data-seen', ''); const k = RondaTools.motionKind(e.name); miniEls[k] && miniEls[k].setAttribute('data-seen', ''); }
 }
 
@@ -483,7 +483,7 @@ function draw(T) {
       ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + ox * 0.7, my + oy * 0.7); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(mx, my, 3.5, 0, 6.2832); ctx.fill(); ctx.restore();
       ctx.save(); ctx.translate(ox * (0.6 + 0.4 * show), oy * (0.6 + 0.4 * show)); ctx.globalAlpha = Math.max(0.001, show);
-      RondaEdge.paint(ctx, arc, st, { size: 78 * kS, u: 0.5, faces: [teamImg[a], teamImg[b]] }); ctx.restore();
+      RondaEdge.paint(ctx, arc, st, { size: 78 * kS, u: 0.5, faces: LIVE ? [] : [teamImg[a], teamImg[b]] }); ctx.restore();
     } else if (st.phase === 'typing') RondaEdge.paint(ctx, arc, st, { size: 52 * kS, u: 0.5 });
     if (activeEv.type === 'call') { tagEls[activeEv.name] && tagEls[activeEv.name].setAttribute('data-now', ''); const k = RondaTools.motionKind(activeEv.name); miniEls[k] && miniEls[k].setAttribute('data-now', ''); }
   }
@@ -528,7 +528,7 @@ if ((q.get('vivo') || '').startsWith('/api/people/')) {
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=1'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=2'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }

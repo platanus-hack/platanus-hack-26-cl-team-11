@@ -15,7 +15,7 @@ window.RondaEdge = (() => {
     for (const e of events) {
       if (t < e.at) continue;
       if (e.type === 'call') {
-        const kind = window.RondaTools ? RondaTools.motionKind(e.name) : 'chat';
+        const kind = e.motion || (window.RondaTools ? RondaTools.motionKind(e.name) : 'chat');
         if (t < e.end) st = { phase: 'tool', kind, p: clamp((t - e.at) / Math.max(0.2, e.end - e.at)), author: e.author, call: e };
         else if (t < e.end + 2.2) st = { phase: 'done', kind, d: clamp((t - e.end) / 2.2), author: e.author, call: e };
         else st = { phase: 'receipt', kind, author: e.author, call: e };

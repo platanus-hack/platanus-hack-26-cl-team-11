@@ -86,12 +86,18 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
   const teammates: Teammate[] = cards.filter((card) => card.token !== requester.token).map((card, position) => ({ id: `p${position + 1}`, card }));
   const byId = new Map(teammates.map((teammate) => [teammate.id, teammate]));
 
+  const from = publicIdOf(requester.token);
+  const step = (tool: string, by: string, state: 'inicio' | 'fin', detail: JsonObject = {}) =>
+    deps.onEvent?.(round.teamId, 'paso', { from, topic: need.topic, tool, by, state, ...detail });
+
+  step('equipo.consultar', from, 'inicio', { people: teammates.length });
   const plan = await deps.model.decide({ system: systemFor(requester.name), prompt: contactPrompt(need, teammates), schema: ContactPlan });
   const contacts = new Map<string, string>();
   for (const contact of plan.contacts) {
     const message = contact.message.trim();
     if (byId.has(contact.teammate) && message && !contacts.has(contact.teammate) && contacts.size < MAX_CONTACTS) contacts.set(contact.teammate, message);
   }
+  step('equipo.consultar', from, 'fin', { people: teammates.length, chosen: contacts.size });
   if (contacts.size === 0) return 'nadie';
 
   const settled = await Promise.allSettled(
@@ -99,13 +105,15 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
       const helper = (byId.get(teammateId) as Teammate).card;
       const threadId = deps.agents.addThread({ roundId: round.id, requesterToken: requester.token, helperToken: helper.token, topic: need.topic });
       deps.agents.addMessage(threadId, requester.token, message);
-      const arc = { thread: threadId, from: publicIdOf(requester.token), to: publicIdOf(helper.token), topic: need.topic };
+      const arc = { thread: threadId, from, to: publicIdOf(helper.token), topic: need.topic };
       deps.onEvent?.(round.teamId, 'hilo_abre', arc);
+      step('checkin.consultar', arc.to, 'inicio', { thread: threadId });
       const reply = await deps.model.decide({ system: systemFor(helper.name), prompt: replyPrompt(helper, requester.name, need, message), schema: HelpReply });
       const help = reply.help.trim().toLowerCase();
       if (!isHelpAnswer(help)) throw new AgentModelError(INCOMPLETE_REPLY);
       deps.agents.addMessage(threadId, helper.token, reply.message.trim());
       deps.agents.setThreadHelp(threadId, help);
+      step('checkin.consultar', arc.to, 'fin', { thread: threadId });
       deps.onEvent?.(round.teamId, 'hilo_responde', { ...arc, help });
       return { id: teammateId, name: helper.name, help, message: reply.message.trim() };
     }),
@@ -117,7 +125,9 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
   const willing = replies.filter((reply) => reply.help !== 'no');
   if (willing.length === 0) return 'sin_ayuda';
 
+  step('propuesta.redactar', from, 'inicio', { willing: willing.length });
   const draft = await deps.model.decide({ system: systemFor(requester.name), prompt: proposalPrompt(requester, need, willing), schema: ProposalDraft });
+  step('propuesta.redactar', from, 'fin', { willing: willing.length });
   const willingIds = new Set(willing.map((reply) => reply.id));
   const helperTokens = [...new Set(draft.helpers.filter((id) => willingIds.has(id)))].slice(0, MAX_HELPERS).map((id) => (byId.get(id) as Teammate).card.token);
   const text = draft.text.trim().slice(0, MAX_PROPOSAL_LENGTH);
@@ -125,7 +135,7 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
 
   const proposal = deps.agents.addProposal({ roundId: round.id, teamId: round.teamId, requesterToken: requester.token, helperTokens, topic: need.topic, text });
   deps.onProposal?.(proposal);
-  deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic, proposal: proposal.id });
+  deps.onEvent?.(round.teamId, 'propuesta_nace', { from, helpers: helperTokens.map(publicIdOf), topic: need.topic, proposal: proposal.id });
   return 'propuesta';
 }
 

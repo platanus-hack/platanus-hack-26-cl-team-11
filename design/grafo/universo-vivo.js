@@ -3,12 +3,15 @@
 // conversaciones y propuestas vienen del servidor. El texto de una conversación llega solo a sus dos
 // dueños; el resto ve quién le escribe a quién, el tema y el resultado, con la marca «dato privado».
 // Cada pedido de la ronda es una escena: quien pide al frente y, a medida que su agente escribe, quienes responden.
+// Cada paso real de un agente (revisar lo que publicó la mesa, leer si su persona puede ayudar, redactar la
+// propuesta) abre su tarjeta de herramienta cuando empieza y la cierra cuando termina, con su miniatura en el arco.
 (function () {
   var source = new URLSearchParams(location.search).get('vivo') || '';
   if (source.indexOf('/api/people/') !== 0 || !LIVE) return;
 
   var RUNNING_MS = 1200, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
-  var GAP = 0.4, HOLD = 2.4, TILES = 64, MAX_STRIDE = 4, LOBBY_ROWS = 8;
+  var GAP = 0.4, HOLD = 2.4, TILES = 64, MAX_STRIDE = 4, LOBBY_ROWS = 8, EXPECTED_STEP = 4, SHORTEST_STEP = 1.2, TILE_PX = 120;
+  var BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   var HELP = { si: 'Puede ayudar.', parcial: 'Puede orientar.', no: 'No puede esta vez.' };
   var ROLE = { si: 'Puede ayudar', parcial: 'Puede orientar', no: 'No puede' };
   var CLOSED = {
@@ -53,7 +56,7 @@
     if (from === undefined) return null;
     var g = { members: [from], topic: ev.topic }, script = { events: [], duration: Infinity };
     SHOWN.push(g); SCRIPTS.push(script); SCENES.push({ kind: 'group', i: SHOWN.length - 1, dur: Infinity });
-    need = { from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {} };
+    need = { from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {}, steps: {} };
     needs.push(need); byKey.set(key, need);
     return need;
   }
@@ -122,8 +125,62 @@
     need.lastEnd = clock + 0.7; need.next = clock + 0.9;
   }
 
+  // La cara de una persona real, recortada del atlas, para la ilustración de una tarjeta.
+  var faceUrls = {};
+  function faceUrlOf(slot) {
+    if (faceUrls[slot]) return faceUrls[slot];
+    if (!atlas.complete || !atlas.naturalWidth) return BLANK;
+    var tile = +people[slot].face.slice(5), canvas = document.createElement('canvas');
+    canvas.width = canvas.height = TILE_PX;
+    canvas.getContext('2d').drawImage(atlas, (tile % 8) * 128 + 4, Math.floor(tile / 8) * 128 + 4, TILE_PX, TILE_PX, 0, 0, TILE_PX, TILE_PX);
+    return (faceUrls[slot] = canvas.toDataURL('image/png'));
+  }
+
+  // Los tres pasos reales de una ronda, con la tarjeta que ya existe para cada uno.
+  var STEPS = {
+    'equipo.consultar': function (need, by, ev) {
+      var others = [];
+      slotOf.forEach(function (slot) { if (slot !== by) others.push(slot); });
+      return { motion: 'help', does: ' revisa la mesa', label: 'Revisar lo que publicó cada persona', receipt: 'Listo', input: { tema: need.g.topic }, output: { personas: ev.people }, faces: others.slice(0, 5).map(faceUrlOf), to: need.g.members[1] === undefined ? by : need.g.members[1] };
+    },
+    'checkin.consultar': function (need, by) {
+      return { motion: 'health', does: ' lee a su persona', label: 'Revisar si ' + people[by].name + ' puede ayudar', receipt: 'Solo para su agente', privateResult: true, input: { tema: need.g.topic }, output: { compartir: false }, faces: [faceUrlOf(by)], to: need.from };
+    },
+    'propuesta.redactar': function (need, by, ev) {
+      return { motion: 'guideline', does: ' redacta', label: 'Redactar la propuesta', receipt: 'Borrador listo', input: { ayudan: ev.willing }, output: { borrador: true }, to: need.g.members[1] === undefined ? by : need.g.members[1] };
+    }
+  };
+  var RECEIPT = {
+    'equipo.consultar': function (ev) { return ev.chosen ? count(ev.chosen, 'persona elegida', 'personas elegidas') : 'Nadie con relación'; }
+  };
+
+  function closeStep(call, receipt) {
+    call.end = Math.max(clock, call.at + SHORTEST_STEP);
+    if (!receipt) return;
+    call.receipt = receipt;
+    var shown = call.node && call.node.querySelector('.rt-done span');
+    if (shown) shown.textContent = receipt;
+  }
+
+  function step(need, ev) {
+    var by = slotOf.get(ev.by), key = ev.tool + '|' + ev.by, make = STEPS[ev.tool];
+    if (by === undefined || !make) return;
+    if (ev.state === 'inicio') {
+      var at = Math.max(clock, need.next);
+      var call = Object.assign(make(need, by, ev), { type: 'call', name: ev.tool, who: agentOf(by), from: by, at: at, end: at + EXPECTED_STEP });
+      need.script.events.push(call); need.steps[key] = call;
+      need.lastEnd = at + SHORTEST_STEP; need.next = at + 0.9;
+    } else if (need.steps[key]) {
+      var open = need.steps[key];
+      delete need.steps[key];
+      closeStep(open, RECEIPT[ev.tool] ? RECEIPT[ev.tool](ev) : '');
+      need.lastEnd = open.end + 0.9; need.next = open.end + 0.7;
+    }
+  }
+
   function play(need, ev) {
     var other = slotOf.get(ev.to);
+    if (ev.type === 'paso') return step(need, ev);
     if (ev.type === 'hilo_abre' && other !== undefined) {
       if (need.g.members.indexOf(other) < 0) { need.g.members.push(other); heading(need); turnTo(need.g.members); }
       need.threads += 1;
@@ -137,6 +194,8 @@
       note(need, [need.from].concat(helpers), 'Propuesta', ev.text || names + (helpers.length === 1 ? ' ayuda a ' : ' ayudan a ') + people[need.from].name + '. Cada persona decide si acepta.', true);
     } else if (ev.type === 'pedido_cierra') {
       need.closed = true; need.outcome = ev.outcome;
+      Object.keys(need.steps).forEach(function (key) { closeStep(need.steps[key], 'Sin respuesta'); });
+      need.steps = {};
       if (CLOSED[ev.outcome]) note(need, [need.from], CLOSED[ev.outcome][0], CLOSED[ev.outcome][1]);
     }
   }
@@ -145,6 +204,8 @@
   LIVE.tick = function () {
     if (showing) {
       while (showing.queue.length && clock >= showing.next) play(showing, showing.queue.shift());
+      // Un paso que sigue esperando al modelo se queda «consultando»: su final se corre mientras no llegue la respuesta.
+      Object.keys(showing.steps).forEach(function (key) { var open = showing.steps[key]; if (clock > open.end - 0.4) open.end = clock + 1.2; });
       var over = (showing.closed || finished) && !showing.queue.length && clock > showing.lastEnd + HOLD;
       if (!over) return;
       showing.done = true; showing = null;

@@ -221,7 +221,7 @@ interface LiveView {
   me: string;
   people: Array<{ id: string; name: string }>;
   round: { id: string; status: string } | null;
-  events: Array<{ id: number; type: string; from?: string; to?: string; topic?: string; help?: string; outcome?: string; text: string | null; calls?: number; tokens?: number }>;
+  events: Array<{ id: number; type: string; from?: string; to?: string; by?: string; tool?: string; state?: string; topic?: string; help?: string; outcome?: string; text: string | null; calls?: number; tokens?: number }>;
   lastEventId: number;
 }
 
@@ -239,8 +239,13 @@ test('the live view streams each step of the round, with the words only for the 
   await settled('Ana');
 
   const mine = await live('Ana');
-  assert.deepEqual(mine.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina']);
-  const [, search, ask, reply, proposal, close, end] = mine.events;
+  assert.deepEqual(
+    mine.events.map((event) => (event.type === 'paso' ? `${event.tool}:${event.state}` : event.type)),
+    ['ronda_empieza', 'pedido_busca', 'equipo.consultar:inicio', 'equipo.consultar:fin', 'hilo_abre', 'checkin.consultar:inicio', 'checkin.consultar:fin', 'hilo_responde', 'propuesta.redactar:inicio', 'propuesta.redactar:fin', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'],
+  );
+  const steps = mine.events.filter((event) => event.type === 'paso');
+  assert.deepEqual(steps.map((event) => event.by === mine.me), [true, true, false, false, true, true]);
+  const [, search, ask, reply, proposal, close, end] = mine.events.filter((event) => event.type !== 'paso');
   assert.equal(search?.from, mine.me);
   assert.equal(search?.topic, TOPIC);
   assert.equal(ask?.text, 'Ana necesita ayuda con pagos.');
@@ -253,8 +258,8 @@ test('the live view streams each step of the round, with the words only for the 
 
   const outside = await live('Carla');
   assert.deepEqual(outside.events.map((event) => event.type), mine.events.map((event) => event.type));
-  assert.deepEqual(outside.events.map((event) => event.text), [null, null, null, null, null, null, null]);
-  assert.equal(outside.events[2]?.from, mine.me);
+  assert.ok(outside.events.every((event) => event.text === null));
+  assert.equal(outside.events.find((event) => event.type === 'hilo_abre')?.from, mine.me);
 
   assert.deepEqual((await live('Ana', mine.lastEventId)).events, []);
   assert.equal((await app.request('/api/people/nadie/mesa/live')).status, 404);
@@ -273,12 +278,12 @@ test('a need nobody relates to closes saying so, and a second round only streams
   assert.equal((await startRound('Ana')).status, 202);
   await settled('Ana');
   const first = await live();
-  assert.deepEqual(first.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'pedido_cierra', 'ronda_termina']);
-  assert.equal(first.events[2]?.outcome, 'nadie');
+  assert.deepEqual(first.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'paso', 'paso', 'pedido_cierra', 'ronda_termina']);
+  assert.equal(first.events.find((event) => event.type === 'pedido_cierra')?.outcome, 'nadie');
 
   assert.equal((await startRound('Ana')).status, 202);
   await settled('Ana');
   const second = await live();
-  assert.equal(second.events.length, 4);
+  assert.equal(second.events.length, first.events.length);
   assert.ok((second.events[0]?.id ?? 0) > first.lastEventId);
 });

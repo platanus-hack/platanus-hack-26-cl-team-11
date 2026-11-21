@@ -73,8 +73,8 @@ export function mesaRoutes(ctx: AppContext) {
     const seated = new Set([me, ...members.filter((member) => hasPublished(cardFor(deps, member, now))).map((member) => publicIdOf(member.token))]);
 
     const events = rooms.eventsAfter(MESA_TEAM_ID, since, MAX_LIVE_EVENTS).map((event) => {
-      const { from, to, helpers, thread, proposal } = event.payload;
-      const involved = [from, to, ...(Array.isArray(helpers) ? helpers : [])].filter((id): id is string => typeof id === 'string');
+      const { from, to, by, helpers, thread, proposal } = event.payload;
+      const involved = [from, to, by, ...(Array.isArray(helpers) ? helpers : [])].filter((id): id is string => typeof id === 'string');
       for (const id of involved) seated.add(id);
       const mine = involved.includes(me);
       const spoken = typeof thread === 'string' ? threads.get(thread)?.messages : undefined;
