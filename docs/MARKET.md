@@ -103,3 +103,9 @@ El [reglamento del juego](https://hack.platan.us/26-cl/market/bases) dice que la
 `inventory.py --paper` partió a las 14:41 UTC con el tope de 300 bananas. Entre las 14:44:20 y las 14:45:20 simuló 15 compras de 20 bananas, a 19 bananas cada una. A las 14:46:32 alguien empezó a comprar team-10 de a 10 bananas, una orden por segundo. La simulación vendió el lote de team-10 a las 14:46:37, 50 ms después de la sexta orden: 30 bananas netas contra 19 de costo. El precio siguió hasta 0,0166 a las 14:46:49. Es una venta simulada: las acciones no estaban en el mercado y nadie pudo vender antes.
 
 Se comparó vender apenas se cruza el umbral contra esperar a que el precio deje de subir. Sobre la cinta, con inicios entre las 11:00 y las 13:45, la espera dio entre −23 y +12 bananas respecto de la venta inmediata. El proceso conserva la venta inmediata.
+
+### Herramientas de la cinta · 14:51 UTC
+
+`python3 tools/market/tape.py --refresh` descarga los 48 historiales públicos, reconstruye cada operación y la guarda en `tape.jsonl` junto a la base local. A las 14:50 UTC la cinta tenía 663 operaciones: 559 compras por 52.653 bananas y 104 ventas por 17.817.
+
+`python3 tools/market/backtest.py` repite sobre esa cinta las reglas de `inventory.py` desde un inicio cada 30 minutos. Acepta `--clip`, `--budget`, `--gain` y `--delay`. Con los valores del proceso en vivo, el inicio de las 14:00 no vendió nada y el de las 14:30 cerró dos ventas por +23.
