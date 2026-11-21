@@ -223,4 +223,13 @@ button.rd-item, a.rd-item { cursor: pointer; }
   .rd-tabbar__tab:hover { color: var(--rd-ink); }
   .rd-tabbar__tab:hover .rd-tabbar__name { opacity: 1; }
 }
+.rd-panel { font-family: var(--rd-font-panel); }
+.rd-panel .rd-title { font-size: var(--rd-text-body); letter-spacing: -0.01em; }
+.rd-panel .rd-item__title { font-size: 15px; font-weight: var(--rd-weight-body); letter-spacing: 0; }
+.rd-panel .rd-item__sub, .rd-panel .rd-note { font-size: 14px; }
+.rd-panel .rd-button { flex: 0 0 auto; height: 36px; padding: 0 var(--rd-space-4); border-radius: var(--rd-space-2); font-size: 14px; font-weight: 500; }
+.rd-panel .rd-button--quiet { background: var(--rd-glass-solid); box-shadow: 0 0 0 1px var(--rd-hairline); }
+.rd-panel .rd-button--small { height: 32px; padding: 0 10px; }
+.rd-panel .rd-input { height: 40px; border-radius: var(--rd-space-2); font-size: 15px; }
+
 @media (prefers-reduced-motion: reduce) { .rd-item__end svg, .rd-tabbar__tab, .rd-tabbar__name { transition: none; } }

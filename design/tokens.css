@@ -54,6 +54,7 @@
 
   /* ---- Tipografía ---- */
   --rd-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --rd-font-panel: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif; /* solo el panel personal (rd-panel) */
   --rd-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace; /* solo código, llaves y direcciones */
   --rd-font-num: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif; /* solo números */
 
