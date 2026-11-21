@@ -59,6 +59,316 @@ class Component extends DCLogic {
     this.MAX = 300;
   }
 
+  attachMiniatures(cv) {
+    // BEGIN GENERATED MINIATURES
+    // Ronda's graph activity objects. Each instance owns a small inline vector scene.
+// Use <ronda-mini kind="chat" class="rd-mini"> inside an edge's accessible link.
+(() => {
+  if (customElements.get("ronda-mini")) return;
+  const ink = "var(--rd-mini-ink)";
+  const color = tone => "var(--rd-mini-" + tone + ")";
+  const path = (d, fill, width = 2.5) =>
+    '<path d="' + d + '" fill="' + fill + '" stroke="' + (width ? ink : "none") + '" stroke-width="' + width + '"/>';
+  const line = (d, tone, width = 2.3) =>
+    '<path d="' + d + '" fill="none" stroke="' + color(tone) + '" stroke-width="' + width + '"/>';
+  const dot = (x, y, r, tone) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + color(tone) + '"/>';
+  const group = (name, inside) => '<g class="' + name + '">' + inside + '</g>';
+  const at = (transform, inside) => '<g transform="' + transform + '">' + inside + '</g>';
+  const shadow = (x, y, rx) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="6" fill="var(--rd-mini-shadow)"/>';
+  function relief(d, face, edge, depth = 5) {
+    // Project the silhouette towards the lower right. The outline belongs to
+    // the two outer faces; filling the steps between them gives one solid rim.
+    let sides = "";
+    for (let i = depth; i >= 0; i--) {
+      sides += at("translate(" + i * .55 + " " + i + ")", path(d, color(edge), i === depth ? 2.5 : 0));
+    }
+    return sides + path(d, color(face));
+  }
+
+  function chat() {
+    const near = "M14 43Q14 36 22 36H63Q70 36 70 43V65Q70 72 63 72H40L26 82L28 72H22Q14 72 14 65Z";
+    const far = "M51 21Q51 15 58 15H94Q101 15 101 22V42Q101 48 94 48H89L91 57L76 48H58Q51 48 51 42Z";
+    const answer = relief(far, "yellow", "ochre") + line("M57 23Q57 20 62 20H89", "paper", 2)
+      + group("reply-ink", line("M63 33H87M64 39H77", "ink", 3.2));
+    const question = relief(near, "mint", "teal", 6) + line("M19 45Q19 41 24 41H47", "paper", 2)
+      + [29, 41, 53].map((x, i) => group("dot d" + i, dot(x, 55, 3.4, "ink"))).join("");
+    return shadow(58, 88, 44) + at("rotate(6 77 36)", group("chat-reply", answer))
+      + at("rotate(-8 40 58)", group("chat-ask", question));
+  }
+
+  function pad(cover, rim) {
+    const sheet = "M23 19H69Q73 19 73 24V70Q73 74 69 74H23Q19 74 19 70V24Q19 19 23 19Z";
+    const binding = [30, 45, 60].map(x => line("M" + x + " 23v-9q0-4 4-4", "ink", 4.5)).join("");
+    return relief(sheet, "paper", "paper-side", 6)
+      + path("M23 19H69Q73 19 73 24V34H19V24Q19 19 23 19Z", color(cover), 2)
+      + line("M22 26H69", rim, 2) + binding
+      + line("M27 42h8m10 0h12M28 64h12m8 0h9", "paper-side", 3.2)
+      + group("cal-match", path("M22 46H70V58H22Z", color("mint"), 1.5) + line("m40 52 4 3 9-7", "ink", 2));
+  }
+  function calendars() {
+    return shadow(61, 88, 43)
+      + at("translate(38 0) rotate(9 43 53) scale(.9)", group("cal-back", pad("blue", "denim")))
+      + at("translate(-2 12) rotate(-8 45 55) scale(.91)", group("cal-front", pad("orange", "rust")));
+  }
+
+  function health() {
+    const caseShape = "M22 24Q22 17 30 17H88Q96 17 96 25V66Q96 74 87 74H29Q22 74 22 65Z";
+    const lock = line("M78 64v-6q0-11 9-11t9 10v7", "ink", 6)
+      + line("M78 62v-4q0-9 8-9t8 9v5", "paper", 2.4)
+      + relief("M75 62H98Q101 62 101 66V81Q101 84 98 84H75Q72 84 72 81V66Q72 62 75 62Z", "yellow", "ochre", 3)
+      + dot(86, 72, 2.5, "ink") + line("M86 73v4", "ink", 2.5);
+    return shadow(60, 89, 43)
+      + path("M45 72l-2 9-11 3v3h50v-4l-13-3-2-10Z", color("teal"))
+      + at("rotate(-5 60 47)", relief(caseShape, "mint", "teal", 6)
+        + line("M28 28q0-5 5-5h38", "paper", 2)
+        + path("M34 30Q34 27 38 27H80Q86 27 86 32V55Q86 60 80 60H39Q33 60 33 55Z", color("screen"))
+        + line("M39 36l7-4m-5 10 14-9", "teal", 1.4)
+        + group("signal", line("M39 46h10l4-7 5 14 5-21 5 15h12", "phosphor", 2.8))
+        + dot(35, 66, 2.2, "phosphor") + line("M42 66h13m3 0h4", "ink", 2.2))
+      + group("lock", lock);
+  }
+
+  function permission() {
+    const page = "M16 61 70 51 101 70 47 84Z";
+    const stamp = relief("M33 46 68 39 85 49 49 57Z", "blue", "denim", 5)
+      + path("M46 44q6-5 4-11l-3-10 14-3 1 10q-1 9 5 13l-12 5Z", color("rust"))
+      + relief("M43 19q1-6 11-8 13-3 19 4 3 6-5 10-10 5-20 3-8-1-5-9Z", "orange", "rust", 4)
+      + line("M48 18q6-4 14-4", "paper", 2.4);
+    return shadow(60, 90, 44)
+      + group("paper", relief(page, "paper", "paper-side", 4)
+        + line("m24 63 19-4m-13 7 13-3", "paper-side", 2)
+        + group("inkmark", line("m52 68 6 3 11-10", "teal", 4)))
+      + group("stamp", stamp);
+  }
+
+  function help() {
+    const left = "M14 34H49V44C56 40 64 44 64 51S56 62 49 57V71H16Q12 71 12 67V38Q12 34 14 34Z";
+    const right = "M50 34H88Q92 34 92 38V67Q92 71 88 71H50V57C57 62 65 58 65 51S57 40 50 44Z";
+    function accepted(x, name) {
+      return group(name, dot(x, 55, 7, "paper") + line("m" + (x-3.5) + " 55 2.5 2.5 4.8-5.3", "ink", 2.1));
+    }
+    return shadow(58, 85, 44) + at("translate(5 -3) rotate(-10 54 55)",
+      group("puzzle-r", relief(right, "blue", "denim", 6) + line("M55 39H84", "paper", 2) + accepted(77, "yes-r"))
+      + group("puzzle-l", relief(left, "yellow", "ochre", 6) + line("M17 43v-4h26", "paper", 2) + accepted(29, "yes-l")));
+  }
+
+  const drawings = {chat, calendars, health, permission, help};
+  const styles = `
+    :host { display:inline-block; width:var(--mini-size,72px); aspect-ratio:1; }
+    svg { display:block; width:100%; height:100%; overflow:visible; }
+    .chat-ask,.chat-reply,.dot,.cal-back,.cal-front,.cal-match,.signal,.lock,.stamp,.paper,.inkmark,.puzzle-l,.puzzle-r,.yes-l,.yes-r {
+      animation-duration:var(--mini-cycle,5s); animation-iteration-count:infinite;
+      animation-timing-function:cubic-bezier(.36,.05,.22,1); animation-delay:var(--mini-delay,0s);
+      transform-box:fill-box; transform-origin:center;
+    }
+    .chat-ask {animation-name:ask} .chat-reply {animation-name:reply}
+    .d0 {animation-name:dot-a} .d1 {animation-name:dot-b} .d2 {animation-name:dot-c}
+    .cal-back {animation-name:back} .cal-front {animation-name:front} .cal-match,.inkmark {animation-name:print}
+    .signal path {stroke-dasharray:85; animation:trace var(--mini-cycle,5s) linear var(--mini-delay,0s) infinite}
+    .lock {animation-name:latch} .stamp {animation-name:press} .paper {animation-name:send}
+    .puzzle-l {animation-name:join-left} .puzzle-r {animation-name:join-right}
+    .yes-l {animation-name:agree-left} .yes-r {animation-name:agree-right}
+    @keyframes ask {0%,45%,100%{transform:none} 17%,26%{transform:translate(2px,-7px) rotate(-3deg)}}
+    @keyframes reply {0%,34%,83%,100%{transform:none} 54%,64%{transform:translate(-2px,-9px) rotate(4deg)}}
+    @keyframes dot-a {12%,29%{transform:none} 19%{transform:translateY(-4px)}}
+    @keyframes dot-b {15%,32%{transform:none} 22%{transform:translateY(-4px)}}
+    @keyframes dot-c {18%,35%{transform:none} 25%{transform:translateY(-4px)}}
+    @keyframes back {0%,12%,92%,100%{transform:translate(4px,-5px) rotate(5deg)} 42%,72%{transform:none}}
+    @keyframes front {0%,12%,92%,100%{transform:translate(-4px,2px) rotate(-6deg)} 42%,72%{transform:none}}
+    @keyframes print {0%,28%,96%,100%{opacity:0} 37%,88%{opacity:1}}
+    @keyframes trace {0%,10%{stroke-dashoffset:85} 49%,88%{stroke-dashoffset:0} 99%,100%{stroke-dashoffset:-85}}
+    @keyframes latch {0%,33%,95%,100%{transform:translate(5px,-6px) rotate(9deg)} 53%,79%{transform:none}}
+    @keyframes press {0%,15%,87%,100%{transform:translate(0,-4px) rotate(-5deg)} 36%,43%{transform:translate(0,12px)} 57%,77%{transform:translate(-1px,-7px) rotate(-5deg)}}
+    @keyframes send {0%,49%,100%{transform:none} 74%,84%{transform:translate(10px,-2px)}}
+    @keyframes join-left {0%,31%,94%,100%{transform:translate(-7px,1px)} 51%,76%{transform:none}}
+    @keyframes join-right {0%,31%,94%,100%{transform:translate(11px,-2px)} 51%,76%{transform:none}}
+    @keyframes agree-left {0%,8%,96%,100%{opacity:0} 17%,83%{opacity:1}}
+    @keyframes agree-right {0%,22%,96%,100%{opacity:0} 30%,83%{opacity:1}}
+    :host([paused]) * {animation-play-state:paused}
+    :host([poster]) *, :host([poster]) .signal path {animation:none}
+    @media(prefers-reduced-motion:reduce){:host svg *{animation:none!important}}
+  `;
+  class RondaMini extends HTMLElement {
+    static observedAttributes = ["kind"];
+    constructor() { super(); this.attachShadow({mode:"open"}); }
+    connectedCallback() { this.draw(); }
+    attributeChangedCallback() { if (this.isConnected) this.draw(); }
+    draw() {
+      const render = drawings[this.getAttribute("kind")];
+      if (!Object.hasOwn(drawings, this.getAttribute("kind"))) { this.shadowRoot.replaceChildren(); return; }
+      this.shadowRoot.innerHTML = '<style>' + styles + '</style><svg aria-hidden="true" viewBox="0 0 116 104" stroke-linejoin="round" stroke-linecap="round">' + render() + '</svg>';
+    }
+  }
+  customElements.define("ronda-mini", RondaMini);
+})();
+
+// Position parameters are in the host graph's viewBox. Only the public kind
+// and participants reach the object. Its SVG never receives private values.
+(() => {
+  const kinds = {
+    chat: "Chat", calendars: "Agendas", health: "Salud privada", permission: "Permiso", help: "Ayuda",
+  };
+  function demo(ids) {
+    const [a,b,c,d,e] = ids;
+    return [
+      {kind:"chat", from:a, to:b}, {kind:"calendars", from:b, to:c},
+      {kind:"health", from:e, to:c}, {kind:"permission", from:e, to:a},
+      {kind:"help", from:d, to:c},
+    ];
+  }
+  function link(activity, prefix, index) {
+    const label = kinds[activity.kind];
+    if (!Object.hasOwn(kinds, activity.kind)) throw new Error("Unknown activity kind");
+    const anchor = document.createElement("a");
+    anchor.className = "rd-mini-link";
+    anchor.href = prefix + activity.kind + ".html";
+    anchor.title = label + " · Ver escena";
+    anchor.setAttribute("aria-label", "Ver escena de " + label.toLowerCase());
+    const object = document.createElement("ronda-mini");
+    object.className = "rd-mini";
+    object.setAttribute("kind", activity.kind);
+    object.style.setProperty("--mini-delay", (-index * .93) + "s");
+    object.style.setProperty("--mini-cycle", (4.4 + index * .24) + "s");
+    const caption = document.createElement("span");
+    caption.className = "rd-mini-caption";
+    caption.textContent = label;
+    anchor.append(object, caption);
+    return anchor;
+  }
+  function quadratic(p, q, control, t) {
+    const s = 1 - t;
+    return {x:s*s*p.x + 2*s*t*control.x + t*t*q.x,
+            y:s*s*p.y + 2*s*t*control.y + t*t*q.y};
+  }
+  window.RondaGraphMinis = {demo, link, quadratic};
+})();
+
+// Host units are the globe's original 1440 × 900 drawing coordinates. The
+// adapter owns five foreground objects, independent of the number of edges.
+function mountGlobeMinis(canvas, scenePrefix, frozen) {
+  const layer = document.createElement("div");
+  layer.className = "globe-minis";
+  layer.style.cssText = "position:absolute;left:0;top:0;width:1440px;height:900px;pointer-events:none;transform-origin:0 0";
+  canvas.after(layer);
+  const styles = document.createElement("style");
+  styles.textContent = `
+    .globe-object { position:absolute;left:0;top:0;width:0;height:0; }
+    .globe-object[hidden]{display:none}
+    .mini-leader {position:absolute;left:0;top:0;height:1.5px;background:var(--rd-mini-ink);opacity:.42;transform-origin:left center;pointer-events:none}
+    .globe-object .rd-mini-link { pointer-events:auto;position:absolute;display:grid;place-items:center;left:0;top:0;transform:translate(-50%,-50%);text-decoration:none;color:inherit; }
+    .globe-object .rd-mini { width:var(--mini-size,76px);aspect-ratio:1;display:block; }
+    .globe-object .rd-mini-caption { margin-top:-5px;font:600 var(--mini-label-size,12px)/1.25 var(--rd-font,system-ui);white-space:nowrap;border-radius:99px;padding:2px 7px;background:var(--rd-glass-solid,#fff);color:var(--rd-ink,#222); }
+    .globe-object .rd-mini-link:focus-visible {outline:2px solid var(--rd-mini-ink);outline-offset:1px;border-radius:8px}
+    .globe-object .rd-mini-link:is(:hover,:focus-visible) .rd-mini-caption { background:var(--rd-mini-ink);color:var(--rd-mini-paper) }
+  `;
+  layer.append(styles);
+  const demo = window.RondaGraphMinis.demo([0,1,2,3,4]);
+  const notes = ["¿Quién cubre las 11?", "Review antes de las 10:30", "Consulta privada de salud", "Permiso de un solo uso", "Presentación aceptada"];
+  const elements = demo.map((activity,i)=>{
+    const holder = document.createElement("div");
+    holder.className = "globe-object";
+    holder.hidden = true;
+    const link = window.RondaGraphMinis.link(activity, scenePrefix, i);
+    link.title = notes[i];
+    if (!scenePrefix) link.removeAttribute("href"); // Canvas design preview has no sibling HTML files.
+    link.querySelector("ronda-mini").toggleAttribute("poster", new URLSearchParams(location.search).has("still"));
+    const leader = document.createElement("i");
+    leader.className = "mini-leader";
+    leader.setAttribute("aria-hidden","true");
+    holder.append(leader,link);
+    layer.append(holder);
+    return holder;
+  });
+  const rows = demo.map((a,i)=>[a.from,a.to,notes[i]]);
+  const denseRows = rows.slice(0,2);
+  const candidates = [.5,.38,.62,.29,.71];
+  let used = [];
+  let occupied = [];
+  const lastT = demo.map(()=>.5);
+  const offsets = demo.map(()=>({x:0,y:0}));
+  let radius=40;
+  let dimensionsKey = "";
+  let userPaused = false;
+  function pauseObjects() {
+    for (const holder of elements) holder.querySelector("ronda-mini").toggleAttribute("paused", userPaused || document.hidden);
+  }
+  document.addEventListener("visibilitychange",pauseObjects);
+  function begin(count, points, faceSize) {
+    // A media layout can project the whole canvas; keep the DOM and canvas
+    // layers on the very same transform and keep the glyph readable on phones.
+    const box = canvas.getBoundingClientRect();
+    const scale = box.width / 1440 || 1;
+    const key = [count,scale,canvas.style.left,canvas.style.top].join(",");
+    if (key !== dimensionsKey) {
+      dimensionsKey = key;
+      layer.style.transform = canvas.style.transform;
+      layer.style.left = canvas.style.left;
+      layer.style.top = canvas.style.top;
+      const small = scale < .7;
+      const size=Math.min(140, (small?51:count===5?76:62)/scale);
+      radius=size*.48;
+      layer.style.setProperty("--mini-size", size+"px");
+      layer.style.setProperty("--mini-label-size", Math.min(28,(small?10:12)/scale)+"px");
+    }
+    occupied = points.slice(0,count===5?5:3).map((p,i)=>({x:p.x,y:p.y,r:faceSize*(count>5&&i>0?.62:i>=3?.8:1)*p.f}));
+    used = [];
+    for(let i=0;i<elements.length;i++) elements[i].hidden = i >= (count===5?5:2);
+  }
+  function place(index,p,q,control) {
+    function room(xy) {
+      let space=Math.min(xy.x,1440-xy.x,xy.y,900-xy.y);
+      for (const n of occupied) space=Math.min(space,Math.hypot(xy.x-n.x,xy.y-n.y)-n.r);
+      for (const n of used) space=Math.min(space,Math.hypot(xy.x-n.x,xy.y-n.y)-radius);
+      return space;
+    }
+    let bestT=.5, score=-Infinity;
+    for (const t of candidates) {
+      const distance=room(window.RondaGraphMinis.quadratic(p,q,control,t));
+      if (distance>score) {score=distance;bestT=t;}
+      if (distance>=radius+8) break;
+    }
+    const ease=frozen?1:.18;
+    lastT[index]+=(bestT-lastT[index])*ease;
+    const anchor=window.RondaGraphMinis.quadratic(p,q,control,lastT[index]);
+    let delta={x:0,y:0};
+    // After a turn, two projected arcs may coincide. Move the object just
+    // off its arc and draw a leader back to the exact attachment point.
+    if (room(anchor)<radius+4) {
+      let quality=-Infinity;
+      for (const step of [radius,1.55*radius,2.1*radius]) {
+        for (let j=0;j<8;j++) {
+          const angle=j*Math.PI/4;
+          const x=step*Math.cos(angle),y=step*Math.sin(angle);
+          const available=room({x:anchor.x+x,y:anchor.y+y});
+          const value=Math.min(available,radius+8)-step*.13-Math.hypot(x-offsets[index].x,y-offsets[index].y)*.08;
+          if(value>quality){quality=value;delta={x,y};}
+        }
+      }
+    }
+    const offset=offsets[index];
+    offset.x+=(delta.x-offset.x)*ease;offset.y+=(delta.y-offset.y)*ease;
+    const spot={x:anchor.x+offset.x,y:anchor.y+offset.y};
+    used.push(spot);
+    const holder=elements[index],leader=holder.firstElementChild;
+    const length=Math.hypot(offset.x,offset.y);
+    leader.hidden=length<radius;
+    if (!leader.hidden) {
+      leader.style.width=length.toFixed(1)+"px";
+      leader.style.transform="rotate("+Math.atan2(-offset.y,-offset.x)+"rad)";
+    }
+    holder.style.transform="translate("+spot.x.toFixed(1)+"px,"+spot.y.toFixed(1)+"px)";
+  }
+  return {rows:n=>n===5?rows:denseRows,begin,place,
+    pause(value) { userPaused=value; pauseObjects(); },
+    destroy() { document.removeEventListener("visibilitychange",pauseObjects); layer.remove(); }};
+}
+
+    const controller = mountGlobeMinis(cv, "", this.reduced || new URLSearchParams(location.search).has('still'));
+    cv.nextElementSibling.style.cssText += ";--rd-mini-ink: #392c2b;\n--rd-mini-paper: #fff4d9;\n--rd-mini-paper-side: #d2ad82;\n--rd-mini-yellow: #ffc64c;\n--rd-mini-ochre: #c87d27;\n--rd-mini-orange: #fd8455;\n--rd-mini-rust: #bd533b;\n--rd-mini-mint: #85d5ba;\n--rd-mini-teal: #418e86;\n--rd-mini-blue: #96bdf4;\n--rd-mini-denim: #5e78ac;\n--rd-mini-screen: #284b47;\n--rd-mini-phosphor: #c8ff90;\n--rd-mini-shadow: rgba(68, 44, 37, .17);";
+    return controller;
+    // END GENERATED MINIATURES
+  }
+
   componentDidMount() {
     var self = this;
     this.faces = {};
@@ -81,6 +391,7 @@ class Component extends DCLogic {
     this.uy = 0; this.up = 0; this.vy = 0; this.vp = 0; this.drag = null; this.hover = -1; this.mouse = null; this.idle = 0;
     var cv = this.canvasRef.current;
     if (cv) {
+      this.minis = this.attachMiniatures(cv);
       cv.style.cursor = 'grab'; cv.style.touchAction = 'none';
       var at = function (e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * 1440 / r.width, y: (e.clientY - r.top) * 900 / r.height }; };
       this.onDown = function (e) { var m = at(e); self.drag = { x: m.x, y: m.y, t: performance.now() }; self.vy = 0; self.vp = 0; cv.style.cursor = 'grabbing'; cv.setPointerCapture && cv.setPointerCapture(e.pointerId); };
@@ -107,6 +418,7 @@ class Component extends DCLogic {
 
   componentWillUnmount() {
     cancelAnimationFrame(this.raf);
+    if (this.minis) this.minis.destroy();
     var cv = this.canvasRef.current;
     if (cv && this.onDown) { cv.removeEventListener('pointerdown', this.onDown); cv.removeEventListener('pointermove', this.onMove); cv.removeEventListener('pointerup', this.onUp); cv.removeEventListener('pointercancel', this.onUp); cv.removeEventListener('pointerleave', this.onLeave); }
   }
@@ -195,8 +507,9 @@ class Component extends DCLogic {
     }
     function proj(v) { var f = D / (D - v[2]); return { x: CX + v[0] * S * f, y: CY - v[1] * S * f, z: v[2], f: f }; }
 
-    var live = n > 0 ? [[0, 1, '¿Quién cubre las 11?'], [1, 2, 'Review antes de las 10:30']] : [];
-    var liveKey = { '0-1': 1, '1-2': 1 };
+    var live = this.minis.rows(n);
+    var liveKey = {};
+    live.forEach(function (row) { liveKey[Math.min(row[0], row[1]) + '-' + Math.max(row[0], row[1])] = 1; });
 
     var count = 0;
     for (var a0 = 0; a0 < this.MAX; a0++) if (this.vis[a0] > 0.02) count = a0 + 1;
@@ -283,6 +596,7 @@ class Component extends DCLogic {
     }
     ctx.globalAlpha = 1;
 
+    this.minis.begin(n, P, p.faceR);
     var grads = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
     for (var li = 0; li < live.length; li++) {
       var A = live[li][0], B = live[li][1];
@@ -304,8 +618,7 @@ class Component extends DCLogic {
         }
         ctx.globalAlpha = 1;
       }
-      var mx = 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, my = 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y;
-      this.chip(ctx, live[li][2], mx, my);
+      this.minis.place(li, pa, pb, c2);
     }
 
     for (var fi = 0; fi < order.length; fi++) {

@@ -22,6 +22,37 @@ La primera imagen es la referencia de Ronda. Las otras cinco muestran el resulta
 - Cada archivo se probó por separado desde disco, con Chrome sin red. Se comprobó la carga de imágenes y favicon, navegación con teclado, pausa en el mismo cuadro, reinicio y cambio de preferencia de movimiento. Con movimiento reducido se abre el resultado final y se puede reproducir manualmente. Stagehand también abrió cada HTML en un navegador local y comprobó pausa y reinicio.
 - Pasaron `design/lint.sh` y el chequeo de tipos del kit. La revisión móvil usó emulación de Chrome. Safari y teléfonos físicos quedan fuera de esta verificación.
 
+## Miniaturas en el globo
+
+El [globo de cinco agentes](../grafo/globo.html?n=5) dibuja los objetos sobre los arcos proyectados.
+La [vista de interacciones](minis.html) usa las mismas cinco piezas en un Stage de Stageshow. Al
+abrir una escena grande, «Ver en el grafo» vuelve a esa pieza. Usa las páginas en la misma
+estructura de carpetas para navegar entre ellas.
+
+| Objeto | Gesto que se ensayó |
+|---|---|
+| Chat | Sube el primer bocadillo, se mueven sus puntos y responde el segundo. |
+| Agendas | Se acercan las tapas y ambas revelan una franja de disponibilidad a la misma altura. |
+| Salud privada | Se dibuja la señal dentro del monitor y el candado baja. |
+| Permiso | El sello baja y deja la marca antes de que se desplace el papel. |
+| Ayuda | Aparecen los dos vistos buenos y las piezas encajan. |
+
+Para la composición se tomó la escala repetida de `many-of-one` y los tiempos superpuestos de
+`payout-flow`. El soporte común aquí es el arco del grafo. En la revisión visual se amplió la
+franja de ambas agendas y se dio más espacio a la etiqueta inferior.
+
+- La vista conjunta pasó `film.mjs --gate` a 1280 y 390 px y en la captura por estados.
+  Algunas capturas tuvieron intervalos sin muestras. La pasada independiente de `jumps.mjs`
+  cubrió nueve segundos completos. La prueba de comportamiento también leyó las animaciones
+  en cada objeto para comprobar que los cinco relojes avanzaban y quedaban quietos al pausar.
+- En Chrome sin red se probaron el globo y la vista conjunta a ambos anchos. Se verificaron los
+  cinco enlaces de ida y vuelta, el foco al regresar, el favicon incrustado, la preferencia de
+  movimiento reducido y los controles. `layout.mjs --strict` pasó en ambas páginas y anchos.
+- Se arrastró el globo y se recorrieron 5, 10, 50, 300 y 5 agentes. La vista de cinco tuvo
+  cinco objetos, y las otras tres tuvieron dos. Se verificaron los totales de pares de cada vista.
+  La verificación móvil corresponde a Chrome emulado. El archivo para el editor de diseño se
+  actualiza desde los mismos dibujos. La prueba interactiva se realizó sobre el HTML local.
+
 ## Regenerar y ensayar
 
 Desde la raíz del repositorio:
@@ -29,6 +60,7 @@ Desde la raíz del repositorio:
 ```sh
 npm ci --prefix .agents/skills/stageshow
 python3 design/motion/src/build.py
+python3 design/grafo/mini/build.py
 design/lint.sh
 ```
 

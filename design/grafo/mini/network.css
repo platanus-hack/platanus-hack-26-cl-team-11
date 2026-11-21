@@ -1,0 +1,34 @@
+body {margin:0}
+[hidden] {display:none!important}
+.rd-aura {overflow:clip}
+.frame {max-width:1160px;margin:auto;min-height:100svh;display:flex;flex-direction:column;padding-bottom:0}
+.rd-bar {border-bottom:1px solid var(--rd-hairline);padding-block:20px}
+.brand-note {display:flex;align-items:center;gap:14px}
+.brand-note .rd-note {border-left:1px solid var(--rd-hairline);padding-left:14px}
+#toggle {flex:none;display:inline-flex;align-items:center;gap:9px;height:40px;padding-inline:18px}
+#toggle svg {width:14px;height:14px;fill:currentColor}
+#toggle[data-paused="true"] .pause-icon,#toggle:not([data-paused="true"]) .play-icon {display:none}
+.stage-title {font-size:clamp(32px,4.4vw,58px);margin:0}
+main {flex:1;display:flex;flex-direction:column;justify-content:center;padding-block:24px 8px}
+#example {width:100%;min-width:0}
+.network,.routes {position:absolute;inset:0;width:100%;height:100%}
+.routes path {fill:none;stroke-linecap:round}
+.quiet-line {stroke:var(--rd-edge-idle);stroke-width:1}
+.active-line {stroke:url(#live);stroke-width:2;opacity:.58}
+.routing-light {stroke:var(--rd-on-ink);stroke-width:2.2;stroke-dasharray:2 98;animation:deliver 4.8s linear infinite}
+@keyframes deliver {to{stroke-dashoffset:-100}}
+.network[data-paused="true"] .routing-light {animation-play-state:paused}
+.agent {position:absolute;width:0;height:0;z-index:1}
+.agent .rd-face {width:66px;height:66px;transform:translate(-50%,-50%)}
+.agent .rd-person__name {position:absolute;left:0;top:39px;transform:translateX(-50%);color:var(--rd-ink);font-family:var(--rd-font)}
+.activity {position:absolute;z-index:2;transform:translate(-50%,-50%)}
+.activity .rd-mini-link {display:grid;justify-items:center;align-content:center;--mini-size:96px}
+.rd-mini-caption {font:var(--rd-weight) var(--rd-text-small)/1.25 var(--rd-font);white-space:nowrap;background:var(--rd-glass-solid);color:var(--rd-ink);border:1px solid var(--rd-hairline);border-radius:var(--rd-radius-pill);padding:3px 9px}
+.activity a:is(:hover,:focus-visible) .rd-mini-caption {background:var(--rd-ink);color:var(--rd-on-ink)}
+[data-layout="compact"] .agent .rd-face {width:40px;height:40px}
+[data-layout="compact"] .agent .rd-person__name {top:23px;font-size:13px}
+[data-layout="compact"] .activity .rd-mini-link {--mini-size:64px}
+[data-layout="compact"] .rd-mini-caption {font-size:12px;padding:2px 6px}
+.note {padding:15px 0 20px;border-top:1px solid var(--rd-hairline);display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:650px){.rd-bar{padding-block:12px}.frame{padding-inline:12px}.brand-note .rd-note{display:none}main{padding-top:22px}.rd-mark{width:34px;height:34px}.note{align-items:flex-start;flex-direction:column;gap:3px}}
+@media(prefers-reduced-motion:reduce){.routing-light{animation:none;opacity:0}}

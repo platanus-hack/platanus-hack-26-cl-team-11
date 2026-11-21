@@ -153,12 +153,12 @@ SCENES = [
 ]
 
 
-def bundle():
+def bundle(entry=SRC / "player.jsx"):
     skill = DESIGN.parent / ".agents/skills/stageshow"
     modules = skill / "node_modules"
     with tempfile.TemporaryDirectory() as temp:
         output = Path(temp) / "scene.js"
-        subprocess.run([str(modules / ".bin/esbuild"), str(SRC / "player.jsx"),
+        subprocess.run([str(modules / ".bin/esbuild"), str(entry),
                         "--bundle", "--jsx=automatic", "--minify", '--define:process.env.NODE_ENV="production"',
                         "--legal-comments=inline", "--outfile=" + str(output)],
                        env={**os.environ, "NODE_PATH": str(modules)}, check=True)
@@ -179,7 +179,7 @@ def build():
 <title>{title} · Ronda</title><link rel="icon" type="image/svg+xml" href="{LOGO}"><style>{css}</style></head>
 <body class="rd-page"><div aria-hidden="true" class="rd-aura"><i></i><i></i><i></i><i></i></div>
 <div class="rd-page__inner shell">
-<header class="rd-bar"><div class="rd-brand"><img class="rd-mark" src="{LOGO}" alt="">Ronda</div><span class="rd-note">Demo · Datos simulados</span></header>
+<header class="rd-bar"><div class="rd-brand"><img class="rd-mark" src="{LOGO}" alt="">Ronda</div><div class="scene-nav"><a class="rd-note" href="minis.html#mini-{slug}">Ver en el grafo</a><span class="rd-note">Datos simulados</span></div></header>
 <main><div class="heading"><div class="rd-label label-icon">{icon(symbol)}{label}</div><h1 class="rd-hero">{first}<br><span class="rd-gradient-text">{second}</span></h1></div>
 <div class="art" id="example" aria-label="{title}"></div><template id="illustration">{scene()}</template></main>
 <footer class="rd-player" data-duration="{duration}" data-scene="{slug}" aria-label="Reproducción de la escena">

@@ -166,6 +166,10 @@ rebotes ni giros. Se respeta `prefers-reduced-motion`.
 
 ### Miniaturas de interacción
 
+![Las cinco miniaturas a escala de detalle](grafo/miniaturas.png)
+
+[Globo con actividades](grafo/globo.html?n=5) · [Vista ampliada de los cinco objetos](motion/minis.html)
+
 En el grafo se ven varias acciones a la vez. Cada una se lee por la silueta y por el
 movimiento de un objeto físico. La referencia que pidió Mati es el estilo chunky de
 PostHog: objetos pequeños de escritorio, con volumen, color local y una mecánica reconocible.
@@ -184,6 +188,20 @@ PostHog: objetos pequeños de escritorio, con volumen, color local y una mecáni
   Salud lee en el monitor y cierra el candado. Permisos estampa la autorización antes de que salga
   el papel. Ayuda encaja dos piezas después de que ambas aceptan. Las miniaturas compartidas
   representan la actividad con símbolos y prescinden de valores personales.
+
+En la demo de cinco agentes se dibuja un objeto en cada uno de cinco arcos activos. Al pasar a
+10, 50 o 300 se muestran las dos conversaciones destacadas del globo. Cada objeto calcula su
+posición sobre la misma curva que se dibuja en el canvas. Si dos proyecciones se superponen al
+girar, la miniatura se aparta y un trazo fino conserva el anclaje al arco. Al seleccionarla se
+abre la escena completa. La vista ampliada permite comparar las cinco acciones con la red quieta.
+
+La primitiva reutilizable es `<ronda-mini kind="calendars" class="rd-mini">`. Los tipos son
+`chat`, `calendars`, `health`, `permission` y `help`. Cada uno acepta los atributos booleanos
+`paused` (congela el cuadro) y `poster` (muestra el resultado). Un anfitrión puede ajustar
+`--mini-size`, `--mini-cycle` y `--mini-delay`. La geometría y los gestos se editan en
+`grafo/mini/objects.js`. La integración con la cámara está en `grafo/mini/globe.js`.
+Después de editar, ejecutar `python3 design/grafo/mini/build.py` desde la raíz para actualizar
+el HTML portátil y las dos fuentes del globo. El ensayo está en [REHEARSAL.md](motion/REHEARSAL.md).
 
 ## Lo que no se hace
 
