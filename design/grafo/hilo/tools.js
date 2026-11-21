@@ -267,7 +267,7 @@ window.RondaTools = (() => {
     copy.append(h('b', 'rt-label', call.label), meta);
     const status = h('span', 'rt-status');
     const run = h('span', 'rt-run');
-    run.innerHTML = '<i class="rt-ico"><svg class="rt-spin" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 1.5a5.5 5.5 0 0 1 5.5 5.5"/></svg></i>';
+    run.innerHTML = '<i class="rt-ico"><svg class="rt-spin" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><g class="rt-spin-arc"><path d="M7 1.5a5.5 5.5 0 0 1 5.5 5.5"/></g></svg></i>';
     run.append(h('span', '', 'Consultando'));
     const done = h('span', 'rt-done');
     done.innerHTML = call.privateResult

@@ -68,7 +68,8 @@
 .rt-done { background: var(--rt-soft); color: var(--rt-deep); opacity: 0; transform: scale(0.92); }
 .rt-card:not([data-state='running']) .rt-run { opacity: 0; }
 .rt-card:not([data-state='running']) .rt-done { opacity: 1; transform: none; }
-.rt-spin { animation: rt-spin 0.8s linear infinite; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.rt-spin { fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.rt-spin-arc { transform-origin: 7px 7px; animation: rt-spin 0.8s linear infinite; }
 .rt-spin circle { stroke: color-mix(in srgb, var(--rd-ink) 14%, white); }
 .rt-spin path { stroke: var(--rd-ink); }
 @keyframes rt-spin { to { transform: rotate(360deg); } }
@@ -148,5 +149,5 @@
 .rt-io pre { margin: 0; font-family: var(--rd-font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 
 @media (prefers-reduced-motion: reduce) {
-  .rt-card[data-state='running']::after, .rt-spin { animation: none; }
+  .rt-card[data-state='running']::after, .rt-spin-arc { animation: none; }
 }
