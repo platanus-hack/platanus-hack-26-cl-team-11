@@ -268,3 +268,23 @@ button.rd-item, a.rd-item { cursor: pointer; }
   .rd-cara__gota, .rd-cara__gota > canvas, .rd-cara__gota > svg, .rd-cara__halo, .rd-cara__anillo { transition: none; }
 }
 
+/* ---------- Marco estándar de página ----------
+   Es el marco de contexto/ (Resumen, Conexiones, Mapa), que Mati fijó como estándar el 21-nov-2026: barra con marca,
+   pestañas y aviso; titular de una sola frase; selector con relieve. Toda página de producto o de demo lo usa.
+   Los nombres cx-* son los mismos estilos (los usan las páginas de contexto/). Ver DESIGN.md, «La página estándar». */
+.rd-top, .cx-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 26px; }
+.rd-nav, .cx-nav { display: inline-flex; gap: 2px; padding: 4px; border-radius: 16px; background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 8px 24px rgba(40, 30, 90, 0.06); }
+.rd-nav > *, .cx-nav a { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border: 0; border-radius: 12px; background: none; font-family: inherit; font-size: 15px; font-weight: var(--rd-weight); color: var(--rd-ink); text-decoration: none; white-space: nowrap; }
+.rd-nav > button { cursor: pointer; }
+.rd-nav > [aria-current], .cx-nav a[aria-current='page'] { background: var(--rd-ink); color: var(--rd-on-ink); }
+.rd-nav > :focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
+.rd-tag, .cx-tag { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: var(--rd-radius-pill); background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.9); font-size: 13px; font-weight: var(--rd-weight); color: var(--rd-muted); white-space: nowrap; }
+.rd-pagehead, .cx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; padding: 30px 0 22px; }
+.rd-pagetitle, .cx-title { margin: 0; font-size: clamp(36px, 4vw, 54px); font-weight: var(--rd-weight); letter-spacing: -0.04em; line-height: 1.04; }
+.rd-pagesub, .cx-sub { margin: 6px 0 0; font-size: 15px; color: var(--rd-muted); }
+/* Selector con relieve: un hueco y una tecla levantada (velocidad, tamaño, filtro de una tarjeta). */
+.rd-seg { display: inline-flex; gap: 3px; padding: 4px; border-radius: 16px; background: rgba(120, 120, 140, 0.12); box-shadow: inset 0 2px 0 rgba(60, 60, 90, 0.07); }
+.rd-seg > button { height: 34px; padding: 0 14px; border: 0; border-radius: 12px; background: none; color: var(--rd-muted); font-family: inherit; font-size: 14px; font-weight: var(--rd-weight); cursor: pointer; transition: color 0.15s ease, transform 0.12s ease; }
+.rd-seg > button[aria-pressed='true'] { background: #fff; color: var(--rd-ink); transform: translateY(-1px); box-shadow: 0 3px 0 #d2cdea, 0 8px 14px rgba(40, 30, 90, 0.08); }
+.rd-seg > button:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .rd-seg > button { transition: none; } }

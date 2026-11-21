@@ -11,15 +11,8 @@
 .cx button, .cx input { font: inherit; }
 .cx :focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
 
-/* ---------- Barra: marca, pestañas y aviso de datos de prueba ---------- */
-.cx-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 26px; }
-.cx-nav { display: inline-flex; gap: 2px; padding: 4px; border-radius: 15px; background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 8px 24px rgba(40, 30, 90, 0.06); }
-.cx-nav a { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 11px; font-size: 15px; font-weight: var(--rd-weight); color: var(--rd-ink); text-decoration: none; }
-.cx-nav a[aria-current='page'] { background: var(--rd-ink); color: #fff; }
-.cx-tag { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: var(--rd-radius-pill); background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.9); font-size: 13px; font-weight: var(--rd-weight); color: var(--rd-muted); white-space: nowrap; }
-.cx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; padding: 30px 0 22px; }
-.cx-title { margin: 0; font-size: clamp(36px, 4vw, 54px); font-weight: var(--rd-weight); letter-spacing: -0.04em; line-height: 1.04; }
-.cx-sub { margin: 6px 0 0; font-size: 15px; color: var(--rd-muted); }
+/* ---------- Barra, pestañas, aviso y titular: el marco estándar vive en ../ronda.css (rd-top, rd-nav, rd-tag,
+   rd-pagehead, rd-pagetitle, rd-pagesub). Los nombres cx-top, cx-nav, cx-tag, cx-head, cx-title y cx-sub son los mismos estilos. ---------- */
 
 /* ---------- Superficies ---------- */
 .cx-slab { background: #fff; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 1px 2px rgba(40, 30, 90, 0.04), 0 16px 40px rgba(40, 30, 90, 0.07); min-width: 0; }
