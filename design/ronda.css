@@ -123,6 +123,19 @@
 .rd-row + .rd-row { border-top: 1px solid var(--rd-hairline); }
 .rd-code { font-family: var(--rd-font-mono); font-size: var(--rd-text-small); word-break: break-all; padding: var(--rd-space-3) var(--rd-space-4); border-radius: var(--rd-space-4); background: var(--rd-fill-soft); }
 
+/* ---------- Reproducción de una escena ---------- */
+.rd-player {
+  display: flex;
+  align-items: center;
+  gap: var(--rd-space-4);
+  border-top: 1px solid var(--rd-hairline);
+  padding: var(--rd-space-4) 0;
+}
+.rd-player .rd-button { flex: none; }
+.rd-player__position { flex: 1; height: 4px; background: var(--rd-fill-soft); border-radius: var(--rd-radius-pill); overflow: hidden; }
+.rd-player__position > span { display: block; height: 100%; background: var(--rd-ink); transform-origin: left; }
+.rd-player__time { color: var(--rd-muted); font-size: var(--rd-text-small); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 /* ---------- Teléfono ---------- */
 @media (max-width: 700px) {
   .rd-chip--status { white-space: normal; }
