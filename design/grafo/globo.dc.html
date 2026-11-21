@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Globo de agentes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.aura i{position:absolute;border-radius:50%;aspect-ratio:1}
+.aura i:nth-child(1){left:6%;top:31%;width:36%;background:#4fb4ff;opacity:.30;filter:blur(110px)}
+.aura i:nth-child(2){left:29%;top:44%;width:36%;background:#b36bff;opacity:.26;filter:blur(120px)}
+.aura i:nth-child(3){left:53%;top:19%;width:32%;background:#ff5fa8;opacity:.22;filter:blur(120px)}
+.aura i:nth-child(4){left:72%;top:58%;width:29%;background:#ffa24a;opacity:.24;filter:blur(120px)}
+.grad{background:linear-gradient(100deg,#1e9bff 0%,#7b61ff 30%,#e840d8 55%,#ff3b6b 76%,#ff8a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{height:40px;min-width:64px;padding:0 18px;border:0;border-radius:999px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .25s ease,color .25s ease}
+.pill:focus-visible{outline:2px solid #7b61ff;outline-offset:3px}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: #f7f7fa; color: #1d1d1f; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif">
+  <div class="aura" aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none"><i></i><i></i><i></i><i></i></div>
+  <canvas ref="{{canvasRef}}" aria-hidden="true" style="position: absolute; inset: 0; width: 1440px; height: 900px; display: block"></canvas>
+
+  <header style="position: absolute; left: 44px; right: 44px; top: 26px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 600; letter-spacing: -0.02em"><img src="/_blob/0d17598bfabb8ce4825e7ea44797ac6d" alt="" style="width: 40px; height: 40px; display: block">Ronda</div>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); -webkit-backdrop-filter: blur(28px) saturate(1.4); backdrop-filter: blur(28px) saturate(1.4); font-size: 13px; font-weight: 600"><span style="width: 7px; height: 7px; border-radius: 50%; background: #30d158"></span>Viernes 8:45 · {{onlineLabel}}</div>
+  </header>
+
+  <h1 style="position: absolute; left: 44px; top: 104px; margin: 0; font-size: 62px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; pointer-events: none">Tu mañana,<br><span class="grad">resuelta entre agentes.</span></h1>
+
+  <aside style="position: absolute; right: 44px; top: 100px; width: 392px; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 8px; padding: 22px 24px 24px; border-radius: 28px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); -webkit-backdrop-filter: blur(28px) saturate(1.4); backdrop-filter: blur(28px) saturate(1.4)">
+      <span style="font-size: 13px; font-weight: 600; color: #6e6e73">Con {{n}} personas</span>
+      <div style="display: flex; align-items: baseline; gap: 14px; font-family: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif">
+        <span style="font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums">{{pairs}}<span style="font-size: 16px; color: #6e6e73; letter-spacing: 0; margin: 0 6px 0 3px">pares</span></span>
+        <span style="font-size: 22px; color: #aeaeb2">→</span>
+        <span style="font-size: 40px; font-weight: 600; line-height: 1"><span class="grad">1</span><span style="font-size: 16px; color: #6e6e73; margin: 0 6px 0 3px">decisión</span></span>
+      </div>
+      <span style="font-size: 13px; color: #6e6e73; line-height: 1.35">Los agentes viven en O(n²). Tú vives en O(1).</span>
+    </div>
+    <div role="group" aria-label="Personas" style="display: flex; gap: 6px; padding: 5px; border-radius: 999px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); align-self: flex-start">
+      <sc-for list="{{options}}" as="opt" hint-placeholder-count="4">
+        <button type="button" class="pill" aria-pressed="{{opt.pressed}}" onClick="{{opt.pick}}" style="{{opt.style}}">{{opt.label}}</button>
+      </sc-for>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"autoplay":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { n: 5, auto: props.autoplay !== false };
+    this.canvasRef = { current: null };
+    this.SEQ = [5, 10, 50, 300];
+    this.MAX = 300;
+  }
+
+  componentDidMount() {
+    var self = this;
+    this.faces = {};
+    var src = { 0: '/_blob/99f89ebce844c0146b9057f1306965b8', 1: '/_blob/8603a08d152decb5f7e246585a4965f3', 2: '/_blob/72c77a593cf5b42fed6fe4280d65a858', 3: '/_blob/4d17422fc0319c81c3227a4cb57cf3ee', 4: '/_blob/f35903635b1800513173f450be2e5781' };
+    Object.keys(src).forEach(function (k) { var im = new Image(); im.src = src[k]; self.faces[k] = im; });
+    this.people = [
+      { name: 'Tú', status: 'Pide cobertura' },
+      { name: 'Ian', status: 'Tiene la cifra' },
+      { name: 'Lian', status: 'Hueco de 9:30 a 10:15' },
+      { name: 'Andrés', status: 'Plan B listo' },
+      { name: 'Roberto', status: 'En reuniones' }
+    ];
+    this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.cur = []; this.vis = [];
+    for (var i = 0; i < this.MAX; i++) { this.cur.push(null); this.vis.push(0); }
+    this.p = this.look(this.state.n);
+    this.edgeFade = 1;
+    this.t0 = performance.now(); this.last = this.t0;
+    this.lastStep = this.t0;
+    this.uy = 0; this.up = 0; this.vy = 0; this.vp = 0; this.drag = null; this.hover = -1; this.mouse = null; this.idle = 0;
+    var cv = this.canvasRef.current;
+    if (cv) {
+      cv.style.cursor = 'grab'; cv.style.touchAction = 'none';
+      var at = function (e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * 1440 / r.width, y: (e.clientY - r.top) * 900 / r.height }; };
+      this.onDown = function (e) { var m = at(e); self.drag = { x: m.x, y: m.y, t: performance.now() }; self.vy = 0; self.vp = 0; cv.style.cursor = 'grabbing'; cv.setPointerCapture && cv.setPointerCapture(e.pointerId); };
+      this.onMove = function (e) {
+        var m = at(e); self.mouse = m;
+        if (!self.drag) return;
+        var now = performance.now(), dts = Math.max(0.008, (now - self.drag.t) / 1000);
+        var dy = (m.x - self.drag.x) * 0.006, dp = (m.y - self.drag.y) * 0.006;
+        self.uy += dy; self.up = Math.max(-0.9, Math.min(0.9, self.up + dp));
+        self.vy = dy / dts; self.vp = dp / dts;
+        self.drag = { x: m.x, y: m.y, t: now }; self.idle = 0;
+      };
+      this.onUp = function () { self.drag = null; cv.style.cursor = 'grab'; };
+      this.onLeave = function () { self.mouse = null; };
+      cv.addEventListener('pointerdown', this.onDown);
+      cv.addEventListener('pointermove', this.onMove);
+      cv.addEventListener('pointerup', this.onUp);
+      cv.addEventListener('pointercancel', this.onUp);
+      cv.addEventListener('pointerleave', this.onLeave);
+    }
+    var loop = function (now) { self.frame(now); self.raf = requestAnimationFrame(loop); };
+    this.raf = requestAnimationFrame(loop);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    var cv = this.canvasRef.current;
+    if (cv && this.onDown) { cv.removeEventListener('pointerdown', this.onDown); cv.removeEventListener('pointermove', this.onMove); cv.removeEventListener('pointerup', this.onUp); cv.removeEventListener('pointercancel', this.onUp); cv.removeEventListener('pointerleave', this.onLeave); }
+  }
+
+  setN(n, keepAuto) {
+    if (n === this.state.n) { if (!keepAuto) this.setState({ auto: false }); return; }
+    this.edgeFade = 0;
+    this.lastStep = performance.now();
+    this.setState(keepAuto ? { n: n } : { n: n, auto: false });
+  }
+
+  look(n) {
+    if (n <= 5) return { S: 285, lw: 1, ea: 0.18, pearl: 6, faceR: 42 };
+    if (n <= 10) return { S: 255, lw: 1, ea: 0.2, pearl: 6.5, faceR: 40 };
+    if (n <= 50) return { S: 255, lw: 0.6, ea: 0.13, pearl: 4.2, faceR: 36 };
+    return { S: 255, lw: 0.4, ea: 0.075, pearl: 2.4, faceR: 34 };
+  }
+
+  norm(v) { var l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; }
+
+  target(i, n) {
+    var front = this.norm([0, 0.5, 0.86]);
+    if (i === 0) return front;
+    if (n <= 5) {
+      var a = -Math.PI / 2 + (2 * Math.PI * i) / n, r = 0.78;
+      return this.norm([r * Math.cos(a) * 1.18, -r * Math.sin(a) * 0.82 - 0.05, Math.sqrt(Math.max(0.05, 1 - r * r))]);
+    }
+    if (i === 1) return this.norm([0.62, 0.02, 0.78]);
+    if (i === 2) return this.norm([0.3, -0.56, 0.77]);
+    var g = Math.PI * (3 - Math.sqrt(5)), k = i - 3, m = n - 3;
+    var y = 1 - 2 * (k + 0.5) / m, rr = Math.sqrt(1 - y * y), th = k * g + 0.7;
+    return [rr * Math.cos(th), y, rr * Math.sin(th)];
+  }
+
+  frame(now) {
+    var cv = this.canvasRef.current; if (!cv) return;
+    var dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
+    var t = this.reduced ? 0 : (now - this.t0) / 1000;
+    var n = this.state.n;
+
+    if (this.state.auto && !this.reduced) {
+      var hold = n === 300 ? 6500 : n === 5 ? 5000 : 3200;
+      if (now - this.lastStep > hold) { var idx = this.SEQ.indexOf(n); this.setN(this.SEQ[(idx + 1) % this.SEQ.length], true); n = this.state.n; }
+    }
+
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = 1440, H = 900;
+    if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+    var ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    var k = this.reduced ? 1 : 1 - Math.exp(-dt * 3.2);
+    var tg = this.look(n), p = this.p;
+    for (var key in tg) p[key] += (tg[key] - p[key]) * k;
+    this.edgeFade += (1 - this.edgeFade) * (this.reduced ? 1 : 1 - Math.exp(-dt * 1.6));
+
+    for (var i = 0; i < this.MAX; i++) {
+      if (i < n) {
+        var tp = this.target(i, n);
+        if (!this.cur[i]) this.cur[i] = tp.slice();
+        var c = this.cur[i];
+        this.cur[i] = this.norm([c[0] + (tp[0] - c[0]) * k, c[1] + (tp[1] - c[1]) * k, c[2] + (tp[2] - c[2]) * k]);
+        this.vis[i] += (1 - this.vis[i]) * (this.reduced ? 1 : 1 - Math.exp(-dt * 2.4));
+      } else {
+        this.vis[i] += (0 - this.vis[i]) * (this.reduced ? 1 : 1 - Math.exp(-dt * 4));
+      }
+    }
+
+    var big = n > 5;
+    if (!this.drag) {
+      this.uy += this.vy * dt; this.up = Math.max(-0.9, Math.min(0.9, this.up + this.vp * dt));
+      var fr = Math.exp(-dt * 2.2); this.vy *= fr; this.vp *= fr;
+      this.idle += dt;
+      if (this.idle > 4) { var back = 1 - Math.exp(-dt * 0.8); this.uy -= this.uy * back; this.up -= this.up * back; }
+    }
+    if (!big) { this.uy = Math.max(-0.7, Math.min(0.7, this.uy)); this.up = Math.max(-0.5, Math.min(0.5, this.up)); }
+    var yaw = Math.sin(t * 0.16) * (big ? 0.42 : 0.2) + (big ? 0.12 : 0) + this.uy;
+    var pitch = 0.1 + Math.sin(t * 0.11) * 0.05 + this.up;
+    var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    var CX = 590, CY = 545, D = 3.4, S = p.S;
+    var self = this;
+    function rot(v) {
+      var x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy;
+      var y2 = v[1] * cp - z * sp, z2 = v[1] * sp + z * cp;
+      return [x, y2, z2];
+    }
+    function proj(v) { var f = D / (D - v[2]); return { x: CX + v[0] * S * f, y: CY - v[1] * S * f, z: v[2], f: f }; }
+
+    var live = n > 0 ? [[0, 1, '¿Quién cubre las 11?'], [1, 2, 'Review antes de las 10:30']] : [];
+    var liveKey = { '0-1': 1, '1-2': 1 };
+
+    var count = 0;
+    for (var a0 = 0; a0 < this.MAX; a0++) if (this.vis[a0] > 0.02) count = a0 + 1;
+    var P = [], R = [];
+    for (var q = 0; q < count; q++) { R[q] = rot(this.cur[q] || [0, 0, 1]); P[q] = proj(R[q]); }
+
+    this.hover = -1;
+    if (this.mouse && !this.drag) {
+      var best = Infinity;
+      for (var h = 0; h < count; h++) {
+        if (this.vis[h] < 0.5 || P[h].z < -0.15) continue;
+        var hx0 = P[h].x - this.mouse.x, hy0 = P[h].y - this.mouse.y, d2 = hx0 * hx0 + hy0 * hy0;
+        var lim = (h < 5 && (!big || h <= 2)) ? 44 : 14;
+        if (d2 < lim * lim && d2 < best) { best = d2; this.hover = h; }
+      }
+    }
+    var cvs = this.canvasRef.current; if (cvs && !this.drag) cvs.style.cursor = this.hover >= 0 ? 'pointer' : 'grab';
+
+    function ctrl(a, b) {
+      var va = R[a], vb = R[b];
+      var d = Math.hypot(va[0] - vb[0], va[1] - vb[1], va[2] - vb[2]);
+      var sx = (va[0] + vb[0]) / 2, syy = (va[1] + vb[1]) / 2, sz = (va[2] + vb[2]) / 2;
+      var L = Math.hypot(sx, syy, sz), lift = L > 0.45 ? (1 + 0.05 * d) / L : 1;
+      var pm = proj([sx * lift, syy * lift, sz * lift]);
+      return { x: 2 * pm.x - (P[a].x + P[b].x) / 2, y: 2 * pm.y - (P[a].y + P[b].y) / 2, z: (va[2] + vb[2]) / 2 };
+    }
+
+    var buckets = [new Path2D(), new Path2D(), new Path2D()];
+    for (var a = 0; a < count; a++) {
+      if (this.vis[a] < 0.5) continue;
+      for (var b = a + 1; b < count; b++) {
+        if (this.vis[b] < 0.5 || liveKey[a + '-' + b]) continue;
+        var cc = ctrl(a, b), bi = cc.z > 0.25 ? 0 : cc.z > -0.35 ? 1 : 2;
+        buckets[bi].moveTo(P[a].x, P[a].y);
+        buckets[bi].quadraticCurveTo(cc.x, cc.y, P[b].x, P[b].y);
+      }
+    }
+    ctx.lineCap = 'round';
+    ctx.lineWidth = p.lw;
+    var mult = [1, 0.55, 0.22];
+    for (var bb = 2; bb >= 0; bb--) {
+      ctx.strokeStyle = 'rgba(70,70,150,' + (p.ea * mult[bb] * this.edgeFade).toFixed(4) + ')';
+      ctx.stroke(buckets[bb]);
+    }
+
+    if (big) {
+      var sr = S * 1.06, hx = CX - sr * 0.35, hy = CY - sr * 0.45;
+      var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, sr * 1.25);
+      hg.addColorStop(0, 'rgba(255,255,255,0.55)'); hg.addColorStop(0.45, 'rgba(255,255,255,0.12)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.stroke();
+    }
+
+    if (this.hover >= 0) {
+      var hp = new Path2D(), hb = new Path2D(), H0 = this.hover;
+      for (var e2 = 0; e2 < count; e2++) {
+        if (e2 === H0 || this.vis[e2] < 0.5 || liveKey[Math.min(e2, H0) + '-' + Math.max(e2, H0)]) continue;
+        var ce = ctrl(H0, e2), into = ce.z > -0.1 ? hp : hb;
+        into.moveTo(P[H0].x, P[H0].y); into.quadraticCurveTo(ce.x, ce.y, P[e2].x, P[e2].y);
+      }
+      var ha = n > 50 ? 0.22 : n > 10 ? 0.3 : 0.4;
+      ctx.lineWidth = n > 50 ? 0.7 : 1;
+      ctx.strokeStyle = 'rgba(70,70,150,' + (ha * 0.25) + ')'; ctx.stroke(hb);
+      ctx.strokeStyle = 'rgba(70,70,150,' + ha + ')'; ctx.stroke(hp);
+    }
+
+    var order = [];
+    for (var o = 0; o < count; o++) if (this.vis[o] > 0.01) order.push(o);
+    order.sort(function (x, y) { return P[x].z - P[y].z; });
+
+    var withFace = function (i) { return i < 5 && (!big || i <= 2); };
+
+    for (var oi = 0; oi < order.length; oi++) {
+      var id = order[oi]; if (withFace(id)) continue;
+      var pp = P[id], depth = (pp.z + 1) / 2, va = this.vis[id];
+      var r = p.pearl * pp.f * (0.75 + 0.25 * depth) * va;
+      ctx.globalAlpha = (0.35 + 0.65 * depth) * va;
+      ctx.fillStyle = 'rgba(120,110,200,0.10)';
+      ctx.beginPath(); ctx.arc(pp.x, pp.y + r * 0.35, r * 2.1, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(pp.x, pp.y, r, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = 'rgba(60,60,110,0.18)'; ctx.lineWidth = 0.6; ctx.stroke();
+      if (id === this.hover) { ctx.globalAlpha = 1; ctx.strokeStyle = '#1d1d1f'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + 4, 0, 6.2832); ctx.stroke(); }
+    }
+    ctx.globalAlpha = 1;
+
+    var grads = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
+    for (var li = 0; li < live.length; li++) {
+      var A = live[li][0], B = live[li][1];
+      if (A >= count || B >= count) continue;
+      var c2 = ctrl(A, B), pa = P[A], pb = P[B];
+      var g = ctx.createLinearGradient(pa.x, pa.y, pb.x, pb.y);
+      grads.forEach(function (col, gi) { g.addColorStop(gi / 4, col); });
+      var path = new Path2D(); path.moveTo(pa.x, pa.y); path.quadraticCurveTo(c2.x, c2.y, pb.x, pb.y);
+      ctx.save(); ctx.globalAlpha = 0.35; ctx.filter = 'blur(7px)'; ctx.strokeStyle = g; ctx.lineWidth = 12; ctx.stroke(path); ctx.restore();
+      ctx.strokeStyle = g; ctx.lineWidth = 3.5; ctx.stroke(path);
+      if (!this.reduced) {
+        for (var s = 0; s < 7; s++) {
+          var u = ((t * 0.42 + li * 0.5) % 1) - s * 0.018; if (u < 0) continue;
+          var x = (1 - u) * (1 - u) * pa.x + 2 * (1 - u) * u * c2.x + u * u * pb.x;
+          var y = (1 - u) * (1 - u) * pa.y + 2 * (1 - u) * u * c2.y + u * u * pb.y;
+          ctx.globalAlpha = s === 0 ? 1 : 0.55 * (1 - s / 7);
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(x, y, s === 0 ? 2.6 : 2 - s * 0.2, 0, 6.2832); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      var mx = 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, my = 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y;
+      this.chip(ctx, live[li][2], mx, my);
+    }
+
+    for (var fi = 0; fi < order.length; fi++) {
+      var id2 = order[fi]; if (!withFace(id2)) continue;
+      var fp = P[id2], vis = this.vis[id2], im = this.faces[id2];
+      var main = id2 === 0 || !big;
+      var R0 = (big && id2 !== 0 ? p.faceR * 0.62 : (id2 >= 3 ? p.faceR * 0.8 : p.faceR)) * fp.f * vis;
+      if (R0 < 1) continue;
+      ctx.save();
+      ctx.shadowColor = 'rgba(40,30,90,0.18)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12;
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.beginPath(); ctx.arc(fp.x, fp.y, R0 + 3, 0, 6.2832); ctx.fill();
+      ctx.restore();
+      if (im && im.complete && im.naturalWidth) {
+        ctx.save(); ctx.beginPath(); ctx.arc(fp.x, fp.y, R0, 0, 6.2832); ctx.clip();
+        ctx.drawImage(im, fp.x - R0, fp.y - R0, R0 * 2, R0 * 2); ctx.restore();
+      }
+      ctx.globalAlpha = vis;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#1d1d1f';
+      ctx.font = '600 16px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
+      var person = this.people[id2];
+      if (id2 === 0) {
+        ctx.fillText(person.name, fp.x, fp.y - R0 - 34);
+        if (!big) { ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, fp.x, fp.y - R0 - 15); }
+        else { ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, fp.x, fp.y - R0 - 15); }
+      } else if (big) {
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(person.name, fp.x + R0 + 12, fp.y);
+        ctx.textBaseline = 'alphabetic';
+      } else {
+        var right = fp.x >= CX, gap = R0 + 16;
+        ctx.textAlign = right ? 'left' : 'right';
+        var lx = right ? fp.x + gap : fp.x - gap;
+        ctx.fillText(person.name, lx, fp.y - 2);
+        ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, lx, fp.y + 17);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (this.hover >= 0 && count > 1) {
+      var hv = P[this.hover], who = this.hover < 5 && (!big || this.hover <= 2) ? this.people[this.hover].name + ' · ' : '';
+      var conv = (n - 1).toLocaleString('es-CL') + (n - 1 === 1 ? ' conversación posible' : ' conversaciones posibles');
+      this.chip(ctx, who + conv, hv.x, hv.y - (this.hover < 5 && (!big || this.hover <= 2) ? 78 : 22));
+    }
+  }
+
+  chip(ctx, text, x, y) {
+    ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
+    var w = ctx.measureText(text).width + 26, h = 30;
+    ctx.save();
+    ctx.shadowColor = 'rgba(40,30,90,0.10)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+    ctx.fillStyle = 'rgba(255,255,255,0.82)';
+    ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 15); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 15); ctx.stroke();
+    ctx.fillStyle = '#1d1d1f'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y + 0.5);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  renderVals() {
+    var self = this, n = this.state.n;
+    return {
+      canvasRef: this.canvasRef,
+      n: n.toLocaleString('es-CL'),
+      pairs: (n * (n - 1) / 2).toLocaleString('es-CL'),
+      onlineLabel: n.toLocaleString('es-CL') + ' agentes en línea',
+      options: this.SEQ.map(function (v) {
+        var on = v === n;
+        return {
+          label: v.toLocaleString('es-CL'),
+          pressed: on ? 'true' : 'false',
+          style: on ? { background: '#1d1d1f', color: '#ffffff' } : { background: 'transparent', color: '#1d1d1f' },
+          pick: function () { self.setN(v, false); }
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

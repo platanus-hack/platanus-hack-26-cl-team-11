@@ -100,7 +100,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-stat`, `rd-stat__unit`, `rd-stat-row` | Número grande con unidad. | Siempre con una `rd-label` arriba. |
 | `rd-chip`, `rd-chip--status`, `rd-dot` | Chip de vidrio y píldora de estado. | Frases cortas, sin punto final. |
 | `rd-face` (`--small`, `--tiny`), `rd-person` | Cara y nombre con estado. | Siempre juntos. |
-| `rd-graph`, `rd-node`, `rd-edge*` | El grafo de agentes. | **En trabajo**, ver abajo. |
+| `rd-graph`, `rd-node`, `rd-edge*` | El grafo de agentes en 2D (referencia). | El grafo de la demo es el globo de `grafo/globo.html`, ver abajo. |
 | `rd-input`, `rd-row`, `rd-code` | Campo de texto, fila de lista con divisor y bloque de código. | Para pantallas de configuración. El código usa `--rd-font-mono`, nada más lo usa. |
 | `rd-mini`, `rd-mini-link` | Miniatura de una interacción sobre su conexión. | Un objeto, un gesto reconocible y su ejemplo ampliado. |
 | `rd-player`, `rd-player__position`, `rd-player__time` | Controles de una escena. | Pausa y repetición, avance de izquierda a derecha y tiempo transcurrido. |
@@ -114,22 +114,40 @@ izquierda; solo se centran los nombres bajo una cara.
   (`public/vita-faces`, escala 1,32 y origen Y 74 %) y se agrega a `faces/`.
 - Las caras actuales no buscan parecerse a cada integrante.
 
-## Grafo de agentes (en trabajo)
+## Grafo de agentes: el globo
 
-Mati: «el grafo necesita trabajo». Lo que **ya está decidido**:
+Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `grafo/globo.html`
+(fuente: `grafo/globo.dc.html`; capturas: `grafo/globo-5.png` … `globo-300.png`). Se abre con
+`?n=5|10|50|300` para fijar un tamaño y `&still` para una captura sin animación.
 
-- Las personas son nodos con su cara. Las conexiones son curvas delgadas, no rectas.
-- Conexión en reposo: 1 px, gris translúcido (`rd-edge`).
-- Conexión negociando: degradado, 3,5 px, con un halo difuminado y un punto de luz que la recorre
-  (`rd-edge--glow`, `rd-edge--live`, `rd-edge--spark`).
-- Sobre una conexión activa va un `rd-chip` con lo que se negocia, en pocas palabras.
-- El grafo no va dentro de una caja: flota sobre el aura.
+**Qué es:**
 
-Lo que **está abierto** (no lo cierres por tu cuenta; propón y pregunta):
+- Un globo de vidrio en 3D, dibujado en `<canvas>` con perspectiva propia (sin librerías). Las
+  personas viven sobre la esfera; cada conversación posible es un arco que pasa por encima de la
+  superficie. Lo que queda atrás se dibuja más tenue (tres capas de profundidad).
+- **Escala desde datos**, no a mano: la lista de personas y de pares decide todo.
+  - 5 personas: pentágono con caras, nombre y estado al costado (como la referencia).
+  - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan y se
+    vuelven más tenues. Con 300 las 44.850 líneas son una neblina de luz dentro del globo, con
+    brillo de vidrio arriba a la izquierda y un borde blanco fino. Nunca una mancha oscura.
+  - Las demás personas son perlas blancas, sin cara ni nombre.
+- **O(1) a la vista:** con más de 5 solo tienen cara Tú y las personas con quienes tu agente está
+  negociando ahora (Ian y Lian en la demo). Solo esas conversaciones van con degradado, halo, chip
+  y el punto de luz que las recorre.
+- **Interactivo:** se arrastra para girar el globo (con inercia; después de 4 s sin tocarlo vuelve
+  solo a su posición). Al pasar el cursor por una persona se encienden sus n − 1 conversaciones
+  en gris, más fuerte las de adelante, y un chip dice «N conversaciones posibles».
+- **Movimiento:** el globo se mece despacio; al cambiar de tamaño las personas viajan a su nuevo
+  lugar y las nuevas crecen desde cero. Sin `prefers-reduced-motion`: queda quieto, sin luz que
+  recorra, y todo cambio es inmediato.
+- Se reproduce solo 5 → 10 → 50 → 300; tocar un tamaño lo detiene ahí.
 
-- La disposición de los nodos (hoy es un pentágono fijo, hecho a mano).
-- Cómo se ve con 50 o 300 personas.
-- Cómo se anima el paso de «negociando» a «acuerdo» y el rearmado cuando alguien se retira.
+**Sigue abierto** (proponer y preguntar):
+
+- Paso de «negociando» a «acuerdo», y el rearmado en vivo cuando alguien retira su disponibilidad.
+- Dirección de las conexiones (flechas de quién le pide a quién, invertir una).
+- Versión para teléfono y el componente real en `frontend/` (React), con sus primitivas `rd-*`.
+- Ensayo con Stageshow (`film.mjs --gate`) y su `REHEARSAL.md`.
 
 ## Texto de la interfaz
 
@@ -187,6 +205,8 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
 | 21-nov-2026 | Miniaturas simultáneas en las conexiones, con superficies 3D chunky de inspiración PostHog y movimiento propio por acción. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
+| 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |
 
 Abierto: nombre definitivo («Ronda» es provisorio) e isotipo definitivo (el actual, tres órbitas y
 un punto, todavía no lo revisó Mati en grande).
