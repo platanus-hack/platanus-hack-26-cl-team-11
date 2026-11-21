@@ -221,6 +221,12 @@ Reglas:
 - **Cada cambio deja un registro** en el servidor de contexto, bajo el asistente que lo hizo, y avisa a las salas de la persona.
 - **Una ronda también deja registro en la sala**: empieza, se abre un hilo, llega la respuesta, nace una propuesta, termina. La pantalla ve quién le escribe a quién y el tema, nunca el texto.
 
+## El globo en la sala (propuesta)
+
+El backend sirve bajo `/design/` las piezas del globo: `design/grafo`, `faces`, `logo`, `sources`, `luz` y las dos hojas de estilo (`backend/src/designAssets.ts`). El resto de `design/` no se sirve.
+
+`/design/grafo/sala.html?sala=<código>` abre el globo aprobado y le carga `grafo/sala.js`, que cada 1,5 s lee `GET /api/rooms/<código>/state` y reemplaza los datos de demo: las personas de la sala con su nombre y su agente, y un grupo por cada persona que pidió ayuda en la última ronda. El más reciente va con color. `globo.html` no cambia. La pantalla `/sala/<código>` enlaza a esta página; integrarla dentro de esa pantalla espera la revisión de Mati.
+
 ## Simulación
 
 `sim/` llena una sala con personas inventadas para ver a muchos agentes conversar. Cada persona inventada entra por el mismo camino que una real: queda en la sala, recibe un repo de tres archivos y su agente participa en la ronda.

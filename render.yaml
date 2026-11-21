@@ -15,7 +15,10 @@ services:
         - design/tokens.css
         - design/ronda.css
         - design/faces/**
-      - design/sources/**
+        - design/sources/**
+        - design/grafo/**
+        - design/logo/**
+        - design/luz/**
         - package.json
         - package-lock.json
         - .nvmrc

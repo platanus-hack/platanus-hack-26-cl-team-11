@@ -188,6 +188,10 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 - Dirección de las conexiones (flechas de quién le pide a quién, invertir una).
 - Versión para teléfono y el componente real en `frontend/` (React), con sus primitivas `rd-*`.
 - Ensayo con Stageshow (`film.mjs --gate`) y su `REHEARSAL.md`.
+- Sala en vivo: `grafo/sala.html?sala=CÓDIGO` dibuja en el globo a las personas reales de una sala y sus
+  conversaciones (`grafo/sala.js` reemplaza los datos de demo sin cambiar `globo.html`). Quedan por decidir
+  cómo nace un nodo, cómo se ve antes y después de conectar su agente, y la dirección del arco.
+  Propuesta del 21-nov, pendiente de revisión de Mati.
 
 ## Hilo entre agentes
 

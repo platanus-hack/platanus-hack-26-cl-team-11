@@ -8,6 +8,6 @@ export default defineConfig({
   server: {
     port: 5173,
     fs: { allow: ['..'] },
-    proxy: { '/api': backend, '^/a/[^/]+$': backend },
+    proxy: { '/api': backend, '/design': backend, '^/a/[^/]+$': backend },
   },
 });
