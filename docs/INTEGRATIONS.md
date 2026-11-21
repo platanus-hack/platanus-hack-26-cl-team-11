@@ -21,14 +21,23 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. El l
 
 | Fuente | Cómo se conecta | Estado |
 |---|---|---|
-| Apple Health | Atajo de iOS que envía a una URL personal | Receptor funcionando en `backend/`; falta probar el Atajo en un iPhone |
-| Google Calendar | OAuth de Google | No empezado |
-| Gmail | El mismo OAuth de Google | No empezado |
+| Apple Health | Atajo de iOS que envía a una URL personal | Receptor funcionando; falta probar el Atajo en un iPhone |
+| Granola | Llave personal pegada | Construido; probado solo con respuestas simuladas |
+| GitHub | Token personal pegado | Construido; probado solo con respuestas simuladas |
+| Linear | Llave personal pegada | Construido; probado solo con respuestas simuladas |
+| Google Calendar | OAuth de Google | Construido; faltan credenciales de Google Cloud |
+| Gmail | El mismo OAuth de Google | Construido; guarda solo asunto, remitente y fecha |
 | Google Health | El mismo OAuth de Google | No empezado |
-| Granola | Llave personal pegada | No empezado |
-| GitHub | OAuth | No empezado |
-| Linear | Llave personal pegada | Solo si sobra tiempo |
 | Whoop | — | Fuera de la hack |
+
+Las fuentes conectadas se vuelven a sincronizar solas cada 15 minutos.
+
+### Para activar Google
+
+1. Crea un proyecto en Google Cloud y habilita las APIs de Calendar y Gmail.
+2. Crea un cliente OAuth web con la dirección de retorno `<PUBLIC_BASE_URL>/api/oauth/google/callback`.
+3. Agrega a cada integrante como usuario de prueba. Con la app sin verificar, los accesos caducan a los 7 días.
+4. Define `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y `PUBLIC_BASE_URL`.
 
 ## Apple Health
 

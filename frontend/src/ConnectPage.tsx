@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchPerson, type PersonPage } from './api';
+import { fetchPerson, fetchSignals, type PersonPage, type Signals } from './api';
 import { formatWhen } from './format';
+import { SignalsCard } from './SignalsCard';
 import { SourceRow } from './SourceRow';
 
 const REFRESH_MS = 5000;
 
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
+  const [signals, setSignals] = useState<Signals | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(
     () =>
-      fetchPerson(token)
-        .then((result) => {
-          setPage(result);
+      Promise.all([fetchPerson(token), fetchSignals(token)])
+        .then(([person, derived]) => {
+          setPage(person);
+          setSignals(derived.signals);
           setError(null);
         })
         .catch((failure: unknown) => setError(failure instanceof Error ? failure.message : 'No se pudo cargar.')),
@@ -46,6 +49,8 @@ export function ConnectPage({ token }: { token: string }) {
           <SourceRow key={source.id} token={token} source={source} onChange={() => void load()} />
         ))}
       </section>
+
+      {signals && <SignalsCard signals={signals} />}
 
       <section className="rd-card rd-glass">
         <span className="rd-label">Apple Health</span>

@@ -5,6 +5,7 @@ import { connectionRoutes } from './routes/connections.js';
 import { ingestRoutes } from './routes/ingest.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { peopleRoutes } from './routes/people.js';
+import { signalRoutes } from './routes/signals.js';
 import { ConnectorError } from './types.js';
 
 export function createApp(ctx: AppContext) {
@@ -21,6 +22,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', connectionRoutes(ctx));
   api.route('/', ingestRoutes(ctx));
   api.route('/', oauthRoutes(ctx));
+  api.route('/', signalRoutes(ctx));
 
   return new Hono().route('/api', api);
 }

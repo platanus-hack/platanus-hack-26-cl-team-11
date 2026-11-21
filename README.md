@@ -46,6 +46,7 @@ El frontend le pasa `/api` al backend, así que en desarrollo se usa solo el pue
 | `npm run type-check` | Revisa tipos en ambos |
 | `npm run build && npm start` | Compila el frontend y lo sirve desde el backend en un solo puerto |
 | `npm run add-person -- "Nombre"` | Crea una persona y muestra su link |
+| `npm run seed` | Crea cinco personas de demo con 14 días de datos sintéticos |
 
 Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección pública que se muestra para el Atajo) y `DATA_DIR` (carpeta de la base; por defecto `backend/data`, ignorada por git).
 
@@ -60,7 +61,15 @@ Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección p
 
 ## Estado
 
-Base funcionando: crear una persona, recibir datos de Apple Health y verlos en su página de conexión. Las demás fuentes y los agentes no están construidos. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md).
+Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y derivar sus señales (energía, carga, bloqueos y experiencia).
+
+| Fuente | Estado |
+|---|---|
+| Apple Health | Recibe envíos; falta probar el Atajo en un iPhone |
+| Granola, GitHub, Linear | Se conectan con llave; probados solo con respuestas simuladas |
+| Google Calendar y Gmail | OAuth listo; falta crear las credenciales en Google Cloud |
+
+Los agentes y su conversación no están construidos. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Remotes
 

@@ -17,6 +17,7 @@
     "test": "npm test -w backend",
     "type-check": "npm run type-check -w backend && npm run type-check -w frontend",
     "add-person": "npm run add-person -w backend --",
+    "seed": "npm run seed -w backend --",
     "lint:design": "design/lint.sh",
     "prepare": "git config core.hooksPath .githooks || true"
   },

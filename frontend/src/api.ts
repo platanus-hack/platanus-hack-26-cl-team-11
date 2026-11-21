@@ -66,3 +66,29 @@ export const connectSource = (token: string, source: string, secret: string) =>
 export const syncSource = (token: string, source: string) => request<{ imported: number }>(`${personPath(token)}/connections/${source}/sync`, post());
 export const oauthStartUrl = (token: string, provider: string) => `${personPath(token)}/oauth/${encodeURIComponent(provider)}/start`;
 export const disconnectSource = (token: string, source: string) => request<{ ok: boolean }>(`${personPath(token)}/connections/${source}`, { method: 'DELETE' });
+
+export type Visibility = 'siempre' | 'preguntar' | 'nunca';
+
+export interface LevelSignal {
+  level: 'baja' | 'media' | 'alta' | 'sin_datos';
+  statement: string;
+  basis: string[];
+  visibility: Visibility;
+}
+
+export interface Blocker {
+  topic: string;
+  since: string;
+  statement: string;
+  visibility: Visibility;
+}
+
+export interface Signals {
+  energy: LevelSignal;
+  load: LevelSignal;
+  blockers: Blocker[];
+  expertise: string[];
+  visibility: { blockers: Visibility; expertise: Visibility };
+}
+
+export const fetchSignals = (token: string) => request<{ name: string; signals: Signals }>(`${personPath(token)}/signals`);
