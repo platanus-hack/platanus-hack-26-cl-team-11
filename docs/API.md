@@ -97,8 +97,18 @@ Cada señal vale `siempre`, `preguntar` o `nunca`. `includeInPulse` es verdadero
 | `GET /api/people/<token>/teams` | — | `{ teams, pending }` |
 | `DELETE /api/people/<token>/teams/<equipo>` | — | `{ ok }`. Sale del equipo, o retira su solicitud si todavía no entraba |
 | `GET /api/people/<token>/teams/<equipo>/pulse` | — | `{ team, members, pulse }` |
+| `POST /api/people/<token>/teams/<equipo>/invites` | — | 201 `{ code, path, expiresAt }`. Solo quien administra. El link vale 7 días y sirve para varias personas |
+| `DELETE /api/people/<token>/teams/<equipo>/invites/<código>` | — | `{ ok }`. Anula el link. Solo quien administra |
+| `DELETE /api/people/<token>/teams/<equipo>/members/<id>` | — | `{ ok }`. Saca a esa persona del equipo. Solo quien administra, y nunca a sí mismo (400) |
+| `POST /api/people/<token>/teams/<equipo>/members/<id>/admin` | — | `{ ok }`. Nombra a otra persona como administradora. Solo quien administra |
+| `GET /api/invites/<código>` | — | `{ team, people, expiresAt }`, o 404 si no existe o venció |
+| `POST /api/invites/<código>/join` | `{ "name": "Rob" }` o `{ "token": "…" }` | 201 `{ token, name, team }`. Entra directo, sin aprobación; 200 si ya era integrante |
 
 En `GET …/teams`, cada equipo trae `id`, `name`, `joinCode`, `members` (solo nombres) y `requests`: `[{ id, name, approvals, needed, approvedByMe }]`. `pending` son los equipos donde la persona espera aprobación.
+
+También trae `admin` (si quien mira administra el equipo), `people` e `invites`. Cada entrada de `people` es `{ id, name, admin, me, pending }`: `id` es un identificador público, nunca el link de la persona, y `pending` es la lista de primeros pasos que le faltan (`agente`, `checkin`, `whatsapp`, `salud`). `pending` e `invites` solo llegan a quien administra; el resto recibe `pending: null` e `invites: []`.
+
+Administra el equipo quien lo creó. Si nadie fue nombrado, administra la persona que lleva más tiempo en el equipo, así que un equipo nunca queda sin administrador.
 
 Forma de `pulse`:
 

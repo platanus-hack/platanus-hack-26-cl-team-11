@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import type { Team } from './api';
 import { CopyButton } from './CopyButton';
-import { Face } from './Face';
 import { Glyph } from './Glyph';
+import { InviteRow } from './InviteRow';
 import { Item } from './Item';
 import { ItemIcon } from './ItemIcon';
 import { JoinRequestRow } from './JoinRequestRow';
 import { SectionHead } from './SectionHead';
+import { TeamPersonRow } from './TeamPersonRow';
 
 interface TeamMembersProps {
   token: string;
@@ -15,13 +17,25 @@ interface TeamMembersProps {
 }
 
 export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) {
+  const [openId, setOpenId] = useState<string | null>(null);
+
   return (
     <div className="app-block">
       <SectionHead first={first} title={team.name} />
       <div className="rd-list">
-        {team.members.map((name, position) => (
-          <Item key={position} icon={<Face name={name} />} title={name} />
+        {team.people.map((person) => (
+          <TeamPersonRow
+            key={person.id}
+            token={token}
+            teamId={team.id}
+            person={person}
+            manage={team.admin}
+            open={openId === person.id}
+            onToggle={() => setOpenId((current) => (current === person.id ? null : person.id))}
+            onChange={onChange}
+          />
         ))}
+        {team.admin && <InviteRow token={token} team={team} onChange={onChange} />}
         {team.requests.map((request) => (
           <JoinRequestRow key={request.id} token={token} teamId={team.id} request={request} onChange={onChange} />
         ))}

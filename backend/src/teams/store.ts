@@ -14,6 +14,16 @@ export interface TeamMember {
 
 export type JoinStatus = 'pendiente' | 'miembro';
 
+export interface TeamInvite {
+  code: string;
+  teamId: string;
+  expiresAt: string;
+}
+
+export const INVITE_DAYS = 7;
+const INVITE_CODE_BYTES = 12;
+const DAY_MS = 86_400_000;
+
 export interface JoinRequest {
   id: string;
   teamId: string;
@@ -36,6 +46,19 @@ export interface TeamStore {
   findJoinRequest(requestId: string): JoinRequest | undefined;
   joinRequestsOf(teamId: string): JoinRequest[];
   pendingTeamsOf(personToken: string): Team[];
+  adminsOf(teamId: string): string[];
+  isAdmin(teamId: string, personToken: string): boolean;
+  makeAdmin(teamId: string, personToken: string): void;
+  createInvite(teamId: string, createdBy: string, now: Date): TeamInvite;
+  findInvite(code: string, now: Date): TeamInvite | undefined;
+  invitesOf(teamId: string, now: Date): TeamInvite[];
+  revokeInvite(teamId: string, code: string): void;
+}
+
+interface InviteRow {
+  code: string;
+  team_id: string;
+  expires_at: string;
 }
 
 interface TeamRow {
@@ -76,6 +99,18 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
       requested_at TEXT NOT NULL,
       UNIQUE (team_id, person_token)
     );
+    CREATE TABLE IF NOT EXISTS team_admins (
+      team_id TEXT NOT NULL REFERENCES teams (id),
+      person_token TEXT NOT NULL REFERENCES people (token),
+      PRIMARY KEY (team_id, person_token)
+    );
+    CREATE TABLE IF NOT EXISTS team_invites (
+      code TEXT PRIMARY KEY,
+      team_id TEXT NOT NULL REFERENCES teams (id),
+      created_by TEXT NOT NULL REFERENCES people (token),
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS team_join_approvals (
       request_id TEXT NOT NULL REFERENCES team_join_requests (id),
       approver_token TEXT NOT NULL REFERENCES people (token),
@@ -99,6 +134,17 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
 
   const memberTokensOf = (teamId: string) =>
     (db.prepare('SELECT person_token FROM team_members WHERE team_id = ?').all(teamId) as unknown as Array<{ person_token: string }>).map((row) => row.person_token);
+
+  const adminsOf = (teamId: string): string[] => {
+    const named = db
+      .prepare('SELECT a.person_token AS token FROM team_admins a JOIN team_members m ON m.team_id = a.team_id AND m.person_token = a.person_token WHERE a.team_id = ?')
+      .all(teamId) as unknown as Array<{ token: string }>;
+    if (named.length > 0) return named.map((row) => row.token);
+    const first = db.prepare('SELECT person_token AS token FROM team_members WHERE team_id = ? ORDER BY joined_at, rowid LIMIT 1').get(teamId) as { token: string } | undefined;
+    return first ? [first.token] : [];
+  };
+
+  const toInvite = (row: InviteRow): TeamInvite => ({ code: row.code, teamId: row.team_id, expiresAt: row.expires_at });
 
   const findJoinRequest = (requestId: string): JoinRequest | undefined => {
     const row = db
@@ -141,14 +187,17 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
     addMember,
 
     removeMember(teamId, personToken) {
+      const keptAdmins = adminsOf(teamId).filter((admin) => admin !== personToken);
       db.prepare('DELETE FROM team_members WHERE team_id = ? AND person_token = ?').run(teamId, personToken);
+      db.prepare('DELETE FROM team_admins WHERE team_id = ? AND person_token = ?').run(teamId, personToken);
+      for (const admin of keptAdmins) db.prepare('INSERT OR IGNORE INTO team_admins (team_id, person_token) VALUES (?, ?)').run(teamId, admin);
       const request = db.prepare('SELECT id FROM team_join_requests WHERE team_id = ? AND person_token = ?').get(teamId, personToken) as { id: string } | undefined;
       if (request) dropJoinRequest(request.id);
     },
 
     membersOf(teamId) {
       const rows = db
-        .prepare('SELECT p.token AS token, p.name AS name FROM team_members m JOIN people p ON p.token = m.person_token WHERE m.team_id = ? ORDER BY m.joined_at, p.name')
+        .prepare('SELECT p.token AS token, p.name AS name FROM team_members m JOIN people p ON p.token = m.person_token WHERE m.team_id = ? ORDER BY m.joined_at, m.rowid')
         .all(teamId) as unknown as TeamMember[];
       return rows.map((row) => ({ token: row.token, name: row.name }));
     },
@@ -186,6 +235,35 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
         .prepare(`SELECT ${REQUEST_COLUMNS} FROM team_join_requests r JOIN people p ON p.token = r.person_token WHERE r.team_id = ? ORDER BY r.requested_at, p.name`)
         .all(teamId) as unknown as JoinRequestRow[];
       return rows.map(toJoinRequest);
+    },
+
+    adminsOf,
+
+    isAdmin: (teamId, personToken) => adminsOf(teamId).includes(personToken),
+
+    makeAdmin(teamId, personToken) {
+      if (!isMember(teamId, personToken)) return;
+      for (const admin of [...adminsOf(teamId), personToken]) db.prepare('INSERT OR IGNORE INTO team_admins (team_id, person_token) VALUES (?, ?)').run(teamId, admin);
+    },
+
+    createInvite(teamId, createdBy, instant) {
+      const invite: TeamInvite = { code: randomBytes(INVITE_CODE_BYTES).toString('base64url'), teamId, expiresAt: new Date(instant.getTime() + INVITE_DAYS * DAY_MS).toISOString() };
+      db.prepare('INSERT INTO team_invites (code, team_id, created_by, created_at, expires_at) VALUES (?, ?, ?, ?, ?)').run(invite.code, teamId, createdBy, instant.toISOString(), invite.expiresAt);
+      return invite;
+    },
+
+    findInvite(code, instant) {
+      const row = db.prepare('SELECT code, team_id, expires_at FROM team_invites WHERE code = ? AND expires_at >= ?').get(code, instant.toISOString()) as InviteRow | undefined;
+      return row ? toInvite(row) : undefined;
+    },
+
+    invitesOf(teamId, instant) {
+      const rows = db.prepare('SELECT code, team_id, expires_at FROM team_invites WHERE team_id = ? AND expires_at >= ? ORDER BY created_at DESC').all(teamId, instant.toISOString()) as unknown as InviteRow[];
+      return rows.map(toInvite);
+    },
+
+    revokeInvite(teamId, code) {
+      db.prepare('DELETE FROM team_invites WHERE team_id = ? AND code = ?').run(teamId, code);
     },
 
     pendingTeamsOf(personToken) {

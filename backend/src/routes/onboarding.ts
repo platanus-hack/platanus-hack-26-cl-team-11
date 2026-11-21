@@ -12,22 +12,26 @@ interface OnboardingStep {
   done: boolean;
 }
 
-export function onboardingRoutes({ store, teams, assistants, repo, whatsapp }: AppContext) {
+export function onboardingStepsOf({ store, teams, assistants, repo, whatsapp }: AppContext, personToken: string): OnboardingStep[] {
+  const received = store.syncBySource(personToken);
+  const has = (source: string) => (received[source]?.total ?? 0) > 0;
+  const phone = whatsapp.statusOf(personToken);
+  return [
+    { id: 'equipo', done: teams.teamsOf(personToken).length > 0 },
+    { id: 'agente', done: assistants.assistantsOf(personToken).length > 0 || repo.tree(personToken).length > 0 },
+    { id: 'checkin', done: has(CHECKIN_SOURCE) },
+    ...(phone.configured ? [{ id: 'whatsapp' as const, done: phone.linked }] : []),
+    { id: 'salud', done: has(HEALTH_SOURCE) },
+  ];
+}
+
+export function onboardingRoutes(ctx: AppContext) {
   const routes = new Hono();
 
   routes.get('/people/:token/onboarding', (c) => {
-    const person = store.findPerson(c.req.param('token'));
+    const person = ctx.store.findPerson(c.req.param('token'));
     if (!person) return c.json(NOT_FOUND, 404);
-    const received = store.syncBySource(person.token);
-    const has = (source: string) => (received[source]?.total ?? 0) > 0;
-    const phone = whatsapp.statusOf(person.token);
-    const steps: OnboardingStep[] = [
-      { id: 'equipo', done: teams.teamsOf(person.token).length > 0 },
-      { id: 'agente', done: assistants.assistantsOf(person.token).length > 0 || repo.tree(person.token).length > 0 },
-      { id: 'checkin', done: has(CHECKIN_SOURCE) },
-      ...(phone.configured ? [{ id: 'whatsapp' as const, done: phone.linked }] : []),
-      { id: 'salud', done: has(HEALTH_SOURCE) },
-    ];
+    const steps = onboardingStepsOf(ctx, person.token);
     return c.json({ steps, pending: steps.filter((step) => !step.done).length });
   });
 

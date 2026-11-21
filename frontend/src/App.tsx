@@ -4,6 +4,7 @@ import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
 import { HomePage } from './HomePage';
+import { InvitePage } from './InvitePage';
 import { JoinPage } from './JoinPage';
 import { RoomPage } from './RoomPage';
 
@@ -56,6 +57,12 @@ export function App() {
     return (
       <Shell>
         <JoinPage code={token} />
+      </Shell>
+    );
+  if (section === 'invitacion' && token)
+    return (
+      <Shell>
+        <InvitePage code={token} />
       </Shell>
     );
   if (section === 'sala' && token)

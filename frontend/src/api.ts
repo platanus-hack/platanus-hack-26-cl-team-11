@@ -192,11 +192,34 @@ export interface JoinRequest {
   approvedByMe: boolean;
 }
 
+export interface TeamPerson {
+  id: string;
+  name: string;
+  admin: boolean;
+  me: boolean;
+  pending: OnboardingStepId[] | null;
+}
+
+export interface TeamInvite {
+  code: string;
+  path: string;
+  expiresAt: string;
+}
+
 export interface Team extends TeamSummary {
   joinCode: string;
   roomCode: string | null;
   members: string[];
+  admin: boolean;
+  people: TeamPerson[];
+  invites: TeamInvite[];
   requests: JoinRequest[];
+}
+
+export interface InviteSummary {
+  team: string;
+  people: number;
+  expiresAt: string;
 }
 
 export type JoinStatus = 'pendiente' | 'miembro';
@@ -209,6 +232,14 @@ export const joinTeam = (token: string, joinCode: string) => request<TeamSummary
 export const approveJoin = (token: string, teamId: string, requestId: string) =>
   request<{ status: JoinStatus }>(`${teamPath(token, teamId)}/requests/${encodeURIComponent(requestId)}/approve`, post());
 export const leaveTeam = (token: string, teamId: string) => request<{ ok: boolean }>(teamPath(token, teamId), { method: 'DELETE' });
+export const createInvite = (token: string, teamId: string) => request<TeamInvite>(`${teamPath(token, teamId)}/invites`, post());
+export const revokeInvite = (token: string, teamId: string, code: string) => request<{ ok: boolean }>(`${teamPath(token, teamId)}/invites/${encodeURIComponent(code)}`, { method: 'DELETE' });
+export const removeMember = (token: string, teamId: string, memberId: string) =>
+  request<{ ok: boolean }>(`${teamPath(token, teamId)}/members/${encodeURIComponent(memberId)}`, { method: 'DELETE' });
+export const makeAdmin = (token: string, teamId: string, memberId: string) => request<{ ok: boolean }>(`${teamPath(token, teamId)}/members/${encodeURIComponent(memberId)}/admin`, post());
+export const fetchInvite = (code: string) => request<InviteSummary>(`/api/invites/${encodeURIComponent(code)}`);
+export const joinInvite = (code: string, who: { name: string } | { token: string }) =>
+  request<{ token: string; name: string; team: TeamSummary }>(`/api/invites/${encodeURIComponent(code)}/join`, post(who));
 
 export type PulseLevel = 'baja' | 'media' | 'alta';
 
