@@ -43,7 +43,7 @@ Cada elemento de `sources`:
 | `DELETE /api/people/<token>/connections/<fuente>` | — | `{ ok }`. Borra la conexión y todos sus eventos |
 | `GET /api/people/<token>/oauth/<proveedor>/start` | Navegación desde la página de la persona | Redirige al consentimiento de `google`, `github` o `linear` |
 | `GET /api/oauth/<proveedor>/callback` | El retorno del proveedor | Guarda los tokens cifrados, sincroniza y redirige a `/conectar/<token>` |
-| `POST /api/ingest/health/<token>` | El envío del Atajo de iOS, hasta 1 MB. Una noche suelta o varios días con varias métricas | 201 `{ ok, id, summary }`. Con varios días agrega `days`, `from`, `to`, `ignored` y `message`, guarda un registro por día y reenviar un día lo reemplaza. Si no se pudo leer ningún dato, 400 `{ error, ignored, example }`. Formato en [INTEGRATIONS.md](INTEGRATIONS.md#formato-del-envío) |
+| `POST /api/ingest/health/<token>` | El envío del Atajo de iOS, hasta 1 MB. Una noche suelta o varios días con varias métricas | 201 `{ ok, id, summary }`. Con varios días agrega `days`, `from`, `to`, `ignored` y `message`, guarda un registro por día y reenviar un día lo reemplaza. Si no se pudo leer ningún dato, 400 `{ error, message, ignored, example }`. Toda respuesta de esta ruta trae `message`, la frase que muestra el Atajo. Formato en [INTEGRATIONS.md](INTEGRATIONS.md#formato-del-envío) |
 
 Sobre OAuth:
 

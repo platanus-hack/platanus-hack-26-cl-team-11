@@ -6,6 +6,7 @@ import { asObject, NOT_FOUND } from './shared.js';
 
 const MAX_BODY_BYTES = 1_000_000;
 const NOTHING_READABLE = 'No pudimos leer ningún dato de salud en el envío.';
+const NOTHING_SENT = 'Tu teléfono no mandó datos de salud. Revisa que Salud tenga sueño o pasos registrados.';
 
 const shortDay = (day: string) => day.slice(5).split('-').reverse().join('-');
 
@@ -22,14 +23,17 @@ export function ingestRoutes({ store }: AppContext) {
     const slug = c.req.param('slug');
     const connector = CONNECTORS.find((item) => item.kind === 'push' && item.ingestSlug === slug);
     const person = store.findPerson(c.req.param('token'));
-    if (connector?.kind !== 'push' || !person) return c.json(NOT_FOUND, 404);
+    if (connector?.kind !== 'push' || !person) return c.json({ ...NOT_FOUND, message: NOT_FOUND.error }, 404);
     const payload = asObject(await c.req.text());
     const batch = connector.toBatch?.(payload) ?? null;
     if (!batch) {
       const event = store.saveEvent(person.token, connector.toEvent(payload));
       return c.json({ ok: true, id: event?.id ?? null, summary: event?.summary ?? null }, 201);
     }
-    if (!batch.events.length) return c.json({ error: NOTHING_READABLE, ignored: batch.ignored, example: batch.ignoredSample }, 400);
+    if (!batch.events.length) {
+      const error = batch.ignored > 0 ? NOTHING_READABLE : NOTHING_SENT;
+      return c.json({ error, message: error, ignored: batch.ignored, example: batch.ignoredSample }, 400);
+    }
     const saved = batch.events.map((draft) => store.saveEvent(person.token, draft));
     const days = batch.events.map((draft) => draft.occurredAt);
     return c.json(

@@ -109,7 +109,16 @@ test('a batch with nothing readable is refused and nothing is stored', async () 
   const ana = ctx.store.addPerson('Ana');
   const response = await app.request(`/api/ingest/health/${ana.token}`, send({ steps_by_day: 'ayer|muchos' }));
   assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), { error: 'No pudimos leer ningún dato de salud en el envío.', ignored: 1, example: 'ayer|muchos' });
+  const unreadable = 'No pudimos leer ningún dato de salud en el envío.';
+  assert.deepEqual(await response.json(), { error: unreadable, message: unreadable, ignored: 1, example: 'ayer|muchos' });
+
+  const empty = await app.request(`/api/ingest/health/${ana.token}`, send({ sleep_samples: '', steps_by_day: '', active_energy_by_day: '' }));
+  assert.equal(empty.status, 400);
+  assert.match(((await empty.json()) as { message: string }).message, /^Tu teléfono no mandó datos de salud/);
+
+  const stranger = await app.request('/api/ingest/health/no-existe', send({ steps_by_day: '2026-11-21|100' }));
+  assert.equal(stranger.status, 404);
+  assert.deepEqual(await stranger.json(), { error: 'Link no válido.', message: 'Link no válido.' });
   assert.equal(ctx.store.listEvents(ana.token).length, 0);
 });
 
