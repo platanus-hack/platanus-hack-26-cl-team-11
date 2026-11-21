@@ -258,6 +258,23 @@ Forma de `GET …/mesa`:
 | `usage` | `{ lastRound: { calls, tokens, measured } o null, lastDayTokens, dailyCap }` |
 | `asks`, `threads`, `proposals` | Igual que en `GET …/agents`, para la mesa |
 
+## Panel del equipo (`/admin`)
+
+La pantalla `/admin` (`frontend/src/AdminPage.tsx`) toma la sesión de Google de quien entra; `/admin/<token>` abre el panel de esa persona. Solo entra quien opera la mesa (un correo de `MESA_OPERATORS`; sin ingreso con Google configurado, cualquiera). En una pantalla:
+
+- **El globo abre en: En vivo / Demo.** Fija con qué abre el globo de la pestaña Equipo para todas las personas. Cada persona puede cambiarlo en su pantalla; no se guarda.
+- **Que conversen ahora** y **Que vuelvan a conversar solos.** Usan `POST …/mesa/rounds` y `PUT …/mesa/interval` de arriba.
+- **Historial.** Las últimas 40 rondas de la mesa: estado, quién la inició, conversaciones, tokens y llamadas. Al abrir una se ven todas sus conversaciones con el texto completo y las propuestas que dejó. Quien opera ve el texto de todas las personas, no solo el suyo.
+
+| Ruta | Recibe | Responde |
+|---|---|---|
+| `GET /api/mesa/globe` | — | `{ mode: "mesa" \| "demo" }`. Pública; la lee el globo al abrir. Sin valor guardado, `mesa` |
+| `GET /api/admin/<token>` | — | `{ globeMode, configured, intervalSeconds, usage: { lastDayTokens, dailyCap }, people: [{ name, member, publishing }], rounds }` |
+| `PUT /api/admin/<token>/globe` | `{ "mode": "demo" }` | `{ globeMode }`. 400 si no es `mesa` ni `demo` |
+| `GET /api/admin/<token>/rounds/<id>` | — | `{ round, threads: [{ id, topic, requesterName, helperName, help, messages: [{ fromName, text, createdAt }] }], proposals: [{ id, topic, text }] }`. 404 si la ronda no está entre las últimas 40 |
+
+Cada elemento de `rounds` es `{ id, status, startedAt, finishedAt, problem, startedBy, threads, tokens, calls }`; `startedBy` es el nombre de quien la inició o `null` si la inició el intervalo. Las rutas `/api/admin/…` responden 404 a un token que no existe y 403 a quien no opera. El modo del globo se guarda en `mesa_settings` (clave `globe_mode`). Pruebas: `backend/test/admin.test.ts`.
+
 ## Servidor de contexto (datos de prueba)
 
 `GET /api/context/<token>`, `POST /api/context/<token>/push`, `POST` y `DELETE /api/context/<token>/sources/<fuente>` y `POST /api/context/<token>/simulate`. Están descritas en [ARCHITECTURE.md](ARCHITECTURE.md#servidor-de-contexto-datos-de-prueba). Usan tablas propias y no tocan los eventos reales ni las señales.

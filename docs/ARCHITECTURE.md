@@ -97,6 +97,7 @@ El frontend no usa un enrutador: `frontend/src/App.tsx` mira la dirección y eli
 | `/sala` | Abre una sala nueva | `RoomStart.tsx` |
 | `/conectar/<token>` | Panel personal, con cuatro pestañas | `ConnectPage.tsx` |
 | `/contexto/<token>` | Mapa de contexto, con datos de prueba | `ContextPage.tsx` |
+| `/admin` o `/admin/<token>` | Panel del equipo: con qué abre el globo, iniciar una ronda, cada cuánto se repite e historial de conversaciones. Solo para quien opera la mesa ([API.md](API.md#panel-del-equipo-admin)) | `AdminPage.tsx` |
 
 El panel personal es una columna de filas con una barra de pestañas abajo. La pestaña activa va en la dirección (`#fuentes`, `#tu`, `#equipo`, `#ajustes`), así que se puede enlazar directo a una. El panel vuelve a leer sus datos cada 5 segundos.
 

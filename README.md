@@ -83,6 +83,8 @@ En producción: https://ronda-n8if.onrender.com
 
 Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. También responden las preguntas del tablero: quien pregunta recibe una sola respuesta armada con lo que comparten los demás (probado solo con un modelo falso). El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. La llave está en el servidor desde el 21-nov-2026: la ronda corrió con 50x en local y una simulación de 4 personas corrió en producción. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+**Panel del equipo.** En [`/admin`](https://ronda-n8if.onrender.com/admin) quien opera la mesa elige si el globo abre en vivo o en demo, hace que los agentes conversen ahora o cada cierto tiempo, y lee el historial de las últimas 40 rondas con cada conversación completa. En producción desde el 21-nov-2026. Detalle en [docs/API.md](docs/API.md#panel-del-equipo-admin).
+
 **WhatsApp.** Cada persona puede unir su teléfono y hablar con su agente por WhatsApp, vía Kapso: check-in, permiso para contar un bloqueo, propuestas con botones, presentación al acordar y preguntas al equipo. Construido y probado con un Kapso falso. El servidor ya tiene la llave y el webhook registrado en el número de prueba de Kapso; falta probarlo con un teléfono. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md#whatsapp).
 
 ## Remotes
