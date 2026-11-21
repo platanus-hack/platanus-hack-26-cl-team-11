@@ -78,6 +78,27 @@ Desconectar una fuente borra la conexión y todos sus eventos.
 
 Cada persona tiene un token largo y aleatorio. Su link `/conectar/<token>` es su identidad: no hay cuentas ni contraseñas. Quien tenga el link ve sus registros, así que se entrega solo a su dueño.
 
+## Pantallas
+
+El frontend no usa un enrutador: `frontend/src/App.tsx` mira la dirección y elige una de tres pantallas.
+
+| Dirección | Pantalla | Archivo |
+|---|---|---|
+| `/` | Portada: crea una persona y muestra su link | `HomePage.tsx` |
+| `/conectar/<token>` | Panel personal, con cuatro pestañas | `ConnectPage.tsx` |
+| `/contexto/<token>` | Mapa de contexto, con datos de prueba | `ContextPage.tsx` |
+
+El panel personal es una columna de filas con una barra de pestañas abajo. La pestaña activa va en la dirección (`#fuentes`, `#tu`, `#equipo`, `#ajustes`), así que se puede enlazar directo a una. El panel vuelve a leer sus datos cada 5 segundos.
+
+| Pestaña | Qué tiene | Archivos |
+|---|---|---|
+| Fuentes | Una fila por fuente: conectar, sincronizar, desconectar, y la dirección personal para el Atajo de Apple Health | `SourcesTab.tsx`, `SourceRow.tsx`, `SourceDetail.tsx` |
+| Tú | El check-in del día y las señales que salen de tus datos, cada una con su permiso | `YouTab.tsx`, `CheckinSection.tsx`, `SignalsSection.tsx` |
+| Equipo | Crear un equipo o pedir entrar con un código, aprobar solicitudes, la ronda de agentes, el pulso y el tablero | `TeamSection.tsx`, `TeamView.tsx`, `RoundSection.tsx`, `PulseSection.tsx`, `BoardSection.tsx` |
+| Ajustes | El permiso de cada señal, participar o no en el pulso, y tu link | `SettingsTab.tsx`, `PermissionRow.tsx` |
+
+Las llamadas al backend están en `frontend/src/api.ts`, y en `hubApi.ts` las del mapa de contexto. Las primitivas del panel (`rd-panel`, `rd-list`, `rd-item`, `rd-tabbar`) están en [design/DESIGN.md](../design/DESIGN.md).
+
 ## Pruebas
 
 `npm test` corre las pruebas del backend con una base en memoria. `npm run type-check` revisa tipos en backend y frontend. El lint de diseño corre solo antes de cada commit.
@@ -98,6 +119,23 @@ No hay agente coordinador. Lo que comparte un equipo son dos piezas que no inter
 Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
 
 Un equipo se crea desde una persona. Los demás piden entrar con un código y quedan dentro cuando cada integrante aprueba. Todas las rutas de equipo verifican la membresía.
+
+## Protecciones que dejó la revisión del backend
+
+El 21-nov-2026 tres revisores independientes revisaron el backend, con un verificador por hallazgo. Lo que se confirmó quedó corregido como estas reglas, cada una con su prueba en `backend/test/`. Lo que no alcanzó a verificarse está en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
+| Regla | Prueba |
+|---|---|
+| Todo cuerpo tiene tope: 10.000 bytes, y 1 MB para el envío de Apple Health | `fix-body-limit` |
+| Entrar a un equipo exige la aprobación de cada integrante. Con el código solo, una persona podía sumar identidades propias y leer el pulso de otra | `fix-pulse` |
+| El pulso no cuenta a quien lo mira y no depende de su check-in ni de sus permisos | `fix-pulse` |
+| El total de bloqueos solo cuenta a integrantes que tienen datos de bloqueos | `fix-pulse` |
+| Una conexión OAuth parte solo desde la propia página, queda amarrada al navegador que la inició, dura 10 minutos y se usa una vez | `fix-oauth-state` |
+| Una reunión movida, cancelada o rechazada reemplaza o borra el evento guardado, para que no quede pegada en la carga | `fix-calendar-updates` |
+| Las señales leen los últimos 60 días de cada fuente y todo el historial de Linear, así el promedio propio de sueño y una tarea detenida no se pierden cuando llegan muchos eventos nuevos | `fix-signal-events` |
+| El pulso del equipo lee los mismos eventos que las señales de cada integrante | `fix-signal-events` |
+| La página de la persona muestra lo último recibido, no lo agendado más lejos | `fix-signal-events` |
+| Las señales salen con el permiso que guardó la persona, en la ruta de señales y en la respuesta del check-in | `fix-signal-visibility` |
 
 ## Agentes
 
