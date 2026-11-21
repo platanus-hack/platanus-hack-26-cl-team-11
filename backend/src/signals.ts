@@ -44,8 +44,8 @@ export const DEFAULT_TIME_ZONE = 'America/Santiago';
 export const DEFAULT_VISIBILITY: SignalVisibility = { energy: 'preguntar', load: 'preguntar', blockers: 'siempre', expertise: 'siempre' };
 export const FIXED_THRESHOLD_BASIS = 'umbral fijo por poco historial';
 
-const DAY_MS = 86_400_000;
-const MINUTE_MS = 60_000;
+export const DAY_MS = 86_400_000;
+export const MINUTE_MS = 60_000;
 
 const MIN_BASELINE_NIGHTS = 3;
 const LOW_SLEEP_RATIO = 0.85;
@@ -74,8 +74,8 @@ const HIGH_LOAD_PRESSURE = 2;
 
 const STALE_TASK_DAYS = 3;
 const CHECKIN_BLOCKER_MAX_AGE_DAYS = 7;
-const STARTED_STATE = 'started';
-const CLOSED_STATES = ['completed', 'canceled'];
+export const STARTED_STATE = 'started';
+export const CLOSED_STATES = ['completed', 'canceled'];
 
 const MAX_REPOS = 5;
 const MAX_FOCUS_TASKS = 3;
@@ -107,24 +107,24 @@ export function dayKeyOf(instant: Date, timeZone: string = DEFAULT_TIME_ZONE): s
 }
 
 const dayNumber = (dayKey: string) => Date.UTC(Number(dayKey.slice(0, 4)), Number(dayKey.slice(5, 7)) - 1, Number(dayKey.slice(8, 10))) / DAY_MS;
-const daysBetween = (fromDay: string, toDay: string) => dayNumber(toDay) - dayNumber(fromDay);
+export const daysBetween = (fromDay: string, toDay: string) => dayNumber(toDay) - dayNumber(fromDay);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
-const rawOf = (event: StoredEvent): Record<string, unknown> => (isRecord(event.raw) ? event.raw : {});
-const textOf = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value.trim() : null);
+export const rawOf = (event: StoredEvent): Record<string, unknown> => (isRecord(event.raw) ? event.raw : {});
+export const textOf = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value.trim() : null);
 
-const numberOf = (value: unknown): number | null => {
+export const numberOf = (value: unknown): number | null => {
   const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number.parseFloat(value.replace(',', '.')) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const instantOf = (value: unknown): number | null => {
+export const instantOf = (value: unknown): number | null => {
   const text = textOf(value);
   const parsed = text ? Date.parse(text) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const dayOf = (value: unknown, timeZone: string): string | null => {
+export const dayOf = (value: unknown, timeZone: string): string | null => {
   const text = textOf(value);
   if (!text) return null;
   if (DAY_KEY_PATTERN.test(text)) return text;
@@ -132,18 +132,18 @@ const dayOf = (value: unknown, timeZone: string): string | null => {
   return instant === null ? null : dayKeyOf(new Date(instant), timeZone);
 };
 
-const mean = (values: number[]) => values.reduce((total, value) => total + value, 0) / values.length;
-const isFrom = (event: StoredEvent, source: string, type: string) => event.source === source && event.type === type;
+export const mean = (values: number[]) => values.reduce((total, value) => total + value, 0) / values.length;
+export const isFrom = (event: StoredEvent, source: string, type: string) => event.source === source && event.type === type;
 
 const elapsedText = (days: number) => (days <= 0 ? 'desde hoy' : days === 1 ? 'desde ayer' : `desde hace ${days} días`);
 
-interface Night {
+export interface Night {
   day: string;
   hours: number;
   eventId: number;
 }
 
-function nightsUntil(events: StoredEvent[], today: string, timeZone: string): Night[] {
+export function nightsUntil(events: StoredEvent[], today: string, timeZone: string): Night[] {
   const byDay = new Map<string, Night>();
   for (const event of events) {
     if (!isFrom(event, 'apple_health', 'salud_diaria')) continue;
@@ -157,7 +157,7 @@ function nightsUntil(events: StoredEvent[], today: string, timeZone: string): Ni
   return [...byDay.values()].sort((left, right) => dayNumber(right.day) - dayNumber(left.day));
 }
 
-interface Checkin {
+export interface Checkin {
   at: number;
   day: string;
   eventId: number;
@@ -165,7 +165,7 @@ interface Checkin {
   blocker: string | null;
 }
 
-function checkinsUntil(events: StoredEvent[], today: string, timeZone: string): Checkin[] {
+export function checkinsUntil(events: StoredEvent[], today: string, timeZone: string): Checkin[] {
   const checkins: Checkin[] = [];
   for (const event of events) {
     if (!isFrom(event, 'checkin', 'checkin')) continue;
@@ -208,7 +208,7 @@ function deriveEnergy(nights: Night[], checkins: Checkin[], today: string): Leve
   return { level, statement: `Energía ${level} ${period}`, basis, visibility };
 }
 
-interface Task {
+export interface Task {
   identifier: string;
   title: string;
   stateType: string | null;
@@ -217,7 +217,7 @@ interface Task {
   eventId: number;
 }
 
-function latestTasks(events: StoredEvent[], timeZone: string): Task[] {
+export function latestTasks(events: StoredEvent[], timeZone: string): Task[] {
   const byIdentifier = new Map<string, Task>();
   for (const event of events) {
     if (!isFrom(event, 'linear', 'tarea')) continue;

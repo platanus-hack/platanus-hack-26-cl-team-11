@@ -124,7 +124,37 @@ export interface Signals {
   asOf: string;
 }
 
-export const fetchSignals = (token: string) => request<{ name: string; signals: Signals }>(`${personPath(token)}/signals`);
+export interface SummaryMeeting {
+  title: string;
+  start: string;
+  minutes: number;
+}
+
+export interface SummaryTask {
+  title: string;
+  due: string | null;
+}
+
+export interface Summary {
+  lines: string[];
+  meetings: SummaryMeeting[];
+  working: SummaryTask[];
+  topics: string[];
+  sleep: { lastHours: number | null; weekHours: number | null; usualHours: number | null };
+  move: { workoutMinutes: number | null; steps: number | null };
+  asOf: string;
+}
+
+export interface Profile {
+  goal: string | null;
+  guide: string | null;
+}
+
+export const fetchProfile = (token: string) => request<Profile>(`${personPath(token)}/profile`);
+export const saveProfile = (token: string, changes: Partial<Profile>) =>
+  request<Profile>(`${personPath(token)}/profile`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(changes) });
+
+export const fetchSignals = (token: string) => request<{ name: string; signals: Signals; summary: Summary }>(`${personPath(token)}/signals`);
 
 export const MOODS = ['bien', 'normal', 'cansada', 'mal'] as const;
 export type Mood = (typeof MOODS)[number];

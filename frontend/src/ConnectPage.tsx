@@ -1,7 +1,7 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
-import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals } from './api';
+import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
 import { ONBOARDING_STEPS } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
 import { SourcesTab } from './SourcesTab';
@@ -14,10 +14,12 @@ import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
 
 const HEALTH_SOURCE = 'apple_health';
+const RETIRED_STEP = 'checkin';
 
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
   const [signals, setSignals] = useState<Signals | null>(null);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [firstSteps, setFirstSteps] = useState<OnboardingStep[]>([]);
   const [focusedSource, setFocusedSource] = useState<string | null>(() => (new URLSearchParams(window.location.search).has(HEALTH_RETURN_PARAM) ? HEALTH_SOURCE : null));
   const { tab, select } = useHashTab();
@@ -26,7 +28,8 @@ export function ConnectPage({ token }: { token: string }) {
     const [person, derived, onboarding] = await Promise.all([fetchPerson(token), fetchSignals(token), fetchOnboarding(token).catch(() => null)]);
     setPage(person);
     setSignals(derived.signals);
-    setFirstSteps(onboarding?.steps ?? []);
+    setSummary(derived.summary);
+    setFirstSteps((onboarding?.steps ?? []).filter((step) => step.id !== RETIRED_STEP));
   }, [token]);
   const { error, refresh } = usePolling(load);
 
@@ -48,7 +51,7 @@ export function ConnectPage({ token }: { token: string }) {
 
   const content: Record<TabId, ReactNode> = {
     fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
-    tu: <YouTab token={token} name={page.name} signals={signals} sources={page.sources} onSaved={reload} />,
+    tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
     agente: <AgentTab token={token} />,
     equipo: <TeamSection token={token} />,
     ajustes: <SettingsTab token={token} firstSteps={firstSteps} onOpenStep={openStep} />,

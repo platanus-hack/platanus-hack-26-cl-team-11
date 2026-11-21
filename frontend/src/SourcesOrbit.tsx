@@ -1,9 +1,6 @@
-import type { Source } from './api';
+import type { ReactNode } from 'react';
 import { countOf } from './format';
 import { Face } from './Face';
-import { SOURCE_APP_ICONS } from './sourceAppIcons';
-import { SourceGlyph } from './SourceGlyph';
-import { isConnected } from './sourceState';
 
 const WIDTH = 1000;
 const HEIGHT = 720;
@@ -39,27 +36,33 @@ const spoke = (from: Point) => {
 
 const percent = (point: Point) => ({ left: `${(point.x / WIDTH) * 100}%`, top: `${(point.y / HEIGHT) * 100}%` });
 
-const statusOf = (source: Source) => (source.connect === 'soon' ? 'Próximamente' : isConnected(source) ? 'Conectada' : 'Sin conectar');
+export const AGENT = 'agente';
+
+export interface OrbitNode {
+  id: string;
+  label: string;
+  status: string;
+  on: boolean;
+  icon: ReactNode;
+}
 
 interface SourcesOrbitProps {
   name: string;
-  sources: Source[];
+  nodes: OrbitNode[];
   agents: number;
   selected: string | null;
   onSelect: (id: string) => void;
 }
 
-export const AGENT = 'agente';
-
-export function SourcesOrbit({ name, sources, agents, selected, onSelect }: SourcesOrbitProps) {
-  const nodes = sources.map((source, index) => ({ source, place: placeOf(index, sources.length), on: isConnected(source) }));
-  const connected = sources.filter(isConnected).length;
+export function SourcesOrbit({ name, nodes, agents, selected, onSelect }: SourcesOrbitProps) {
+  const placed = nodes.map((node, index) => ({ node, place: placeOf(index, nodes.length) }));
+  const connected = nodes.filter((node) => node.on).length;
 
   return (
     <div className="rd-graph app-map">
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
-        {nodes.map(({ source, place, on }) => (
-          <path key={source.id} className={on ? 'rd-edge rd-edge--focus' : 'rd-edge rd-edge--pending'} d={spoke(place)} />
+        {placed.map(({ node, place }) => (
+          <path key={node.id} className={node.on ? 'rd-edge rd-edge--focus' : 'rd-edge rd-edge--pending'} d={spoke(place)} />
         ))}
       </svg>
 
@@ -70,30 +73,27 @@ export function SourcesOrbit({ name, sources, agents, selected, onSelect }: Sour
           {agents > 0 && <span className="rd-dot" />}
         </span>
         <span className="rd-source__when">
-          {agents > 0 ? `Conectado · ${connected} de ${countOf(sources.length, 'fuente', 'fuentes')}` : 'Sin conectar'}
+          {agents > 0 ? `Conectado · ${connected} de ${countOf(nodes.length, 'fuente', 'fuentes')}` : 'Sin conectar'}
         </span>
       </button>
 
-      {nodes.map(({ source, place, on }) => {
-        const icon = SOURCE_APP_ICONS[source.id];
-        return (
-          <button
-            key={source.id}
-            type="button"
-            className={`rd-source${on ? '' : ' rd-source--idle'}`}
-            style={percent(place)}
-            aria-pressed={selected === source.id}
-            onClick={() => onSelect(source.id)}
-          >
-            <span className="rd-source__app">
-              {icon ? <img src={icon} alt="" /> : <SourceGlyph id={source.id} />}
-              {on && <span className="rd-dot" />}
-            </span>
-            <span className="rd-source__name">{source.label}</span>
-            <span className="rd-source__when">{statusOf(source)}</span>
-          </button>
-        );
-      })}
+      {placed.map(({ node, place }) => (
+        <button
+          key={node.id}
+          type="button"
+          className={`rd-source${node.on ? '' : ' rd-source--idle'}`}
+          style={percent(place)}
+          aria-pressed={selected === node.id}
+          onClick={() => onSelect(node.id)}
+        >
+          <span className="rd-source__app">
+            {node.icon}
+            {node.on && <span className="rd-dot" />}
+          </span>
+          <span className="rd-source__name">{node.label}</span>
+          <span className="rd-source__when">{node.status}</span>
+        </button>
+      ))}
     </div>
   );
 }
