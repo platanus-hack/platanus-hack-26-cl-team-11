@@ -21,7 +21,7 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. Hoy 
 
 | Fuente | Cómo se conecta | Estado |
 |---|---|---|
-| Apple Health | Atajo de iOS que envía a una URL personal | **Probado con un iPhone real** el 21-nov-2026 con el Atajo mínimo: llega el sueño y se deriva la energía. El envío de varios días y los botones de la página están construidos; falta armar el Atajo compartido en un iPhone |
+| Apple Health | Atajo de iOS que envía a una URL personal | **Probado con un iPhone real** el 21-nov-2026 con el Atajo mínimo: llega el sueño y se deriva la energía. El envío de varios días, los botones de la página y el Atajo compartido están construidos; el Atajo compartido falta probarlo en un iPhone |
 | GitHub | OAuth | Construido; falta crear la OAuth App y cargar sus credenciales |
 | Linear | OAuth | Construido; falta crear la aplicación OAuth y cargar sus credenciales |
 | Google Calendar | OAuth de Google | Construido; faltan credenciales de Google Cloud |
@@ -131,9 +131,42 @@ curl -X POST http://localhost:8787/api/ingest/health/<token> \
   -d '{"steps_by_day":"2026-11-20|8421\n2026-11-21|10233","sleep_samples":"2026-11-20T23:40:00-03:00|2026-11-21T06:55:00-03:00|Core"}'
 ```
 
-### Armar el Atajo compartido
+### El Atajo compartido, ya armado
 
-Lo arma una persona, una vez, en un iPhone. Después se comparte y todos reciben el mismo. Las acciones de Salud solo existen en el teléfono, así que no se puede armar desde un computador. **Esta receta no se ha probado en un teléfono**: los nombres de las acciones cambian un poco entre versiones de iOS, y el paso 9 dice qué revisar antes de compartirlo.
+El Atajo no se arma a mano: lo genera `tools/atajo-salud/build.py` y queda en `tools/atajo-salud/Ronda Salud.xml`. Manda en un solo envío:
+
+| Qué | Rango | Campo |
+|---|---|---|
+| Sueño, un tramo por línea | 7 días | `sleep_samples` |
+| Pasos, agrupados por día | 30 días | `steps_by_day` |
+| Energía activa, agrupada por día | 30 días | `active_energy_by_day` |
+
+Si se abre sin la dirección de la persona, avisa «Abre este Atajo desde tu página de Ronda» y termina. Al final muestra la frase `message` que responde el servidor.
+
+Para dejarlo disponible:
+
+1. **Generar y firmar**, en un Mac con sesión de iCloud:
+
+       python3 tools/atajo-salud/build.py
+       cp "tools/atajo-salud/Ronda Salud.xml" "/tmp/Ronda Salud.shortcut"
+       shortcuts sign --mode anyone --input "/tmp/Ronda Salud.shortcut" --output "$HOME/Desktop/Ronda Salud.shortcut"
+
+2. **Agregarlo.** Abre el archivo firmado en el Mac y acepta «Agregar atajo». iCloud lo lleva al iPhone de esa misma cuenta.
+3. **Probarlo en el iPhone**, desde la página de Ronda (ver «Qué revisar» abajo).
+4. **Compartirlo.** En Atajos, **Compartir → Copiar enlace de iCloud**. Ese link va en `HEALTH_SHORTCUT_URL`, en el panel de Render.
+
+El archivo se armó con la estructura que documenta [Shortcuts Playground](https://github.com/viticci/shortcuts-playground-plugin) (MIT) para las acciones de Salud, que solo existen en iPhone y iPad. **Todavía no se ha ejecutado en un teléfono.** Qué revisar en la primera prueba:
+
+- Que al abrirlo en el iPhone los tres bloques «Buscar muestras de salud» muestren su tipo (Sueño, Pasos, Calorías activas) y el rango de días. Si alguno aparece vacío, se elige a mano en ese bloque.
+- Que la respuesta diga cuántos días llegaron. Si responde que no pudo leer los datos, el campo `example` de la respuesta muestra en qué formato salió la fecha.
+- Que funcione en un teléfono **sin reloj**, donde no hay sueño: hay reportes de que un resultado vacío detiene el Atajo completo.
+- Que en `GET /api/people/<token>/events` aparezca un registro por día.
+
+Pulso en reposo y variabilidad no van en el archivo: no confirmamos el nombre con que Atajos guarda esos tipos. El servidor ya los recibe (`resting_hr_by_day`, `hrv_by_day`); se agregan a mano con los pasos de abajo.
+
+### Armar o ampliar el Atajo a mano
+
+Sirve para agregar un tipo al Atajo generado o para rehacerlo si el archivo no importa bien. Los nombres de las acciones cambian un poco entre versiones de iOS.
 
 1. Abre **Atajos**, crea uno nuevo y nómbralo exactamente `Ronda Salud`.
 2. En el panel de detalles (ⓘ), en «Recibir», deja solo **Texto**. En «Si no hay entrada», elige **Detener y responder** con el texto «Abre este Atajo desde tu página de Ronda.»
@@ -152,10 +185,7 @@ Lo arma una persona, una vez, en un iPhone. Después se comparte y todos reciben
    Si tu versión no muestra «Agrupar por», baja el rango a 7 días. El servidor suma o promedia igual las muestras de un mismo día.
 7. Agrega **Obtener contenido de URL**. La URL es la variable **Entrada del atajo**. Método **POST**, cuerpo **JSON**, y un campo de **Texto** por cada variable: `sleep_samples` con `Sueño`, `steps_by_day` con `Pasos`, y así con las demás.
 8. Agrega **Obtener valor del diccionario** para la clave `message` sobre el resultado anterior, y después **Mostrar resultado** con ese valor. Así la persona lee «Listo. Llegaron 7 días de datos…».
-9. **Antes de compartirlo, pruébalo.** Abre tu página de Ronda en el iPhone, copia tu dirección personal y ejecuta el Atajo desde Atajos pegándola como entrada, o apunta `HEALTH_SHORTCUT_URL` a tu link y toca **Enviar datos**. Revisa tres cosas:
-   - Que la respuesta diga cuántos días llegaron. Si responde con `example`, esa línea muestra en qué formato salió la fecha.
-   - Que funcione en un teléfono **sin reloj**, donde no hay sueño ni pulso: hay reportes de que un resultado vacío detiene el Atajo completo. Si pasa, rodea cada bloque con **Si** «las muestras tienen algún valor».
-   - Que en `GET /api/people/<token>/events` aparezca un registro por día.
+9. Pruébalo con lo de «Qué revisar» de la sección anterior. Si un teléfono sin datos de un tipo detiene el Atajo, rodea ese bloque con **Si** «las muestras tienen algún valor».
 10. En el Atajo, toca **Compartir → Copiar enlace de iCloud**. Ese link va en `HEALTH_SHORTCUT_URL`, en el panel de Render.
 
 Entrenamientos (`workouts`) queda fuera de la receta: no confirmamos qué acción de Atajos los entrega. El servidor ya los recibe si se agregan después.
@@ -209,7 +239,7 @@ Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cue
 - [x] **Cifrado** de tokens y llaves. Hecho con AES-256-GCM; detalle en [ARCHITECTURE.md](ARCHITECTURE.md#credenciales).
 - [ ] **Base definitiva.** El backend usa SQLite en disco. Si se pasa a Postgres, cambian `backend/src/db.ts` y las tiendas de `teams/`, `board/`, `policy/`, `agents/` y `hub/`.
 - [ ] **Credenciales de cada aplicación OAuth.** Falta crear las tres aplicaciones y cargar sus variables en Render; ver «Aplicaciones OAuth por crear».
-- [ ] **Armar el Atajo compartido de Apple Health** en un iPhone, probarlo y cargar su link en `HEALTH_SHORTCUT_URL`; ver «Armar el Atajo compartido».
+- [ ] **Probar el Atajo compartido de Apple Health en un iPhone** y cargar su link de iCloud en `HEALTH_SHORTCUT_URL`; ver «El Atajo compartido, ya armado».
 - [ ] **Probar cada fuente contra el servicio real.** Solo Apple Health está probada.
 
 ## Fuentes
