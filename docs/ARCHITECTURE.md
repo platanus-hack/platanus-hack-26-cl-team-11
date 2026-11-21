@@ -91,8 +91,8 @@ Se leen en `GET /api/people/<token>/signals`. Es la entrada que usarán los agen
 No hay agente coordinador. Lo que comparte un equipo son dos piezas que no interpretan ni deciden:
 
 - **Tablero** (`board/`). Cualquier integrante publica una pregunta, un pedido o una propuesta; los demás responden y votan las propuestas. Una respuesta marcada como no contable solo la leen quien publicó y quien respondió.
-- **Pulso** (`pulse.ts`). Devuelve el nivel mediano de energía y de carga y el total de bloqueos del equipo. Nunca devuelve una distribución ni un nombre. Con menos de 3 personas aportando a una señal, no devuelve nada para esa señal.
+- **Pulso** (`pulse.ts`). Devuelve el nivel mediano de energía y de carga y el total de bloqueos del equipo. Nunca devuelve una distribución ni un nombre. Se calcula sobre el resto del equipo, sin contar a quien lo mira, y con menos de 3 de ellos aportando a una señal no devuelve nada para esa señal.
 
 Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
 
-Un equipo se crea desde una persona y los demás entran con un código. Todas las rutas de equipo verifican la membresía.
+Un equipo se crea desde una persona. Los demás piden entrar con un código y quedan dentro cuando cada integrante aprueba. Todas las rutas de equipo verifican la membresía.

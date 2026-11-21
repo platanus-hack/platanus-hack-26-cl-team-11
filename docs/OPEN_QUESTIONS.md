@@ -24,7 +24,7 @@
 
 ### Privacidad
 
-- [ ] **Tamaño mínimo de grupo.** Hoy es 3 personas aportando por señal, y el pulso entrega solo el nivel mediano, sin distribución. Falta decidir si 3 basta: en un grupo chico, quien conoce su propio nivel todavía puede deducir algo de los demás.
+- [ ] **Tamaño mínimo de grupo.** Hoy son 3 personas aportando por señal sin contar a quien mira (equipo de 4), y el pulso entrega solo el nivel mediano. Falta decidir si basta para equipos chicos.
 - [ ] **Cuánto tiempo se guarda** la memoria privada.
 - [ ] **Qué ve un líder** cuando una persona eligió no compartir nada.
 
@@ -40,3 +40,17 @@
 
 - [ ] Quién toma cada ítem de [ROADMAP.md](ROADMAP.md) y quién arma la presentación.
 - [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo.
+
+### Hallazgos de la revisión del backend sin verificar (21-nov-2026)
+
+Tres revisores encontraron 17 problemas. Los 9 más graves se verificaron y se corrigieron. Estos 8 no alcanzaron a verificarse, así que pueden ser reales o no:
+
+- [ ] El envío de Apple Health guarda cualquier contenido de hasta 1 MB por evento, sin tope por persona ni detección de duplicados.
+- [ ] Una tarea de Linear que deja de estar asignada a la persona queda «en curso» para siempre y se vuelve un bloqueo permanente.
+- [ ] Al cambiar de cuenta en una fuente, los eventos de la cuenta anterior siguen guardados.
+- [ ] Desconectar una fuente mientras se está sincronizando puede dejar eventos guardados sin conexión.
+- [ ] El código de ingreso al equipo lo ve todo integrante y nunca cambia. Desde que entrar requiere aprobación, el código solo deja una solicitud.
+- [ ] Cualquiera puede crear personas, equipos y publicaciones sin límite: no hay autenticación ni freno por frecuencia.
+- [ ] El conector de GitHub lee campos que su API podría haber dejado de enviar; la prueba pasa con un ejemplo antiguo. Se confirma con una llave real.
+- [ ] El pulso todavía se puede comparar entre dos lecturas: no hay una foto diaria fija. Para aprovecharlo hace falta una segunda identidad aprobada por todo el equipo.
+

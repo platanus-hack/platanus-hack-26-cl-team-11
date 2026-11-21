@@ -62,7 +62,7 @@ Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección p
 
 ## Estado
 
-Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y derivar sus señales (energía, carga, bloqueos y experiencia). También el check-in diario, los equipos con código de ingreso, el tablero compartido y el pulso agregado del equipo.
+Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y derivar sus señales (energía, carga, bloqueos y experiencia). También el check-in diario, los equipos con código y aprobación de ingreso, el tablero compartido y el pulso agregado del equipo.
 
 | Fuente | Estado |
 |---|---|
