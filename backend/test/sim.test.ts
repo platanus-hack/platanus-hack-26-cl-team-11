@@ -85,7 +85,7 @@ test('a simulation fills the room with invented people, each with a repo, and th
 
   assert.equal(asked.filter((schema) => schema === SimTeam).length, 3);
   assert.equal(asked.filter((schema) => schema === RepoDigestAnswer).length, 0);
-  assert.equal(state.threads.length, 2);
+  assert.equal(state.threads.length, 3);
   for (const thread of state.threads) {
     assert.deepEqual(
       thread.messages?.map((message) => message.text),
