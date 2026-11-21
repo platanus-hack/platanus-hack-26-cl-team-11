@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { claudeCliConfigFrom, createClaudeCliModel } from './agents/claudeCli.js';
 import { openDigestStore, type DigestStore } from './agents/digest.js';
 import { createFiftyXModel, fiftyXConfigFrom } from './agents/fiftyx.js';
 import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agents/model.js';
@@ -69,6 +70,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 const modelFrom = (env: NodeJS.ProcessEnv, fetchImpl: Fetch): AgentModel | null => {
   const fiftyX = fiftyXConfigFrom(env);
   if (fiftyX) return createFiftyXModel(fiftyX, fetchImpl);
+  const cli = claudeCliConfigFrom(env);
+  if (cli) return createClaudeCliModel(cli);
   const config = agentModelConfigFrom(env);
   return config ? createClaudeModel(config) : null;
 };

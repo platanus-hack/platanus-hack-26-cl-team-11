@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as z from 'zod/v4';
-import { createFiftyXModel, FIFTYX_BASE_URL, FIFTYX_MAX_PARALLEL_CALLS, FIFTYX_MODEL, fiftyXConfigFrom } from '../src/agents/fiftyx.js';
+import { createFiftyXModel, FIFTYX_BASE_URL, FIFTYX_MAX_PARALLEL_CALLS, FIFTYX_MODEL, fiftyXConfigFrom, jsonSchemaOf } from '../src/agents/fiftyx.js';
 import { AgentModelError, MODEL_FAILURE } from '../src/agents/model.js';
 import type { Fetch } from '../src/types.js';
 
@@ -60,7 +60,7 @@ test('a decision asks the exact DeepSeek model for the schema and returns the pa
   assert.equal(sent[0]?.authorization, 'Bearer test-key');
   assert.equal(sent[0]?.body.model, FIFTYX_MODEL);
   assert.equal(sent[0]?.body.response_format.type, 'json_schema');
-  assert.deepEqual(sent[0]?.body.response_format.json_schema?.schema, z.toJSONSchema(Reply));
+  assert.deepEqual(sent[0]?.body.response_format.json_schema?.schema, jsonSchemaOf(Reply));
   assert.match(sent[0]?.body.messages[0]?.content ?? '', /Eres un agente\.[\s\S]*"help"/);
   assert.equal(sent[0]?.body.messages[1]?.content, 'Decide.');
 });

@@ -34,7 +34,12 @@ export function fiftyXConfigFrom(env: NodeJS.ProcessEnv): FiftyXConfig | null {
   return { apiKey, baseURL: (env.FIFTYX_BASE_URL || FIFTYX_BASE_URL).replace(TRAILING_SLASHES, '') };
 }
 
-function createLimiter(maxActive: number) {
+export const jsonSchemaOf = (schema: z.ZodType): Record<string, unknown> => {
+  const { $schema: _dialect, ...shape } = z.toJSONSchema(schema) as Record<string, unknown>;
+  return shape;
+};
+
+export function createLimiter(maxActive: number) {
   let active = 0;
   const waiting: Array<() => void> = [];
   return async <Result>(work: () => Promise<Result>): Promise<Result> => {
@@ -111,7 +116,7 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
 
   return {
     async decide(request) {
-      const jsonSchema = z.toJSONSchema(request.schema);
+      const jsonSchema = jsonSchemaOf(request.schema);
       const system = `${request.system}\n\nResponde solo con un objeto JSON que cumpla este esquema JSON, sin texto antes ni después:\n${JSON.stringify(jsonSchema)}`;
       const messages: ChatMessage[] = [
         { role: 'system', content: system },
