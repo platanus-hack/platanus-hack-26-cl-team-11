@@ -350,3 +350,37 @@ button.rd-item, a.rd-item { cursor: pointer; }
 .rd-bubble--typing i:nth-child(3) { animation-delay: .3s; }
 @keyframes rd-bubble-punto { 0%, 60%, 100% { opacity: .35; translate: 0 0; } 30% { opacity: 1; translate: 0 -3px; } }
 @media (prefers-reduced-motion: reduce) { .rd-bubble, .rd-bubble--typing i { animation: none; } }
+
+/* ---- Equipo: una tarjeta por persona, con en qué está y sus cuatro señales ---- */
+.rd-tint--energy { --tint: var(--rd-g5); }
+.rd-tint--load { --tint: var(--rd-g2); }
+.rd-tint--sleep { --tint: var(--rd-g1); }
+.rd-tint--move { --tint: var(--rd-g4); }
+.rd-people { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rd-space-4); }
+.rd-persona { --i: 0; display: flex; flex-direction: column; gap: var(--rd-space-4); padding: 20px var(--rd-space-6); border-radius: var(--rd-radius-card); min-width: 0; animation: rd-vital-sube .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+.rd-persona__head { display: flex; align-items: center; gap: var(--rd-space-3); min-width: 0; }
+.rd-persona__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rd-persona__name { font-size: var(--rd-text-name); font-weight: var(--rd-weight); }
+.rd-persona__doing { font-size: var(--rd-text-small); color: var(--rd-muted); line-height: 1.35; overflow-wrap: anywhere; }
+.rd-persona__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rd-space-3) var(--rd-space-4); }
+.rd-persona__stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rd-persona__label { display: inline-flex; align-items: center; gap: 6px; font-size: var(--rd-text-small); font-weight: var(--rd-weight); color: var(--rd-muted); }
+.rd-persona__label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--tint, var(--rd-faint)); }
+.rd-persona__value { font-family: var(--rd-font-num); font-size: 20px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-num); font-variant-numeric: tabular-nums; }
+.rd-persona__value--off { color: var(--rd-faint); }
+@media (max-width: 700px) { .rd-people { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- Hilo entre agentes dentro de la app: las burbujas del hilo de grafo/hilo, con su streaming por letra ---- */
+.rd-thread { display: flex; flex-direction: column; gap: var(--rd-space-4); padding: 20px var(--rd-space-6) var(--rd-space-6); border-radius: var(--rd-radius-card); }
+.rd-thread__head { display: flex; align-items: center; gap: var(--rd-space-3); }
+.rd-thread__faces { display: flex; flex: 0 0 auto; }
+.rd-thread__faces > * + * { margin-left: -10px; }
+.rd-thread__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.rd-thread__topic { font-size: 18px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); }
+.rd-thread__lines { display: flex; flex-direction: column; gap: 10px; }
+.rd-thread__line { display: flex; flex-direction: column; gap: var(--rd-space-1); align-items: flex-start; align-self: flex-start; max-width: 86%; animation: rd-vital-sube .5s cubic-bezier(.2, .8, .2, 1) both; }
+.rd-thread__line--mine { align-items: flex-end; align-self: flex-end; }
+.rd-thread__author { font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); }
+.rd-thread .rd-bubble { max-width: 100%; border-radius: 6px 18px 18px 18px; animation: none; }
+.rd-thread__line--mine .rd-bubble { border-radius: 18px 6px 18px 18px; background: var(--rd-fill-soft); box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .rd-persona, .rd-thread__line { animation: none; } }
