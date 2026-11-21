@@ -107,7 +107,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-source` (`__disc`, `__name`, `__when`, `--off`, `--dim`), `rd-edge--focus`, `rd-edge--dim`, `rd-edge--incoming` | Mapa de contexto: cada fuente (salud, correo, asistentes) es un disco de vidrio con un glifo en tinta alrededor de tu cara. | Glifo de trazo en `currentColor`, nunca el logo de la marca. La seleccionada lleva aro de tinta, no degradado. Un dato que llega se ve como trazos de tinta que viajan hacia tu cara. Propuesta del 21-nov, pendiente de revisión de Mati. |
 | `rd-layout`, `rd-stack` | Dos columnas: contenido y columna de tarjetas de 392 px. | En teléfono queda una columna. |
 | `rd-head`, `rd-head__end` | Encabezado de sección: un `rd-title`, una píldora de estado opcional (`rd-chip`) y una acción a la derecha. | Sin tarjeta alrededor de la sección. |
-| `rd-list`, `rd-item` (`__icon`, `__text`, `__title`, `__sub`, `__end`, `__value`, `__detail`, `--off`) | Lista de filas con divisor fino: ícono cuadrado o cara, título, subtítulo gris de una línea y una sola acción al final. | La fila que abre algo es un `button` con chevron; lo que abre va en `__detail`. Glifos de trazo en `currentColor`. |
+| `rd-list`, `rd-item` (`__icon`, `__icon--app`, `__text`, `__title`, `__sub`, `__end`, `__value`, `__detail`, `--off`) | Lista de filas con divisor fino: ícono de 28 px sin recuadro o cara, título, subtítulo gris de una línea y una sola acción al final. | La fila que abre algo es un `button` con chevron; lo que abre va en `__detail`. Una fuente conectable lleva el ícono real de su app, desde `sources/` (`__icon--app` redondea los que son ícono de app completo); todo lo demás, glifo de trazo en `currentColor`. Pedido de Ian del 21-nov, pendiente de revisión de Mati. |
 | `rd-iconbutton`, `rd-iconbutton--bare` | Botón redondo de 36 px con un glifo («+» junto a un encabezado, «⋯» del menú). | Siempre con `aria-label`. |
 | `rd-button--small` | Botón píldora de 36 px para la acción de una fila. | Un solo verbo: «Conectar», «Cambiar», «Pausar». Va con `rd-button--quiet`. |
 | `rd-menu`, `rd-menu__item` | Menú de vidrio que se abre bajo el «⋯». | Se combina con `rd-glass`. |
@@ -301,6 +301,7 @@ un punto, todavía no lo revisó Mati en grande).
 | `reference.html`, `reference.png` | La pantalla de referencia, hecha solo con primitivas, y su captura. |
 | `logo/ronda-mark.svg` | Isotipo. |
 | `faces/` | Caras del equipo. |
+| `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |
 | `archive/` | Direcciones descartadas. No usar. |
