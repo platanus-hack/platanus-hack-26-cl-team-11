@@ -91,3 +91,16 @@ en movimiento quedó inconcluso por el desplazamiento continuo del papel. En el 
 pasó `layout --strict` a ambos anchos. Se revisaron la hoja de contacto, la pausa y reanudación
 en el mismo ciclo, la preferencia de movimiento reducido y la decodificación del favicon.
 El móvil se comprobó en Chrome emulado. La dirección visual está en revisión con Mati.
+
+### Calendario a escala del globo
+
+[Ver en el arco de Ian y Lian](../grafo/globo.html?n=5&solo=calendars).
+El control ocupa 64 × 43 px en escritorio y 52 × 35 px en teléfono. Dos franjas
+llegan desde extremos opuestos. Cuando se alinean, la hora rueda hasta las 10:30.
+La coordenada sale del mismo arco que dibuja el globo. Al girarlo, la ubicación
+se ajusta según el espacio disponible entre las caras.
+
+Se inspeccionó el canvas real en Chrome a 1280 y 390 px. Se comprobó el anclaje
+durante el arrastre, el cambio en vivo a movimiento reducido, el favicon y el
+selector de 5, 10, 50 y 300 personas. Stageshow ensaya la versión grande. El
+globo usa su propio canvas y la verificación visual de esta pieza se hizo allí.

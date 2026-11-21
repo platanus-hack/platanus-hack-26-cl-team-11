@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Globo de agentes</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -467,7 +468,9 @@ class Component extends DCLogic {
           }
         }
         ctx.globalAlpha = 1;
-        if (Gr.edges[ei][2] && u > 0.95) chips.push([Gr.edges[ei][2], 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y, gAlpha]);
+        if (this.drawCalendar && Gr.mine && A === 1 && B === 2) {
+          this.drawCalendar(ctx, pa, pb, c2, P, this.calendarZoom, t, this.reduced);
+        } else if (Gr.edges[ei][2] && u > 0.95) chips.push([Gr.edges[ei][2], 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y, gAlpha]);
       }
       if (ph2.agree > 0 || (isFocus && !Gr.mine)) {
         var mx = 0, my = 0, cnt = 0, top = Infinity;
