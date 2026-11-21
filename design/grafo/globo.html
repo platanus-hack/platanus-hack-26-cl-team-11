@@ -42,6 +42,7 @@
 <body>
 <div class="rd-page"><div class="globo">
   <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <canvas id="luz" aria-hidden="true"></canvas>
   <canvas id="c" role="img" aria-label="Globo de agentes. Arrastra para girarlo; toca a una persona con aro para ver su grupo."></canvas>
   <header class="rd-bar">
     <span class="rd-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</span>
@@ -99,6 +100,7 @@
     </footer>
   </div>
 </dialog>
+<script src="../luz/luz.js"></script>
 <script src="./hilo/stream.js"></script>
 <script src="./hilo/tools.js"></script>
 <script src="./mini/thread-stories.js"></script>
@@ -365,6 +367,14 @@ class Component extends DCLogic {
     var yaw = swayY + (big ? 0.12 : 0) + this.uy, pitch = 0.1 + swayP + this.up;
     var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     var CX = 590, CY = 545, D = 3.4, S = p.S;
+    if (this.luz === undefined) {
+      var lc = document.getElementById('luz'), luzOn = new URLSearchParams(location.search).get('luz') !== '0';
+      this.luz = lc && luzOn && window.RondaLuz ? window.RondaLuz.sphere(lc, { palette: [0, 9, 7, 5] }) : null;
+      if (this.luz) { lc.width = 720; lc.height = 450; }
+      this.luzK = 0;
+    }
+    this.luzK += ((big && this.luz ? 1 : 0) - this.luzK) * sm(3);
+    if (this.luz) this.luz.render(14 + t * 0.32, CX / 2, CY / 2, S * 1.06 / 2, 0.8 * this.luzK * (1 - 0.35 * this.dimK));
     function rot(v) { var x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy; return [x, v[1] * cp - z * sp, v[1] * sp + z * cp]; }
     function proj(v) { var f = D / (D - v[2]); return { x: CX + v[0] * S * f, y: CY - v[1] * S * f, z: v[2], f: f }; }
     var smooth = function (a, b, x) { var u = Math.max(0, Math.min(1, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
@@ -431,7 +441,8 @@ class Component extends DCLogic {
     }
     var mult = [1, 0.55, 0.22];
     ctx.lineCap = 'round'; ctx.lineWidth = p.lw;
-    for (var bb = 2; bb >= 0; bb--) { ctx.strokeStyle = 'rgba(70,70,150,' + (p.ea * mult[bb] * this.edgeFade * dim).toFixed(4) + ')'; ctx.stroke(buckets[bb]); }
+    var lk = this.luzK, eg = Math.round(70 + 185 * lk), eb = Math.round(150 + 105 * lk), ek = 1 + (n > 50 ? 0.3 : 1.2) * lk;
+    for (var bb = 2; bb >= 0; bb--) { ctx.strokeStyle = 'rgba(' + eg + ',' + eg + ',' + eb + ',' + (p.ea * ek * mult[bb] * this.edgeFade * dim).toFixed(4) + ')'; ctx.stroke(buckets[bb]); }
 
     if (big) {
       var sr = S * 1.06, sw = t * 0.07;
