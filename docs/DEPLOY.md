@@ -93,7 +93,8 @@ Para probar el modelo antes de cargarlas, define la misma variable en tu termina
 
 ## Límites
 
-- **Una sola instancia.** Un servicio con disco no escala a varias, y cada despliegue lo deja unos segundos sin responder.
+- **Una sola instancia.** Un servicio con disco no escala a varias, y cada despliegue lo deja unos 30 segundos sin responder: Render apaga el servidor anterior antes de prender el nuevo, porque el disco solo se conecta a uno. Mientras la base viva en el disco, Render no puede cambiar al servidor nuevo solo cuando está listo.
+- **Qué ve la persona durante ese corte.** La página abre igual, desde una copia guardada en su navegador (`frontend/public/sw.js`), y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`). Kapso reintenta los mensajes de WhatsApp a los 10 y a los 40 segundos. No están cubiertos el Atajo de Apple Health, que no reintenta, ni el retorno de una autorización OAuth que caiga justo en el corte.
 - **SQLite en disco.** Render guarda una copia diaria del disco por siete días. Si el proyecto sigue, pasar a Postgres cambia solo `backend/src/db.ts` y las tiendas de `teams/`, `board/` y `policy/`.
 - **El disco no existe durante la compilación**, solo al correr.
 

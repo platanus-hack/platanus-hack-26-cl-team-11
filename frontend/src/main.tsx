@@ -13,6 +13,8 @@ icon.type = 'image/svg+xml';
 icon.href = markUrl;
 document.head.append(icon);
 
+if (import.meta.env.PROD && 'serviceWorker' in navigator) void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
