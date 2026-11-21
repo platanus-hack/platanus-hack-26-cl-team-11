@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Montu · entrada</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+</head>
+<body class="rd-page">
+<div class="rd-loader rd-loader--entrada" id="carga" role="img" aria-label="El equipo de Montu te mira">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div id="escena"></div>
+  <p class="rd-loader__name" id="nombre">Montu</p>
+</div>
+<script src="../luz/luz.js"></script>
+<script src="../faces/caras.js"></script>
+<script src="entrada.js"></script>
+<script>
+  var still = new URLSearchParams(location.search).has('quieto');
+  var nombre = document.getElementById('nombre');
+  if (still) nombre.style.animation = 'none';
+  var entrada = RondaEntrada.mount(document.getElementById('escena'), { still: still });
+  document.getElementById('carga').addEventListener('click', function () {
+    entrada.replay();
+    nombre.style.animation = 'none';
+    void nombre.offsetWidth;
+    nombre.style.animation = '';
+  });
+</script>
+</body>
+</html>

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import '../../design/luz/luz.js';
+import '../../design/faces/caras.js';
 import '../../design/montu/montu.js';
+import '../../design/montu/entrada.js';
 
 interface MountedMontu {
   replay(): void;
@@ -9,6 +12,7 @@ interface MountedMontu {
 declare global {
   interface Window {
     RondaMontu: { mount(canvas: HTMLCanvasElement): MountedMontu; introMs(): number };
+    RondaEntrada: { mount(host: HTMLElement, options?: { still?: boolean }): MountedMontu; introMs(): number };
   }
 }
 
@@ -77,7 +81,26 @@ function MontuCanvas({ className }: { className: string }) {
   return <canvas ref={host} className={className} aria-hidden="true" />;
 }
 
-const MontuFigure = () => <MontuCanvas className="rd-loader__figure" />;
+function MontuEntrance({ run }: { run: number }) {
+  const host = useRef<HTMLDivElement>(null);
+  const mounted = useRef<MountedMontu | null>(null);
+
+  useEffect(() => {
+    const node = host.current;
+    if (!node) return;
+    mounted.current = window.RondaEntrada.mount(node);
+    return () => {
+      mounted.current?.destroy();
+      mounted.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (run > 0) mounted.current?.replay();
+  }, [run]);
+
+  return <div ref={host} aria-hidden="true" />;
+}
 
 export function MontuLoading() {
   useEffect(() => {
@@ -98,13 +121,7 @@ export function MontuInline() {
 export function MontuSplash() {
   const loading = useSyncExternalStore(watchLoading, isLoading);
   const [stage, setStage] = useState<SplashStage>('shown');
-  const visit = useRef({ since: Date.now(), atLeast: alreadySeen() ? SHORTEST_VISIT_MS : window.RondaMontu.introMs() + HOLD_MS });
-
-  useEffect(() => {
-    if (!loading || stage === 'shown') return;
-    visit.current = { since: Date.now(), atLeast: SHORTEST_VISIT_MS };
-    setStage('shown');
-  }, [loading, stage]);
+  const visit = useRef({ since: Date.now(), atLeast: alreadySeen() ? SHORTEST_VISIT_MS : window.RondaEntrada.introMs() + HOLD_MS });
 
   useEffect(() => {
     if (stage === 'gone' || (stage === 'shown' && loading)) return;
@@ -116,9 +133,9 @@ export function MontuSplash() {
 
   if (stage === 'gone') return null;
   return (
-    <div className={stage === 'leaving' ? 'rd-loader rd-loader--out' : 'rd-loader'} role="status" aria-label="Cargando Montu" onClick={() => (loading ? undefined : setStage('leaving'))}>
+    <div className={stage === 'leaving' ? 'rd-loader rd-loader--entrada rd-loader--out' : 'rd-loader rd-loader--entrada'} role="status" aria-label="Cargando Montu" onClick={() => (loading ? undefined : setStage('leaving'))}>
       <Aura />
-      <MontuFigure />
+      <MontuEntrance run={0} />
       <p className="rd-loader__name">Montu</p>
     </div>
   );
@@ -127,9 +144,9 @@ export function MontuSplash() {
 export function MontuStage() {
   const [run, setRun] = useState(0);
   return (
-    <div className="rd-loader" role="img" aria-label="Montu se arma como un grafo" onClick={() => setRun((count) => count + 1)}>
+    <div className="rd-loader rd-loader--entrada" role="img" aria-label="El equipo de Montu te mira" onClick={() => setRun((count) => count + 1)}>
       <Aura />
-      <MontuFigure key={`figure-${run}`} />
+      <MontuEntrance run={run} />
       <p key={`name-${run}`} className="rd-loader__name">
         Montu
       </p>
