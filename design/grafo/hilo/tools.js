@@ -75,121 +75,127 @@ window.RondaTools = (() => {
   function pick(obj, keys, fallback) { if (obj) for (const k of keys) if (obj[k] !== undefined) return Array.isArray(obj[k]) ? obj[k].join(' · ') : String(obj[k]); return fallback; }
 
   // Cada escena dibuja en 300 × 64 y devuelve paint(p, d): p = avance mientras corre, d = llegada del resultado.
+  // Un objeto y un gesto por escena. Relieve (clase rt-mark) solo en las marcas de datos, nunca en el texto.
   const SCENES = {
     week(g, call) {
-      const slots = [], busy = [0, 1, 0, 1, 1, 0, 0, 1], free = [0, 2, 5, 6];
-      s('line', { x1: 8, y1: 46, x2: 292, y2: 46, class: 'rt-hair' }, g);
-      busy.forEach((b, i) => slots.push(s('rect', { x: 10 + i * 35, y: 18, width: 29, height: 22, rx: 6, class: b ? 'rt-busy' : 'rt-slot' }, g)));
-      const lbl = ['9:00', '10:00', '11:00', '12:00'];
-      lbl.forEach((t, i) => s('text', { x: 10 + i * 70, y: 60, class: 'rt-tiny' }, g).textContent = t);
-      const scan = s('rect', { x: 8, y: 12, width: 3, height: 34, rx: 1.5, class: 'rt-scan' }, g);
+      const busy = [0, 1, 0, 1, 1, 0, 0, 1];
+      const marks = s('g', { class: 'rt-mark' }, g);
+      const slots = busy.map((b, i) => s('rect', { x: 10 + i * 35, y: 14, width: 29, height: 24, rx: 6, class: b ? 'rt-busy' : 'rt-slot' }, marks));
+      ['9:00', '10:00', '11:00', '12:00'].forEach((t, i) => s('text', { x: 10 + i * 70, y: 58, class: 'rt-tiny' }, g).textContent = t);
+      const scan = s('rect', { x: 8, y: 8, width: 3, height: 36, rx: 1.5, class: 'rt-scan' }, g);
       return (p, d) => {
         const x = 8 + 280 * p;
         set(scan, { x: x.toFixed(1), opacity: (1 - d).toFixed(2) });
-        busy.forEach((b, i) => { if (b) return; const lit = (x > 10 + i * 35 + 14 ? 1 : 0) || d; set(slots[i], { class: lit ? 'rt-free' : 'rt-slot' }); });
+        busy.forEach((b, i) => { if (b) return; const lit = x > 10 + i * 35 + 14 || d > 0; set(slots[i], { class: lit ? 'rt-free' : 'rt-slot' }); });
       };
     },
     cross(g, call) {
       const rowA = [0, 1, 1, 0, 0], rowB = [1, 0, 1, 1, 0], both = 2;
-      const A = rowA.map((f, i) => s('rect', { x: 60 + i * 46, y: 6, width: 40, height: 18, rx: 6, class: f ? 'rt-free' : 'rt-busy' }, g));
-      const B = rowB.map((f, i) => s('rect', { x: 60 + i * 46, y: 30, width: 40, height: 18, rx: 6, class: f ? 'rt-free' : 'rt-busy' }, g));
+      const ma = s('g', { class: 'rt-mark' }, g), mb = s('g', { class: 'rt-mark' }, g);
+      rowA.forEach((f, i) => s('rect', { x: 60 + i * 46, y: 6, width: 40, height: 18, rx: 6, class: f ? 'rt-free' : 'rt-busy' }, ma));
+      rowB.forEach((f, i) => s('rect', { x: 60 + i * 46, y: 30, width: 40, height: 18, rx: 6, class: f ? 'rt-free' : 'rt-busy' }, mb));
       const who = Array.isArray(call.participants) && call.participants.length >= 2 ? call.participants : ['Agenda A', 'Agenda B'];
       s('text', { x: 8, y: 19, class: 'rt-tiny' }, g).textContent = who[0];
       s('text', { x: 8, y: 43, class: 'rt-tiny' }, g).textContent = who[1];
-      const glow = s('rect', { x: 58 + both * 46, y: 3, width: 44, height: 48, rx: 9, class: 'rt-match' }, g);
-      const label = s('text', { x: 60 + both * 46 + 20, y: 62, class: 'rt-tiny rt-strong', 'text-anchor': 'middle' }, g);
+      const glow = s('rect', { x: 57 + both * 46, y: 2, width: 46, height: 50, rx: 6, class: 'rt-match', opacity: 0 }, g);
+      const label = s('text', { x: 60 + both * 46 + 20, y: 64, class: 'rt-tiny rt-strong', 'text-anchor': 'middle', opacity: 0 }, g);
       label.textContent = pick(call.output, ['desde'], 'Coincide');
       return (p, d) => {
-        const off = (1 - ease(p)) * 22;
-        A.forEach(r => set(r, { transform: `translate(${(-off).toFixed(1)} 0)` }));
-        B.forEach(r => set(r, { transform: `translate(${off.toFixed(1)} 0)` }));
-        set(glow, { opacity: (0.15 + 0.85 * d).toFixed(2), transform: `translate(0 ${((1 - d) * 3).toFixed(1)})` });
+        const off = (1 - ease(p + d)) * 22;
+        set(ma, { transform: `translate(${(-off).toFixed(1)} 0)` });
+        set(mb, { transform: `translate(${off.toFixed(1)} 0)` });
+        set(glow, { opacity: d.toFixed(2) });
         set(label, { opacity: d.toFixed(2) });
       };
     },
     vault(g, call) {
-      const bars = [0, 1, 2].map(i => s('rect', { x: 10, y: 10 + i * 16, width: 150 - i * 30, height: 9, rx: 4.5, class: 'rt-line' }, g));
-      const veil = [0, 1, 2].map(i => s('rect', { x: 8, y: 7 + i * 16, width: 0, height: 15, rx: 7.5, class: 'rt-veil' }, g));
-      const lock = s('g', { transform: 'translate(232 8)' }, g);
-      s('rect', { x: 0, y: 20, width: 40, height: 30, rx: 9, class: 'rt-lockbody' }, lock);
-      const shackle = s('path', { d: 'M9 21V13a11 11 0 0 1 22 0v8', class: 'rt-shackle' }, lock);
-      s('circle', { cx: 20, cy: 34, r: 3.6, class: 'rt-keyhole' }, lock);
+      // Tres datos se tapan uno a uno con el tinte y el candado se cierra.
+      const W = [150, 120, 90];
+      const marks = s('g', { class: 'rt-mark' }, g);
+      W.forEach((w, i) => s('rect', { x: 20, y: 12 + i * 15, width: w, height: 9, rx: 4.5, class: 'rt-line' }, marks));
+      const veil = W.map((w, i) => s('rect', { x: 20, y: 12 + i * 15, width: 0, height: 9, rx: 4.5, class: 'rt-veil' }, g));
+      const lock = s('g', { transform: 'translate(226 6)' }, g);
+      const shackle = s('path', { d: 'M10 22V14a10 10 0 0 1 20 0v8', class: 'rt-shackle' }, lock);
+      const body = s('g', { class: 'rt-mark' }, lock);
+      s('rect', { x: 2, y: 22, width: 36, height: 28, rx: 6, class: 'rt-lockbody' }, body);
+      s('circle', { cx: 20, cy: 35, r: 3.5, class: 'rt-keyhole' }, lock);
       return (p, d) => {
-        veil.forEach((v, i) => set(v, { width: (ease(smooth(i * 0.2, i * 0.2 + 0.55, p)) * (154 - i * 30)).toFixed(1) }));
-        set(shackle, { transform: `translate(0 ${(-7 * (1 - d) + Math.sin(p * 9) * (1 - d) * 1.2).toFixed(2)})` });
+        veil.forEach((v, i) => set(v, { width: (ease(smooth(i * 0.2, i * 0.2 + 0.5, p + d)) * W[i]).toFixed(1) }));
+        set(shackle, { transform: `translate(0 ${(-6 * (1 - ease(d))).toFixed(2)})` });
         set(lock, { class: d > 0.5 ? 'rt-locked' : '' });
       };
     },
     people(g, call) {
       const urls = (call.faces && call.faces.length ? call.faces : DEFAULT_FACES).slice(0, 5);
+      const n = urls.length, gap = 52, x0 = 150 - (n - 1) * gap / 2;
       const faces = urls.map((u, i) => {
-        const c = s('g', { transform: `translate(${34 + i * 52} 30)` }, g);
+        const c = s('g', { transform: `translate(${x0 + i * gap} 30)` }, g);
         face(c, 0, 0, 17, u);
         const dot = s('circle', { cx: 13, cy: 13, r: 5, class: 'rt-dot' }, c);
         return { c, dot };
       });
       return (p, d) => faces.forEach((f, i) => {
         const k = ease(smooth(i * 0.15, i * 0.15 + 0.35, p) + d);
-        set(f.c, { opacity: (0.25 + 0.75 * k).toFixed(2), transform: `translate(${34 + i * 52} ${(30 + (1 - k) * 6).toFixed(1)}) scale(${(0.86 + 0.14 * k).toFixed(3)})` });
+        set(f.c, { opacity: (0.3 + 0.7 * k).toFixed(2), transform: `translate(${x0 + i * gap} ${(30 + (1 - k) * 5).toFixed(1)})` });
         set(f.dot, { opacity: smooth(0.5, 1, k).toFixed(2) });
       });
     },
     pulse(g, call) {
       // Solo se conocen agregados: aportes contados contra el mínimo y un nivel común. Nunca valores individuales.
       const need = 3;
-      const dots = Array.from({ length: need }, (_, i) => s('circle', { cx: 22 + i * 30, cy: 30, r: 10, class: 'rt-slot' }, g));
-      s('text', { x: 22, y: 58, class: 'rt-tiny' }, g).textContent = 'Aportes · mínimo ' + need;
-      s('rect', { x: 130, y: 22, width: 160, height: 16, rx: 8, class: 'rt-bar' }, g);
-      const fill = s('rect', { x: 130, y: 22, width: 0, height: 16, rx: 8, class: 'rt-bar rt-bar-on' }, g);
-      const lock = s('text', { x: 210, y: 58, class: 'rt-tiny', 'text-anchor': 'middle' }, g);
-      lock.textContent = 'Nivel del equipo';
+      const md = s('g', { class: 'rt-mark' }, g);
+      const dots = Array.from({ length: need }, (_, i) => s('circle', { cx: 30 + i * 28, cy: 26, r: 10, class: 'rt-slot' }, md));
+      s('text', { x: 20, y: 58, class: 'rt-tiny' }, g).textContent = 'Mínimo ' + need;
+      const mb = s('g', { class: 'rt-mark' }, g);
+      s('rect', { x: 130, y: 18, width: 150, height: 16, rx: 8, class: 'rt-bar' }, mb);
+      const fill = s('rect', { x: 130, y: 18, width: 0, height: 16, rx: 8, class: 'rt-bar-on' }, mb);
+      s('text', { x: 130, y: 58, class: 'rt-tiny' }, g).textContent = 'Nivel del equipo';
       return (p, d) => {
         dots.forEach((c, i) => set(c, { class: (smooth(i * 0.25, i * 0.25 + 0.2, p) > 0.5 || d > 0) ? 'rt-free' : 'rt-slot' }));
-        set(fill, { width: (160 * 0.62 * ease(d)).toFixed(1) });
-        set(lock, { opacity: (0.4 + 0.6 * d).toFixed(2) });
+        set(fill, { width: (150 * 0.6 * ease(d)).toFixed(1) });
       };
     },
     stamp(g, call) {
-      const ticket = s('rect', { x: 80, y: 30, width: 140, height: 30, rx: 8, class: 'rt-ticket' }, g);
-      const mark = s('text', { x: 150, y: 50, class: 'rt-stampmark', 'text-anchor': 'middle' }, g);
-      mark.textContent = '✓ Una vez';
-      const st = s('g', {}, g);
-      s('circle', { cx: 150, cy: -12, r: 7, class: 'rt-stamp-knob' }, st);
-      s('rect', { x: 146, y: -8, width: 8, height: 12, rx: 3, class: 'rt-stamp-knob' }, st);
-      s('rect', { x: 126, y: 2, width: 48, height: 12, rx: 5, class: 'rt-stamp' }, st);
+      const ticket = s('rect', { x: 90, y: 32, width: 120, height: 28, rx: 6, class: 'rt-ticket' }, g);
+      const mark = s('text', { x: 150, y: 51, class: 'rt-stampmark', 'text-anchor': 'middle', opacity: 0 }, g);
+      mark.textContent = 'Una vez';
+      const st = s('g', { class: 'rt-mark' }, g);
+      s('circle', { cx: 150, cy: -10, r: 6, class: 'rt-stamp-knob' }, st);
+      s('rect', { x: 147, y: -6, width: 6, height: 10, rx: 3, class: 'rt-stamp-knob' }, st);
+      s('rect', { x: 128, y: 4, width: 44, height: 12, rx: 6, class: 'rt-stamp' }, st);
       return (p, d) => {
         const hover = 2 + 3 * (Math.sin(clamp(p) * Math.PI * 3) * 0.5 + 0.5);
-        const y = d > 0 ? hover + 9 * Math.sin(Math.min(1, d * 1.6) * Math.PI) : hover;
+        const y = d > 0 ? hover + 10 * Math.sin(Math.min(1, d * 1.6) * Math.PI) : hover;
         set(st, { transform: `translate(0 ${y.toFixed(1)})` });
-        set(mark, { opacity: smooth(0.35, 0.7, d).toFixed(2), transform: `rotate(-6 150 44) scale(${(1.15 - 0.15 * smooth(0.35, 0.8, d)).toFixed(3)})` });
+        set(mark, { opacity: smooth(0.35, 0.7, d).toFixed(2) });
         set(ticket, { class: d > 0.4 ? 'rt-ticket rt-ticket-on' : 'rt-ticket' });
       };
     },
     intro(g, call) {
-      const left = s('g', {}, g), right = s('g', {}, g);
       const fu = call.faces && call.faces.length >= 2 ? call.faces : [DEFAULT_FACES[1], DEFAULT_FACES[3]];
-      s('rect', { x: 0, y: 16, width: 96, height: 32, rx: 16, class: 'rt-chip' }, left);
-      face(left, 17, 32, 11, fu[0]);
-      s('rect', { x: 34, y: 28, width: 46, height: 8, rx: 4, class: 'rt-line' }, left);
-      s('rect', { x: 0, y: 16, width: 96, height: 32, rx: 16, class: 'rt-chip' }, right);
-      face(right, 79, 32, 11, fu[1]);
-      s('rect', { x: 16, y: 28, width: 46, height: 8, rx: 4, class: 'rt-line' }, right);
-      const link = s('line', { x1: 150, y1: 32, x2: 150, y2: 32, class: 'rt-link' }, g);
+      const left = s('g', {}, g), right = s('g', {}, g);
+      s('rect', { x: 0, y: 14, width: 84, height: 36, rx: 18, class: 'rt-chip rt-mark' }, left);
+      face(left, 18, 32, 12, fu[0]);
+      s('rect', { x: 38, y: 28, width: 32, height: 8, rx: 4, class: 'rt-line' }, left);
+      s('rect', { x: 0, y: 14, width: 84, height: 36, rx: 18, class: 'rt-chip rt-mark' }, right);
+      face(right, 66, 32, 12, fu[1]);
+      s('rect', { x: 14, y: 28, width: 32, height: 8, rx: 4, class: 'rt-line' }, right);
+      const link = s('line', { x1: 150, y1: 32, x2: 150, y2: 32, class: 'rt-link', opacity: 0 }, g);
       const knot = s('circle', { cx: 150, cy: 32, r: 0, class: 'rt-knot' }, g);
       return (p, d) => {
-        const k = ease(p);
-        set(left, { transform: `translate(${(8 + 30 * k).toFixed(1)} 0)` });
-        set(right, { transform: `translate(${(196 - 30 * k).toFixed(1)} 0)` });
-        const span = 16 * k;
-        set(link, { x1: (150 - span - 6).toFixed(1), x2: (150 + span + 6).toFixed(1), opacity: k.toFixed(2) });
+        const k = ease(p + d);
+        set(left, { transform: `translate(${(16 + 26 * k).toFixed(1)} 0)` });
+        set(right, { transform: `translate(${(200 - 26 * k).toFixed(1)} 0)` });
+        const a = 16 + 26 * k + 84, b = 200 - 26 * k;
+        set(link, { x1: a.toFixed(1), x2: b.toFixed(1), opacity: k.toFixed(2) });
         set(knot, { r: (6 * ease(d)).toFixed(2) });
       };
     },
     note(g, call) {
-      s('rect', { x: 80, y: 4, width: 140, height: 56, rx: 10, class: 'rt-paper' }, g);
-      const lines = [0, 1, 2].map(i => s('rect', { x: 96, y: 18 + i * 13, width: 0, height: 6, rx: 3, class: 'rt-ink' }, g));
-      const pin = s('circle', { cx: 210, cy: 12, r: 0, class: 'rt-pin' }, g);
-      const W = [104, 88, 60];
+      s('rect', { x: 90, y: 4, width: 120, height: 56, rx: 6, class: 'rt-paper rt-mark' }, g);
+      const W = [84, 70, 46];
+      const lines = W.map((w, i) => s('rect', { x: 106, y: 18 + i * 13, width: 0, height: 6, rx: 3, class: 'rt-ink' }, g));
+      const pin = s('circle', { cx: 198, cy: 14, r: 0, class: 'rt-pin' }, g);
       return (p, d) => {
         lines.forEach((l, i) => set(l, { width: (W[i] * ease(smooth(i * 0.3, i * 0.3 + 0.4, p + d))).toFixed(1) }));
         set(pin, { r: (5 * ease(d)).toFixed(2) });
@@ -197,57 +203,61 @@ window.RondaTools = (() => {
     },
     invite(g, call) {
       const card = s('g', {}, g);
-      s('rect', { x: 0, y: 6, width: 112, height: 52, rx: 10, class: 'rt-paper' }, card);
-      s('rect', { x: 0, y: 6, width: 112, height: 14, rx: 10, class: 'rt-band' }, card);
-      const t = s('text', { x: 56, y: 44, class: 'rt-big', 'text-anchor': 'middle' }, card);
+      const body = s('g', { class: 'rt-mark' }, card);
+      s('rect', { x: 0, y: 4, width: 112, height: 54, rx: 6, class: 'rt-paper' }, body);
+      s('path', { d: 'M0 10a6 6 0 0 1 6-6h100a6 6 0 0 1 6 6v6H0z', class: 'rt-band' }, body);
+      const t = s('text', { x: 56, y: 46, class: 'rt-big', 'text-anchor': 'middle' }, card);
       t.textContent = pick(call.input, ['inicio', 'desde'], '10:30');
-      const badge = s('g', { transform: 'translate(104 10)' }, card);
+      const badge = s('g', { transform: 'translate(108 6)', opacity: 0 }, card);
       s('circle', { r: 10, class: 'rt-badge' }, badge);
       s('path', { d: 'M-4 0l3 3 5-6', class: 'rt-tick' }, badge);
       return (p, d) => {
-        set(card, { transform: `translate(${(20 + 150 * ease(p)).toFixed(1)} ${(4 * Math.sin(p * Math.PI)).toFixed(1)}) rotate(${(-4 * (1 - p)).toFixed(2)})` });
-        set(badge, { opacity: d.toFixed(2), transform: `translate(104 10) scale(${(0.6 + 0.4 * ease(d)).toFixed(3)})` });
+        const k = ease(p + d);
+        set(card, { transform: `translate(${(30 + 64 * k).toFixed(1)} 0)`, opacity: (0.4 + 0.6 * k).toFixed(2) });
+        set(badge, { opacity: d.toFixed(2), transform: `translate(108 6) scale(${(0.6 + 0.4 * ease(d)).toFixed(3)})` });
       };
     },
     git(g, call) {
-      s('line', { x1: 10, y1: 22, x2: 290, y2: 22, class: 'rt-trunk' }, g);
-      const branch = s('path', { d: 'M60 22 C 90 46, 120 46, 150 46 L 220 46 C 250 46, 260 22, 280 22', class: 'rt-branch', 'stroke-dasharray': '300', 'stroke-dashoffset': '300' }, g);
-      const commits = [80, 130, 180, 230].map(x => s('circle', { cx: x, cy: 46, r: 0, class: 'rt-commit' }, g));
-      const merge = s('circle', { cx: 280, cy: 22, r: 0, class: 'rt-merge' }, g);
+      s('line', { x1: 20, y1: 20, x2: 280, y2: 20, class: 'rt-trunk' }, g);
+      const branch = s('path', { d: 'M60 20 C 84 44, 110 44, 130 44 L 200 44 C 224 44, 240 20, 260 20', class: 'rt-branch', 'stroke-dasharray': '260', 'stroke-dashoffset': '260' }, g);
+      const commits = [110, 150, 190].map(x => s('circle', { cx: x, cy: 44, r: 0, class: 'rt-commit' }, g));
+      const merge = s('circle', { cx: 260, cy: 20, r: 0, class: 'rt-merge' }, g);
       return (p, d) => {
-        set(branch, { 'stroke-dashoffset': (300 * (1 - ease(p * 0.8 + d * 0.2))).toFixed(1) });
-        commits.forEach((c, i) => set(c, { r: (5 * ease(smooth(0.15 + i * 0.18, 0.3 + i * 0.18, p))).toFixed(2) }));
+        set(branch, { 'stroke-dashoffset': (260 * (1 - ease(p * 0.85 + d * 0.15))).toFixed(1) });
+        commits.forEach((c, i) => set(c, { r: (5 * ease(smooth(0.2 + i * 0.2, 0.35 + i * 0.2, p + d))).toFixed(2) }));
         set(merge, { r: (7 * ease(d)).toFixed(2) });
       };
     },
     granola(g, call) {
-      const bars = Array.from({ length: 28 }, (_, i) => s('rect', { x: 10 + i * 10, y: 32, width: 5, height: 0, rx: 2.5, class: 'rt-wave' }, g));
-      const lines = [0, 1].map(i => s('rect', { x: 10, y: 44 + i * 10, width: 0, height: 5, rx: 2.5, class: 'rt-ink' }, g));
+      // La grabación se vuelve notas: las ondas bajan y aparecen dos líneas de texto.
+      const bars = Array.from({ length: 24 }, (_, i) => s('rect', { x: 32 + i * 10, y: 22, width: 5, height: 0, rx: 2.5, class: 'rt-wave' }, g));
+      const lines = [0, 1].map(i => s('rect', { x: 32, y: 44 + i * 11, width: 0, height: 6, rx: 3, class: 'rt-ink' }, g));
       return (p, d) => {
-        const T = performance.now() / 1000;
-        bars.forEach((b, i) => { const a = (1 - d) * (6 + 12 * Math.abs(Math.sin(i * 0.9 + T * 5))) * Math.min(1, p * 4) + d * 3; set(b, { y: (26 - a / 2).toFixed(1), height: a.toFixed(1) }); });
-        lines.forEach((l, i) => set(l, { width: (ease(d - i * 0.15) * (220 - i * 80)).toFixed(1) }));
+        const T = p * 6;
+        bars.forEach((b, i) => { const a = (1 - d) * (6 + 14 * Math.abs(Math.sin(i * 0.9 + T * 5))) * Math.min(1, p * 4) + d * 4; set(b, { y: (24 - a / 2).toFixed(1), height: a.toFixed(1) }); });
+        lines.forEach((l, i) => set(l, { width: (ease(d - i * 0.15) * (200 - i * 80)).toFixed(1) }));
       };
     },
     chat(g, call) {
-      const a = s('rect', { x: 10, y: 6, width: 0, height: 22, rx: 11, class: 'rt-bubble-in' }, g);
-      const b = s('rect', { x: 290, y: 34, width: 0, height: 22, rx: 11, class: 'rt-bubble-out' }, g);
-      const ticks = s('path', { d: 'M250 50l3 3 5-6M256 50l3 3 5-6', class: 'rt-ticks' }, g);
+      const marks = s('g', { class: 'rt-mark' }, g);
+      const a = s('rect', { x: 40, y: 6, width: 0, height: 22, rx: 11, class: 'rt-bubble-in' }, marks);
+      const b = s('rect', { x: 260, y: 34, width: 0, height: 22, rx: 11, class: 'rt-bubble-out' }, marks);
+      const ticks = s('path', { d: 'M226 42l3 3 5-6M232 42l3 3 5-6', class: 'rt-ticks', opacity: 0 }, g);
       return (p, d) => {
-        const ka = ease(smooth(0, 0.5, p)), kb = ease(smooth(0.4, 1, p));
-        set(a, { width: (150 * ka).toFixed(1) });
-        set(b, { width: (120 * kb).toFixed(1), x: (290 - 120 * kb).toFixed(1) });
+        const ka = ease(smooth(0, 0.5, p + d)), kb = ease(smooth(0.4, 1, p + d));
+        set(a, { width: (130 * ka).toFixed(1) });
+        set(b, { width: (110 * kb).toFixed(1), x: (260 - 110 * kb).toFixed(1) });
         set(ticks, { opacity: d.toFixed(2), class: d > 0.5 ? 'rt-ticks rt-ticks-read' : 'rt-ticks' });
       };
     },
     heart(g, call) {
-      const path = 'M0 32 H70 L80 32 L88 12 L98 52 L106 26 L114 32 H160 L170 32 L178 14 L188 50 L196 28 L204 32 H300';
+      const path = 'M20 32 H80 L88 32 L96 12 L106 52 L114 26 L122 32 H170 L178 32 L186 14 L196 50 L204 28 L212 32 H280';
       s('path', { d: path, class: 'rt-ecg-ghost' }, g);
-      const ecg = s('path', { d: path, class: 'rt-ecg', 'stroke-dasharray': '420', 'stroke-dashoffset': '420' }, g);
-      return (p, d) => set(ecg, { 'stroke-dashoffset': (420 * (1 - ease(p * 0.9 + d * 0.1))).toFixed(1) });
+      const ecg = s('path', { d: path, class: 'rt-ecg', 'stroke-dasharray': '400', 'stroke-dashoffset': '400' }, g);
+      return (p, d) => set(ecg, { 'stroke-dashoffset': (400 * (1 - ease(p * 0.9 + d * 0.1))).toFixed(1) });
     },
     generic(g, call) {
-      const bars = [0, 1, 2].map(i => s('rect', { x: 10, y: 12 + i * 15, width: 0, height: 8, rx: 4, class: 'rt-line' }, g));
+      const bars = [0, 1, 2].map(i => s('rect', { x: 50, y: 14 + i * 14, width: 0, height: 8, rx: 4, class: 'rt-line' }, g));
       return (p, d) => bars.forEach((b, i) => set(b, { width: ((200 - i * 40) * ease(smooth(i * 0.2, i * 0.2 + 0.6, p + d))).toFixed(1) }));
     }
   };
@@ -258,13 +268,16 @@ window.RondaTools = (() => {
     el.dataset.flavor = flavor;
     el.style.setProperty('--rt-tint', F.tint);
 
+    // Cabeza: tecla, nombre de la acción y, debajo, el conector con su detalle y el recibo.
     const head = h('div', 'rt-head');
     const tile = h('span', 'rt-tile'); tile.setAttribute('aria-hidden', 'true');
     tile.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20"><path d="${F.glyph}"/></svg>`;
-    const copy = h('span', 'rt-copy');
     const meta = h('span', 'rt-meta');
-    meta.append(h('span', 'rt-connector', F.connector), h('code', 'rt-method', call.name));
-    copy.append(h('b', 'rt-label', call.label), meta);
+    const more = h('button', 'rt-more');
+    more.type = 'button';
+    more.setAttribute('aria-expanded', 'false');
+    more.setAttribute('aria-label', 'Ver entrada y salida');
+    more.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5L8 6l-3.5 3.5"/></svg>';
     const status = h('span', 'rt-status');
     const run = h('span', 'rt-run');
     run.innerHTML = '<i class="rt-ico"><svg class="rt-spin" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><g class="rt-spin-arc"><path d="M7 1.5a5.5 5.5 0 0 1 5.5 5.5"/></g></svg></i>';
@@ -275,7 +288,8 @@ window.RondaTools = (() => {
       : '<i class="rt-ico"><svg width="14" height="14" viewBox="0 0 14 14"><path class="rt-checkpath" d="M3 7.4l2.6 2.6L11 4.3"/></svg></i>';
     done.append(h('span', '', call.receipt || 'Listo'));
     status.append(run, done);
-    head.append(tile, copy, status);
+    meta.append(h('span', 'rt-connector', F.connector), more, status);
+    head.append(tile, h('b', 'rt-label', call.label), meta);
 
     const stage = h('div', 'rt-stage'); stage.setAttribute('aria-hidden', 'true');
     const plate = h('div', 'rt-plate'); stage.append(plate);
@@ -284,12 +298,15 @@ window.RondaTools = (() => {
     plate.append(svg);
     const paint = (SCENES[flavor] || SCENES.generic)(g, call);
 
-    const io = h('details', 'rt-io');
-    const sum = h('summary', '', 'Entrada y salida');
+    // Detalle plegado: nombre técnico, entrada y salida.
+    const io = h('div', 'rt-io'); io.hidden = true;
+    io.id = 'rt-io-' + (++uid);
+    more.setAttribute('aria-controls', io.id);
     const grid = h('div', 'rt-io-grid');
     const outLabel = h('span', 'rt-io-k', 'Salida'), outPre = h('pre', '', pretty(call.output));
     grid.append(h('span', 'rt-io-k', 'Entrada'), h('pre', '', pretty(call.input)), outLabel, outPre);
-    io.append(sum, grid);
+    io.append(h('code', 'rt-io-name', call.name), grid);
+    more.addEventListener('click', () => { const open = io.hidden; io.hidden = !open; more.setAttribute('aria-expanded', String(open)); });
 
     el.append(head, stage, io);
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

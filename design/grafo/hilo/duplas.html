@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ronda · miniatura y herramienta</title>
+<title>Ronda · Arco e hilo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231e9bff'/%3E%3Cstop offset='.5' stop-color='%23e840d8'/%3E%3Cstop offset='1' stop-color='%23ff8a1f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Ccircle cx='20' cy='20' r='5' fill='white'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../../tokens.css">
 <link rel="stylesheet" href="../../ronda.css">
@@ -12,13 +12,10 @@
 <style>
   /* Duplas: lo que se ve en el arco del grafo y en el hilo, con el mismo reloj. */
   body { margin: 0; }
-  .du-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 18px 0 8px; }
-  .du-seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--rd-radius-pill); }
-  .du-seg .rd-button { flex: 0 0 auto; height: 36px; padding: 0 16px; font-size: 14px; background: transparent; color: var(--rd-ink); }
-  .du-seg .rd-button[aria-pressed="true"] { background: var(--rd-ink); color: var(--rd-on-ink); }
-  .du-list { display: flex; flex-direction: column; gap: 18px; margin-top: 12px; }
+  .du-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .du-list { display: flex; flex-direction: column; gap: 18px; padding-bottom: 48px; }
   .du-row { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; padding: 16px; border-radius: var(--rd-radius-card); align-items: start; }
-  .du-edge { position: relative; border-radius: 20px; background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.25)); cursor: pointer; }
+  .du-edge { position: relative; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.25)); cursor: pointer; }
   .du-edge canvas { display: block; width: 380px; height: 190px; }
   .du-edge:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
   .du-cap { position: absolute; left: 14px; top: 12px; }
@@ -27,26 +24,38 @@
   .du-msg[hidden] { display: flex; opacity: 0; transform: translateY(-6px); visibility: hidden; }
   .du-msg.mine { flex-direction: row-reverse; }
   .du-face { width: 26px; height: 26px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; flex: 0 0 auto; }
-  .du-bubble { padding: 9px 13px; border-radius: 6px 18px 18px 18px; background: var(--rd-glass-solid); box-shadow: var(--rd-shadow-card); font-size: 14px; line-height: 1.4; max-width: 85%; }
-  .du-msg.mine .du-bubble { border-radius: 18px 6px 18px 18px; background: var(--rd-fill-soft); box-shadow: none; }
+  .du-bubble { padding: 9px 13px; border-radius: 6px 16px 16px 16px; background: var(--rd-glass-solid); box-shadow: var(--rd-shadow-card); font-size: 14px; line-height: 1.4; max-width: 85%; }
+  .du-msg.mine .du-bubble { border-radius: 16px 6px 16px 16px; background: var(--rd-fill-soft); box-shadow: none; }
   .du-tool { transition: opacity .6s cubic-bezier(.25,.8,.25,1), transform .6s cubic-bezier(.25,.8,.25,1); }
   .du-tool[data-wait] { opacity: 0; transform: translateY(-6px); }
-  .du-tool.flash .rt-card { box-shadow: 0 0 0 2px var(--rt-tint), 0 14px 30px rgba(40,30,90,.12); }
+  .du-tool.flash .rt-card { box-shadow: 0 0 0 2px var(--rt-tint), 0 10px 26px rgba(40,30,90,.08); }
   @media (max-width: 860px) { .du-row { grid-template-columns: 1fr; } .du-edge canvas { width: 100%; height: auto; } }
+  @media (max-width: 700px) { .rd-top .rd-nav { order: 3; } }
 </style>
 </head>
 <body>
 <div class="rd-page">
   <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="rd-page__inner">
-    <header class="rd-bar"><span class="rd-brand"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</span></header>
-    <h1 class="rd-hero">El arco y el hilo,<br><span class="rd-gradient-text">al mismo tiempo.</span></h1>
-    <div class="du-controls">
-      <span class="rd-label">Tamaño de la miniatura</span>
-      <div class="du-seg rd-glass" role="group" aria-label="Tamaño" id="size"></div>
-      <div class="rd-actions"><button type="button" class="rd-button rd-button--quiet" id="replay" style="flex: 0 0 auto">Repetir</button></div>
+    <header class="rd-top">
+      <a class="rd-brand" href="../../contexto/resumen.html"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="rd-nav" aria-label="Banco de prueba">
+        <a href="herramientas.html">Herramientas</a>
+        <a href="duplas.html" aria-current="page">Arco e hilo</a>
+      </nav>
+      <span class="rd-tag">Banco de prueba</span>
+    </header>
+    <div class="rd-pagehead">
+      <div>
+        <h1 class="rd-pagetitle">Arco e hilo</h1>
+        <p class="rd-pagesub">Lo que pasa en el arco del globo y en el hilo, con el mismo reloj. Toca un arco para resaltar su tarjeta.</p>
+      </div>
+      <div class="du-controls">
+        <span class="rd-label">Miniatura</span>
+        <div class="rd-seg" role="group" aria-label="Tamaño de la miniatura" id="size"></div>
+        <button type="button" class="rd-button rd-button--quiet rd-button--small" id="replay">Repetir</button>
+      </div>
     </div>
-    <p class="rd-note">Escriben: tres puntos chicos viajan por el arco. Corre la herramienta: su miniatura aparece en el arco y su tarjeta en el hilo. Termina: check en el arco, recibo en la tarjeta, y queda un punto. Toca un arco para resaltar su tarjeta.</p>
     <section class="du-list" id="list"></section>
   </div>
 </div>
@@ -101,7 +110,7 @@ const rows = CALLS.map((c, idx) => {
   return { cv, events, m1, m2, tool, toolWrap, offset: idx * 0.15 };
 });
 const seg = document.getElementById('size');
-SIZES.forEach(([label, px]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'rd-button'; b.textContent = label; b.setAttribute('aria-pressed', px === size ? 'true' : 'false'); b.onclick = () => { size = px; [...seg.children].forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; seg.append(b); });
+SIZES.forEach(([label, px]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', px === size ? 'true' : 'false'); b.onclick = () => { size = px; [...seg.children].forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; seg.append(b); });
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let t0 = performance.now();
 document.getElementById('replay').onclick = () => { t0 = performance.now(); };

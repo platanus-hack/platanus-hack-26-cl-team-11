@@ -3,27 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ronda · herramientas de los agentes</title>
+<title>Ronda · Herramientas</title>
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
 <link rel="stylesheet" href="../../tokens.css">
 <link rel="stylesheet" href="../../ronda.css">
 <link rel="stylesheet" href="./tools.css">
 <link rel="stylesheet" href="./stream.css">
 <style>
-  /* Galería de trabajo de las tarjetas de herramienta. ?t=<segundos> fija el reloj. */
+  /* Banco de prueba de las tarjetas de herramienta. ?t=<segundos> fija el reloj. */
   body { margin: 0; }
-  .gal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
-  .demo { max-width: 420px; margin-top: 24px; padding: 18px 20px; border-radius: var(--rd-radius-card); font-size: 15px; line-height: 1.45; }
+  .hb-bubble { max-width: 440px; margin: 0 0 22px; padding: 12px 16px; border-radius: 6px 16px 16px 16px; font-size: 15px; line-height: 1.45; }
+  .gal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-bottom: 48px; }
+  @media (max-width: 1100px) { .gal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 700px) { .gal { grid-template-columns: minmax(0, 1fr); } .rd-top .rd-nav { order: 3; } }
 </style>
 </head>
 <body>
 <div class="rd-page">
   <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="rd-page__inner">
-    <header class="rd-bar"><span class="rd-brand"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</span></header>
-    <h1 class="rd-hero">Herramientas,<br><span class="rd-gradient-text">cada una con su forma.</span></h1>
-    <p class="demo rd-glass" id="demo"></p>
-    <div class="rd-actions" style="max-width: 200px"><button type="button" class="rd-button rd-button--quiet" id="replay">Repetir</button></div>
+    <header class="rd-top">
+      <a class="rd-brand" href="../../contexto/resumen.html"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="rd-nav" aria-label="Banco de prueba">
+        <a href="herramientas.html" aria-current="page">Herramientas</a>
+        <a href="duplas.html">Arco e hilo</a>
+      </nav>
+      <span class="rd-tag">Banco de prueba</span>
+    </header>
+    <div class="rd-pagehead">
+      <div>
+        <h1 class="rd-pagetitle">Herramientas</h1>
+        <p class="rd-pagesub">Lo que ves en el hilo cuando un agente usa una herramienta.</p>
+      </div>
+      <button type="button" class="rd-button rd-button--quiet rd-button--small" id="replay">Repetir</button>
+    </div>
+    <p class="hb-bubble rd-glass" id="demo"></p>
     <section class="gal" id="gal" aria-label="Tarjetas de herramienta"></section>
   </div>
 </div>
