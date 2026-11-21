@@ -516,6 +516,19 @@ export const GOOGLE_LOGIN_PATH = '/api/login/google/start';
 export const googleLinkPath = (token: string) => `${personPath(token)}/login/google/start`;
 export const fetchLoginOptions = () => request<{ google: boolean }>('/api/login');
 export const fetchSession = () => request<{ person: { token: string; name: string } | null }>('/api/session');
+
+const SESSION_RETRY_WAITS_MS = [1000, 2000, 4000, 8000];
+
+export async function fetchSessionPerson(): Promise<{ token: string; name: string } | null> {
+  for (const wait of SESSION_RETRY_WAITS_MS) {
+    try {
+      return (await fetchSession()).person;
+    } catch {
+      await new Promise((resolve) => window.setTimeout(resolve, wait));
+    }
+  }
+  return (await fetchSession()).person;
+}
 export const closeSession = () => request<{ ok: boolean }>('/api/session/logout', post());
 
 export type FaceKind = 'capsula' | 'ovalo' | 'cuenta' | 'almendra' | 'huevo' | 'arco' | 'gota' | 'media' | 'cuadrada';
