@@ -17,6 +17,7 @@ services:
         - design/faces/**
         - design/sources/**
         - design/grafo/**
+        - design/contexto/**
         - design/logo/**
         - design/luz/**
         - package.json

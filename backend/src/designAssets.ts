@@ -4,7 +4,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz)\/|(?:tokens|ronda)\.css$)/;
+const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz|contexto)\/|(?:tokens|ronda)\.css$)/;
 
 export function designAssets() {
   const routes = new Hono();

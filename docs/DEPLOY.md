@@ -12,7 +12,7 @@ push a main  →  Render instala y compila  →  publica
 
 - **Render despliega en cada commit a `main`** (`autoDeployTrigger: commit`). No hay chequeos previos: lo que llega a `main` se publica.
 - Si la compilación falla, Render deja publicada la versión anterior.
-- **Solo despliegan los commits que tocan el producto:** `backend/`, `frontend/`, los estilos y caras de `design/` que usa el frontend, y los archivos de paquetes. Un commit que solo cambia documentos, tableros de diseño o skills no despliega. Así se evita la caída de unos segundos que trae cada despliegue.
+- **Solo despliegan los commits que tocan el producto:** `backend/`, `frontend/`, los estilos y caras de `design/` que usa el frontend, las páginas de prueba que se muestran publicadas (`design/grafo/`, `design/contexto/`) y los archivos de paquetes. Un commit que solo cambia documentos, tableros de diseño o skills no despliega. Así se evita la caída de unos segundos que trae cada despliegue.
 - Para que un commit no despliegue, incluye `[skip render]` en el mensaje.
 
 Las pruebas se corren en local con `npm test` y `npm run type-check`. `.github/workflows/ci.yml` tiene esos mismos chequeos, pero solo se lanza a mano: las Actions de este repo no arrancan por un problema de pago de la cuenta dueña (probado el 21-nov-2026).
