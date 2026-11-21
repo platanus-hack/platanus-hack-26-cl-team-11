@@ -1,5 +1,5 @@
 # secrets
-integrations/data/
+backend/data/
 .env
 .env.*
 !.env.example

@@ -30,7 +30,7 @@
 
 ### Técnica
 
-- [ ] **Stack:** lenguaje, framework de agentes y base de datos. Sin definir a propósito.
+- [ ] **Framework de agentes.** El resto del stack ya está en el repo: TypeScript, Hono y SQLite en `backend/`, React con Vite en `frontend/`.
 - [ ] **Transporte entre agentes:** cola de mensajes, base de datos compartida u otro.
 - [ ] **Puente de WhatsApp:** qué proveedor y qué número.
 - [ ] **Dónde corre cada agente** y cómo se aísla su memoria privada.

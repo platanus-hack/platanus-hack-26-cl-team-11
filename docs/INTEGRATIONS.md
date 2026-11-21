@@ -21,7 +21,7 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. El l
 
 | Fuente | Cómo se conecta | Estado |
 |---|---|---|
-| Apple Health | Atajo de iOS que envía a una URL personal | Receptor funcionando en `integrations/`; falta probar el Atajo en un iPhone |
+| Apple Health | Atajo de iOS que envía a una URL personal | Receptor funcionando en `backend/`; falta probar el Atajo en un iPhone |
 | Google Calendar | OAuth de Google | No empezado |
 | Gmail | El mismo OAuth de Google | No empezado |
 | Google Health | El mismo OAuth de Google | No empezado |
@@ -49,7 +49,37 @@ Límites del Atajo:
 - **Exige HTTPS público** con certificado válido. No funciona contra `localhost`.
 - **Sin confirmar:** las fuentes se contradicen sobre si entrega entrenamientos y muestras crudas. Se prueba en un iPhone real.
 
-El formato que espera el receptor y cómo armar el Atajo están en [`integrations/README.md`](../integrations/README.md).
+### Formato del envío
+
+`POST /api/ingest/health/<token>` con JSON. Todos los campos son opcionales:
+
+```json
+{ "date": "2026-11-21", "sleep_hours": 6.4, "resting_hr": 58, "steps": 4312 }
+```
+
+Los números pueden venir como texto y con coma decimal. Lo que llegue se guarda completo aunque no traiga estos campos, para poder ver qué manda cada iPhone. La dirección personal aparece en la página `/conectar/<token>`.
+
+Probar sin teléfono:
+
+```bash
+curl -X POST http://localhost:8787/api/ingest/health/<token> \
+  -H 'content-type: application/json' \
+  -d '{"date":"2026-11-21","sleep_hours":6.4}'
+```
+
+### Armar el Atajo en el iPhone
+
+El iPhone necesita una dirección HTTPS pública. Para probar, expón el puerto con un túnel (por ejemplo `cloudflared tunnel --url http://localhost:8787`) y define `PUBLIC_BASE_URL` con esa dirección.
+
+1. Abre **Atajos** y crea uno nuevo.
+2. Agrega **Buscar muestras de salud**. Tipo: Sueño. Fecha de inicio: en los últimos 1 días.
+3. Agrega **Calcular estadísticas** sobre la duración, operación Suma, para obtener el total.
+4. Agrega **Diccionario** con las claves `date` (fecha actual, formato `yyyy-MM-dd`) y `sleep_hours` (el total anterior).
+5. Agrega **Obtener contenido de URL**. URL: tu dirección de envío. Método: POST. Cuerpo: JSON, con el diccionario.
+6. Ejecútalo una vez y acepta el permiso de Salud.
+7. En **Automatización**, crea una que lo ejecute al abrir una app que uses a diario, con «Ejecutar inmediatamente».
+
+Los nombres de las acciones cambian un poco entre versiones de iOS. Si el total llega en una unidad distinta de horas, se ve en `GET /api/people/<token>/events`, que guarda el envío completo.
 
 ## ¿Apple Health reemplaza a Whoop?
 
@@ -75,7 +105,7 @@ Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cue
 
 - [ ] **OAuth a mano o con una plataforma.** Composio, Nango y Pipedream Connect resuelven Google, GitHub y Linear con un link por persona. Ninguna cubre Apple Health ni Granola.
 - [ ] **Dónde se despliega** el receptor para tener HTTPS público.
-- [ ] **Base definitiva.** El receptor usa SQLite local para poder probar hoy; el stack del proyecto sigue abierto en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+- [ ] **Base definitiva.** El backend usa SQLite local para funcionar sin montar nada. Si se pasa a Postgres, cambia solo `backend/src/db.ts`.
 - [ ] **Cifrado** de tokens y llaves antes de guardar la primera credencial real.
 
 ## Fuentes
