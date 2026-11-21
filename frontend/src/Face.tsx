@@ -17,6 +17,9 @@ export interface FaceRecipe {
   brow: string | null;
   mark: string | null;
   lashes: boolean;
+  gap: number;
+  lid: number;
+  tilt: number;
 }
 
 declare global {
@@ -27,7 +30,7 @@ declare global {
       keyFor(name: string): string;
       recipeFor(name: string): FaceRecipe;
       lightFor(name: string): { palette: number[] };
-      paletteFromTone(tone: number): number[];
+      paletteFromTone(tone: number, mix?: string): number[];
       TEAM: Record<string, FaceRecipe>;
     };
     RondaLuz?: { css(palette: number[]): string };

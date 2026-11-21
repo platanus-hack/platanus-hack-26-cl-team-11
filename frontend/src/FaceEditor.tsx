@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchFace, saveFace, type FaceLook } from './api';
 import { Face } from './Face';
-import { applyFaceLook, FACE_TONES, lookFromName } from './faceLook';
+import { applyFaceLook, FACE_TONES, facePalette, lookFromName } from './faceLook';
 import { SectionHead } from './SectionHead';
 
 type Choice<Key extends keyof FaceLook> = { value: FaceLook[Key]; label: string };
@@ -13,6 +13,29 @@ const KINDS: Choice<'kind'>[] = [
   { value: 'almendra', label: 'Almendra' },
   { value: 'huevo', label: 'Huevo' },
   { value: 'arco', label: 'Arco' },
+  { value: 'gota', label: 'Gota' },
+  { value: 'media', label: 'Media luna' },
+  { value: 'cuadrada', label: 'Cuadrados' },
+];
+const SPACINGS: Choice<'spacing'>[] = [
+  { value: 'juntos', label: 'Juntos' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'separados', label: 'Separados' },
+];
+const LIDS: Choice<'lid'>[] = [
+  { value: 'despiertos', label: 'Despiertos' },
+  { value: 'tranquilos', label: 'Tranquilos' },
+  { value: 'sueno', label: 'Con sueño' },
+];
+const TILTS: Choice<'tilt'>[] = [
+  { value: 'rectos', label: 'Rectos' },
+  { value: 'arriba', label: 'Hacia arriba' },
+  { value: 'abajo', label: 'Hacia abajo' },
+];
+const MIXES: Choice<'mix'>[] = [
+  { value: 'armonica', label: 'Armónica' },
+  { value: 'contraste', label: 'Contraste' },
+  { value: 'unico', label: 'Un tono' },
 ];
 const SIZES: Choice<'size'>[] = [
   { value: 'chica', label: 'Chicos' },
@@ -129,6 +152,9 @@ export function FaceEditor({ token, name }: { token: string; name: string }) {
           <div className="app-face-editor__choices">
             <ChoiceRow label="Ojos" field="kind" choices={KINDS} look={look} onPick={pick} />
             <ChoiceRow label="Tamaño" field="size" choices={SIZES} look={look} onPick={pick} />
+            <ChoiceRow label="Distancia" field="spacing" choices={SPACINGS} look={look} onPick={pick} />
+            <ChoiceRow label="Párpados" field="lid" choices={LIDS} look={look} onPick={pick} />
+            <ChoiceRow label="Inclinación" field="tilt" choices={TILTS} look={look} onPick={pick} />
             <ChoiceRow label="Anteojos" field="glasses" choices={GLASSES} look={look} onPick={pick} />
             <ChoiceRow label="Ceja" field="brow" choices={BROWS} look={look} disabled={withGlasses} onPick={pick} />
             <ChoiceRow label="Pestañas" field="lashes" choices={LASHES} look={look} disabled={withGlasses} onPick={pick} />
@@ -143,12 +169,13 @@ export function FaceEditor({ token, name }: { token: string; name: string }) {
                     type="button"
                     aria-label={`Luz ${tone + 1}`}
                     aria-pressed={look.tone === tone}
-                    style={{ background: window.RondaLuz?.css(window.RondaCaras.paletteFromTone(tone)) }}
+                    style={{ background: window.RondaLuz?.css(facePalette(tone, look.mix)) }}
                     onClick={() => pick({ tone })}
                   />
                 ))}
               </div>
             </div>
+            <ChoiceRow label="Mezcla" field="mix" choices={MIXES} look={look} onPick={pick} />
           </div>
         )}
         {problem && (

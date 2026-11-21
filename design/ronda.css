@@ -230,7 +230,7 @@ button.rd-item, a.rd-item { cursor: pointer; }
 
 .rd-tabbar { position: fixed; left: 50%; bottom: calc(var(--rd-space-4) + env(safe-area-inset-bottom, 0px)); z-index: 10; transform: translateX(-50%); display: flex; gap: var(--rd-space-1); padding: 6px; border-radius: var(--rd-radius-pill); }
 .rd-tabbar__tab { position: relative; width: 56px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--rd-radius-pill); background: none; color: var(--rd-muted); font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color .2s ease, color .2s ease; }
-.rd-tabbar__tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rd-tabbar__tab > svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .rd-tabbar__tab[aria-current] { background: var(--rd-fill-soft); color: var(--rd-ink); }
 .rd-tabbar__tab:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 2px; }
 .rd-tabbar__name { position: absolute; left: 50%; bottom: calc(100% + var(--rd-space-3)); transform: translateX(-50%); padding: var(--rd-space-1) var(--rd-space-3); border: 1px solid var(--rd-glass-border); border-radius: var(--rd-radius-pill); background: var(--rd-glass-solid); box-shadow: var(--rd-shadow-card); color: var(--rd-ink); font-size: var(--rd-text-small); font-weight: var(--rd-weight); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s ease; }

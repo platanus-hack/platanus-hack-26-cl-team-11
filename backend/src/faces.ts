@@ -1,11 +1,15 @@
 import type { DatabaseSync } from 'node:sqlite';
 
-export const FACE_KINDS = ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco'] as const;
+export const FACE_KINDS = ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco', 'gota', 'media', 'cuadrada'] as const;
 export const FACE_SIZES = ['chica', 'media', 'grande'] as const;
 export const FACE_GLASSES = ['redondo', 'suave', 'pantos', 'ceja'] as const;
 export const FACE_BROWS = ['plana', 'arco', 'alzada'] as const;
 export const FACE_MARKS = ['lunar', 'pecas'] as const;
-export const FACE_TONES = 11;
+export const FACE_SPACINGS = ['juntos', 'normal', 'separados'] as const;
+export const FACE_LIDS = ['despiertos', 'tranquilos', 'sueno'] as const;
+export const FACE_TILTS = ['rectos', 'arriba', 'abajo'] as const;
+export const FACE_MIXES = ['armonica', 'contraste', 'unico'] as const;
+export const FACE_TONES = 15;
 
 export interface FaceLook {
   kind: (typeof FACE_KINDS)[number];
@@ -14,7 +18,11 @@ export interface FaceLook {
   brow: (typeof FACE_BROWS)[number] | null;
   mark: (typeof FACE_MARKS)[number] | null;
   lashes: boolean;
+  spacing: (typeof FACE_SPACINGS)[number];
+  lid: (typeof FACE_LIDS)[number];
+  tilt: (typeof FACE_TILTS)[number];
   tone: number;
+  mix: (typeof FACE_MIXES)[number];
 }
 
 export interface FaceStore {
@@ -24,6 +32,7 @@ export interface FaceStore {
 }
 
 const oneOf = <Value extends string>(options: readonly Value[], value: unknown): value is Value => typeof value === 'string' && (options as readonly string[]).includes(value);
+const withDefault = <Value extends string>(options: readonly Value[], value: unknown): Value | undefined => (value === undefined ? options[0] : oneOf(options, value) ? value : undefined);
 const optional = <Value extends string>(options: readonly Value[], value: unknown): Value | null | undefined => (value === null ? null : oneOf(options, value) ? value : undefined);
 
 export function parseFaceLook(input: unknown): FaceLook | null | undefined {
@@ -35,8 +44,13 @@ export function parseFaceLook(input: unknown): FaceLook | null | undefined {
   const mark = optional(FACE_MARKS, body.mark);
   const tone = body.tone;
   if (!oneOf(FACE_KINDS, body.kind) || !oneOf(FACE_SIZES, body.size) || glasses === undefined || brow === undefined || mark === undefined) return undefined;
+  const spacing = withDefault(FACE_SPACINGS, body.spacing === undefined ? 'normal' : body.spacing);
+  const lid = withDefault(FACE_LIDS, body.lid);
+  const tilt = withDefault(FACE_TILTS, body.tilt);
+  const mix = withDefault(FACE_MIXES, body.mix);
+  if (!spacing || !lid || !tilt || !mix) return undefined;
   if (typeof body.lashes !== 'boolean' || typeof tone !== 'number' || !Number.isInteger(tone) || tone < 0 || tone >= FACE_TONES) return undefined;
-  return { kind: body.kind, size: body.size, glasses, brow, mark, lashes: body.lashes, tone };
+  return { kind: body.kind, size: body.size, glasses, brow, mark, lashes: body.lashes, spacing, lid, tilt, tone, mix };
 }
 
 export function openFaceStore(db: DatabaseSync): FaceStore {

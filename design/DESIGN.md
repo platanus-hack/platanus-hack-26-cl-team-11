@@ -182,7 +182,7 @@ nariz ni pelo. Para verlas y probarlas: `caras/caras.html`.
       cara.set('activa');
 
   En React la envuelve `frontend/src/Face.tsx`: `<Face name="Camila Rojas" state="activa" />`.
-- **Cada persona puede elegir su propia cara** en Ajustes → «Tu cara» (ojos, tamaño, anteojos, ceja, pestañas, detalle y luz). Se guarda en el backend (`/api/people/:token/face`), la app la registra con `RondaCaras.customize(nombre, …)` y la ve todo su equipo (`/faces`). En la barra de pestañas, «Tú» es tu cara (Mati, 21-nov).
+- **Cada persona puede elegir su propia cara** en Ajustes → «Tu cara» (9 formas de ojos, tamaño, distancia, párpados, inclinación, anteojos, ceja, pestañas, detalle, 15 luces y su mezcla). Se guarda en el backend (`/api/people/:token/face`), la app la registra con `RondaCaras.customize(nombre, …)` y la ve todo su equipo (`/faces`). En la barra de pestañas, «Tú» es tu cara (Mati, 21-nov).
 - **El mismo nombre da siempre la misma cara y los mismos colores**, en cualquier pantalla y sin
   guardar nada. Una persona nueva no requiere componer ni exportar nada.
 - **El equipo** (mati, ian, lian, andres, roberto) tiene ojos y tonos fijos, escritos en `TEAM` y

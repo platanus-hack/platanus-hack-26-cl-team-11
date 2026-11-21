@@ -479,7 +479,7 @@ export const fetchLoginOptions = () => request<{ google: boolean }>('/api/login'
 export const fetchSession = () => request<{ person: { token: string; name: string } | null }>('/api/session');
 export const closeSession = () => request<{ ok: boolean }>('/api/session/logout', post());
 
-export type FaceKind = 'capsula' | 'ovalo' | 'cuenta' | 'almendra' | 'huevo' | 'arco';
+export type FaceKind = 'capsula' | 'ovalo' | 'cuenta' | 'almendra' | 'huevo' | 'arco' | 'gota' | 'media' | 'cuadrada';
 export type FaceSizeChoice = 'chica' | 'media' | 'grande';
 
 export interface FaceLook {
@@ -489,7 +489,11 @@ export interface FaceLook {
   brow: 'plana' | 'arco' | 'alzada' | null;
   mark: 'lunar' | 'pecas' | null;
   lashes: boolean;
+  spacing: 'juntos' | 'normal' | 'separados';
+  lid: 'despiertos' | 'tranquilos' | 'sueno';
+  tilt: 'rectos' | 'arriba' | 'abajo';
   tone: number;
+  mix: 'armonica' | 'contraste' | 'unico';
 }
 
 export const fetchFace = (token: string) => request<{ face: FaceLook | null }>(`${personPath(token)}/face`);

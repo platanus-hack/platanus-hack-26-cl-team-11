@@ -90,6 +90,8 @@
   function tidy(recipe) {
     if (recipe.kind === 'cuenta') recipe.tall = 1;
     if (recipe.kind === 'capsula') recipe.tall = Math.max(recipe.tall, 1.6);
+    if (recipe.kind === 'media') recipe.tall = clamp(recipe.tall, 0.9, 1.3);
+    if (recipe.kind === 'cuadrada') recipe.tall = clamp(recipe.tall, 1, 1.5);
     if (recipe.kind === 'arco') { recipe.lid = 0; recipe.brow = null; recipe.lashes = false; recipe.tall = 0.9; }
     if (recipe.glasses) { recipe.gap = Math.max(recipe.gap, 14.8); recipe.brow = null; recipe.lashes = false; recipe.a = Math.min(recipe.a, 5.2); if (recipe.kind === 'arco') recipe.kind = 'ovalo'; if (recipe.glasses === 'ceja') recipe.lid = 0; }
     return recipe;
@@ -137,18 +139,21 @@
   /* ---------- La cara que cada persona eligió para sí ---------- */
 
   var CHOICES = {
-    kind: ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco'],
+    kind: ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco', 'gota', 'media', 'cuadrada'],
     size: { chica: 4.2, media: 5.2, grande: 6.4 },
     glasses: [null, 'redondo', 'suave', 'pantos', 'ceja'],
     brow: [null, 'plana', 'arco', 'alzada'],
     mark: [null, 'lunar', 'pecas'],
-    tones: 11
+    tones: 15,
+    mix: ['armonica', 'contraste', 'unico']
   };
   var CUSTOM = {};
 
-  function paletteFromTone(tone) {
-    var wheel = CHOICES.tones;
-    return [tone % wheel, (tone + 1) % wheel, (tone + 3) % wheel, (tone + wheel - 1) % wheel];
+  function paletteFromTone(tone, mix) {
+    var n = CHOICES.tones, at = function (step) { return (tone + step + n) % n; };
+    if (mix === 'unico') return [tone, tone, at(1), tone];
+    if (mix === 'contraste') return [tone, at(6), at(1), at(7)];
+    return [tone, at(1), at(3), at(-1)];
   }
 
   function customize(name, look) {
@@ -173,6 +178,9 @@
       case 'capsula': { var r = Math.min(a, b); return 'M' + -a + ' ' + (-b + r) + 'A' + a + ' ' + r + ' 0 0 1 ' + a + ' ' + (-b + r) + 'V' + (b - r) + 'A' + a + ' ' + r + ' 0 0 1 ' + -a + ' ' + (b - r) + 'Z'; }
       case 'almendra': return 'M' + -a + ' ' + round(b * 0.2) + 'C' + round(-a * 0.7) + ' ' + round(-b * 1.05) + ' ' + round(a * 0.7) + ' ' + round(-b * 1.15) + ' ' + a + ' ' + round(-b * 0.15) + 'C' + round(a * 0.6) + ' ' + round(b * 0.95) + ' ' + round(-a * 0.5) + ' ' + round(b * 1.05) + ' ' + -a + ' ' + round(b * 0.2) + 'Z';
       case 'huevo': return 'M0 ' + -b + 'C' + round(a * 0.62) + ' ' + -b + ' ' + a + ' ' + round(-b * 0.25) + ' ' + a + ' ' + round(b * 0.1) + 'C' + a + ' ' + round(b * 0.7) + ' ' + round(a * 0.55) + ' ' + b + ' 0 ' + b + 'C' + round(-a * 0.55) + ' ' + b + ' ' + -a + ' ' + round(b * 0.7) + ' ' + -a + ' ' + round(b * 0.1) + 'C' + -a + ' ' + round(-b * 0.25) + ' ' + round(-a * 0.62) + ' ' + -b + ' 0 ' + -b + 'Z';
+      case 'gota': return 'M' + -a + ' 0C' + round(-a * 0.55) + ' ' + round(-b * 0.78) + ' ' + round(-a * 0.1) + ' ' + -b + ' ' + round(a * 0.25) + ' ' + -b + 'C' + round(a * 0.8) + ' ' + -b + ' ' + a + ' ' + round(-b * 0.5) + ' ' + a + ' 0C' + a + ' ' + round(b * 0.6) + ' ' + round(a * 0.65) + ' ' + b + ' ' + round(a * 0.1) + ' ' + b + 'C' + round(-a * 0.35) + ' ' + b + ' ' + round(-a * 0.65) + ' ' + round(b * 0.6) + ' ' + -a + ' 0Z';
+      case 'media': { var top = round(-b * 0.35); return 'M' + -a + ' ' + top + 'H' + a + 'A' + a + ' ' + round(b * 1.35) + ' 0 0 1 ' + -a + ' ' + top + 'Z'; }
+      case 'cuadrada': { var q = round(Math.min(a, b) * 0.55); return 'M' + (-a + q) + ' ' + -b + 'H' + (a - q) + 'Q' + a + ' ' + -b + ' ' + a + ' ' + (-b + q) + 'V' + (b - q) + 'Q' + a + ' ' + b + ' ' + (a - q) + ' ' + b + 'H' + (-a + q) + 'Q' + -a + ' ' + b + ' ' + -a + ' ' + (b - q) + 'V' + (-b + q) + 'Q' + -a + ' ' + -b + ' ' + (-a + q) + ' ' + -b + 'Z'; }
       default: return 'M' + -a + ' 0A' + a + ' ' + b + ' 0 1 1 ' + a + ' 0A' + a + ' ' + b + ' 0 1 1 ' + -a + ' 0Z';
     }
   }
@@ -385,6 +393,8 @@
     if (level === 's') {
       if (live.kind === 'almendra' || live.kind === 'huevo') live.kind = 'ovalo';
       live.lashes = false; live.brow = null; live.mark = null; live.glasses = null;
+      live.a = Math.min(live.a, 4.6);
+      live.gap = Math.min(live.gap, 14);
     }
     var k = level === 's' ? 1.5 : level === 'm' ? 1.12 : 1;
     var a = round(live.a), b = round(live.a * live.tall);
