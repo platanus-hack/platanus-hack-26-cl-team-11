@@ -1,5 +1,7 @@
 import { approveJoin, type JoinRequest } from './api';
-import { PersonTag } from './PersonTag';
+import { Face } from './Face';
+import { Item } from './Item';
+import { RowButton } from './RowButton';
 import { useAction } from './useAction';
 
 interface JoinRequestRowProps {
@@ -13,32 +15,27 @@ export function JoinRequestRow({ token, teamId, request, onChange }: JoinRequest
   const { busy, error, run } = useAction();
 
   const approve = () =>
-    run(async () => {
+    void run(async () => {
       await approveJoin(token, teamId, request.id);
       await onChange();
     });
 
+  const progress = `${request.approvals} de ${request.needed} aprobaron`;
+
   return (
-    <div className="app-source">
-      <div className="rd-row">
-        <PersonTag name={request.name} />
-        <span className="rd-note">
-          {request.approvals} de {request.needed} aprobaron
-        </span>
-      </div>
-      {request.approvedByMe ? (
-        <span className="rd-note">Ya aprobaste. Falta el resto del equipo.</span>
-      ) : (
-        <div className="rd-actions">
-          <button className="rd-button rd-button--quiet" type="button" disabled={busy} onClick={() => void approve()}>
-            Aprobar ingreso
-          </button>
-        </div>
-      )}
+    <div>
+      <Item
+        icon={<Face name={request.name} />}
+        title={request.name}
+        subtitle={request.approvedByMe ? `Ya aprobaste · ${progress}` : `Quiere entrar · ${progress}`}
+        end={request.approvedByMe ? undefined : <RowButton label="Aprobar" name={`Aprobar el ingreso de ${request.name}`} disabled={busy} onClick={approve} />}
+      />
       {error && (
-        <span className="rd-note" role="alert">
-          {error}
-        </span>
+        <div className="rd-item__detail">
+          <span className="rd-note" role="alert">
+            {error}
+          </span>
+        </div>
       )}
     </div>
   );

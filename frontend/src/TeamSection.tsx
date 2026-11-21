@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { fetchTeams, type Team, type TeamSummary } from './api';
-import { PendingTeamCard } from './PendingTeamCard';
+import { PendingTeamRow } from './PendingTeamRow';
+import { SectionHead } from './SectionHead';
 import { TeamStart } from './TeamStart';
 import { TeamView } from './TeamView';
 import { usePolling } from './usePolling';
@@ -18,14 +19,16 @@ export function TeamSection({ token }: { token: string }) {
 
   if (!list) {
     return (
-      <section className="rd-card rd-glass">
-        <span className="rd-label">Tu equipo</span>
+      <div className="app-block">
+        <SectionHead first title="Equipo" />
         <p className="rd-note" role={error ? 'alert' : undefined}>
           {error ?? 'Cargando…'}
         </p>
-      </section>
+      </div>
     );
   }
+
+  const waiting = list.pending.length > 0;
 
   return (
     <>
@@ -34,12 +37,20 @@ export function TeamSection({ token }: { token: string }) {
           {error}
         </p>
       )}
-      {list.pending.map((team) => (
-        <PendingTeamCard key={team.id} token={token} team={team} onChange={refresh} />
-      ))}
-      {list.teams.length === 0 && list.pending.length === 0 && <TeamStart token={token} onChange={refresh} />}
-      {list.teams.map((team) => (
-        <TeamView key={team.id} token={token} team={team} onChange={refresh} />
+      {waiting && (
+        <div className="app-block">
+          <SectionHead first title="Tus solicitudes" />
+          <div className="rd-list">
+            {list.pending.map((team) => (
+              <PendingTeamRow key={team.id} token={token} team={team} onChange={refresh} />
+            ))}
+          </div>
+          <p className="rd-note">Quedas dentro cuando cada integrante del equipo lo apruebe desde su página.</p>
+        </div>
+      )}
+      {list.teams.length === 0 && !waiting && <TeamStart token={token} onChange={refresh} />}
+      {list.teams.map((team, position) => (
+        <TeamView key={team.id} token={token} team={team} first={position === 0 && !waiting} onChange={refresh} />
       ))}
     </>
   );

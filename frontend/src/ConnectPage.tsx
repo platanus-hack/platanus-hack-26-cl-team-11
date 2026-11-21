@@ -1,15 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { fetchPerson, fetchSignals, type PersonPage, type Signals } from './api';
-import { CheckinCard } from './CheckinCard';
-import { formatWhen } from './format';
-import { SignalsCard } from './SignalsCard';
-import { SourceRow } from './SourceRow';
+import { SettingsTab } from './SettingsTab';
+import { SourcesTab } from './SourcesTab';
+import { TabBar } from './TabBar';
+import { TABS, type TabId } from './tabs';
 import { TeamSection } from './TeamSection';
+import { TopBar } from './TopBar';
+import { useHashTab } from './useHashTab';
 import { usePolling } from './usePolling';
+import { YouTab } from './YouTab';
 
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
   const [signals, setSignals] = useState<Signals | null>(null);
+  const { tab, select } = useHashTab();
 
   const load = useCallback(async () => {
     const [person, derived] = await Promise.all([fetchPerson(token), fetchSignals(token)]);
@@ -18,60 +22,41 @@ export function ConnectPage({ token }: { token: string }) {
   }, [token]);
   const { error, refresh } = usePolling(load);
 
-  if (error && !page) return <h1 className="rd-hero">{error}</h1>;
-  if (!page) return <p className="rd-note">Cargando…</p>;
+  if (!page) {
+    return (
+      <div className="app-column">
+        <TopBar token={token} />
+        <main className="app-tab">{error ? <h1 className="rd-title">{error}</h1> : <p className="rd-note">Cargando…</p>}</main>
+      </div>
+    );
+  }
 
   const notice = new URLSearchParams(window.location.search).get('aviso');
-  const ingestUrl = `${page.publicBaseUrl ?? window.location.origin}${page.healthIngestPath}`;
+  const reload = () => void refresh();
+
+  const content: Record<TabId, ReactNode> = {
+    fuentes: <SourcesTab token={token} page={page} notice={notice} onChange={reload} />,
+    tu: <YouTab token={token} name={page.name} signals={signals} sources={page.sources} onSaved={reload} />,
+    equipo: <TeamSection token={token} />,
+    ajustes: <SettingsTab token={token} />,
+  };
 
   return (
-    <>
-      <h1 className="rd-hero">
-        Hola, <span className="rd-gradient-text">{page.name}.</span>
-      </h1>
-      <p className="rd-note">Lo que conectes queda en tu memoria privada. Tú decides qué sale de ahí.</p>
-      <div className="rd-actions">
-        <a className="rd-button rd-button--quiet app-link" href={`/contexto/${encodeURIComponent(token)}`}>
-          Ver tu mapa de contexto
-        </a>
-      </div>
-      {notice && <p className="rd-note">{notice}</p>}
-      {error && (
-        <p className="rd-note" role="alert">
-          {error}
-        </p>
-      )}
-
-      <section className="rd-card rd-glass">
-        <span className="rd-label">Tus fuentes</span>
-        {page.sources.map((source) => (
-          <SourceRow key={source.id} token={token} source={source} onChange={() => void refresh()} />
+    <div className="app-column">
+      <TopBar token={token} />
+      <main>
+        {error && (
+          <p className="rd-note app-alert" role="alert">
+            {error}
+          </p>
+        )}
+        {TABS.map(({ id, name }) => (
+          <section key={id} className="app-tab" aria-label={name} hidden={tab !== id}>
+            {content[id]}
+          </section>
         ))}
-      </section>
-
-      {signals && <SignalsCard token={token} signals={signals} />}
-
-      <section className="rd-card rd-glass">
-        <span className="rd-label">Apple Health</span>
-        <p className="rd-note">Tu Atajo envía un POST con JSON a esta dirección. Es personal: no la compartas.</p>
-        <span className="rd-code">{ingestUrl}</span>
-      </section>
-
-      <section className="rd-card rd-glass">
-        <span className="rd-label">Últimos registros</span>
-        {page.events.length === 0 && <p className="rd-note">Todavía no llega nada.</p>}
-        {page.events.map((event) => (
-          <div className="rd-row" key={event.id}>
-            <div className="app-text">
-              <span className="app-title">{event.summary}</span>
-              <span className="rd-note">{formatWhen(event.occurredAt)}</span>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <CheckinCard token={token} onSaved={() => void refresh()} />
-      <TeamSection token={token} />
-    </>
+      </main>
+      <TabBar active={tab} onSelect={select} />
+    </div>
   );
 }

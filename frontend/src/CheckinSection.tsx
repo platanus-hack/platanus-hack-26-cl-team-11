@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { fetchCheckins, MOODS, recordCheckin, type CheckinEntry, type Mood } from './api';
 import { formatWhen, messageOf } from './format';
+import { SectionHead } from './SectionHead';
 import { useAction } from './useAction';
 
 const MAX_TEXT_LENGTH = 280;
@@ -21,7 +22,9 @@ function lastText(last: LastCheckin) {
   return `Último check-in: ${formatWhen(last.entry.at)} · ${MOOD_LABEL[last.entry.mood]}`;
 }
 
-export function CheckinCard({ token, onSaved }: { token: string; onSaved: () => void }) {
+const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
+
+export function CheckinSection({ token, onSaved }: { token: string; onSaved: () => void }) {
   const [mood, setMood] = useState<Mood | null>(null);
   const [blocker, setBlocker] = useState('');
   const [note, setNote] = useState('');
@@ -53,9 +56,11 @@ export function CheckinCard({ token, onSaved }: { token: string; onSaved: () => 
     });
   }
 
+  const doneToday = last.state === 'ready' && last.entry !== null && isToday(last.entry.at);
+
   return (
-    <section className="rd-card rd-glass">
-      <span className="rd-label">Tu check-in de hoy</span>
+    <div className="app-block">
+      <SectionHead title="Tu check-in de hoy" status={doneToday ? 'Hecho hoy' : undefined} live />
       <form className="app-form" onSubmit={submit}>
         <div className="rd-actions" role="group" aria-label="Cómo llegas hoy">
           {MOODS.map((option) => (
@@ -101,6 +106,6 @@ export function CheckinCard({ token, onSaved }: { token: string; onSaved: () => 
       )}
       <p className="rd-note">{lastText(last)}</p>
       <p className="rd-note">La nota no sale de aquí. Del bloqueo puede salir una frase, según tu permiso para bloqueos.</p>
-    </section>
+    </div>
   );
 }

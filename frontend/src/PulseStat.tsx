@@ -1,21 +1,25 @@
+import { Glyph, type GlyphName } from './Glyph';
+import { Item } from './Item';
+import { ItemIcon } from './ItemIcon';
+
 interface PulseStatProps {
+  glyph: GlyphName;
   label: string;
   value: string | null;
-  unit?: string;
   note: string;
 }
 
-export function PulseStat({ label, value, unit, note }: PulseStatProps) {
+export function PulseStat({ glyph, label, value, note }: PulseStatProps) {
   return (
-    <div>
-      <span className="rd-label">{label}</span>
-      {value !== null && (
-        <span className="rd-stat">
-          {value}
-          {unit && <span className="rd-stat__unit">{unit}</span>}
-        </span>
-      )}
-      <span className="rd-note">{note}</span>
-    </div>
+    <Item
+      icon={
+        <ItemIcon>
+          <Glyph name={glyph} />
+        </ItemIcon>
+      }
+      title={label}
+      subtitle={note}
+      end={value !== null ? <span className="rd-item__value">{value}</span> : undefined}
+    />
   );
 }

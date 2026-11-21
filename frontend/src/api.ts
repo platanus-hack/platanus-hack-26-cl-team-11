@@ -15,6 +15,7 @@ export interface Source {
   how: string;
   connect: 'push' | 'key' | 'oauth' | 'soon';
   provider: string | null;
+  configured?: boolean;
   sync: SourceSync | null;
   connection: SourceConnection | null;
 }

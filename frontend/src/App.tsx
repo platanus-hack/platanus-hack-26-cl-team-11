@@ -3,7 +3,7 @@ import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
 import { HomePage } from './HomePage';
 
-function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+function Backdrop({ children }: { children: ReactNode }) {
   return (
     <div className="rd-page">
       <div className="rd-aura" aria-hidden="true">
@@ -12,15 +12,21 @@ function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean
         <i />
         <i />
       </div>
-      <div className="rd-page__inner">
-        <header className="rd-bar">
-          <a className="rd-brand" href="/">
-            Ronda
-          </a>
-        </header>
-        <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>
-      </div>
+      <div className="rd-page__inner">{children}</div>
     </div>
+  );
+}
+
+function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+  return (
+    <Backdrop>
+      <header className="rd-bar">
+        <a className="rd-brand" href="/">
+          Ronda
+        </a>
+      </header>
+      <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>
+    </Backdrop>
   );
 }
 
@@ -32,5 +38,15 @@ export function App() {
         <ContextPage token={token} />
       </Shell>
     );
-  return <Shell>{section === 'conectar' && token ? <ConnectPage token={token} /> : <HomePage />}</Shell>;
+  if (section === 'conectar' && token)
+    return (
+      <Backdrop>
+        <ConnectPage token={token} />
+      </Backdrop>
+    );
+  return (
+    <Shell>
+      <HomePage />
+    </Shell>
+  );
 }
