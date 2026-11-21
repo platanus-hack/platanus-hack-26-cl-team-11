@@ -60,7 +60,7 @@ async function api(action, id = marketId) {
 function message(html) { $('feedback').innerHTML = html; }
 function title(value) { $('heading').textContent = value; document.title = value + ' · Mesa 26'; }
 function label(m) { return question(m, teams); }
-function resolver(m) { return m.kind === 'manual' ? m.resolver || 'Mati' : 'Platanus (automático)'; }
+function resolutionLabel(m) { return m.kind === 'manual' ? 'Resuelve ' + (m.resolver || 'Mati') : 'Automática con precios de Platanus'; }
 function marketLink(m) { return isSimple(m) ? link(m.id) : advanced(m.id); }
 function rate(price) { return price == null ? '—' : n(price); }
 function note(text) { return '<p class="rd-note">' + esc(text) + '</p>'; }
@@ -81,7 +81,7 @@ function renderList() {
       }).join('') + '</div>';
     return '<li class="question"><div><a class="question-title" href="' + destination + '">' + esc(label(m)) +
       '</a><p class="meta">' + (m.status === 'open' ? 'Cierra ' : 'Cierre ') + esc(when(m.expiry)) +
-      ' · Resuelve ' + esc(resolver(m)) + '</p></div>' + end + '</li>';
+      ' · ' + esc(resolutionLabel(m)) + '</p></div>' + end + '</li>';
   }).join('');
   $('content').innerHTML = '<p class="intro">Elige Sí o No. Si aciertas, cada participación paga 100 fichas de juego.</p>' +
     '<div class="section-head"><nav class="filters" aria-label="Estado de las preguntas"><a href="/bolsa"' +
@@ -132,8 +132,8 @@ function rules(m) {
     ? 'Mati elige Sí, No o reembolso según esta regla.' +
       (m.decisionDeadline ? ' Si no publica una decisión antes del ' + when(m.decisionDeadline) + ', se reembolsa la apuesta.' : '')
     : 'Se usa el último precio oficial al cierre o antes. Si la fuente sigue sin poder verificarse tras una hora de gracia, se reembolsa la apuesta.';
-  return '<section class="rules"><h2>Cómo se resuelve</h2><p>' + esc(rule) + '</p><p class="meta">Resuelve <strong>' +
-    esc(resolver(m)) + '</strong> · Cierre ' + esc(when(m.expiry)) + '</p><p class="rd-note">' + esc(info) + '</p>' +
+  return '<section class="rules"><h2>Cómo se resuelve</h2><p>' + esc(rule) + '</p><p class="meta"><strong>' +
+    esc(resolutionLabel(m)) + '</strong> · Cierre ' + esc(when(m.expiry)) + '</p><p class="rd-note">' + esc(info) + '</p>' +
     (m.status !== 'open' && m.evidence?.reason ? '<p><strong>Motivo</strong> ' + esc(m.evidence.reason) + '</p>' : '') +
     (m.evidence?.observations || []).map(obs => '<p class="rd-note">Precio observado de ' + esc(teams.get(obs.team) || obs.team) +
       ': ' + n(obs.price * 100) + ' % · ' + when(obs.at) + '</p>').join('') + '</section>';
