@@ -16,6 +16,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/PRIVACY.md](docs/PRIVACY.md) | Qué se comparte, quién ve qué y los derechos de cada persona. |
 | [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Fuentes de señal y qué deriva el agente de cada una. |
 | [docs/DEMO.md](docs/DEMO.md) | Alcance y guion de la demo. |
+| [docs/demo/](docs/demo/README.md) | El camino feliz grabado de punta a punta: sala, QR, agente, repo, ronda y globo. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Qué se construye en la hack, en qué orden y contra qué referentes de EE. UU. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Cómo está armado el código y cómo se agrega una fuente. |
 | [docs/API.md](docs/API.md) | Todas las rutas del backend: qué reciben y qué responden. |
@@ -77,7 +78,7 @@ En producción: https://ronda-n8if.onrender.com
 
 **Multijugador.** Una sala se abre desde la portada y muestra un QR en `/sala/<código>`. Quien lo escanea entra con su nombre y conecta el agente que ya usa pegándole una línea con un link; ese agente escribe su repo. Probado el 21-nov-2026 en local con dos agentes reales, Claude Code y Codex. Una app de chat sin herramientas entra copiando una pregunta y pegando la respuesta. Detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sala-asistentes-y-repo).
 
-Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda y la simulación contra el modelo real; hasta ahora corren solo con un modelo falso en las pruebas. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda con 50x. En un computador la ronda ya corrió de verdad con el Claude de la terminal (`AGENT_CLI=claude`); la simulación todavía no se ha probado con un modelo real. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Remotes
 

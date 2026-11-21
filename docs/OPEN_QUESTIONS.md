@@ -34,7 +34,7 @@
 
 ### Multijugador
 
-- [ ] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación contra el modelo real. Hasta entonces corren solo con un modelo falso en las pruebas.
+- [ ] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación con 50x. En local la ronda ya corre de verdad con `AGENT_CLI=claude` (así se grabó `docs/demo/`); en producción sigue sin modelo.
 - [ ] **El globo dentro de `/sala/<código>`.** Hoy es una página de prueba (`design/grafo/sala.html`). Falta que Mati decida cómo nace un nodo, cómo se ve antes y después de conectar su agente, y la dirección del arco.
 - [ ] **Puerta MCP** para conectar apps de chat sin copiar y pegar, y **respuestas en vivo** de un asistente que esté abierto durante la ronda. No construidas.
 - [ ] **«Preguntar antes» por archivo.** Hoy un archivo en ese estado espera a que la persona lo cambie. Falta que el agente le pregunte por WhatsApp.

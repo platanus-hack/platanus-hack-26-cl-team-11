@@ -40,7 +40,9 @@ Para mostrar el multijugador con el público:
 4. En la sala aparece su nombre con el agente conectado. «Ver la sala en el globo» abre el globo con esas personas.
 5. «Simular 30 personas» suma personas inventadas y corre una ronda entre sus agentes. Necesita el modelo configurado.
 
-Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales. La ronda y la simulación no se han probado contra el modelo real.
+Todo el recorrido está grabado: [demo/camino-feliz.mp4](demo/camino-feliz.mp4), con el detalle de qué es real en [demo/README.md](demo/README.md).
+
+Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales, y con una ronda real usando el Claude de la terminal (`AGENT_CLI=claude`). Con 50x todavía no se ha probado: falta la llave.
 
 ## Qué es real y qué puede ser simulado
 
