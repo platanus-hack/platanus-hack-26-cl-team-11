@@ -57,22 +57,27 @@
         </section>
 
         <section class="cx-slab cx-t" id="cmp-tile">
-          <div class="cx-t__head"><h2 class="cx-t__title">Tú y tu equipo</h2></div>
-          <div class="cx-trio" id="trio"></div>
-          <div class="cx-key"><span>Equipo es la mediana de las 5 personas. Nadie ve el dato de otra persona.</span></div>
+          <div class="cx-t__head">
+            <h2 class="cx-t__title">Tú y tu equipo</h2>
+            <div class="cx-seg" id="groups" role="group" aria-label="Grupo de señales"></div>
+          </div>
+          <div class="cx-trio" id="trio" aria-live="polite"></div>
+          <div class="cx-key"><span>Equipo: la mediana de tu equipo. Nadie ve el dato de otra persona.</span></div>
         </section>
       </div>
 
       <div class="cx-stack">
-        <section class="cx-slab cx-t" id="inbox-tile">
+        <section class="cx-slab cx-t ss-stage" id="inbox-tile">
           <div class="cx-t__head"><h2 class="cx-t__title">Llegó a ti</h2></div>
           <div class="cx-count">
             <span class="cx-big" id="got">4</span>
             <span class="cx-count__label">de <b id="of">46</b> conversaciones</span>
             <div class="cx-beads" id="beads" aria-hidden="true"></div>
           </div>
-          <div class="cx-how" id="how"></div>
-          <div class="cx-tks" id="inbox"></div>
+          <div class="cx-tray">
+            <div class="cx-how" id="how"></div>
+            <div class="cx-tks" id="inbox"></div>
+          </div>
         </section>
 
         <section class="cx-slab cx-t cx-t--tint" id="pulse-tile">
@@ -89,6 +94,7 @@
 
     <section class="cx-slab cx-t cx-t--wide" id="team-tile" style="--tint: var(--rd-g2)">
       <div class="cx-t__head"><h2 class="cx-t__title">Tu equipo</h2></div>
+      <div class="cx-count"><span class="cx-big" id="with-others">23</span><span class="cx-count__label">conversaciones de tu agente con los otros cuatro</span></div>
       <div class="cx-mates" id="mates"></div>
     </section>
   </div>
@@ -195,10 +201,10 @@
 
   /* ---------- Llegó a ti: una cuenta por conversación, la herramienta y los avisos ---------- */
   const INBOX = [
-    { from: 'lian', text: 'Lian te cubre la demo del jueves', state: 'Aceptado', how: { name: 'agenda.cruzar', label: 'Cruzar tu agenda con la de Lian', participants: ['Tú', 'Lian'], output: { desde: 'Jueves 11:00' }, receipt: 'Lian puede' } },
-    { from: 'ian', text: 'Ian revisa tu cambio antes de las 10:30', state: 'Aceptado', how: { name: 'github.pr', label: 'Pedir a Ian que revise tu cambio', receipt: 'Ian lo toma' } },
-    { from: 'roberto', text: 'Roberto propone no tener reuniones antes de las 10:00', action: 'Votar', done: 'A favor', how: { name: 'propuesta.redactar', label: 'Redactar la regla de Roberto', receipt: 'Borrador listo' } },
-    { from: 'andres', text: 'Andrés necesita el guion hoy', action: 'Responder', done: 'Respondido', how: { name: 'granola.buscar', label: 'Buscar quién quedó con el guion', receipt: 'Quedaste tú' } },
+    { from: 'lian', text: 'Lian te cubre la demo del jueves', state: 'Aceptado', how: { name: 'agenda.cruzar', label: 'Cruzar tu agenda con la de Lian', participants: ['Tú', 'Lian'], input: { dia: 'jueves', duracion_min: 30 }, output: { desde: 'Jueves 11:00', cubre: 'Lian' }, receipt: 'Lian puede' } },
+    { from: 'ian', text: 'Ian revisa tu cambio antes de las 10:30', state: 'Aceptado', how: { name: 'github.pr', label: 'Pedir revisión a Ian', input: { pr: 128, antes_de: '10:30' }, output: { revisa: 'Ian' }, receipt: 'Ian lo toma' } },
+    { from: 'roberto', text: 'Roberto propone no tener reuniones antes de las 10:00', action: 'Votar', done: 'A favor', how: { name: 'propuesta.redactar', label: 'Redactar la regla de Roberto', input: { tema: 'reuniones antes de las 10:00' }, output: { borrador: true }, receipt: 'Borrador listo' } },
+    { from: 'andres', text: 'Andrés necesita el guion hoy', action: 'Responder', done: 'Respondido', how: { name: 'granola.buscar', label: 'Buscar quién tiene el guion', input: { tema: 'guion' }, output: { quien: 'Tú', reunion: 'Daily del martes' }, receipt: 'Quedaste tú' } },
   ];
   const tintOf = (item) => Tools.FLAVORS[Tools.flavorOf(item.how.name)].tint;
 
@@ -237,7 +243,6 @@
     const start = clock();
     const call = Object.assign({}, INBOX[index].how, { at: start, end: start + runFor });
     card = Object.assign(Tools.create(call), { until: call.end + 0.9 });
-    card.el.classList.add('ss-stage');
     $('how').replaceChildren(card.el);
     card.update(still ? call.end + 2 : start);
     rows.forEach((row, other) => {
@@ -367,54 +372,64 @@
     }, 500);
   }
 
-  /* ---------- Tú y tu equipo: tres grupos, una comparación grande en cada uno ---------- */
+  /* ---------- Tú y tu equipo: una comparación grande por grupo; el selector abre un grupo entero ---------- */
   const GROUPS = [
-    { name: 'Salud', items: [
-      { app: 'health', label: 'Sueño por noche', big: '10 %', word: 'menos', me: '6 h 12 min', team: '6 h 54 min', a: 372, b: 414 },
-      { app: 'health', label: 'Pulso en reposo', big: '4', word: 'lpm menos', me: '58 lpm', team: '62 lpm', a: 58, b: 62 },
-      { app: 'strava', label: 'Entrenamientos', big: '2×', word: 'más', me: '4', team: '2', a: 4, b: 2 },
+    { id: 'salud', name: 'Salud', items: [
+      { app: 'health', label: 'Sueño por noche', big: '10 %', word: 'menos', me: '6 h 12 min', team: '6 h 54 min', a: 372, b: 414, what: 'Promedio por noche', from: 4 },
+      { app: 'health', label: 'Pulso en reposo', big: '4', word: 'lpm menos', me: '58 lpm', team: '62 lpm', a: 58, b: 62, what: 'Promedio de la semana', from: 4 },
+      { app: 'strava', label: 'Entrenamientos', big: '2×', word: 'más', me: '4', team: '2', a: 4, b: 2, what: 'Total de la semana', from: 3 },
     ] },
-    { name: 'Trabajo', items: [
-      { app: 'gcal', label: 'Reuniones', big: '27 %', word: 'más', me: '14', team: '11', a: 14, b: 11 },
-      { app: 'granola', label: 'Reuniones transcritas', big: '27', word: 'puntos más', me: '79 %', team: '52 %', a: 79, b: 52 },
-      { app: 'github', label: 'Commits', big: '35 %', word: 'más', me: '23', team: '17', a: 23, b: 17 },
+    { id: 'trabajo', name: 'Trabajo', items: [
+      { app: 'gcal', label: 'Reuniones', big: '27 %', word: 'más', me: '14', team: '11', a: 14, b: 11, what: 'Total de la semana', from: 5 },
+      { app: 'granola', label: 'Reuniones transcritas', big: '27', word: 'puntos más', me: '79 %', team: '52 %', a: 79, b: 52, what: 'Parte de tus reuniones', from: 4 },
+      { app: 'github', label: 'Commits', big: '35 %', word: 'más', me: '23', team: '17', a: 23, b: 17, what: 'Total de la semana', from: 3 },
     ] },
-    { name: 'Mensajes', items: [
-      { app: 'whatsapp', label: 'Tiempo de respuesta', big: '2×', word: 'más rápido', me: '12 min', team: '25 min', a: 12, b: 25 },
-      { app: 'whatsapp', label: 'WhatsApps respondidos', big: '34 %', word: 'más', me: '86', team: '64', a: 86, b: 64 },
-      { app: 'gmail', label: 'Correos respondidos', big: '21', word: 'puntos menos', me: '40 %', team: '61 %', a: 40, b: 61 },
+    { id: 'mensajes', name: 'Mensajes', items: [
+      { app: 'whatsapp', label: 'Tiempo de respuesta', big: '2×', word: 'más rápido', me: '12 min', team: '25 min', a: 12, b: 25, what: 'Mediana de la semana', from: 5 },
+      { app: 'whatsapp', label: 'WhatsApps respondidos', big: '34 %', word: 'más', me: '86', team: '64', a: 86, b: 64, what: 'Total de la semana', from: 5 },
+      { app: 'gmail', label: 'Correos respondidos', big: '21', word: 'puntos menos', me: '40 %', team: '61 %', a: 40, b: 61, what: 'Parte de los que recibiste', from: 5 },
     ] },
   ];
-  const lead = GROUPS.map(() => 0);
+  let filter = 'todo';
   const fill = (share, mine, grow) => '<span class="cx-twin__track"><i class="cx-twin__fill' + (mine ? ' cx-twin__fill--me' : '') + '" data-w="' + share.toFixed(1) + '"' + (grow ? '' : ' style="width:' + share.toFixed(1) + '%"') + '></i></span>';
   const grow = (root, delay) => setTimeout(() => nextPaint(() => root.querySelectorAll('[data-w]').forEach((el) => { el.style.width = el.dataset.w + '%'; })), delay);
   $('trio').innerHTML = GROUPS.map(() => '<div class="cx-grp"></div>').join('');
   const columns = Array.from($('trio').children);
 
-  function group(index, delay) {
-    const data = GROUPS[index];
-    const item = data.items[lead[index]];
+  function column(el, caption, item, more, animate) {
     const app = find(item.app);
     const scale = Math.max(item.a, item.b) * 1.04;
-    const animate = delay !== null;
     const bar = (who, value, amount, mine) => '<div><div class="cx-twin__line"><span>' + who + '</span><b>' + esc(value) + '</b></div>' + fill((amount / scale) * 100, mine, animate) + '</div>';
-    columns[index].style.setProperty('--tint', app.tint);
-    columns[index].innerHTML = '<span class="cx-grp__name">' + data.name + '</span>' +
+    el.style.setProperty('--tint', app.tint);
+    el.innerHTML = '<span class="cx-grp__name">' + esc(caption) + '</span>' +
       '<div class="cx-grp__label">' + tile(app) + '<span>' + esc(item.label) + '</span></div>' +
       '<div class="cx-grp__delta"><b>' + esc(item.big) + '</b><span>' + esc(item.word) + '</span></div>' +
       '<div class="cx-twin">' + bar('Tú', item.me, item.a, true) + bar('Equipo', item.team, item.b, false) + '</div>' +
-      '<div class="cx-grp__more">' + data.items.map((other, at) => (at === lead[index] ? '' :
-        '<button type="button" data-lead="' + index + ':' + at + '"><span>' + esc(other.label) + '</span><b>' + esc(other.big + ' ' + other.word) + '</b></button>')).join('') + '</div>';
-    if (animate) grow(columns[index], delay);
+      '<div class="cx-grp__more">' + more + '</div>';
   }
-  $('trio').addEventListener('click', (event) => {
-    const button = event.target.closest('[data-lead]');
+  function renderTrio(delay) {
+    const animate = delay !== null;
+    const open = GROUPS.find((data) => data.id === filter);
+    columns.forEach((el, index) => {
+      if (!open) {
+        const data = GROUPS[index];
+        const more = data.items.slice(1).map((other) => '<button type="button" data-open="' + data.id + '"><span>' + esc(other.label) + '</span><b>' + esc(other.big + ' ' + other.word) + '</b></button>').join('');
+        return column(el, data.name, data.items[0], more, animate);
+      }
+      const item = open.items[index];
+      const more = '<div><span>Qué mide</span><b>' + esc(item.what) + '</b></div><div><span>Aportan</span><b>' + item.from + ' de 5 personas</b></div>';
+      return column(el, find(item.app).name, item, more, animate);
+    });
+    $('groups').innerHTML = [['todo', 'Todo']].concat(GROUPS.map((data) => [data.id, data.name])).map(([id, name]) => '<button type="button" aria-pressed="' + (id === filter) + '" data-filter="' + id + '">' + name + '</button>').join('');
+    if (animate) grow($('trio'), delay);
+  }
+  $('cmp-tile').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-filter], [data-open]');
     if (!button) return;
-    const [index, at] = button.dataset.lead.split(':').map(Number);
-    lead[index] = at;
-    group(index, still ? null : 0);
+    filter = button.dataset.filter || button.dataset.open;
+    renderTrio(still ? null : 0);
   });
-  GROUPS.forEach((_, index) => group(index, still ? null : 700 + index * 90));
+  renderTrio(still ? null : 700);
 
   /* ---------- Pulso del equipo: bloques por día y nivel ---------- */
   const LEVEL = { 1: 'Baja', 2: 'Media', 3: 'Alta' };
@@ -475,6 +490,8 @@
 
   /* ---------- Tu equipo ---------- */
   const SHARED = { ian: 'Libre de 15:00 a 18:00', lian: 'Ocupada hasta las 12:00', andres: 'Ensayo del pitch a las 10:30', roberto: 'En reuniones hasta las 13:00' };
+  const withOthers = edges.filter((edge) => edge.a === 'me').reduce((sum, edge) => sum + edge.count, 0);
+  $('with-others').textContent = String(withOthers);
   $('mates').innerHTML = PEOPLE.filter((p) => p.id !== 'me').map((p) => {
     const count = edges.find((edge) => edge.a === 'me' && edge.b === p.id).count;
     return '<a class="cx-mate" href="mapa.html?persona=' + p.id + '"><span class="cx-mate__who"><img src="../faces/' + p.face + '.png" alt=""><span class="cx-mate__text"><b>' + esc(p.name) + '</b><span>' + esc(SHARED[p.id]) + '</span></span></span>' +
