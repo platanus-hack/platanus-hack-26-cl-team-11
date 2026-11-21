@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Wellness Company · esfera</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='white'/%3E%3Ccircle cx='32' cy='32' r='24' fill='black'/%3E%3Cpath d='M14 30 C22 18 40 18 50 30 C40 44 24 44 14 30Z' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IM+Fell+English&family=Big+Shoulders+Display:wght@700&family=Syne:wght@700&family=Bodoni+Moda:opsz,wght@6..96,500&family=Cormorant+Garamond:wght@500&family=Unbounded:wght@500&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.4 system-ui, sans-serif; background: #e9e8e4; color: #111; display: grid; grid-template-columns: 300px 1fr; }
+  aside { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid #0001; padding: 16px 16px 40px; background: #e9e8e4; }
+  aside h1 { font-size: 15px; margin: 0 0 4px; }
+  aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #0008; margin: 18px 0 6px; }
+  .ctl { margin: 8px 0; }
+  .ctl > label { display: flex; justify-content: space-between; color: #000b; margin-bottom: 4px; }
+  .ctl > label output { color: #0008; font-variant-numeric: tabular-nums; }
+  .opts { display: flex; flex-wrap: wrap; gap: 4px; }
+  button { font: inherit; font-size: 12px; border: 1px solid #0002; background: #fff; border-radius: 999px; padding: 3px 9px; cursor: pointer; }
+  button[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
+  input[type=range] { width: 100%; accent-color: #111; }
+  .actions { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+  main { min-width: 0; }
+  .hero { display: grid; grid-template-columns: minmax(300px, 560px) 1fr; gap: 24px; padding: 20px 24px; align-items: center; }
+  .hero canvas { width: 100%; aspect-ratio: 1; background: #fff; border-radius: 24px; display: block; }
+  .hero p { margin: 6px 0; color: #000b; max-width: 46ch; }
+  .row { padding: 12px 24px 4px; }
+  .row h2 { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+  .row h2 small { font-weight: 400; color: #0008; margin-left: 6px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .card { cursor: pointer; }
+  .card canvas { width: 100%; aspect-ratio: 1; background: #fff; border-radius: 14px; display: block; transition: transform .15s; }
+  .card:hover canvas { transform: translateY(-2px); }
+  .card.on canvas { outline: 3px solid #111; outline-offset: 3px; }
+  .card span { display: block; margin-top: 4px; font-size: 11px; color: #0007; }
+  @media (prefers-reduced-motion: reduce) { .card canvas { transition: none; } }
+</style>
+</head>
+<body>
+<aside>
+  <h1>The Wellness Company</h1>
+  <div style="color:#0008">Esfera · todo se ajusta en vivo</div>
+  <div id="controls"></div>
+  <div class="actions">
+    <button id="play">Girando</button>
+    <button id="png">Descargar PNG</button>
+    <button id="reset">Restablecer</button>
+  </div>
+</aside>
+<main>
+  <section class="hero">
+    <canvas id="hero" width="900" height="900"></canvas>
+    <div>
+      <p id="hero-label"></p>
+      <p>La cinta de Vita es el mapa de un planeta. Con <b>Vitas</b> pones dos, tres o cuatro cintas entrelazadas sobre el mismo globo. Con la superficie en <b>vidrio</b>, la esfera desaparece y queda solo su contorno, y las cintas de atrás se ven a través.</p>
+      <p>Clic en cualquier tarjeta para verla grande. «Descargar PNG» baja la grande.</p>
+    </div>
+  </section>
+  <div id="rows"></div>
+</main>
+
+<script>
+const VITA_PATHS = [
+  "m155.079 290.086c-9.487 70.397 10.163 132.752 57.978 162.093 10.015 6.142 20.791 10.512 32.053 13.235-2.599-.549-5.219-1.14-7.818-1.816-58.422-14.987-119.695-62.206-162.5448-131.949-69.42966-112.952-64.3165-242.1568 11.3885-288.5955 52.3573-32.1272 124.7873-16.2325 187.4343 33.9636.592.5066 1.162.9921 1.775 1.4987-27.32 22.2062-52.695 50.9352-73.676 85.0672-21.573 35.061-35.941 71.706-43.23 106.957-1.374 6.565-2.493 13.087-3.36 19.546z",
+  "m475.774 332.135c-47.561 77.383-117.773 126.988-181.603 135.664-.782.106-1.564.19-2.324.296-1.331.168-2.662.337-3.972.443-.106 0-.212 0-.317.021-14.685 1.351-28.968.485-42.491-2.786-2.62-.634-5.197-1.351-7.754-2.175 2.599.676 5.219 1.267 7.818 1.816-11.262-2.723-22.038-7.093-32.053-13.235-47.815-29.341-67.464-91.696-57.978-162.093.867-6.459 1.987-12.981 3.36-19.546 7.332-35.125 21.657-71.642 43.145-106.598 20.981-34.154 46.378-62.882 73.677-85.0885.887.7388 1.796 1.4776 2.725 2.1953 47.963 37.9112 124.598 57.4152 207.677 47.2412 11.325-1.372 22.396-3.272 33.172-5.636 15.023 59.483 1.014 137.754-43.061 209.481z",
+  "m478.563 129.218c-7.775.528-21.235 1.415-37.462 1.246-19.628-.211-46.018-.486-78.662-9.14-20.031-5.319-35.455-11.948-44.519-16.211-17.896-8.4228-32.327-17.7316-43.272-25.774 14.346-13.3195 37.842-31.325 70.972-42.4914 19.396-6.5226 48.047-16.1058 83.501-7.7469 10.861 2.5542 42.681 10.5754 66.683 40.4862 17.305 21.5729 22.207 44.1591 23.834 55.2621-10.797 1.562-24.742 3.272-41.075 4.369z"
+];
+
+const CITIES = ["Santiago", "Miami", "San Francisco", "Palo Alto"];
+const FONTS = [
+  { name: "Instrument Serif", fam: "Instrument Serif", w: 400 },
+  { name: "Fraunces", fam: "Fraunces", w: 600 },
+  { name: "IM Fell", fam: "IM Fell English", w: 400 },
+  { name: "Bodoni", fam: "Bodoni Moda", w: 500 },
+  { name: "Cormorant", fam: "Cormorant Garamond", w: 500 },
+  { name: "Big Shoulders", fam: "Big Shoulders Display", w: 700 },
+  { name: "Syne", fam: "Syne", w: 700 },
+  { name: "Unbounded", fam: "Unbounded", w: 500 },
+  { name: "Space Mono", fam: "Space Mono", w: 400 },
+];
+const SHADES = [
+  { id: "line", name: "Línea" },
+  { id: "engrave", name: "Grabado" },
+  { id: "halftone", name: "Medio tono" },
+  { id: "negative", name: "Negativo" },
+];
+const LAYOUTS = [
+  { id: "solo", name: "Solo la esfera", note: "la marca sin texto" },
+  { id: "planet", name: "Planeta", note: "la esfera y el nombre abajo" },
+  { id: "equator", name: "Ecuador", note: "el nombre escrito sobre la esfera" },
+  { id: "saturn", name: "Anillo", note: "el nombre en una banda que orbita" },
+  { id: "company", name: "C◯MPANY", note: "la esfera es la O" },
+  { id: "label", name: "Etiqueta de botica", note: "casa con sucursales" },
+  { id: "stamp", name: "Estampilla", note: "sello de correo perforado" },
+];
+
+const CONTROLS = [
+  { section: "Texto" },
+  { key: "city", label: "Ciudad", options: CITIES.map((c, i) => [i, c]) },
+  { key: "font", label: "Letra", options: FONTS.map((f, i) => [i, f.name]) },
+  { section: "Cintas (el mapa)" },
+  { key: "vitas", label: "Vitas", options: [["1", "Una"], ["2x", "2 cruzadas"], ["2o", "2 opuestas"], ["2m", "2 espejo"], ["2t", "2 trenzadas"], ["3", "3 trenzadas"], ["4", "4 alrededor"]] },
+  { key: "sep", label: "Separación", min: 0, max: 120, unit: "°" },
+  { key: "twist", label: "Giro de la segunda", min: 0, max: 180, unit: "°" },
+  { key: "proj", label: "Proyección", options: [["merc", "Mercator"], ["equi", "Equirrectangular"], ["decal", "Calcomanía"]] },
+  { key: "span", label: "Tamaño", min: 40, max: 320, unit: "°" },
+  { key: "lat", label: "Latitud", min: -60, max: 60, unit: "°" },
+  { key: "ribbon", label: "Cinta", options: [["fill", "Llena"], ["outline", "Contorno"], ["thin", "Hilo"]] },
+  { key: "thick", label: "Grosor de la cinta", min: 15, max: 110 },
+  { section: "Esfera" },
+  { key: "surface", label: "Superficie", options: [["solid", "Sólida"], ["glass", "Vidrio (solo contorno)"], ["none", "Sin esfera"]] },
+  { key: "outlineW", label: "Grosor del contorno", min: 0, max: 40, unit: "" },
+  { key: "rings", label: "Contornos extra", min: 0, max: 4, unit: "" },
+  { key: "grat", label: "Meridianos", options: [["auto", "Auto"], ["on", "Sí"], ["off", "No"]] },
+  { key: "gratStep", label: "Malla", options: [[15, "15°"], [30, "30°"], [45, "45°"], [90, "90°"]] },
+  { key: "ghost", label: "Cinta de atrás", min: 0, max: 100, unit: "%" },
+  { key: "density", label: "Densidad (grabado, puntos)", min: 50, max: 220, unit: "%" },
+  { key: "light", label: "Luz", min: 0, max: 360, unit: "°" },
+  { section: "Movimiento" },
+  { key: "tilt", label: "Inclinación", min: -80, max: 80, unit: "°" },
+  { key: "yaw0", label: "Rotación (tarjetas)", min: -180, max: 180, unit: "°" },
+  { key: "speed", label: "Velocidad", min: 0, max: 300, unit: "%" },
+  { section: "Color" },
+  { key: "invert", label: "Fondo", options: [[false, "Blanco"], [true, "Negro"]] },
+];
+
+const DEFAULTS = { city: 0, font: 0, vitas: "2o", sep: 26, twist: 90, proj: "merc", span: 110, lat: 0, ribbon: "fill", thick: 50, surface: "glass", outlineW: 10, rings: 0, grat: "auto", gratStep: 30, ghost: 40, density: 100, light: 225, tilt: 22, yaw0: -24, speed: 100, invert: false };
+const state = { ...DEFAULTS, play: !matchMedia("(prefers-reduced-motion: reduce)").matches, hero: { layout: 0, shade: 0 } };
+
+const TW = 2048, TH = 2048;
+const texCache = new Map();
+const TEX_KEYS = ["vitas", "sep", "twist", "span", "lat", "ribbon", "thick", "city", "font"];
+
+function copies() {
+  const d = state.sep, tw = state.twist;
+  switch (state.vitas) {
+    case "2x": return [{ lon: -d / 2, rot: 0 }, { lon: d / 2, rot: tw }];
+    case "2o": return [{ lon: 0, rot: 0 }, { lon: 180, rot: tw }];
+    case "2m": return [{ lon: -d / 2, rot: 0 }, { lon: d / 2, rot: tw, flip: true }];
+    case "2t": return [{ lon: -d / 2, rot: 0, dy: -0.12 }, { lon: d / 2, rot: 180 + tw - 90, dy: 0.12 }];
+    case "3": return [{ lon: -d, rot: 0 }, { lon: 0, rot: 120 }, { lon: d, rot: 240 }];
+    case "4": return [0, 90, 180, 270].map((l, i) => ({ lon: l, rot: i * tw }));
+    default: return [{ lon: 0, rot: 0 }];
+  }
+}
+
+function makeTexture(withText) {
+  const key = [withText, ...TEX_KEYS.map(k => state[k])].join("|");
+  if (texCache.has(key)) return texCache.get(key);
+  if (texCache.size > 24) texCache.clear();
+  const c = document.createElement("canvas");
+  c.width = TW; c.height = TH;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  const markW = TW * state.span / 360;
+  const s = markW / 550;
+  const k = TW / (2 * Math.PI);
+  const latY = state.proj === "merc" ? Math.log(Math.tan(Math.PI / 4 + state.lat * Math.PI / 360)) : state.lat * Math.PI / 180;
+  const cy0 = TH / 2 - latY * k;
+  const paths = VITA_PATHS.map(d => new Path2D(d));
+  const thick = state.thick;
+  for (const cp of copies()) {
+    for (const off of [-TW, 0, TW]) {
+      const cx = TW / 2 + cp.lon / 360 * TW + off;
+      if (cx < -markW || cx > TW + markW) continue;
+      g.save();
+      g.translate(cx, cy0 + (cp.dy || 0) * markW);
+      g.rotate(cp.rot * Math.PI / 180);
+      g.scale(cp.flip ? -s : s, s);
+      g.translate(-272, -248);
+      g.lineJoin = "round"; g.miterLimit = 10;
+      if (state.ribbon === "thin") {
+        g.lineWidth = thick * 0.22; g.strokeStyle = "#000";
+        for (const p of paths) g.stroke(p);
+      } else {
+        g.globalCompositeOperation = "source-over";
+        g.lineWidth = thick; g.strokeStyle = "#000";
+        for (const p of paths) g.stroke(p);
+        if (state.ribbon === "outline") {
+          g.globalCompositeOperation = "destination-out";
+          g.lineWidth = thick * 0.6;
+          for (const p of paths) g.stroke(p);
+        }
+      }
+      g.restore();
+    }
+  }
+  if (withText) {
+    const f = FONTS[state.font];
+    const str = `THE WELLNESS COMPANY · OF ${CITIES[state.city].toUpperCase()} ·`;
+    const from = 60, to = 300;
+    const width = TW * (to - from) / 360;
+    const chars = [...str];
+    const gap = 0.18;
+    let size = 200;
+    g.font = `${f.w} ${size}px "${f.fam}"`;
+    const measure = () => chars.reduce((a, ch) => a + g.measureText(ch).width, 0);
+    size = size * width / (measure() * (1 + gap));
+    g.font = `${f.w} ${size}px "${f.fam}"`;
+    let x = TW / 2 + TW * from / 360 + (width - measure() * (1 + gap)) / 2;
+    g.globalCompositeOperation = "source-over";
+    g.fillStyle = "#000"; g.textBaseline = "middle";
+    for (const ch of chars) {
+      const w = g.measureText(ch).width;
+      for (const off of [0, -TW]) g.fillText(ch, x + off, TH / 2);
+      x += w * (1 + gap);
+    }
+  }
+  const data = g.getImageData(0, 0, TW, TH).data;
+  const alpha = new Uint8Array(TW * TH);
+  for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4 + 3];
+  texCache.set(key, alpha);
+  return alpha;
+}
+
+function sampler(tex) {
+  const k = TW / (2 * Math.PI);
+  const decalA = Math.min(0.98, Math.sin(Math.min(Math.PI / 2, (state.span + state.sep) * Math.PI / 360)));
+  const decalS = (TW * (state.span + state.sep) / 360 / 2) / decalA;
+  return (X, Y, Z) => {
+    let tx, ty;
+    if (state.proj === "decal") {
+      if (Z <= 0) return 0;
+      tx = TW / 2 + X * decalS; ty = TH / 2 - Y * decalS;
+    } else {
+      const lat = Math.asin(Math.max(-1, Math.min(1, Y)));
+      tx = TW / 2 + Math.atan2(X, Z) * k;
+      const m = state.proj === "merc" ? Math.log(Math.tan(Math.PI / 4 + Math.max(-1.45, Math.min(1.45, lat)) / 2)) : lat;
+      ty = TH / 2 - m * k;
+    }
+    tx = ((Math.floor(tx) % TW) + TW) % TW;
+    ty = Math.floor(ty);
+    if (ty < 0 || ty >= TH) return 0;
+    return tex[ty * TW + tx] / 255;
+  };
+}
+
+function toWorld(x, y, z, yaw, tilt) {
+  const ct = Math.cos(-tilt), st = Math.sin(-tilt);
+  const y1 = y * ct - z * st, z1 = y * st + z * ct;
+  const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
+  return [x * cy + z1 * sy, y1, -x * sy + z1 * cy];
+}
+function toView(X, Y, Z, yaw, tilt) {
+  const cy = Math.cos(yaw), sy = Math.sin(yaw);
+  const x1 = X * cy + Z * sy, z1 = -X * sy + Z * cy;
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
+  return [x1, Y * ct - z1 * st, Y * st + z1 * ct];
+}
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+
+function drawSphere(ctx, cx, cy, R, shade, yaw, withText) {
+  const tilt = state.tilt * Math.PI / 180;
+  const look = sampler(makeTexture(withText));
+  const la = state.light * Math.PI / 180;
+  const Lv = (() => { const v = [Math.cos(la) * 0.62, -Math.sin(la) * 0.62, 0.6]; const n = Math.hypot(...v); return v.map(x => x / n); })();
+  const solid = state.surface === "solid";
+  const ghost = state.ghost / 100;
+  const dens = state.density / 100;
+  const cell = Math.max(3, R / (24 * dens));
+  const latP = Math.PI / (46 * dens);
+  const x0 = Math.max(0, Math.floor(cx - R - 1)), y0 = Math.max(0, Math.floor(cy - R - 1));
+  const w = Math.min(ctx.canvas.width - x0, Math.ceil(2 * R + 3)), h = Math.min(ctx.canvas.height - y0, Math.ceil(2 * R + 3));
+  if (w <= 0 || h <= 0) return;
+  if (state.grat === "on" || (state.grat === "auto" && shade === "line")) { if (!solid) graticule(ctx, cx, cy, R, yaw, tilt, false); }
+  const img = ctx.getImageData(x0, y0, w, h);
+  const d = img.data;
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < w; i++) {
+      const px = x0 + i + 0.5, py = y0 + j + 0.5;
+      const dx = (px - cx) / R, dy = (py - cy) / R;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > 1 + 2 / R) continue;
+      const cov = clamp01((1 - Math.sqrt(d2)) * R + 0.5);
+      if (cov <= 0) continue;
+      const z = Math.sqrt(Math.max(0, 1 - d2));
+      const [X, Y, Z] = toWorld(dx, -dy, z, yaw, tilt);
+      const mf = look(X, Y, Z);
+      const [Xb, Yb, Zb] = toWorld(dx, -dy, -z, yaw, tilt);
+      const mb = state.proj === "decal" ? 0 : look(Xb, Yb, Zb);
+      const lam = Math.max(0, dx * Lv[0] - dy * Lv[1] + z * Lv[2]);
+      let ink;
+      if (shade === "line") {
+        ink = mf + (1 - mf) * ghost * mb;
+      } else if (shade === "negative") {
+        ink = solid ? 1 - (mf + (1 - mf) * ghost * mb) : mf + (1 - mf) * ghost * mb;
+      } else if (shade === "engrave") {
+        const lat = Math.asin(Math.max(-1, Math.min(1, Y)));
+        const lon = Math.atan2(X, Z);
+        const pix = 1 / (R * Math.max(z, 0.18));
+        const dark = 0.12 + 0.78 * (1 - lam);
+        const fl = Math.abs(((lat / latP) % 1 + 1) % 1 - 0.5) * latP;
+        const cl = clamp01((dark * latP / 2 - fl) / pix + 0.5);
+        const lonP = latP / Math.max(0.2, Math.cos(lat));
+        const fm = Math.abs(((lon / lonP) % 1 + 1) % 1 - 0.5) * lonP * Math.cos(lat);
+        const cm = clamp01((0.8 * latP / 2 - fm) / pix + 0.5);
+        const mark = mf * Math.max(cm, 0.55 + 0.45 * cl);
+        ink = solid ? Math.max(cl, mark) : Math.max(mark, ghost * mb * clamp01((0.5 * latP / 2 - fl) / pix + 0.5));
+      } else {
+        const gx = Math.floor(px / cell), gy = Math.floor(py / cell);
+        const dist = Math.hypot(px - (gx + 0.5) * cell, py - (gy + 0.5) * cell);
+        const base = solid ? cell * 0.5 * Math.sqrt(0.04 + 0.5 * (1 - lam)) : 0;
+        let r = base + (cell * 0.74 - base) * mf;
+        r = Math.max(r, cell * 0.55 * ghost * mb);
+        ink = clamp01(r - dist + 0.5);
+      }
+      const k = (j * w + i) * 4;
+      if (solid) {
+        const gval = 255 * (1 - ink);
+        d[k] = d[k] * (1 - cov) + gval * cov; d[k + 1] = d[k + 1] * (1 - cov) + gval * cov; d[k + 2] = d[k + 2] * (1 - cov) + gval * cov;
+      } else {
+        const a = ink * cov;
+        d[k] *= 1 - a; d[k + 1] *= 1 - a; d[k + 2] *= 1 - a;
+      }
+      d[k + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, x0, y0);
+  if (state.grat === "on" || (state.grat === "auto" && shade === "line")) graticule(ctx, cx, cy, R, yaw, tilt, true);
+  const ow = state.outlineW / 10 * Math.max(1, R / 110);
+  const wantOutline = state.surface !== "none" && ow > 0 && !(solid && shade === "negative");
+  ctx.save();
+  ctx.strokeStyle = "#000";
+  if (wantOutline) { ctx.lineWidth = ow; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke(); }
+  if (state.surface !== "none") {
+    for (let r = 1; r <= state.rings; r++) {
+      ctx.lineWidth = Math.max(0.8, ow * 0.6);
+      ctx.beginPath(); ctx.arc(cx, cy, R * (1 + r * 0.07), 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function graticule(ctx, cx, cy, R, yaw, tilt, front) {
+  ctx.save();
+  ctx.strokeStyle = front ? "rgba(0,0,0,.32)" : "rgba(0,0,0,.1)";
+  ctx.lineWidth = Math.max(0.8, R / 160);
+  const step = state.gratStep;
+  const line = pts => {
+    ctx.beginPath();
+    let pen = false;
+    for (const [X, Y, Z] of pts) {
+      const [x, y, z] = toView(X, Y, Z, yaw, tilt);
+      if ((z >= 0) !== front) { pen = false; continue; }
+      const sx = cx + x * R, sy = cy - y * R;
+      pen ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+      pen = true;
+    }
+    ctx.stroke();
+  };
+  for (let lon = 0; lon < 360; lon += step) {
+    const a = lon * Math.PI / 180, pts = [];
+    for (let t = -90; t <= 90; t += 3) { const b = t * Math.PI / 180; pts.push([Math.cos(b) * Math.sin(a), Math.sin(b), Math.cos(b) * Math.cos(a)]); }
+    line(pts);
+  }
+  for (let lat = -90 + step; lat < 90; lat += step) {
+    const b = lat * Math.PI / 180, pts = [];
+    for (let t = 0; t <= 360; t += 3) { const a = t * Math.PI / 180; pts.push([Math.cos(b) * Math.sin(a), Math.sin(b), Math.cos(b) * Math.cos(a)]); }
+    line(pts);
+  }
+  ctx.restore();
+}
+
+function font(size, f = FONTS[state.font]) { return `${f.w} ${size}px "${f.fam}"`; }
+function text(ctx, str, x, y, size, opts = {}) {
+  ctx.save();
+  ctx.font = font(size);
+  const sp = (opts.spacing ?? 0) * size;
+  ctx.letterSpacing = `${sp}px`;
+  ctx.fillStyle = opts.color ?? "#000";
+  ctx.textAlign = opts.align ?? "center";
+  ctx.textBaseline = opts.baseline ?? "alphabetic";
+  ctx.fillText(str, x + (ctx.textAlign === "center" ? sp / 2 : 0), y);
+  ctx.restore();
+}
+function fitSize(ctx, str, maxW, spacing, start = 200) {
+  ctx.save(); ctx.font = font(start); ctx.letterSpacing = `${spacing * start}px`;
+  const w = ctx.measureText(str).width; ctx.restore();
+  return start * maxW / w;
+}
+const CITY = () => CITIES[state.city];
+
+const DRAW = {
+  solo(ctx, W, H, shade, t) { drawSphere(ctx, W / 2, H / 2, W * 0.36, shade, t, false); },
+  planet(ctx, W, H, shade, t) {
+    drawSphere(ctx, W / 2, H * 0.41, W * 0.28, shade, t, false);
+    const s = fitSize(ctx, "THE WELLNESS COMPANY", W * 0.78, 0.08);
+    text(ctx, "THE WELLNESS COMPANY", W / 2, H * 0.84, s, { spacing: 0.08 });
+    text(ctx, `of ${CITY()}`, W / 2, H * 0.84 + s * 1.5, s * 0.8, { spacing: 0.04, color: "#0009" });
+  },
+  equator(ctx, W, H, shade, t) { drawSphere(ctx, W / 2, H / 2, W * 0.4, shade, t - 2.6, true); },
+  saturn(ctx, W, H, shade, t) {
+    const cx = W / 2, cy = H * 0.48, R = W * 0.25;
+    const rx = W * 0.44, ry = W * 0.11, rot = -0.2;
+    const chars = [...`THE WELLNESS COMPANY · ${CITY().toUpperCase()} · `];
+    const dt = Math.PI * 2 / chars.length;
+    const size = rx * dt * 1.35, band = size * 0.62;
+    const ring = (from, to, alpha) => {
+      ctx.save(); ctx.strokeStyle = `rgba(0,0,0,${alpha})`; ctx.lineWidth = Math.max(1, W / 380);
+      for (const r of [-band, band]) { ctx.beginPath(); ctx.ellipse(cx, cy + r * Math.cos(rot), rx, ry, rot, from, to); ctx.stroke(); }
+      ctx.restore();
+    };
+    const glyphs = front => chars.forEach((ch, k) => {
+      const a = Math.PI - k * dt + t * 0.6, sa = Math.sin(a);
+      if ((sa > 0) !== front) return;
+      const ex = Math.cos(a) * rx, ey = sa * ry;
+      ctx.save();
+      ctx.translate(cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot));
+      ctx.rotate(rot); ctx.scale((front ? 1 : -1) * Math.max(0.08, Math.abs(sa)), 1);
+      ctx.font = font(size); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = front ? "#000" : "rgba(0,0,0,.28)"; ctx.fillText(ch, 0, 0);
+      ctx.restore();
+    });
+    ring(Math.PI, Math.PI * 2, 0.35); glyphs(false);
+    drawSphere(ctx, cx, cy, R, shade, t, false);
+    ring(0, Math.PI, 1); glyphs(true);
+  },
+  company(ctx, W, H, shade, t) {
+    const sp = 0.06;
+    const measure = size => {
+      ctx.save(); ctx.font = font(size); ctx.letterSpacing = `${sp * size}px`;
+      const a = ctx.measureText("C").width, b = ctx.measureText("MPANY").width; ctx.restore();
+      return { a, b, o: size * 0.78 };
+    };
+    let f = 100, m = measure(f);
+    f = f * (W * 0.86) / (m.a + m.o + m.b + f * sp); m = measure(f);
+    const total = m.a + m.o + m.b + f * sp, x0 = (W - total) / 2, base = H * 0.6;
+    text(ctx, "C", x0, base, f, { align: "left", spacing: sp });
+    const ox = x0 + m.a + m.o / 2;
+    drawSphere(ctx, ox, base - f * 0.35, m.o / 2 * 1.02, shade, t, false);
+    text(ctx, "MPANY", ox + m.o / 2 + f * sp, base, f, { align: "left", spacing: sp });
+    const s = fitSize(ctx, "THE WELLNESS", total * 0.62, 0.22);
+    text(ctx, "THE WELLNESS", W / 2, base - f * 0.95, s, { spacing: 0.22 });
+    text(ctx, `— of ${CITY()} —`, W / 2, base + f * 0.55, s * 0.85, { spacing: 0.06, color: "#0009" });
+  },
+  label(ctx, W, H, shade, t) {
+    const m = W * 0.07, lw = Math.max(1, W / 300), inner = W - 2 * m;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = lw * 2; ctx.strokeRect(m, m, W - 2 * m, H - 2 * m);
+    ctx.lineWidth = lw; ctx.strokeRect(m + lw * 6, m + lw * 6, W - 2 * m - lw * 12, H - 2 * m - lw * 12);
+    text(ctx, "THE", W / 2, H * 0.2, W * 0.045, { spacing: 0.3 });
+    const big = fitSize(ctx, "WELLNESS", inner * 0.78, 0.04);
+    text(ctx, "WELLNESS", W / 2, H * 0.2 + big * 0.95, big, { spacing: 0.04 });
+    const R = W * 0.1, cy = H * 0.5;
+    ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(m + inner * 0.08, cy); ctx.lineTo(W / 2 - R * 1.35, cy); ctx.moveTo(W / 2 + R * 1.35, cy); ctx.lineTo(W - m - inner * 0.08, cy); ctx.stroke();
+    drawSphere(ctx, W / 2, cy, R, shade, t, false);
+    const big2 = fitSize(ctx, "COMPANY", inner * 0.78, 0.04);
+    text(ctx, "COMPANY", W / 2, cy + R * 1.35 + big2 * 0.75, big2, { spacing: 0.04 });
+    const branches = [CITY(), ...CITIES.filter(c => c !== CITY())].map(c => c.toUpperCase()).join(" · ");
+    const s = fitSize(ctx, branches, inner * 0.8, 0.12);
+    text(ctx, branches, W / 2, H * 0.84, s, { spacing: 0.12 });
+    text(ctx, "EST. MMXXVI", W / 2, H * 0.84 + s * 2, s, { spacing: 0.3, color: "#0009" });
+  },
+  stamp(ctx, W, H, shade, t) {
+    const m = W * 0.1, x0 = m, y0 = m * 0.9, w = W - 2 * m, h = H - 1.8 * m;
+    ctx.fillStyle = "#000"; ctx.fillRect(x0, y0, w, h);
+    const hole = W * 0.016, step = hole * 3.1;
+    ctx.fillStyle = "#fff";
+    for (let x = x0 + step / 2; x < x0 + w; x += step) for (const y of [y0, y0 + h]) { ctx.beginPath(); ctx.arc(x, y, hole, 0, 7); ctx.fill(); }
+    for (let y = y0 + step / 2; y < y0 + h; y += step) for (const x of [x0, x0 + w]) { ctx.beginPath(); ctx.arc(x, y, hole, 0, 7); ctx.fill(); }
+    const p = W * 0.045;
+    ctx.fillRect(x0 + p, y0 + p, w - 2 * p, h - 2 * p);
+    ctx.strokeStyle = "#000"; ctx.lineWidth = Math.max(1, W / 360);
+    ctx.strokeRect(x0 + p * 1.6, y0 + p * 1.6, w - 3.2 * p, h - 3.2 * p);
+    const s = fitSize(ctx, "THE WELLNESS COMPANY", w * 0.72, 0.1);
+    text(ctx, "THE WELLNESS COMPANY", W / 2, y0 + p * 1.6 + s * 2.1, s, { spacing: 0.1 });
+    drawSphere(ctx, W / 2, y0 + h * 0.52, w * 0.27, shade, t, false);
+    text(ctx, CITY().toUpperCase(), x0 + p * 2.4, y0 + h - p * 2.3, s * 0.95, { align: "left", spacing: 0.12 });
+    text(ctx, "N.º 1", x0 + w - p * 2.4, y0 + h - p * 2.3, s * 1.6, { align: "right" });
+  },
+};
+
+function paint(canvas, layoutId, shade, t) {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  DRAW[layoutId](ctx, canvas.width, canvas.height, shade, t);
+  if (state.invert) {
+    ctx.globalCompositeOperation = "difference";
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = "source-over";
+  }
+}
+
+const dpr = Math.min(2, devicePixelRatio || 1);
+const yawCards = () => state.yaw0 * Math.PI / 180;
+
+function renderGrid() {
+  const rows = document.getElementById("rows");
+  rows.innerHTML = LAYOUTS.map((l, li) => `
+    <section class="row"><h2>${l.name}<small>${l.note}</small></h2>
+      <div class="cards">${SHADES.map((s, si) => `<div class="card${li === state.hero.layout && si === state.hero.shade ? " on" : ""}" data-l="${li}" data-s="${si}"><canvas></canvas><span>${s.name}</span></div>`).join("")}</div>
+    </section>`).join("");
+  rows.querySelectorAll(".card").forEach(card => {
+    const cv = card.querySelector("canvas");
+    cv.width = cv.height = Math.round(cv.getBoundingClientRect().width * dpr) || 400;
+    paint(cv, LAYOUTS[+card.dataset.l].id, SHADES[+card.dataset.s].id, yawCards());
+  });
+}
+
+const hero = document.getElementById("hero");
+let yaw = yawCards(), last = 0;
+function renderHero() {
+  const L0 = LAYOUTS[state.hero.layout], S0 = SHADES[state.hero.shade];
+  paint(hero, L0.id, S0.id, state.play ? yaw : yawCards());
+  document.getElementById("hero-label").innerHTML = `<b>${L0.name}</b> · ${S0.name}`;
+}
+function loop(ts) {
+  if (state.play) { yaw += (last ? Math.min(50, ts - last) : 16) * 0.00045 * state.speed / 100; renderHero(); }
+  last = ts;
+  requestAnimationFrame(loop);
+}
+function renderAll() { renderHero(); renderGrid(); }
+
+let debounce;
+function changed(key) {
+  const snap = {}; for (const k of Object.keys(DEFAULTS)) if (state[k] !== DEFAULTS[k]) snap[k] = state[k]; snap.hero = state.hero;
+  history.replaceState(null, "", "#" + encodeURIComponent(JSON.stringify(snap)));
+  if (key === "font") { document.fonts.load(font(40)).then(renderAll); return; }
+  if (key === "yaw0") yaw = yawCards();
+  renderHero();
+  clearTimeout(debounce);
+  debounce = setTimeout(renderGrid, 220);
+}
+
+function buildControls() {
+  const root = document.getElementById("controls");
+  root.innerHTML = "";
+  for (const c of CONTROLS) {
+    if (c.section) { const h = document.createElement("h3"); h.textContent = c.section; root.appendChild(h); continue; }
+    const wrap = document.createElement("div"); wrap.className = "ctl";
+    const lab = document.createElement("label"); lab.textContent = c.label; wrap.appendChild(lab);
+    if (c.options) {
+      const box = document.createElement("div"); box.className = "opts";
+      for (const [v, name] of c.options) {
+        const b = document.createElement("button"); b.textContent = name;
+        b.setAttribute("aria-pressed", String(state[c.key] === v));
+        b.onclick = () => { state[c.key] = v; box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); changed(c.key); };
+        box.appendChild(b);
+      }
+      wrap.appendChild(box);
+    } else {
+      const out = document.createElement("output"); out.textContent = state[c.key] + (c.unit ?? ""); lab.appendChild(out);
+      const r = document.createElement("input"); r.type = "range"; r.min = c.min; r.max = c.max; r.value = state[c.key];
+      r.oninput = () => { state[c.key] = +r.value; out.textContent = r.value + (c.unit ?? ""); changed(c.key); };
+      wrap.appendChild(r);
+    }
+    root.appendChild(wrap);
+  }
+}
+try { if (location.hash.length > 1) Object.assign(state, JSON.parse(decodeURIComponent(location.hash.slice(1)))); } catch {}
+buildControls();
+
+const play = document.getElementById("play");
+const syncPlay = () => { play.setAttribute("aria-pressed", String(state.play)); play.textContent = state.play ? "Girando" : "Quieto"; };
+syncPlay();
+play.onclick = () => { state.play = !state.play; syncPlay(); renderHero(); };
+document.getElementById("png").onclick = () => {
+  const a = document.createElement("a");
+  a.download = `wellness-co-${LAYOUTS[state.hero.layout].id}-${SHADES[state.hero.shade].id}.png`;
+  a.href = hero.toDataURL("image/png"); a.click();
+};
+document.getElementById("reset").onclick = () => { Object.assign(state, DEFAULTS); buildControls(); yaw = yawCards(); renderAll(); };
+
+document.getElementById("rows").addEventListener("click", e => {
+  const c = e.target.closest(".card");
+  if (!c) return;
+  state.hero = { layout: +c.dataset.l, shade: +c.dataset.s };
+  document.querySelectorAll(".card").forEach(x => x.classList.toggle("on", x === c));
+  renderHero();
+  window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+});
+
+document.fonts.ready.then(() => Promise.all(FONTS.map(f => document.fonts.load(font(40, f))))).then(() => { renderAll(); requestAnimationFrame(loop); });
+</script>
+</body>
+</html>
