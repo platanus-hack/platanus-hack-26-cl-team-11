@@ -7,6 +7,7 @@ import { connectionRoutes } from './routes/connections.js';
 import { ingestRoutes } from './routes/ingest.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { peopleRoutes } from './routes/people.js';
+import { pulseRoutes } from './routes/pulse.js';
 import { signalRoutes } from './routes/signals.js';
 import { teamRoutes } from './routes/teams.js';
 import { ConnectorError } from './types.js';
@@ -29,6 +30,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', teamRoutes(ctx));
   api.route('/', checkinRoutes(ctx));
   api.route('/', boardRoutes(ctx));
+  api.route('/', pulseRoutes(ctx));
 
   return new Hono().route('/api', api);
 }
