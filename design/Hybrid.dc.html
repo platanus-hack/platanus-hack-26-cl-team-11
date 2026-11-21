@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dirección C: Híbrido</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter+Tight:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1450FF}a:hover{color:#0B36B8}
+</style>
+</helmet>
+<div style="width: 1440px; height: 960px; box-sizing: border-box; padding: 64px 72px; display: flex; flex-direction: column; gap: 40px; background: #F4F5F7; color: #0E1116; font-family: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif">
+  <div style="display: flex; justify-content: space-between; border-top: 1.5px solid #0E1116; padding-top: 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em">
+    <span>DIRECCIÓN C · RECOMENDADA</span><span>SERIF PARA LA IDEA · GROTESK PARA LA INTERFAZ · COLORES DE METRO PARA LAS PERSONAS</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 72px; flex-grow: 1; align-items: center">
+    <div style="display: flex; flex-direction: column; gap: 36px">
+      <div style="display: flex; align-items: center; gap: 28px">
+        <svg width="150" height="150" viewBox="0 0 100 100" role="img" aria-label="Logo: muchas conexiones entre agentes y un solo punto para la persona">
+          <path d="M50 10L88.04 37.64M50 10L73.51 82.36M50 10L26.49 82.36M50 10L11.96 37.64M88.04 37.64L73.51 82.36M88.04 37.64L26.49 82.36M88.04 37.64L11.96 37.64M73.51 82.36L26.49 82.36M73.51 82.36L11.96 37.64M26.49 82.36L11.96 37.64" stroke="#0E1116" stroke-width="1" fill="none"></path>
+          <circle cx="50" cy="10" r="3" fill="#0E1116"></circle>
+          <circle cx="88.04" cy="37.64" r="3" fill="#0E1116"></circle>
+          <circle cx="73.51" cy="82.36" r="3" fill="#0E1116"></circle>
+          <circle cx="26.49" cy="82.36" r="3" fill="#0E1116"></circle>
+          <circle cx="11.96" cy="37.64" r="3" fill="#0E1116"></circle>
+          <circle cx="50" cy="52.8" r="11" fill="#1450FF"></circle>
+        </svg>
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 140px; line-height: 0.85; letter-spacing: -0.02em">{{name}}</div>
+      </div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 64px; line-height: 1.0; letter-spacing: -0.01em">Los agentes viven en <i>O(n²)</i>.<br>Tú vives en <i style="color: #1450FF">O(1)</i>.</div>
+      <div style="font-size: 18px; line-height: 1.55; max-width: 540px; color: #4A505C">Cuando cambia el día, tu agente negocia con el de cada compañero, con lo que cada uno autoriza compartir. A ti te llega una decisión.</div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border-top: 1px solid #C9CDD6; padding-top: 18px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #4A505C">10 COMPAÑEROS</span><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em">45 pares · 1 propuesta</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #4A505C">100 COMPAÑEROS</span><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em">4.950 · 1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #4A505C">300 COMPAÑEROS</span><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em">44.850 · 1</span></div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #4A505C; letter-spacing: 0.06em">
+        <span>8:45 · LA RED SE REACOMODA</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <span style="width: 48px; height: 48px; border-radius: 50%; background: #0E1116; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 19px">Tú</span>
+        <span style="height: 1px; flex-grow: 1; background: #0E1116"></span>
+        <span style="width: 48px; height: 48px; border-radius: 50%; background: #FF6319; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px">V</span>
+        <span style="height: 1px; flex-grow: 1; background: #0E1116"></span>
+        <span style="width: 48px; height: 48px; border-radius: 50%; background: #00933C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px">D</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; font-size: 13px; line-height: 1.4; color: #4A505C">
+        <span>Dormiste mal. Reunión con cliente a las 11. Sin acceso a los datos.</span>
+        <span>Ya investigó la cifra. Tiene cambios con cero reviews.</span>
+        <span>Tiene un hueco antes de las 10:30.</span>
+      </div>
+
+      <div style="background: #FFFFFF; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 1px 0 #DCDFE5, 0 24px 48px -24px rgba(14, 17, 22, 0.25)">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: #1450FF">TU DECISIÓN DE HOY</span>
+          <span style="font-size: 13px; color: #4A505C">3 agentes · 1 propuesta</span>
+        </div>
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1.15">Vale explica los datos al cliente a las 11. Dani hace la review de Vale antes de las 10:30. Tú sigues como contacto del cliente.</div>
+        <div style="display: flex; gap: 10px">
+          <button type="button" style="font-family: inherit; font-size: 16px; font-weight: 600; padding: 14px 26px; border-radius: 999px; border: none; background: #1450FF; color: #FFFFFF">Aceptar</button>
+          <button type="button" style="font-family: inherit; font-size: 16px; font-weight: 600; padding: 14px 26px; border-radius: 999px; border: 1.5px solid #0E1116; background: transparent; color: #0E1116">Ajustar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"name":{"editor":"text","default":"Ronda"},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { name: this.props.name ?? 'Ronda' };
+  }
+}
+</script>
+</body>
+</html>

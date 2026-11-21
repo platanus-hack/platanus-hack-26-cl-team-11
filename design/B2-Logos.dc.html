@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>B2: Cuatro logos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter+Tight:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F4EFE6}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="width: 1440px; height: 960px; box-sizing: border-box; padding: 14px; background: #F4EFE6; font-family: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif; color: #F4EFE6; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px">
+
+  <div style="background: {{cobalt}}; border-radius: 16px; position: relative; display: flex; align-items: center; justify-content: center">
+    <span style="position: absolute; top: 22px; left: 26px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em">01 · SELLO</span>
+    <svg width="330" height="330" viewBox="0 0 200 200" role="img" aria-label="Sello: nombre en círculo alrededor de cinco agentes conectados y un punto central">
+      <defs><path id="ring1" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"></path></defs>
+      <text fill="#F4EFE6" font-family="Inter Tight, Helvetica Neue, Arial, sans-serif" font-size="12.5" letter-spacing="3.4"><textPath href="#ring1">RONDA · LOS AGENTES CONVERSAN · TÚ DECIDES ·</textPath></text>
+      <circle cx="100" cy="100" r="60" stroke="#F4EFE6" stroke-width="0.9" fill="none"></circle>
+      <g transform="translate(50 47)">
+        <path d="M50 10L88.04 37.64M50 10L73.51 82.36M50 10L26.49 82.36M50 10L11.96 37.64M88.04 37.64L73.51 82.36M88.04 37.64L26.49 82.36M88.04 37.64L11.96 37.64M73.51 82.36L26.49 82.36M73.51 82.36L11.96 37.64M26.49 82.36L11.96 37.64" stroke="#F4EFE6" stroke-width="0.9" fill="none"></path>
+        <circle cx="50" cy="52.8" r="6" fill="#F4EFE6"></circle>
+      </g>
+    </svg>
+  </div>
+
+  <div style="background: {{cobalt}}; border-radius: 16px; position: relative; display: flex; align-items: center; justify-content: center">
+    <span style="position: absolute; top: 22px; left: 26px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em">02 · APILADO</span>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'Instrument Serif', Georgia, serif; line-height: 1">
+      <span style="font-style: italic; font-size: 34px">the</span>
+      <span style="font-size: 104px; letter-spacing: 0.04em">RONDA</span>
+      <span style="font-size: 34px"><i>of</i> SANTIAGO</span>
+    </div>
+  </div>
+
+  <div style="background: {{cobalt}}; border-radius: 16px; position: relative; display: flex; align-items: center; justify-content: center; gap: 36px">
+    <span style="position: absolute; top: 22px; left: 26px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em">03 · ORBE</span>
+    <svg width="230" height="230" viewBox="0 0 100 100" role="img" aria-label="Orbe: círculo con meridianos y un punto central">
+      <circle cx="50" cy="50" r="46" stroke="#F4EFE6" stroke-width="1.1" fill="none"></circle>
+      <ellipse cx="50" cy="50" rx="18" ry="46" stroke="#F4EFE6" stroke-width="1.1" fill="none"></ellipse>
+      <ellipse cx="50" cy="50" rx="34" ry="46" stroke="#F4EFE6" stroke-width="1.1" fill="none"></ellipse>
+      <ellipse cx="50" cy="50" rx="46" ry="18" stroke="#F4EFE6" stroke-width="1.1" fill="none"></ellipse>
+      <circle cx="50" cy="50" r="7" fill="#F4EFE6"></circle>
+    </svg>
+    <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 112px; line-height: 1">Ronda</span>
+  </div>
+
+  <div style="background: {{cobalt}}; border-radius: 16px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px">
+    <span style="position: absolute; top: 22px; left: 26px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em">04 · PALABRA</span>
+    <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 150px; line-height: 0.9; font-style: italic">ronda.</span>
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.22em">LOS AGENTES CONVERSAN · TÚ DECIDES</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"cobalt":{"editor":"color","default":"#1A4BFF","options":["#1A4BFF","#0F3BE0","#2D5BFF","#0F1A3D"]},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { cobalt: this.props.cobalt ?? '#1A4BFF' };
+  }
+}
+</script>
+</body>
+</html>
