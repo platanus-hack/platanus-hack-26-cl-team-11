@@ -1,0 +1,289 @@
+{
+  "titulo": "Diez personas, sus fuentes y sus agentes",
+  "sala": "Equipo Quillay",
+  "base": "http://localhost:8797",
+  "commit": "b78e3ae",
+  "modelo": "claude-sonnet-5-5",
+  "toma": 2,
+  "opciones": {
+    "permiso": "pantalla",
+    "sinGlobo": false,
+    "sinWebgl": true,
+    "parcialVale": true
+  },
+  "variante": "V2",
+  "publicable": true,
+  "motivo": "Catalina no respondió «no»; el agente de Felipe le respondió «no» al de Javiera.",
+  "puertas": {
+    "G0": true,
+    "G1": true,
+    "G2": true,
+    "G2b": true,
+    "G3": true
+  },
+  "pasos": [
+    {
+      "numero": "1",
+      "texto": "Diez personas inventadas y datos simulados sobre el producto real",
+      "segundo": 0
+    },
+    {
+      "numero": "2",
+      "texto": "Antonia le pega una línea a su Claude Code y él escribe su repo",
+      "segundo": 2.9
+    },
+    {
+      "numero": "3",
+      "texto": "Llega su sueño; un permiso de Google simulado trae agenda y correo",
+      "segundo": 16
+    },
+    {
+      "numero": "4",
+      "texto": "Granola entra con una llave y suma una reunión de hoy",
+      "segundo": 31.8
+    },
+    {
+      "numero": "5",
+      "texto": "Check-in desde el teléfono: cómo llega y qué la frena",
+      "segundo": 42.6
+    },
+    {
+      "numero": "6",
+      "texto": "De sus fuentes sale una frase: carga alta hoy",
+      "segundo": 54.3
+    },
+    {
+      "numero": "7",
+      "texto": "Su agente pregunta antes de contar el bloqueo. Antonia permite",
+      "segundo": 59.4
+    },
+    {
+      "numero": "8",
+      "texto": "Entran nueve personas más, cada una con su asistente y sus fuentes",
+      "segundo": 66.3
+    },
+    {
+      "numero": "9",
+      "texto": "Empieza la ronda: los agentes conversan (video acelerado ×6)",
+      "segundo": 86.5
+    },
+    {
+      "numero": "10",
+      "texto": "Dos personas pueden ayudar a Antonia. Los tres aceptan",
+      "segundo": 93.6
+    },
+    {
+      "numero": "11",
+      "texto": "El pedido de Ignacio no lo escribió nadie: salió de Linear",
+      "segundo": 116
+    },
+    {
+      "numero": "12",
+      "texto": "El agente de Felipe dijo que no puede. No dijo por qué",
+      "segundo": 129.5
+    },
+    {
+      "numero": "13",
+      "texto": "Felipe sí lo sabe: hoy anotó que llegó con cansancio",
+      "segundo": 142.6
+    },
+    {
+      "numero": "14",
+      "texto": "Su agente lo usa para decidir por él y no se lo cuenta a nadie",
+      "segundo": 151.6
+    },
+    {
+      "numero": "15",
+      "texto": "De 45 conversaciones posibles, los agentes tuvieron 5",
+      "segundo": 155.6
+    },
+    {
+      "numero": "16",
+      "texto": "Qué fue real y qué fue actuado en esta grabación",
+      "segundo": 165.2
+    }
+  ],
+  "personas": [
+    {
+      "nombre": "Antonia",
+      "asistente": "Claude Code en el MacBook",
+      "puerta": "link",
+      "fuentes": [
+        "Apple Health",
+        "Google Calendar",
+        "Gmail",
+        "Granola",
+        "check-in"
+      ]
+    },
+    {
+      "nombre": "Ignacio",
+      "asistente": "Codex",
+      "puerta": "link",
+      "fuentes": [
+        "GitHub",
+        "Linear"
+      ]
+    },
+    {
+      "nombre": "Javiera",
+      "asistente": "ChatGPT",
+      "puerta": "pegado y compartido",
+      "fuentes": []
+    },
+    {
+      "nombre": "Catalina",
+      "asistente": "Cursor",
+      "puerta": "link",
+      "fuentes": [
+        "Apple Health",
+        "Google Calendar",
+        "Gmail",
+        "Linear",
+        "Granola"
+      ]
+    },
+    {
+      "nombre": "Cristóbal",
+      "asistente": "Claude Code",
+      "puerta": "link",
+      "fuentes": [
+        "Apple Health",
+        "GitHub"
+      ]
+    },
+    {
+      "nombre": "Felipe",
+      "asistente": "OpenClaw",
+      "puerta": "link",
+      "fuentes": [
+        "check-in"
+      ]
+    },
+    {
+      "nombre": "Fernanda",
+      "asistente": "Grok",
+      "puerta": "pegado y compartido",
+      "fuentes": [
+        "check-in"
+      ]
+    },
+    {
+      "nombre": "Nicolás",
+      "asistente": "Claude",
+      "puerta": "pegado y compartido",
+      "fuentes": [
+        "Google Calendar",
+        "Gmail"
+      ]
+    },
+    {
+      "nombre": "Martina",
+      "asistente": "Gemini",
+      "puerta": "pegado, sin compartir",
+      "fuentes": []
+    },
+    {
+      "nombre": "Sebastián",
+      "asistente": null,
+      "puerta": null,
+      "fuentes": [
+        "check-in"
+      ]
+    }
+  ],
+  "conversaciones": [
+    {
+      "pide": "Ignacio",
+      "ayuda": "Catalina",
+      "tema": "Conciliación de cobros con el banco",
+      "respuesta": "parcial"
+    },
+    {
+      "pide": "Javiera",
+      "ayuda": "Cristóbal",
+      "tema": "Animación en canvas",
+      "respuesta": "si"
+    },
+    {
+      "pide": "Javiera",
+      "ayuda": "Felipe",
+      "tema": "Animación en canvas",
+      "respuesta": "no"
+    },
+    {
+      "pide": "Antonia",
+      "ayuda": "Fernanda",
+      "tema": "guion y ensayo del pitch",
+      "respuesta": "si"
+    },
+    {
+      "pide": "Antonia",
+      "ayuda": "Nicolás",
+      "tema": "guion y ensayo del pitch",
+      "respuesta": "si"
+    }
+  ],
+  "hiloElegido": {
+    "pide": "Javiera",
+    "ayuda": "Felipe",
+    "mensajes": [
+      {
+        "de": "Javiera",
+        "texto": "Javiera necesita a alguien que sepa de animación en canvas para que los arcos del mapa de la sala se muevan con fluidez. Te escribo porque optimizas gráficos y tienes animación en canvas entre tus temas. ¿Puedes ayudarla?"
+      },
+      {
+        "de": "Felipe",
+        "texto": "Gracias por escribir. Felipe conoce animación en canvas, pero ahora no tiene disponibilidad para hacerse cargo, así que no puede ayudar a Javiera con esto."
+      }
+    ]
+  },
+  "propuestas": [
+    {
+      "pide": "Ignacio",
+      "texto": "Propongo que Catalina oriente a Ignacio de forma puntual en la conciliación de cobros con el banco, sin comprometer horas ni fechas. Catalina, ¿te parece bien?",
+      "estado": "por_aprobar",
+      "ayudantes": [
+        "Catalina"
+      ]
+    },
+    {
+      "pide": "Javiera",
+      "texto": "Propongo que Cristóbal ayude a Javiera con la animación en canvas, para que los arcos del mapa de la sala se muevan sin trabarse. Cristóbal, ¿te parece? Javiera, coordinen los detalles directamente con él.",
+      "estado": "acordada",
+      "ayudantes": [
+        "Cristóbal"
+      ]
+    },
+    {
+      "pide": "Antonia",
+      "texto": "Propongo que Fernanda y Nicolás ayuden a Antonia con el guion y el ensayo del pitch: Fernanda con el guion y Nicolás con el ensayo y la demostración. Cada uno debe aceptar antes de coordinar horario.",
+      "estado": "acordada",
+      "ayudantes": [
+        "Fernanda",
+        "Nicolás"
+      ]
+    }
+  ],
+  "ronda": {
+    "segundosReales": 20,
+    "segundosEnPantalla": 19,
+    "factor": 6,
+    "llamadas": 19,
+    "servidor": {
+      "total": 20,
+      "fallidas": 0,
+      "reintentos": 0,
+      "segundos": 84.9
+    }
+  },
+  "ediciones": {
+    "topeEsperaS": 1.2,
+    "omitidos": 152,
+    "esperasCortadas": 10,
+    "segundosCortados": 7.4,
+    "segundosDeRecarga": 0.6
+  },
+  "segundos": 172,
+  "cuadros": 3554
+}
