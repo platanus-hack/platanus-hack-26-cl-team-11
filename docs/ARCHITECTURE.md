@@ -17,6 +17,10 @@ backend/
     scheduler.ts        vuelve a sincronizar todas las conexiones cada 15 minutos
     signals.ts          deriva energía, carga, bloqueos y experiencia desde los eventos
     seed.ts             personas de demo con datos sintéticos
+    pulse.ts            pulso agregado del equipo: solo totales de grupo
+    teams/              equipos y membresías
+    board/              tablero compartido: preguntas, pedidos, propuestas y votos
+    policy/             qué permite compartir cada persona
     connectors/         un archivo por fuente
       registry.ts       la lista de fuentes
     oauth/              un archivo por proveedor OAuth
@@ -81,3 +85,14 @@ Cada persona tiene un token largo y aleatorio. Su link `/conectar/<token>` es su
 `signals.ts` convierte los eventos de una persona en lo único que puede salir de su agente: frases como «Energía baja esta semana», nunca el dato crudo. La energía se compara contra el promedio de la propia persona, no contra el equipo. Cada señal lleva su permiso por defecto: el trabajo se comparte, y energía, carga y lo dicho en un check-in piden permiso antes.
 
 Se leen en `GET /api/people/<token>/signals`. Es la entrada que usarán los agentes.
+
+## Equipo: tablero y pulso
+
+No hay agente coordinador. Lo que comparte un equipo son dos piezas que no interpretan ni deciden:
+
+- **Tablero** (`board/`). Cualquier integrante publica una pregunta, un pedido o una propuesta; los demás responden y votan las propuestas. Una respuesta marcada como no contable solo la leen quien publicó y quien respondió.
+- **Pulso** (`pulse.ts`). Devuelve el nivel mediano de energía y de carga y el total de bloqueos del equipo. Nunca devuelve una distribución ni un nombre. Con menos de 3 personas aportando a una señal, no devuelve nada para esa señal.
+
+Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
+
+Un equipo se crea desde una persona y los demás entran con un código. Todas las rutas de equipo verifican la membresía.

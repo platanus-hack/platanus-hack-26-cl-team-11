@@ -34,7 +34,7 @@ Sin coordinador, los agentes se hablan uno a uno, así que un agente puede enter
 
 - Un líder ve agregados del equipo, no respuestas individuales.
 - Para que una alerta nombre a una persona, esa persona tuvo que aprobarlo.
-- Un agregado se publica solo si no permite deducir a un individuo. El tamaño mínimo de grupo queda por definir en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+- Un agregado se publica solo si no permite deducir a un individuo. Hoy el mínimo es 3 personas aportando por señal y se entrega solo el nivel mediano; si basta está abierto en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 - El sistema no produce rankings de personas ni puntajes individuales visibles para otros.
 
 ## Derechos de la persona

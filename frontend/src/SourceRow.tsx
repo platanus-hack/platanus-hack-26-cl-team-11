@@ -76,7 +76,7 @@ export function SourceRow({ token, source, onChange }: { token: string; source: 
       {source.connect === 'oauth' && source.provider && !source.connection && (
         <div className="rd-actions">
           <a className="rd-button app-link" href={oauthStartUrl(token, source.provider)}>
-            Conectar {source.how.toLowerCase()}
+            Conectar con {source.provider.charAt(0).toUpperCase() + source.provider.slice(1)}
           </a>
         </div>
       )}

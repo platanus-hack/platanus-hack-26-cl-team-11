@@ -24,7 +24,7 @@
 
 ### Privacidad
 
-- [ ] **Tamaño mínimo de grupo** para publicar un agregado sin exponer a nadie. En un equipo de 5 casi cualquier agregado delata a alguien.
+- [ ] **Tamaño mínimo de grupo.** Hoy es 3 personas aportando por señal, y el pulso entrega solo el nivel mediano, sin distribución. Falta decidir si 3 basta: en un grupo chico, quien conoce su propio nivel todavía puede deducir algo de los demás.
 - [ ] **Cuánto tiempo se guarda** la memoria privada.
 - [ ] **Qué ve un líder** cuando una persona eligió no compartir nada.
 
