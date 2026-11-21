@@ -25,6 +25,7 @@ export function peopleRoutes({ store, config }: AppContext) {
       name: person.name,
       healthIngestPath: health?.kind === 'push' ? `/api/ingest/${health.ingestSlug}/${person.token}` : null,
       publicBaseUrl: config.publicBaseUrl,
+      healthShortcut: config.healthShortcut ?? null,
       sources: CONNECTORS.map((connector) => {
         const connection = connections.find((item) => item.source === connector.id);
         return {

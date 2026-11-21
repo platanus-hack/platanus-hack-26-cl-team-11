@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { connectSource, disconnectSource, oauthStartUrl, syncSource, type Source } from './api';
+import { connectSource, disconnectSource, oauthStartUrl, syncSource, type HealthShortcut, type Source } from './api';
 import { messageOf } from './format';
 import { HealthAddress } from './HealthAddress';
 import { Item } from './Item';
@@ -13,6 +13,7 @@ interface SourceRowProps {
   token: string;
   source: Source;
   ingestUrl: string;
+  healthShortcut: HealthShortcut | null;
   open: boolean;
   onToggle: () => void;
   onChange: () => void;
@@ -20,7 +21,7 @@ interface SourceRowProps {
 
 const imported = (count: number) => (count === 1 ? '1 registro nuevo.' : `${count} registros nuevos.`);
 
-export function SourceRow({ token, source, ingestUrl, open, onToggle, onChange }: SourceRowProps) {
+export function SourceRow({ token, source, ingestUrl, healthShortcut, open, onToggle, onChange }: SourceRowProps) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -54,7 +55,7 @@ export function SourceRow({ token, source, ingestUrl, open, onToggle, onChange }
   function detail() {
     if (!open) return null;
     if (source.connection) return <SourceDetail source={source} connection={source.connection} busy={busy} onSync={sync} onDisconnect={disconnect} />;
-    if (source.connect === 'push') return <HealthAddress url={ingestUrl} sync={source.sync} />;
+    if (source.connect === 'push') return <HealthAddress url={ingestUrl} sync={source.sync} shortcut={healthShortcut} />;
     if (needsKey) return <KeyForm label={source.label} busy={busy} onSubmit={connect} />;
     return null;
   }

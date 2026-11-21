@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
-import { createContext } from '../src/context.js';
+import { createContext, loadConfig, type Config } from '../src/context.js';
 import { appleHealth } from '../src/connectors/appleHealth.js';
 
 const RECEIVED_AT = '2026-11-21T15:00:00.000Z';
@@ -111,4 +111,20 @@ test('a batch with nothing readable is refused and nothing is stored', async () 
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { error: 'No pudimos leer ningún dato de salud en el envío.', ignored: 1, example: 'ayer|muchos' });
   assert.equal(ctx.store.listEvents(ana.token).length, 0);
+});
+
+test('the person page offers the shared shortcut only when the server knows its link', async () => {
+  const shortcut = { url: 'https://www.icloud.com/shortcuts/abc123', name: 'Ronda Salud' };
+  assert.deepEqual(loadConfig({ HEALTH_SHORTCUT_URL: ` ${shortcut.url} ` }).healthShortcut, shortcut);
+  assert.deepEqual(loadConfig({ HEALTH_SHORTCUT_URL: shortcut.url, HEALTH_SHORTCUT_NAME: 'Salud de Ronda' }).healthShortcut, { ...shortcut, name: 'Salud de Ronda' });
+  assert.equal(loadConfig({}).healthShortcut, null);
+  assert.equal(loadConfig({ HEALTH_SHORTCUT_URL: 'javascript:alert(1)' }).healthShortcut, null);
+
+  const pageOf = async (config: Config) => {
+    const ctx = createContext({ location: ':memory:', config });
+    const ana = ctx.store.addPerson('Ana');
+    return (await (await createApp(ctx).request(`/api/people/${ana.token}`)).json()) as { healthShortcut: unknown };
+  };
+  assert.deepEqual((await pageOf({ publicBaseUrl: null, oauth: {}, healthShortcut: shortcut })).healthShortcut, shortcut);
+  assert.equal((await pageOf({ publicBaseUrl: null, oauth: {} })).healthShortcut, null);
 });

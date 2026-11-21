@@ -29,6 +29,7 @@ export function SourcesTab({ token, page, notice, onChange }: SourcesTabProps) {
             token={token}
             source={source}
             ingestUrl={ingestUrl}
+            healthShortcut={page.healthShortcut}
             open={openId === source.id}
             onToggle={() => setOpenId((current) => (current === source.id ? null : source.id))}
             onChange={onChange}

@@ -18,10 +18,16 @@ import { openSimStore, type SimStore } from './sim/personas.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
+export interface HealthShortcut {
+  url: string;
+  name: string;
+}
+
 export interface Config {
   publicBaseUrl: string | null;
   oauth: Record<string, OAuthCredentials | undefined>;
   agentRoundHour?: number | null;
+  healthShortcut?: HealthShortcut | null;
 }
 
 export interface AppContext {
@@ -59,9 +65,18 @@ const agentRoundHourFrom = (value: string | undefined): number | null => {
   return Number.isInteger(hour) && hour >= 0 && hour <= LAST_HOUR ? hour : null;
 };
 
+const DEFAULT_HEALTH_SHORTCUT_NAME = 'Ronda Salud';
+const SECURE_LINK_PREFIX = 'https://';
+
+const healthShortcutFrom = (env: NodeJS.ProcessEnv): HealthShortcut | null => {
+  const url = env.HEALTH_SHORTCUT_URL?.trim() ?? '';
+  return url.startsWith(SECURE_LINK_PREFIX) ? { url, name: env.HEALTH_SHORTCUT_NAME?.trim() || DEFAULT_HEALTH_SHORTCUT_NAME } : null;
+};
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
     agentRoundHour: agentRoundHourFrom(env.AGENT_ROUND_HOUR),
+    healthShortcut: healthShortcutFrom(env),
     publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null,
     oauth: Object.fromEntries(Object.keys(OAUTH_PROVIDERS).map((provider) => [provider, credentialsFrom(env, provider)])),
   };

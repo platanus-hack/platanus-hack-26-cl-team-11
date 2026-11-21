@@ -29,10 +29,16 @@ export interface PersonEvent {
   receivedAt: string;
 }
 
+export interface HealthShortcut {
+  url: string;
+  name: string;
+}
+
 export interface PersonPage {
   name: string;
   healthIngestPath: string;
   publicBaseUrl: string | null;
+  healthShortcut: HealthShortcut | null;
   sources: Source[];
   events: PersonEvent[];
 }
