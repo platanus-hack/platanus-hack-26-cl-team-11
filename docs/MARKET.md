@@ -137,3 +137,22 @@ Dos billeteras nuevas recibieron 1.000 fichas cada una. En el contrato de team-1
 En 8 de los 15 equipos otro participante vendió entre 5.652 y 7.871 acciones dentro de los 20 segundos siguientes a nuestra compra. Esos equipos (12, 22, 41, 48, 34, 6, 20 y 19) bajaron de cerca de 0,0090 a cerca de 0,0051. Las cantidades vendidas en team-12, 22, 41 y 6 coinciden con lotes comprados a las 12:04 con órdenes de 33 bananas. Nuestra compra de 20 bananas sube el precio cerca de 20% y eso bastó para cruzar el umbral de venta de ese participante. La reproducción sobre la cinta no modela esa reacción.
 
 A las 14:56 UTC los 15 lotes se podían vender por 197 bananas contra 285 de costo. No hay ventas ni pérdida realizada. Las compras nuevas quedaron en pausa con `{"buying": false}`. Las ventas siguen activas.
+
+## Análisis de mercado · 15:10 UTC
+
+Cuatro analistas de solo lectura trabajaron sobre la cinta de 663 operaciones, la tabla de posiciones y el reglamento. No hicieron órdenes ni consultas al sitio. Sus cifras son reproducciones hipotéticas. Dos de ellas se comprobaron aparte sobre la misma cinta y coinciden: la venta ajena más rápida tras una compra fuerte tardó 1,45 segundos, y los lotes de 33 bananas se vendieron cuando su venta ya valía 1,68 veces su costo o más.
+
+**Competencia.** Un participante compró lotes de 33 bananas en 22 equipos baratos a las 12:04 y vende el lote entero entre 1,45 y 2,56 segundos después de una compra que lo deje en cerca de 1,65 veces su costo. Es quien vendió sobre 8 de nuestras 15 compras. A las 14:59 recompró esos 8 equipos a 0,0051 con órdenes de 33. Otro participante compra los equipos baratos en orden de precio, uno por segundo, y más tarde vende el 40% de cada posición. De 11 ventas ajenas dentro de los 5 segundos siguientes a una compra fuerte, ninguna llegó antes de 1,45 segundos. Nuestro proceso reacciona en unos 0,3.
+
+**Predicción.** Ninguna característica del equipo predice cuál será comprado: nombre, integrantes, compras previas o caja de sus miembros. Las compras de 400 bananas o más bajaron de unas 9 por hora a 1 por hora desde las 13:00. Las de 50 a 399 subieron a unas 19 por hora.
+
+**Reglas.** Ningún ajuste elegido con las operaciones anteriores a las 13:00 superó a los valores actuales al medirlo después de las 13:00. El único factor que mejora en ambos tramos es cubrir más equipos. La ventaja decae: un inicio a las 14:00 no vende nada.
+
+**Cierre.** El reglamento premia a quien tenga más bananas al cierre «conforme a las predicciones acertadas». No dice cuánto paga cada acción ni a qué hora cierra. Si solo paga el equipo ganador, casi todos los participantes que hoy están arriba quedan en cerca de 1 banana, porque tienen todo en un equipo. Con 979 en caja el modelo da cerca de 99% de quedar dentro del 40% superior. Con 300 bananas de inventario sin vender al cierre da entre 20% y 30%. Seis rivales tienen más de 979 en caja.
+
+### Decisiones
+
+- El umbral de venta del proceso en vivo bajó de 50% a 30% sobre el costo, con un mínimo de 5 bananas. Así vende justo antes del umbral del participante de los lotes de 33.
+- Las compras siguen en pausa en el proceso que corre.
+- La versión nueva de `inventory.py` lee `trader.json`. Vende todo el domingo a las 15:00 UTC, o 45 minutos antes de un cierre publicado, y no compra en los 90 minutos previos. Con `cheap` bajo 1 compra solo equipos que cayeron bajo esa fracción de la mediana, que es donde otro acaba de vender. Acepta listas `only`, `skip` y `sell`, y guarda la cinta del socket en `feed-tape.jsonl`. Al partir releva al proceso anterior mediante `inventory.stop`.
+- No se hacen compras pensadas para activar la venta de otro participante.
