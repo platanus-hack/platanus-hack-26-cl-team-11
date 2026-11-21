@@ -17,6 +17,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Fuentes de señal y qué deriva el agente de cada una. |
 | [docs/DEMO.md](docs/DEMO.md) | Alcance y guion de la demo. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Qué se construye en la hack, en qué orden y contra qué referentes de EE. UU. |
+| [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Cómo entra la señal de cada fuente; el receptor está en `integrations/`. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisiones tomadas y preguntas abiertas. |
 
 ## Estado

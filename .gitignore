@@ -1,4 +1,5 @@
 # secrets
+integrations/data/
 .env
 .env.*
 !.env.example
