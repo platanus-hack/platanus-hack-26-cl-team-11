@@ -140,3 +140,11 @@ A chat, calendario, salud, permiso y ayuda se suman tres escenas. En el check-in
 En Chrome a 1280 y 390 px se tocaron las ocho piezas a escala real y un arco de fondo. Cada pieza abrió la conversación del par correcto. Se comprobó que arrastrar gira el globo, que pausa y repetición controlan el hilo y que se puede retroceder a un instante anterior a una llamada. La entrada se puede leer durante la consulta y la salida aparece al terminar. El hilo de permiso esperó la elección del dueño y conservó la frase ajustada en el mensaje humano y el recibo. La escena de salud mostró el marcador privado. Con movimiento reducido se pudo leer el intercambio completo y abrir los detalles. Se verificaron el favicon incrustado, la carga local y el selector hasta 300 agentes. El teléfono se probó por emulación.
 
 En Stageshow se revisaron las hojas de contacto a ambos anchos y por estados. El gate pasó en las tres pasadas. Las capturas de escritorio y por estados tuvieron intervalos sin muestras. El barrido independiente de movimiento registró 12,56 segundos con cobertura completa y sin saltos detectados. La prueba de geometría de la página pasó en ambos tamaños.
+
+### Streaming y tarjetas por conector
+
+En el [hilo de calendario](../grafo/globo.html?n=5&motion=calendars), la lectura de agenda recorre las franjas y el cruce alinea las agendas de Ian y Lian. La [galería de herramientas](../grafo/hilo/herramientas.html?t=2) muestra también los conectores que no participan en los ocho guiones del globo.
+
+En Chrome a 390 y 1440 px se probó el recorrido completo. Se midieron las once palabras de la primera burbuja de propuesta en siete posiciones del reloj. Sus coordenadas y el tamaño de la burbuja se mantuvieron constantes. Se midió por fotogramas cómo el mensaje anterior se desliza hacia arriba al llegar la primera herramienta, y se comprobó el estado quieto con movimiento reducido.
+
+Se abrieron los ocho hilos y se probaron las catorce variantes visuales, incluido el respaldo genérico. La entrada de una consulta se pudo inspeccionar mientras corría y el resultado apareció al concluir, con el detalle aún abierto. También se repitieron el permiso con frase ajustada, el marcador de privacidad y la decodificación del favicon. El teléfono corresponde a emulación de Chrome.
