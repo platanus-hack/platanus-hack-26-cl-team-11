@@ -60,7 +60,19 @@ function startBridge(): Bridge {
   return { worker, flag: new Int32Array(signal), receive: () => receiveMessageOnPort(port1)?.message as Response | undefined };
 }
 
+export const databaseStats = { queries: 0, ms: 0 };
+
 function ask(request: Omit<Request, 'id'>): { rows: Row[]; affected: number } {
+  const started = performance.now();
+  try {
+    return send(request);
+  } finally {
+    databaseStats.queries += 1;
+    databaseStats.ms += performance.now() - started;
+  }
+}
+
+function send(request: Omit<Request, 'id'>): { rows: Row[]; affected: number } {
   const active = (bridge ??= startBridge());
   const id = (lastRequest += 1);
   const deadline = Date.now() + TIMEOUT_MS;

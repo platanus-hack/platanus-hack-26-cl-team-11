@@ -27,6 +27,7 @@ import { teamRoutes } from './routes/teams.js';
 import { WHATSAPP_WEBHOOK_PATH, whatsappRoutes } from './routes/whatsapp.js';
 import { onboardingRoutes } from './routes/onboarding.js';
 import { ConnectorError } from './types.js';
+import { databaseStats } from './pg/database.js';
 
 const DEFAULT_MAX_BODY_BYTES = 10_000;
 const INGEST_PATH_PREFIX = '/api/ingest/';
@@ -43,6 +44,13 @@ export function createApp(ctx: AppContext) {
     return c.json({ error: 'Error interno.' }, 500);
   });
 
+  api.use('*', async (c, next) => {
+    const started = performance.now();
+    const queries = databaseStats.queries;
+    const spent = databaseStats.ms;
+    await next();
+    c.res.headers.append('Server-Timing', `db;dur=${(databaseStats.ms - spent).toFixed(1)};desc="${databaseStats.queries - queries} consultas", total;dur=${(performance.now() - started).toFixed(1)}`);
+  });
   api.use('*', (c, next) => (setsItsOwnLimit(c.req.path) ? next() : limitBody(c, next)));
   api.get('/health', (c) => c.json({ ok: true }));
   api.route('/duelos', duelRoutes(ctx));
