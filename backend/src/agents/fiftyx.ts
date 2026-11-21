@@ -13,6 +13,9 @@ const BAD_REQUEST = 400;
 const TOO_MANY_REQUESTS = 429;
 const REJECTED_CREDENTIALS = new Set([401, 403]);
 const LOGGED_BODY_CHARS = 300;
+const STREAM_RETRY_MS = 10 * 60 * 1000;
+const STREAM_DATA = 'data:';
+const STREAM_END = '[DONE]';
 const TRAILING_SLASHES = /\/+$/;
 const CODE_FENCE = /^```(?:json)?\s*([\s\S]*?)\s*```$/;
 
@@ -90,18 +93,75 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
   let acceptsJsonSchema = true;
   let warnedAboutModel = false;
 
-  const send = (messages: ChatMessage[], responseFormat: ResponseFormat) =>
+  let streamsAgainAt = 0;
+
+  const send = (messages: ChatMessage[], responseFormat: ResponseFormat, streaming = false) =>
     fetchImpl(`${config.baseURL}/chat/completions`, {
       method: 'POST',
       headers: { authorization: `Bearer ${config.apiKey}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ model: FIFTYX_MODEL, messages, max_tokens: MAX_OUTPUT_TOKENS, response_format: responseFormat }),
+      body: JSON.stringify({
+        model: FIFTYX_MODEL,
+        messages,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        response_format: responseFormat,
+        ...(streaming ? { stream: true, stream_options: { include_usage: true } } : {}),
+      }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+
+  const formatFor = (jsonSchema: unknown): ResponseFormat =>
+    acceptsJsonSchema ? { type: 'json_schema', json_schema: { name: SCHEMA_NAME, strict: true, schema: jsonSchema } } : { type: 'json_object' };
+
+  const streamed = async (messages: ChatMessage[], jsonSchema: unknown, onText: (written: string) => void, onUsage?: (usage: ModelUsage) => void): Promise<string | null> => {
+    if (Date.now() < streamsAgainAt) return null;
+    const giveUp = () => {
+      streamsAgainAt = Date.now() + STREAM_RETRY_MS;
+      return null;
+    };
+    let response: Response;
+    try {
+      response = await send(messages, formatFor(jsonSchema), true);
+    } catch {
+      return null;
+    }
+    if (!response.ok || !response.body) {
+      await response.body?.cancel().catch(() => undefined);
+      return giveUp();
+    }
+    let written = '';
+    let pending = '';
+    let usage: unknown = null;
+    const decoder = new TextDecoder();
+    try {
+      for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) {
+        pending += decoder.decode(chunk, { stream: true });
+        const lines = pending.split('\n');
+        pending = lines.pop() ?? '';
+        for (const line of lines) {
+          const data = line.trim();
+          if (!data.startsWith(STREAM_DATA)) continue;
+          const body = data.slice(STREAM_DATA.length).trim();
+          if (body === STREAM_END) continue;
+          const part = readJson(body) as { usage?: unknown; choices?: Array<{ delta?: { content?: unknown } }> } | undefined;
+          if (part?.usage) usage = part;
+          const piece = part?.choices?.[0]?.delta?.content;
+          if (typeof piece !== 'string' || !piece) continue;
+          written += piece;
+          onText(written);
+        }
+      }
+    } catch {
+      return null;
+    }
+    if (!written.trim()) return giveUp();
+    onUsage?.(usageOf(usage, messages, written));
+    return written;
+  };
 
   const complete = async (messages: ChatMessage[], jsonSchema: unknown, onUsage?: (usage: ModelUsage) => void): Promise<string> => {
     let response: Response;
     try {
-      response = acceptsJsonSchema ? await send(messages, { type: 'json_schema', json_schema: { name: SCHEMA_NAME, strict: true, schema: jsonSchema } }) : await send(messages, { type: 'json_object' });
+      response = await send(messages, formatFor(jsonSchema));
       if (acceptsJsonSchema && response.status === BAD_REQUEST) {
         acceptsJsonSchema = false;
         response = await send(messages, { type: 'json_object' });
@@ -133,7 +193,8 @@ export function createFiftyXModel(config: FiftyXConfig, fetchImpl: Fetch = fetch
         { role: 'user', content: request.prompt },
       ];
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-        const answer = await limit(() => complete(messages, jsonSchema, request.onUsage));
+        const onText = attempt === 1 ? request.onText : undefined;
+        const answer = await limit(async () => (onText ? await streamed(messages, jsonSchema, onText, request.onUsage) : null) ?? (await complete(messages, jsonSchema, request.onUsage)));
         const parsed = request.schema.safeParse(readJson(answer));
         if (parsed.success) return parsed.data;
         messages.push({ role: 'assistant', content: answer }, { role: 'user', content: `Tu respuesta no cumple el esquema:\n${z.prettifyError(parsed.error)}\nResponde de nuevo solo con el objeto JSON.` });

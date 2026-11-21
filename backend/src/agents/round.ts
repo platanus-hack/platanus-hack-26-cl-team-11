@@ -9,6 +9,7 @@ import type { JsonObject } from '../types.js';
 import { buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
 import { currentDigest, refreshDigests, type DigestStore } from './digest.js';
 import { AgentModelError, approximateTokens, type AgentModel, type ModelUsage } from './model.js';
+import { partialContacts, partialString } from './partial.js';
 import {
   ContactPlan,
   contactPrompt,
@@ -48,6 +49,16 @@ export interface RoundDeps {
   onProposal?: (proposal: Proposal) => void;
   maxNeeds?: number;
   cardFilter?: (card: AgentCard) => boolean;
+  onStream?: (teamId: string, text: LiveText) => void;
+}
+
+export interface LiveText {
+  key: string;
+  kind: 'ask' | 'reply';
+  from: string;
+  to: string;
+  topic: string;
+  text: string;
 }
 
 interface OpenNeed {
@@ -90,8 +101,18 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
   const step = (tool: string, by: string, state: 'inicio' | 'fin', detail: JsonObject = {}) =>
     deps.onEvent?.(round.teamId, 'paso', { from, topic: need.topic, tool, by, state, ...detail });
 
+  const stream = deps.onStream;
+  const writtenPlan = (written: string) => {
+    for (const contact of partialContacts(written).slice(0, MAX_CONTACTS)) {
+      const helper = byId.get(contact.teammate);
+      if (!helper) continue;
+      const to = publicIdOf(helper.card.token);
+      stream?.(round.teamId, { key: `ask|${from}|${to}|${need.topic}`, kind: 'ask', from, to, topic: need.topic, text: contact.message });
+    }
+  };
+
   step('equipo.consultar', from, 'inicio', { people: teammates.length });
-  const plan = await deps.model.decide({ system: systemFor(requester.name), prompt: contactPrompt(need, teammates), schema: ContactPlan });
+  const plan = await deps.model.decide({ system: systemFor(requester.name), prompt: contactPrompt(need, teammates), schema: ContactPlan, ...(stream ? { onText: writtenPlan } : {}) });
   const contacts = new Map<string, string>();
   for (const contact of plan.contacts) {
     const message = contact.message.trim();
@@ -108,7 +129,16 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
       const arc = { thread: threadId, from, to: publicIdOf(helper.token), topic: need.topic };
       deps.onEvent?.(round.teamId, 'hilo_abre', arc);
       step('checkin.consultar', arc.to, 'inicio', { thread: threadId });
-      const reply = await deps.model.decide({ system: systemFor(helper.name), prompt: replyPrompt(helper, requester.name, need, message), schema: HelpReply });
+      const writtenReply = (written: string) => {
+        const said = partialString(written, 'message')?.text;
+        if (said) stream?.(round.teamId, { key: `reply|${threadId}`, kind: 'reply', from, to: arc.to, topic: need.topic, text: said });
+      };
+      const reply = await deps.model.decide({
+        system: systemFor(helper.name),
+        prompt: replyPrompt(helper, requester.name, need, message),
+        schema: HelpReply,
+        ...(stream ? { onText: writtenReply } : {}),
+      });
       const help = reply.help.trim().toLowerCase();
       if (!isHelpAnswer(help)) throw new AgentModelError(INCOMPLETE_REPLY);
       deps.agents.addMessage(threadId, helper.token, reply.message.trim());

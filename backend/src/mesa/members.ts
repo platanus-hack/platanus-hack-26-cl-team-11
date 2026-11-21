@@ -26,6 +26,7 @@ export const mesaRoundDeps = (ctx: AppContext, model: AgentModel): RoundDeps => 
   teams: mesaTeams(ctx),
   cardFilter: hasPublished,
   onEvent: (teamId, type, payload) => ctx.rooms.record(teamId, type, payload),
+  onStream: (_teamId, text) => ctx.mesaLive.put(text),
 });
 
 export function activityFingerprint(ctx: AppContext, now: Date): string {

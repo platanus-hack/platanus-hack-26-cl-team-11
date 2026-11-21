@@ -5,11 +5,12 @@
 // Cada pedido de la ronda es una escena: quien pide al frente y, a medida que su agente escribe, quienes responden.
 // Cada paso real de un agente (revisar lo que publicó la mesa, leer si su persona puede ayudar, redactar la
 // propuesta) abre su tarjeta de herramienta cuando empieza y la cierra cuando termina, con su miniatura en el arco.
+// Mientras el modelo escribe un mensaje, el servidor entrega lo que lleva escrito: la burbuja crece con ese texto.
 (function () {
   var source = new URLSearchParams(location.search).get('vivo') || '';
   if (source.indexOf('/api/people/') !== 0 || !LIVE) return;
 
-  var RUNNING_MS = 1200, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
+  var RUNNING_MS = 350, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
   var GAP = 0.4, HOLD = 2.4, TILES = 64, MAX_STRIDE = 4, LOBBY_ROWS = 8, EXPECTED_STEP = 4, SHORTEST_STEP = 1.2, TILE_PX = 120;
   var BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   var HELP = { si: 'Puede ayudar.', parcial: 'Puede orientar.', no: 'No puede esta vez.' };
@@ -22,7 +23,7 @@
   var RESULT = { propuesta: 'quedó una propuesta', nadie: 'nadie con relación al tema', sin_ayuda: 'nadie pudo ayudar', falla: 'el modelo no respondió' };
 
   var slotOf = new Map(), needs = [], byKey = new Map();
-  var since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
+  var arriving = [], since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
 
   document.getElementById('step0').textContent = 'Mesa';
   document.getElementById('step1').firstChild.textContent = 'Ronda ';
@@ -56,7 +57,7 @@
     if (from === undefined) return null;
     var g = { members: [from], topic: ev.topic }, script = { events: [], duration: Infinity };
     SHOWN.push(g); SCRIPTS.push(script); SCENES.push({ kind: 'group', i: SHOWN.length - 1, dur: Infinity });
-    need = { from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {}, steps: {} };
+    need = { from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {}, steps: {}, live: {}, said: {} };
     needs.push(need); byKey.set(key, need);
     return need;
   }
@@ -178,16 +179,41 @@
     }
   }
 
+  // Un mensaje que el modelo está escribiendo ahora: nace con las primeras letras y crece en cada lectura.
+  function writing(stream) {
+    var need = byKey.get(stream.from + '|' + stream.topic), other = slotOf.get(stream.to), id = stream.kind + '|' + stream.to;
+    if (!need || need !== showing || other === undefined || need.said[id]) return;
+    var live = need.live[id];
+    if (!live) {
+      if (need.g.members.indexOf(other) < 0) { need.g.members.push(other); heading(need); turnTo(need.g.members); }
+      live = need.live[id] = { text: '', done: false };
+      live.ev = { type: 'message', from: stream.kind === 'ask' ? need.from : other, to: stream.kind === 'ask' ? other : need.from, at: clock, end: clock + EXPECTED_STEP, text: '', live: live };
+      need.script.events.push(live.ev);
+    }
+    if (stream.text !== null) live.text = stream.text;
+  }
+
+  // El mensaje terminó: queda con su texto final (o como dato privado para quien no es parte).
+  function settleLive(need, id, text) {
+    var live = need.live[id];
+    need.said[id] = true;
+    if (!live) return false;
+    live.text = text; live.done = true; live.ev.end = clock + 0.5;
+    delete need.live[id];
+    need.lastEnd = clock + 1.2; need.next = clock + 0.3;
+    return true;
+  }
+
   function play(need, ev) {
     var other = slotOf.get(ev.to);
     if (ev.type === 'paso') return step(need, ev);
     if (ev.type === 'hilo_abre' && other !== undefined) {
       if (need.g.members.indexOf(other) < 0) { need.g.members.push(other); heading(need); turnTo(need.g.members); }
       need.threads += 1;
-      say(need, need.from, other, ev.text || 'Le escribe por este pedido. [[x]]');
+      if (!settleLive(need, 'ask|' + ev.to, ev.text || 'Le escribe por este pedido. [[x]]')) say(need, need.from, other, ev.text || 'Le escribe por este pedido. [[x]]');
     } else if (ev.type === 'hilo_responde' && other !== undefined) {
       need.answers[other] = ev.help || 'si'; heading(need);
-      say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]');
+      if (!settleLive(need, 'reply|' + ev.to, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]')) say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]');
     } else if (ev.type === 'propuesta_nace') {
       var helpers = (ev.helpers || []).map(function (id) { return slotOf.get(id); }).filter(function (slot) { return slot !== undefined; });
       var names = helpers.map(function (slot) { return people[slot].name; }).join(' y ');
@@ -196,6 +222,7 @@
       need.closed = true; need.outcome = ev.outcome;
       Object.keys(need.steps).forEach(function (key) { closeStep(need.steps[key], 'Sin respuesta'); });
       need.steps = {};
+      Object.keys(need.live).forEach(function (id) { settleLive(need, id, need.live[id].text || 'Sin respuesta.'); });
       if (CLOSED[ev.outcome]) note(need, [need.from], CLOSED[ev.outcome][0], CLOSED[ev.outcome][1]);
     }
   }
@@ -203,9 +230,12 @@
   // Un pedido a la vez: sus pasos entran al hilo en orden, cada uno cuando el anterior terminó de escribirse.
   LIVE.tick = function () {
     if (showing) {
-      while (showing.queue.length && clock >= showing.next) play(showing, showing.queue.shift());
+      // Un paso entra apenas llega, para que su tarjeta quede antes del mensaje que sale de él.
+      while (showing.queue.length && (clock >= showing.next || showing.queue[0].type === 'paso')) play(showing, showing.queue.shift());
       // Un paso que sigue esperando al modelo se queda «consultando»: su final se corre mientras no llegue la respuesta.
       Object.keys(showing.steps).forEach(function (key) { var open = showing.steps[key]; if (clock > open.end - 0.4) open.end = clock + 1.2; });
+      arriving.forEach(writing); arriving = [];
+      Object.keys(showing.live).forEach(function (id) { var live = showing.live[id]; if (clock > live.ev.end - 0.4) live.ev.end = clock + 1.2; });
       var over = (showing.closed || finished) && !showing.queue.length && clock > showing.lastEnd + HOLD;
       if (!over) return;
       showing.done = true; showing = null;
@@ -230,6 +260,7 @@
     data.people.forEach(function (person) { seat(person, false); });
     loaded = true;
     data.events.forEach(take);
+    arriving = data.streams || [];
     since = data.lastEventId || since;
     running = !!(data.round && data.round.status === 'en_curso');
     if (!first) return;

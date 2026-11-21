@@ -292,7 +292,13 @@ function addItem(e) {
     const dots = el('span', 'uv-dots'); dots.innerHTML = '<i></i><i></i><i></i>';
     b.append(s.el, dots); col.append(who, b); node.append(f, col);
     const lead = e.type === 'human' ? 0.15 : 0.5;
-    upd = t => { const p = (t - e.at - lead) / Math.max(0.3, e.end - e.at - lead); b.toggleAttribute('data-typing', p <= 0 && t < e.end); s.update(p, p >= 1.15); };
+    // En vivo, e.live.text crece con lo que el modelo va escribiendo: la burbuja se rehace con el texto nuevo y la cabeza avanza hasta alcanzarlo.
+    if (e.live) { let stream = s, made = e.text, seen = 0;
+      upd = () => { const text = e.live.text || '';
+        if (text !== made) { const next = RondaStream.create(text); stream.el.replaceWith(next.el); stream = next; made = text; }
+        seen = Math.min(text.length, seen + Math.max(0.7, (text.length - seen) * 0.14));
+        b.toggleAttribute('data-typing', !text && !e.live.done); stream.update(text.length ? seen / text.length : 0, e.live.done && seen >= text.length - 0.5); }; }
+    else upd = t => { const p = (t - e.at - lead) / Math.max(0.3, e.end - e.at - lead); b.toggleAttribute('data-typing', p <= 0 && t < e.end); s.update(p, p >= 1.15); };
   } else if (e.type === 'call') {
     node = el('div', 'uv-tool');
     const who = el('div', 'uv-tool-who'); const f = el('span', 'uv-face'); Object.assign(f.style, faceCss(e.from));
@@ -528,7 +534,7 @@ if ((q.get('vivo') || '').startsWith('/api/people/')) {
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=2'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=4'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }

@@ -287,3 +287,43 @@ test('a need nobody relates to closes saying so, and a second round only streams
   assert.equal(second.events.length, first.events.length);
   assert.ok((second.events[0]?.id ?? 0) > first.lastEventId);
 });
+
+test('while the model writes, the live view carries the words to the two people in the conversation and only the length to the rest', async () => {
+  let release = () => {};
+  const hold = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const writing: AgentModel = {
+    async decide<Schema extends z.ZodType>(request: AgentRequest<Schema>): Promise<z.infer<Schema>> {
+      const schema: z.ZodType = request.schema;
+      if (schema === ContactPlan) {
+        request.onText?.('{"contacts":[{"teammate":"p1","message":"Ana necesita');
+        await hold;
+        return request.schema.parse({ contacts: [{ teammate: 'p1', message: 'Ana necesita ayuda con pagos.' }] });
+      }
+      if (schema === HelpReply) return request.schema.parse({ help: 'si', message: 'Puede ayudar con eso.' });
+      return request.schema.parse({ helpers: ['p1'], text: 'Tomás ayuda a Ana con la integración de pagos.' });
+    },
+  };
+  const { ctx, app, tokenOf, startRound, settled } = setup({ model: writing });
+  const live = async (name: string) =>
+    (await (await app.request(`/api/people/${tokenOf(name)}/mesa/live`)).json()) as LiveView & { streams: Array<{ kind: string; from: string; to: string; chars: number; text: string | null }> };
+  ctx.agents.decideTopic(tokenOf('Ana'), TOPIC, true);
+  assert.equal((await startRound('Ana')).status, 202);
+
+  const asker = await live('Ana');
+  assert.equal(asker.streams.length, 1);
+  assert.equal(asker.streams[0]?.kind, 'ask');
+  assert.equal(asker.streams[0]?.from, asker.me);
+  assert.equal(asker.streams[0]?.text, 'Ana necesita');
+  const helper = await live('Tomás');
+  assert.equal(helper.streams[0]?.to, helper.me);
+  assert.equal(helper.streams[0]?.text, 'Ana necesita');
+  const outsider = await live('Carla');
+  assert.equal(outsider.streams[0]?.text, null);
+  assert.equal(outsider.streams[0]?.chars, 'Ana necesita'.length);
+
+  release();
+  await settled('Ana');
+  assert.deepEqual((await live('Ana')).streams, []);
+});

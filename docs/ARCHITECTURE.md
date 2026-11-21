@@ -192,6 +192,10 @@ Cada llamada al modelo informa sus tokens (`onUsage` en `agents/model.ts`): 50x 
 
 La ronda se inicia a mano o sola. Un temporizador revisa cada 5 segundos y parte una ronda solo si se cumplen todas: hay intervalo elegido, no hay ronda en curso, pasó el intervalo desde la última, no se llegó al tope de tokens de las últimas 24 horas (`MESA_DAILY_TOKEN_CAP`, 3.000.000 por defecto) y cambió la huella de lo publicado (versión del repo, frases, temas y pedidos de cada persona). Sin nada nuevo no gasta. Las propuestas llegan a cada persona por los mismos avisos de una ronda de equipo.
 
+### El globo en vivo
+
+Lo que se ve en la pestaña Globo al iniciar una ronda sale de la ronda real, no de un guion. `runRound` registra cada paso en `room_events` (para la mesa, siempre): quién busca ayuda, cada paso de su agente (`paso`: revisar lo que publicó la mesa, leer si su persona puede ayudar, redactar la propuesta), cada mensaje, la propuesta y el cierre. Con 50x, la mesa pide las respuestas en streaming (`onText` en `agents/fiftyx.ts`; si 50x no puede, vuelve sola a la llamada normal y no reintenta por 10 minutos) y `agents/partial.ts` saca del JSON a medio escribir el texto del mensaje, que queda en memoria (`mesa/live.ts`) mientras dura la ronda. `design/grafo/universo-vivo.js` lee `GET …/mesa/live` cada 350 ms durante la ronda: sienta a las personas reales en la esfera, enciende el arco de cada conversación, abre la tarjeta y la miniatura de cada paso y hace crecer cada burbuja con lo que el modelo lleva escrito. Los agentes no llaman herramientas: las tarjetas muestran los pasos reales de cada agente.
+
 ### Preguntarle al equipo
 
 Una persona publica una pregunta en el tablero y recibe una sola respuesta armada con lo que saben los agentes de los demás, sin interrumpir a nadie (`agents/ask.ts`).

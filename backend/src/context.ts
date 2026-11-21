@@ -10,6 +10,7 @@ import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agen
 import { openAgentStore, type AgentStore } from './agents/store.js';
 import { openAssistantStore, type AssistantStore } from './assistants/store.js';
 import { createVault, type Vault } from './crypto.js';
+import { createLiveTexts, type LiveTexts } from './mesa/live.js';
 import { DEFAULT_MESA_DAILY_TOKEN_CAP, DEFAULT_MESA_OPERATORS, openMesaStore, type MesaStore } from './mesa/store.js';
 import { openStore, type Store } from './db.js';
 import { openHubStore, type HubStore } from './hub/store.js';
@@ -35,6 +36,7 @@ export interface Config {
   healthShortcut?: HealthShortcut | null;
   mesaOperators?: string[];
   mesaDailyTokenCap?: number;
+  mesaMemoMs?: number;
 }
 
 export interface AppContext {
@@ -45,6 +47,7 @@ export interface AppContext {
   agents: AgentStore;
   rooms: RoomStore;
   mesa: MesaStore;
+  mesaLive: LiveTexts;
   assistants: AssistantStore;
   repo: RepoStore;
   digests: DigestStore;
@@ -82,6 +85,8 @@ const healthShortcutFrom = (env: NodeJS.ProcessEnv): HealthShortcut | null => {
   return url.startsWith(SECURE_LINK_PREFIX) ? { url, name: env.HEALTH_SHORTCUT_NAME?.trim() || DEFAULT_HEALTH_SHORTCUT_NAME } : null;
 };
 
+const MESA_MEMO_MS = 5000;
+
 const mesaOperatorsFrom = (value: string | undefined): string[] => {
   const emails = (value ?? '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean);
   return emails.length > 0 ? emails : [...DEFAULT_MESA_OPERATORS];
@@ -96,6 +101,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
     mesaOperators: mesaOperatorsFrom(env.MESA_OPERATORS),
     mesaDailyTokenCap: mesaDailyTokenCapFrom(env.MESA_DAILY_TOKEN_CAP),
+    mesaMemoMs: MESA_MEMO_MS,
     agentRoundHour: agentRoundHourFrom(env.AGENT_ROUND_HOUR),
     healthShortcut: healthShortcutFrom(env),
     publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null,
@@ -145,6 +151,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     agents: openAgentStore(db),
     rooms: openRoomStore(db),
     mesa: openMesaStore(db),
+    mesaLive: createLiveTexts(),
     assistants: openAssistantStore(db),
     repo: openRepoStore(db),
     digests: openDigestStore(db),

@@ -22,6 +22,7 @@ export function startMesaRound(ctx: AppContext, model: AgentModel, startedBy: st
   const round = ctx.agents.startRound(MESA_TEAM_ID, startedBy);
   if (!round) return null;
   ctx.mesa.saveFingerprint(fingerprint);
+  ctx.mesaLive.clear();
   return { round, done: runRound(mesaRoundDeps(ctx, model), round, now) };
 }
 

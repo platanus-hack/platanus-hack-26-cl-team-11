@@ -140,3 +140,52 @@ test('each answer reports the tokens 50x says it spent, and approximates them wh
   assert.ok((guessed[0]?.inputTokens ?? 0) > 0);
   assert.ok((guessed[0]?.outputTokens ?? 0) > 0);
 });
+
+const streamOf = (lines: string[], status = 200) =>
+  new Response(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const line of lines) controller.enqueue(new TextEncoder().encode(line));
+        controller.close();
+      },
+    }),
+    { status },
+  );
+const delta = (content: string) => `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`;
+
+test('when someone listens, the answer arrives as it is written, with the tokens 50x reports at the end', async () => {
+  const whole = JSON.stringify(VALID);
+  const cut = Math.floor(whole.length / 2);
+  const firstHalf = delta(whole.slice(0, cut));
+  const lines = [firstHalf.slice(0, 20), firstHalf.slice(20), delta(whole.slice(cut)), `data: ${JSON.stringify({ choices: [], usage: { prompt_tokens: 90, completion_tokens: 12 } })}\n\n`, 'data: [DONE]\n\n'];
+  const { fetchImpl, sent } = fakeFetch([() => streamOf(lines)]);
+  const written: string[] = [];
+  const reported: ModelUsage[] = [];
+  const decision = await createFiftyXModel(CONFIG, fetchImpl).decide({ ...REQUEST, onText: (text) => written.push(text), onUsage: (usage) => reported.push(usage) });
+  assert.deepEqual(decision, VALID);
+  assert.deepEqual(written, [whole.slice(0, cut), whole]);
+  assert.deepEqual(reported, [{ inputTokens: 90, outputTokens: 12, measured: true }]);
+  assert.equal(sent.length, 1);
+  assert.equal((sent[0]?.body as unknown as { stream?: boolean }).stream, true);
+});
+
+test('if 50x cannot stream, the same decision is asked again the usual way and streaming rests for a while', async () => {
+  const { fetchImpl, sent } = fakeFetch([() => streamOf([], 400), () => completion(JSON.stringify(VALID)), () => completion(JSON.stringify(VALID))]);
+  const model = createFiftyXModel(CONFIG, fetchImpl);
+  const written: string[] = [];
+  assert.deepEqual(await model.decide({ ...REQUEST, onText: (text) => written.push(text) }), VALID);
+  assert.equal(written.length, 0);
+  assert.equal(sent.length, 2);
+  assert.equal((sent[1]?.body as unknown as { stream?: boolean }).stream, undefined);
+  assert.equal(sent[1]?.body.response_format.type, 'json_schema');
+
+  assert.deepEqual(await model.decide({ ...REQUEST, onText: (text) => written.push(text) }), VALID);
+  assert.equal(sent.length, 3);
+  assert.equal((sent[2]?.body as unknown as { stream?: boolean }).stream, undefined);
+});
+
+test('nobody listening means no streaming at all', async () => {
+  const { fetchImpl, sent } = fakeFetch([() => completion(JSON.stringify(VALID))]);
+  await createFiftyXModel(CONFIG, fetchImpl).decide(REQUEST);
+  assert.equal((sent[0]?.body as unknown as { stream?: boolean }).stream, undefined);
+});

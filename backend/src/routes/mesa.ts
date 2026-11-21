@@ -17,10 +17,36 @@ const INVALID_MEMBERSHIP = { error: 'La participación en la mesa debe ser verda
 const MAX_LIVE_EVENTS = 200;
 const ASK_MESSAGE = 0;
 const REPLY_MESSAGE = 1;
+const TEXT_EVENTS = ['hilo_abre', 'hilo_responde'];
+
+function remembered<Value>(forMs: number, compute: () => Value): () => Value {
+  let at = 0;
+  let value: Value | undefined;
+  return () => {
+    const now = Date.now();
+    if (value === undefined || now - at >= forMs) {
+      value = compute();
+      at = now;
+    }
+    return value;
+  };
+}
 
 export function mesaRoutes(ctx: AppContext) {
   const { store, agents, mesa, rooms } = ctx;
   const routes = new Hono();
+  const memoMs = ctx.config.mesaMemoMs ?? 0;
+
+  const estimateNow = remembered(memoMs, () => estimateRound(mesaCardDeps(ctx), MESA_TEAM_ID, new Date()));
+  const seatedNow = remembered(memoMs, () => {
+    const now = new Date();
+    const deps = mesaCardDeps(ctx);
+    const members = mesaMembersOf(ctx);
+    return {
+      names: new Map(members.map((member) => [publicIdOf(member.token), member.name])),
+      publishing: members.filter((member) => hasPublished(cardFor(deps, member, now))).map((member) => publicIdOf(member.token)),
+    };
+  });
 
   const viewOf = (personToken: string, name: string) => {
     const now = new Date();
@@ -36,7 +62,7 @@ export function mesaRoutes(ctx: AppContext) {
       publishing: hasPublished(card),
       intervalSeconds: mesa.intervalSeconds(),
       round: round ? { id: round.id, status: round.status, startedAt: round.startedAt, finishedAt: round.finishedAt, problem: round.problem } : null,
-      estimate: estimateRound(deps, MESA_TEAM_ID, now),
+      estimate: estimateNow(),
       usage: {
         lastRound: spent ? { calls: spent.calls, tokens: spent.inputTokens + spent.outputTokens, measured: spent.measured } : null,
         lastDayTokens: mesaTokensLastDay(ctx, now),
@@ -65,14 +91,17 @@ export function mesaRoutes(ctx: AppContext) {
     const asked = Number(c.req.query('since'));
     const since = Number.isInteger(asked) && asked > 0 ? asked : Math.max(0, rooms.lastEventOfType(MESA_TEAM_ID, 'ronda_empieza') - 1);
     const round = agents.latestRound(MESA_TEAM_ID);
-    const threads = new Map((round ? agents.threadsOf(round.id) : []).map((thread) => [thread.id, thread]));
-    const deps = mesaCardDeps(ctx);
-    const members = mesaMembersOf(ctx);
-    const names = new Map(members.map((member) => [publicIdOf(member.token), member.name]));
+    const known = seatedNow();
+    const names = new Map(known.names);
     names.set(me, person.name);
-    const seated = new Set([me, ...members.filter((member) => hasPublished(cardFor(deps, member, now))).map((member) => publicIdOf(member.token))]);
+    const seated = new Set([me, ...known.publishing]);
+    const recorded = rooms.eventsAfter(MESA_TEAM_ID, since, MAX_LIVE_EVENTS);
+    const spokenToMe = recorded.some((event) => TEXT_EVENTS.includes(event.type) && (event.payload.from === me || event.payload.to === me));
+    const threads = new Map((round && spokenToMe ? agents.threadsOf(round.id) : []).map((thread) => [thread.id, thread]));
+    const streams = round?.status === 'en_curso' ? ctx.mesaLive.all() : [];
+    for (const stream of streams) seated.add(stream.from).add(stream.to);
 
-    const events = rooms.eventsAfter(MESA_TEAM_ID, since, MAX_LIVE_EVENTS).map((event) => {
+    const events = recorded.map((event) => {
       const { from, to, by, helpers, thread, proposal } = event.payload;
       const involved = [from, to, by, ...(Array.isArray(helpers) ? helpers : [])].filter((id): id is string => typeof id === 'string');
       for (const id of involved) seated.add(id);
@@ -93,6 +122,7 @@ export function mesaRoutes(ctx: AppContext) {
       people: [...seated].flatMap((id) => (names.has(id) ? [{ id, name: names.get(id) as string }] : [])),
       round: round ? { id: round.id, status: round.status } : null,
       events,
+      streams: streams.map((stream) => ({ kind: stream.kind, from: stream.from, to: stream.to, topic: stream.topic, chars: stream.text.length, text: stream.from === me || stream.to === me ? stream.text : null })),
       lastEventId: events.at(-1)?.id ?? Math.max(since, rooms.lastEventId(MESA_TEAM_ID)),
     });
   });

@@ -19,6 +19,7 @@ export interface AgentRequest<Schema extends z.ZodType> {
   prompt: string;
   schema: Schema;
   onUsage?: (usage: ModelUsage) => void;
+  onText?: (written: string) => void;
 }
 
 export const APPROXIMATE_CHARS_PER_TOKEN = 3.3;

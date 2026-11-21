@@ -239,6 +239,12 @@ Una sola mesa para todas las personas de Montu. Nadie se inscribe: participa qui
 | `PUT /api/people/<token>/mesa/interval` | `{ "seconds": 60 }` o `{ "seconds": null }` | `{ intervalSeconds }` |
 | `PUT /api/people/<token>/mesa/membership` | `{ "member": false }` | `{ member }` |
 
+`GET /api/people/<token>/mesa/live?since=<id>` es lo que lee el globo en vivo. Sin `since` entrega la ronda más reciente desde su inicio; con `since`, solo lo nuevo. Responde `{ me, now, people: [{ id, name }], round, events, streams, lastEventId }`.
+
+- `events` son los pasos de la ronda, en orden: `ronda_empieza`, `pedido_busca`, `paso` (`tool`, `by`, `state` en `inicio` o `fin`), `hilo_abre`, `hilo_responde` (`help`), `propuesta_nace`, `pedido_cierra` (`outcome` en `propuesta`, `nadie`, `sin_ayuda` o `falla`) y `ronda_termina` (`calls`, `tokens`). Cada uno trae `from` (quien pide), `topic` y `text`.
+- `streams` son los mensajes que el modelo está escribiendo en ese momento: `{ kind: ask | reply, from, to, topic, chars, text }`.
+- `text` viene solo para las dos personas de la conversación (o las partes de la propuesta). El resto recibe `null` y, en `streams`, el largo en `chars`.
+
 `POST …/rounds` y `PUT …/interval` responden 403 a quien no opera la mesa. Opera quien entró con un correo de `MESA_OPERATORS`; si el servidor no tiene el ingreso con Google configurado, cualquiera. `POST …/rounds` responde 503 sin credenciales del modelo y 409 con una ronda en curso. `seconds` va de 10 a 86.400; `null` deja la mesa en manual.
 
 Forma de `GET …/mesa`:
