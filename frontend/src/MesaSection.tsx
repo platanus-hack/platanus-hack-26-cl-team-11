@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { formatAgo } from './ago';
 import { fetchMesa, setMesaInterval, setMesaMembership, startMesaRound, type MesaView } from './api';
 import { AskRow } from './AskRow';
@@ -67,10 +67,11 @@ function spendOf(view: MesaView, now: number) {
   if (!view.round || !lastRound) return `Todavía no corre ninguna ronda. ${day}`;
   if (view.round.status === 'en_curso') return `Los agentes están conversando. ${day}`;
   const when = formatAgo(view.round.finishedAt ?? view.round.startedAt, now).toLowerCase();
-  return `Última ronda: ${lastRound.measured ? '' : '≈ '}${amount(lastRound.tokens)} tokens en ${countOf(lastRound.calls, 'llamada', 'llamadas')}, ${when}. ${day}`;
+  const talks = countOf(view.threads.length, 'conversación', 'conversaciones');
+  return `Última ronda, ${when}: ${talks}, ${lastRound.measured ? '' : '≈ '}${amount(lastRound.tokens)} tokens en ${countOf(lastRound.calls, 'llamada', 'llamadas')}. ${day}`;
 }
 
-export function MesaSection({ token }: { token: string }) {
+export function MesaSection({ token, onRound }: { token: string; onRound: (startedHere: boolean) => void }) {
   const [view, setView] = useState<MesaView | null>(null);
   const [openThread, setOpenThread] = useState<string | null>(null);
   const { busy, error: actionError, run } = useAction();
@@ -78,6 +79,10 @@ export function MesaSection({ token }: { token: string }) {
 
   const load = useCallback(async () => setView(await fetchMesa(token)), [token]);
   const { error, refresh } = usePolling(load, running ? RUNNING_REFRESH_MS : IDLE_REFRESH_MS);
+
+  useEffect(() => {
+    if (running) onRound(false);
+  }, [running, onRound]);
 
   const act = (action: () => Promise<unknown>) =>
     void run(async () => {
@@ -118,7 +123,7 @@ export function MesaSection({ token }: { token: string }) {
           {view.configured && view.operator && (
             <>
               <div className="rd-actions">
-                <button className="rd-button" type="button" disabled={busy || running} onClick={() => act(() => startMesaRound(token))}>
+                <button className="rd-button" type="button" disabled={busy || running} onClick={() => act(() => startMesaRound(token).then(() => onRound(true)))}>
                   {running ? 'Agentes conversando…' : 'Iniciar ronda'}
                 </button>
               </div>

@@ -28,6 +28,8 @@
   /* ?embed: dentro de la app (pestaña Globo) la marca y la nota de datos de prueba las pone la app. */
   .uv[data-embed] .uv-top { grid-template-columns: 1fr; justify-items: center; }
   .uv[data-embed] .uv-top .rd-brand, .uv[data-embed] .uv-top .rd-tag { display: none; }
+  /* ?vivo: la ronda real de la mesa. Dos pasos (Mesa, Ronda) y sin controles de quien presenta la demo. */
+  .uv[data-vivo] #step2, .uv[data-vivo] .uv-admin { display: none; }
 
   /* Controles de quien presenta: ocultos por defecto (botón, tecla H, ?ui=1). */
   .uv-admin { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 4; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -197,6 +199,8 @@
 <script src="./universo.js"></script>
 <script>
 // ───────── Datos ─────────
+// En vivo (?vivo=…): universo-vivo.js reemplaza personas, grupos y guiones por la ronda real de la mesa. LIVE.on dice qué lugares de la esfera tienen a alguien.
+let LIVE = null;
 const U = RondaUniverse, people = U.people(), POS = U.sphere();
 const GROUPS = U.groups(POS, 14, 7);
 const SHOWN = GROUPS.slice(0, 6);   // una vuelta: estos grupos y luego la semana
@@ -207,7 +211,7 @@ const atlas = new Image(); atlas.src = '../faces/atlas/faces.png';
 const atlasBlur = new Image(); atlasBlur.src = '../faces/atlas/faces-blur.png';
 const teamImg = {}; people.slice(0, 5).forEach((p, i) => { const im = new Image(); im.src = faceUrl(p); teamImg[i] = im; });
 const tileCss = i => { const t = +people[i].face.slice(5); return { backgroundImage: 'url(../faces/atlas/faces.png)', backgroundSize: '800% 800%', backgroundPosition: (t % 8) * 100 / 7 + '% ' + Math.floor(t / 8) * 100 / 7 + '%' }; };
-const faceCss = i => i < 5 ? { backgroundImage: 'url(' + faceUrl(people[i]) + ')', backgroundSize: 'cover' } : tileCss(i);
+const faceCss = i => i < 5 && !LIVE ? { backgroundImage: 'url(' + faceUrl(people[i]) + ')', backgroundSize: 'cover' } : tileCss(i);
 const COLS = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
 
 // Ronda uno a uno: destellos deterministas (pares al azar) y filas para el panel.
@@ -235,7 +239,7 @@ const nameOf = i => i === 0 ? 'Tú' : people[i].name;
 function header(title, sub, members) {
   document.getElementById('htitle').textContent = title; document.getElementById('hsub').textContent = sub;
   document.getElementById('hmembers').replaceChildren(...(members || []).map((m, k) => {
-    const d = el('div', 'uv-member'), t = el('div'); t.append(el('b', '', nameOf(m)), el('span', '', k === 0 ? 'Pide ayuda' : 'Puede ayudar'));
+    const d = el('div', 'uv-member'), t = el('div'); t.append(el('b', '', nameOf(m)), el('span', '', LIVE && LIVE.roleOf ? LIVE.roleOf(m, k) : k === 0 ? 'Pide ayuda' : 'Puede ayudar'));
     d.append(face(m), t); return d;
   }));
 }
@@ -252,7 +256,7 @@ function pairRow(list, title, sub, check) {
   return n;
 }
 function setSteps() {
-  const k = scene.kind === 'ronda' ? 0 : scene.kind === 'group' ? 1 : 2;
+  const k = scene.kind === 'ronda' || scene.kind === 'vivo' ? 0 : scene.kind === 'group' ? 1 : 2;
   [0, 1, 2].forEach(j => { const s = document.getElementById('step' + j); if (j === k) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
   document.getElementById('stepn').textContent = scene.kind === 'group' ? (scene.i + 1) + '/' + SHOWN.length : '';
   root.dataset.scene = scene.kind;
@@ -268,6 +272,9 @@ function startScene(k) {
     current = { g, events: sc.events, duration: sc.duration, shown: new Set() };
     header(g.topic, g.members.length + ' agentes, ' + (g.members.length * (g.members.length - 1) / 2) + ' conversaciones. Nadie más se entera.', g.members);
     turnTo(g.members);
+  } else if (scene.kind === 'vivo') {
+    header(LIVE.title, LIVE.sub);
+    turnTo([0]); LIVE.rows.forEach(row => push(pairRow(row.faces, row.title, row.sub, row.check)));
   } else {
     header('Acuerdos', SHOWN.length + ' grupos cerraron esta vuelta');
     turnTo([0]); buildWeek();
@@ -369,7 +376,7 @@ function draw(T) {
   ctx.clearRect(0, 0, W, H);
   const narrow = W < 600, CX = W * 0.5, CY = narrow ? H * 0.56 : H * 0.54, S = narrow ? Math.min(W * 0.4, H * 0.36) : Math.min(W * 0.33, H * 0.34), D = 3.4, sr = S * 1.06, kS = Math.max(S, 170) / 300;
   // Calma: en «uno a uno» todos están presentes; al formarse los grupos, quien no está en foco retrocede.
-  const calmT = scene.kind === 'ronda' ? smooth(RONDA.flashEnd - 1, RONDA.dur - 0.4, clock) : 1;
+  const calmT = scene.kind === 'ronda' ? smooth(RONDA.flashEnd - 1, RONDA.dur - 0.4, clock) : scene.kind === 'vivo' ? 0 : 1;
   calm += (calmT - calm) * 0.06;
   if (luz) { luzK += (1 - luzK) * 0.04; luz.render(T * 0.9, CX / 2, CY / 2, sr / 2, (0.5 - 0.12 * calm) * luzK); }
   const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
@@ -381,7 +388,7 @@ function draw(T) {
   const curve = (a, b, u0, u1, bow) => { const c = ctrl(a, b, bow), pa = P[a], pb = P[b]; ctx.beginPath(); for (let s = 0, N = 20; s <= N; s++) { const v = u0 + (u1 - u0) * s / N, w = 1 - v, x = w * w * pa.x + 2 * w * v * c.x + v * v * pb.x, y = w * w * pa.y + 2 * w * v * c.y + v * v * pb.y; s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } return c; };
   // Neblina: todas las conversaciones posibles, como hilos de luz dentro del vidrio.
   const haze = [new Path2D(), new Path2D()];
-  for (let a = 0; a < U.N; a++) for (let b = a + 1; b < U.N; b++) { const c = ctrl(a, b), h = c.z > -0.1 ? haze[0] : haze[1]; h.moveTo(P[a].x, P[a].y); h.quadraticCurveTo(c.x, c.y, P[b].x, P[b].y); }
+  for (let a = 0; a < U.N; a++) for (let b = a + 1; b < U.N; b++) { if (LIVE && !(LIVE.on[a] && LIVE.on[b])) continue; const c = ctrl(a, b), h = c.z > -0.1 ? haze[0] : haze[1]; h.moveTo(P[a].x, P[a].y); h.quadraticCurveTo(c.x, c.y, P[b].x, P[b].y); }
   const hk = 1 - 0.45 * calm;
   ctx.lineWidth = 0.5; ctx.strokeStyle = luz ? 'rgba(255,255,255,' + (0.05 * hk).toFixed(3) + ')' : 'rgba(70,70,150,' + (0.035 * hk).toFixed(3) + ')'; ctx.stroke(haze[1]); ctx.strokeStyle = luz ? 'rgba(255,255,255,' + (0.11 * hk).toFixed(3) + ')' : 'rgba(70,70,150,' + (0.07 * hk).toFixed(3) + ')'; ctx.stroke(haze[0]);
   // Vidrio.
@@ -418,7 +425,7 @@ function draw(T) {
   });
   ctx.globalAlpha = 1;
   // Grupos de fondo, mientras uno está en foco.
-  if (scene.kind === 'group') AMB.forEach(({ g, off }) => {
+  if (scene.kind === 'group' && !LIVE) AMB.forEach(({ g, off }) => {
     if (current && g === current.g) return;
     const loc = (T + off) % 16; if (loc > 13) return;
     const [r, ...hs] = g.members, grow = smooth(0, 1.4, loc), fade = 1 - smooth(11.5, 13, loc);
@@ -439,6 +446,7 @@ function draw(T) {
   const order = P.map((p, i) => i).sort((a, b) => P[a].z - P[b].z);
   const youScene = scene.kind !== 'group';
   for (const i of order) {
+    if (LIVE && !LIVE.on[i]) continue;
     const p = P[i], fog = smooth(0.45, -0.75, p.z), blur = smooth(0.3, -0.55, p.z), focus = focusSet.has(i) || (youScene && i === 0);
     const edge = 0.5 + 0.5 * Math.min(1, Math.abs(p.z) * 1.6), pp = pop.get(i) || 0;
     const back = focus ? 1 : 1 - calm * (1 - smooth(-0.45, 0.15, p.z) * 0.9) - calm * 0.1;   // el hemisferio de atrás casi desaparece
@@ -447,7 +455,7 @@ function draw(T) {
     ctx.save(); ctx.globalAlpha = (1 - 0.5 * fog) * (focus ? 1 : back * (1 - 0.35 * calm));
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, r + (focus ? 3 : 1.5), 0, 6.2832); ctx.fill();
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.2832); ctx.clip();
-    if (i < 5) { if (teamImg[i].complete) { if (blur > 0.05) ctx.filter = 'blur(' + (blur * 2).toFixed(1) + 'px)'; ctx.drawImage(teamImg[i], p.x - r, p.y - r, r * 2, r * 2); } }
+    if (i < 5 && !LIVE) { if (teamImg[i].complete) { if (blur > 0.05) ctx.filter = 'blur(' + (blur * 2).toFixed(1) + 'px)'; ctx.drawImage(teamImg[i], p.x - r, p.y - r, r * 2, r * 2); } }
     else { const t = +people[i].face.slice(5), sx = (t % 8) * 128 + 4, sy = Math.floor(t / 8) * 128 + 4;
       if (blur > 0.05 && atlasBlur.complete) ctx.drawImage(atlasBlur, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2);
       if (atlas.complete) { ctx.globalAlpha *= 1 - blur; ctx.drawImage(atlas, sx, sy, 120, 120, p.x - r, p.y - r, r * 2, r * 2); } }
@@ -497,7 +505,7 @@ function frame(now) {
     current.events.forEach((e, idx) => { if (clock >= e.at && !current.shown.has(idx)) { current.shown.add(idx); addItem(e); } });
     items.forEach(it => it.upd(clock));
   }
-  if (clock > scene.dur) startScene(si + 1);
+  if (LIVE) LIVE.tick(); else if (clock > scene.dur) startScene(si + 1);
   draw(T);
   requestAnimationFrame(frame);
 }
@@ -514,8 +522,17 @@ hideBtn.onclick = () => setClean(!root.hasAttribute('data-clean'));
 addEventListener('keydown', e => { if ((e.key === 'h' || e.key === 'H') && !e.metaKey && !e.ctrlKey && !/INPUT|TEXTAREA/.test(e.target.tagName)) setClean(!root.hasAttribute('data-clean')); });
 setClean(!(q.get('ui') === '1' || (() => { try { return localStorage.getItem('uv-ui') === '1'; } catch (_) { return false; } })()));
 // ?s= escena inicial (0 = uno a uno, 1..6 grupos, 7 = semana) y ?t= segundo dentro de ella. ?g= sigue funcionando.
-startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
-if (q.has('t')) { clock = +q.get('t'); T = clock; }
+// ?vivo=/api/people/<token>/mesa/live: nada de la demo se dibuja; la esfera parte vacía y universo-vivo.js sienta a las personas reales.
+if ((q.get('vivo') || '').startsWith('/api/people/')) {
+  LIVE = { on: new Array(U.N).fill(false), title: 'Mesa pública', sub: '', rows: [], tick() {} };
+  SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
+  root.setAttribute('data-vivo', '');
+  startScene(0);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=1'; document.body.append(live);
+} else {
+  startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
+  if (q.has('t')) { clock = +q.get('t'); T = clock; }
+}
 requestAnimationFrame(frame);
 </script>
 </body>
