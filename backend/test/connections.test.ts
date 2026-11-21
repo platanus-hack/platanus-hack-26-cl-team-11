@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
 import { createVault } from '../src/crypto.js';
-import { openStore } from '../src/db.js';
+import { createContext } from '../src/context.js';
 import type { Fetch } from '../src/types.js';
 
 const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -58,8 +58,9 @@ test('the vault round-trips a secret and never stores it in the clear', () => {
 });
 
 test('connecting GitHub imports recent pushes and pull requests once', async () => {
-  const store = openStore(':memory:');
-  const app = createApp(store, fakeFetch(githubRoutes));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch(githubRoutes) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
 
   const first = await app.request(`/api/people/${token}/connections/github`, connect('ghp_good'));
@@ -74,9 +75,10 @@ test('connecting GitHub imports recent pushes and pull requests once', async () 
 });
 
 test('connecting Granola imports the meeting note without the transcript', async () => {
-  const store = openStore(':memory:');
   const seen: string[] = [];
-  const app = createApp(store, fakeFetch(granolaRoutes, seen));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch(granolaRoutes, seen) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
 
   const response = await app.request(`/api/people/${token}/connections/granola`, connect('grn_good'));
@@ -86,8 +88,9 @@ test('connecting Granola imports the meeting note without the transcript', async
 });
 
 test('a rejected key is reported and nothing is stored', async () => {
-  const store = openStore(':memory:');
-  const app = createApp(store, fakeFetch(githubRoutes));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch(githubRoutes) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
 
   const response = await app.request(`/api/people/${token}/connections/github`, connect('bad'));
@@ -97,8 +100,9 @@ test('a rejected key is reported and nothing is stored', async () => {
 });
 
 test('the person page shows the account but never the secret', async () => {
-  const store = openStore(':memory:');
-  const app = createApp(store, fakeFetch(githubRoutes));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch(githubRoutes) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
   await app.request(`/api/people/${token}/connections/github`, connect('ghp_good'));
 
@@ -108,8 +112,9 @@ test('the person page shows the account but never the secret', async () => {
 });
 
 test('disconnecting removes the connection and its events', async () => {
-  const store = openStore(':memory:');
-  const app = createApp(store, fakeFetch(githubRoutes));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch(githubRoutes) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
   await app.request(`/api/people/${token}/connections/github`, connect('ghp_good'));
 
@@ -120,8 +125,9 @@ test('disconnecting removes the connection and its events', async () => {
 });
 
 test('sources that do not take a key are refused', async () => {
-  const store = openStore(':memory:');
-  const app = createApp(store, fakeFetch({}));
+  const ctx = createContext({ location: ':memory:', fetch: fakeFetch({}) });
+  const { store } = ctx;
+  const app = createApp(ctx);
   const { token } = store.addPerson('Ana');
   assert.equal((await app.request(`/api/people/${token}/connections/apple_health`, connect('x'))).status, 400);
   assert.equal((await app.request(`/api/people/${token}/connections/gmail`, connect('x'))).status, 400);

@@ -51,6 +51,10 @@ function toDraft(event: GithubEvent): EventDraft | null {
 }
 
 export const github: KeyConnector = {
+  id: 'github',
+  label: 'GitHub',
+  how: 'Token personal',
+  kind: 'key',
   async identify(secret, fetchImpl) {
     const user = await getJson<{ login: string }>(fetchImpl, `${BASE}/user`, headers(secret), 'GitHub');
     return user.login;

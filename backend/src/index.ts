@@ -4,9 +4,9 @@ import { existsSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
-import { openStore } from './db.js';
+import { createContext } from './context.js';
 
-const app = createApp(openStore());
+const app = createApp(createContext());
 const frontendDist = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'frontend', 'dist');
 
 if (existsSync(join(frontendDist, 'index.html'))) {

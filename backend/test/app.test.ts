@@ -1,24 +1,24 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
-import { openStore } from '../src/db.js';
-import { appleHealthEvent } from '../src/connectors/appleHealth.js';
+import { createContext } from '../src/context.js';
+import { appleHealth } from '../src/connectors/appleHealth.js';
 
 const setup = () => {
-  const store = openStore(':memory:');
-  return { store, app: createApp(store) };
+  const ctx = createContext({ location: ':memory:' });
+  return { store: ctx.store, app: createApp(ctx) };
 };
 
 const json = (body: unknown) => ({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 test('apple health summary reads text numbers with a decimal comma', () => {
-  const event = appleHealthEvent({ date: '2026-11-21', sleep_hours: '5,2', resting_hr: 58, steps: 4312 });
+  const event = appleHealth.toEvent({ date: '2026-11-21', sleep_hours: '5,2', resting_hr: 58, steps: 4312 });
   assert.equal(event.summary, 'sueño 5.2 h · pulso en reposo 58 lpm · 4312 pasos');
   assert.equal(event.occurredAt, '2026-11-21');
 });
 
 test('apple health keeps a payload with no known fields', () => {
-  const event = appleHealthEvent({ other: 1 }, '2026-11-21T10:00:00.000Z');
+  const event = appleHealth.toEvent({ other: 1 }, '2026-11-21T10:00:00.000Z');
   assert.equal(event.summary, 'datos de salud recibidos sin campos reconocidos');
   assert.equal(event.occurredAt, '2026-11-21T10:00:00.000Z');
   assert.deepEqual(event.raw, { other: 1 });

@@ -32,6 +32,10 @@ interface GranolaNote extends GranolaNoteSummary {
 const headers = (secret: string) => ({ authorization: `Bearer ${secret}`, accept: 'application/json' });
 
 export const granola: KeyConnector = {
+  id: 'granola',
+  label: 'Granola',
+  how: 'Llave personal',
+  kind: 'key',
   async identify(secret, fetchImpl) {
     const list = await getJson<GranolaList>(fetchImpl, `${BASE}/notes?page_size=1`, headers(secret), 'Granola');
     return list.notes[0]?.owner.email ?? 'cuenta de Granola';

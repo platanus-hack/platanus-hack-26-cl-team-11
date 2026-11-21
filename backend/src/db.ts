@@ -1,9 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createVault } from './crypto.js';
+import type { Vault } from './crypto.js';
 import type { Connection, EventDraft, Person, SourceId, StoredEvent } from './types.js';
 
 export interface SourceSync {
@@ -20,6 +17,8 @@ export interface Store {
   saveConnection(personToken: string, source: SourceId, account: string, secret: string): void;
   findConnection(personToken: string, source: SourceId): Connection | undefined;
   listConnections(personToken: string): Connection[];
+  listAllConnections(): Array<{ personToken: string; source: SourceId }>;
+  updateSecret(personToken: string, source: SourceId, secret: string): void;
   markSynced(personToken: string, source: SourceId, error: string | null): void;
   removeConnection(personToken: string, source: SourceId): void;
 }
@@ -43,8 +42,6 @@ interface ConnectionRow {
   last_error: string | null;
 }
 
-const defaultDataDir = () => join(dirname(fileURLToPath(import.meta.url)), '..', 'data');
-
 const toEvent = (row: EventRow): StoredEvent => ({
   id: row.id,
   source: row.source,
@@ -55,11 +52,8 @@ const toEvent = (row: EventRow): StoredEvent => ({
   receivedAt: row.received_at,
 });
 
-export function openStore(location: string = process.env.DATA_DIR || defaultDataDir()): Store {
-  const inMemory = location === ':memory:';
-  if (!inMemory) mkdirSync(location, { recursive: true });
-  const db = new DatabaseSync(inMemory ? ':memory:' : join(location, 'ronda.db'));
-  const vault = createVault(inMemory ? null : location);
+export function openStore(file: string, vault: Vault): Store {
+  const db = new DatabaseSync(file);
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS people (
@@ -156,6 +150,15 @@ export function openStore(location: string = process.env.DATA_DIR || defaultData
     listConnections(personToken) {
       const rows = db.prepare('SELECT * FROM connections WHERE person_token = ?').all(personToken) as unknown as ConnectionRow[];
       return rows.map(toConnection);
+    },
+
+    listAllConnections() {
+      const rows = db.prepare('SELECT person_token, source FROM connections ORDER BY person_token, source').all() as unknown as Array<{ person_token: string; source: SourceId }>;
+      return rows.map((row) => ({ personToken: row.person_token, source: row.source }));
+    },
+
+    updateSecret(personToken, source, secret) {
+      db.prepare('UPDATE connections SET secret_sealed = ? WHERE person_token = ? AND source = ?').run(vault.seal(secret), personToken, source);
     },
 
     markSynced(personToken, source, error) {

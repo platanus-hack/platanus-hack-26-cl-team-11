@@ -1,11 +1,11 @@
-import type { EventDraft, JsonObject } from '../types.js';
+import type { EventDraft, JsonObject, PushConnector } from '../types.js';
 
 const toNumber = (value: unknown): number | null => {
   const parsed = typeof value === 'number' ? value : Number.parseFloat(String(value ?? '').replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-export function appleHealthEvent(payload: JsonObject, receivedAt: string = new Date().toISOString()): EventDraft {
+function toEvent(payload: JsonObject, receivedAt: string = new Date().toISOString()): EventDraft {
   const sleepHours = toNumber(payload.sleep_hours);
   const restingHeartRate = toNumber(payload.resting_hr);
   const steps = toNumber(payload.steps);
@@ -23,3 +23,12 @@ export function appleHealthEvent(payload: JsonObject, receivedAt: string = new D
     raw: payload,
   };
 }
+
+export const appleHealth: PushConnector = {
+  id: 'apple_health',
+  label: 'Apple Health',
+  how: 'Atajo de iOS',
+  kind: 'push',
+  ingestSlug: 'health',
+  toEvent,
+};

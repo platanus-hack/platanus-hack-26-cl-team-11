@@ -1,12 +1,6 @@
-export const SOURCES = [
-  { id: 'apple_health', label: 'Apple Health', how: 'Atajo de iOS', connect: 'push' },
-  { id: 'granola', label: 'Granola', how: 'Llave personal', connect: 'key' },
-  { id: 'github', label: 'GitHub', how: 'Token personal', connect: 'key' },
-  { id: 'google_calendar', label: 'Google Calendar', how: 'Cuenta de Google', connect: 'soon' },
-  { id: 'gmail', label: 'Gmail', how: 'Cuenta de Google', connect: 'soon' },
-] as const;
-
-export type SourceId = (typeof SOURCES)[number]['id'];
+export type SourceId = string;
+export type JsonObject = Record<string, unknown>;
+export type Fetch = typeof fetch;
 
 export interface Person {
   token: string;
@@ -36,12 +30,54 @@ export interface Connection {
   lastError: string | null;
 }
 
-export type JsonObject = Record<string, unknown>;
-export type Fetch = typeof fetch;
+interface ConnectorInfo {
+  id: SourceId;
+  label: string;
+  how: string;
+}
 
-export interface KeyConnector {
+export interface PushConnector extends ConnectorInfo {
+  kind: 'push';
+  ingestSlug: string;
+  toEvent(payload: JsonObject, receivedAt?: string): EventDraft;
+}
+
+export interface KeyConnector extends ConnectorInfo {
+  kind: 'key';
   identify(secret: string, fetchImpl: Fetch): Promise<string>;
   pull(secret: string, account: string, since: Date, fetchImpl: Fetch): Promise<EventDraft[]>;
+}
+
+export interface OAuthConnector extends ConnectorInfo {
+  kind: 'oauth';
+  provider: string;
+  scopes: string[];
+  pull(accessToken: string, account: string, since: Date, fetchImpl: Fetch): Promise<EventDraft[]>;
+}
+
+export interface SoonConnector extends ConnectorInfo {
+  kind: 'soon';
+}
+
+export type Connector = PushConnector | KeyConnector | OAuthConnector | SoonConnector;
+
+export interface OAuthTokens {
+  accessToken: string;
+  refreshToken: string | null;
+  expiresAt: number;
+}
+
+export interface OAuthCredentials {
+  clientId: string;
+  clientSecret: string;
+}
+
+export interface OAuthProvider {
+  id: string;
+  authorizeUrl(input: { credentials: OAuthCredentials; redirectUri: string; scopes: string[]; state: string }): string;
+  exchange(code: string, credentials: OAuthCredentials, redirectUri: string, fetchImpl: Fetch): Promise<OAuthTokens>;
+  refresh(refreshToken: string, credentials: OAuthCredentials, fetchImpl: Fetch): Promise<OAuthTokens>;
+  identify(accessToken: string, fetchImpl: Fetch): Promise<string>;
 }
 
 export class ConnectorError extends Error {
