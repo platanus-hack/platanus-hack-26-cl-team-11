@@ -1,0 +1,38 @@
+/* Ronda · streaming. Regla Stream de Stageshow: palabras en su lugar final, se encienden. */
+.rs-stream { white-space: normal; }
+.rs-word {
+  opacity: 0;
+  filter: blur(3px);
+  transition: opacity 0.35s ease, filter 0.35s ease;
+}
+.rs-word[data-on] { opacity: 1; filter: none; }
+.rs-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px 1px 6px;
+  border-radius: var(--rd-radius-pill);
+  background: var(--rd-fill-soft);
+  color: var(--rd-muted);
+  font-size: 0.87em;
+  font-weight: var(--rd-weight);
+  vertical-align: 1px;
+}
+.rs-private svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.rs-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -3px;
+  border-radius: 1px;
+  background: var(--rd-ink);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.rs-stream[data-writing] .rs-caret { opacity: 1; animation: rs-caret 1.05s steps(1) infinite; }
+@keyframes rs-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .rs-word { transition: none; }
+  .rs-stream[data-writing] .rs-caret { animation: none; }
+}
