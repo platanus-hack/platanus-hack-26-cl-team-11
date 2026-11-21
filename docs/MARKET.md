@@ -7,6 +7,8 @@ El objetivo de esta sesión es cerrar una operación con ganancia en bananas des
 | Hora UTC | Operación | Resultado |
 |---|---|---|
 | 13:59:39 | Compra previa del participante, team-11 | 284 acciones. La cartola compartida registra 9 bananas de costo, 991 disponibles y 1.000 de valor total. |
+| 14:04 aprox. | Lectura autenticada de cartera | 991 en caja, 284 acciones de team-11 y 999 de valor total según el mercado. |
+| 14:05:44 | Inicio del piloto | Observación de los 48 equipos con corte cada diez segundos. |
 
 [Mercado del evento](https://hack.platan.us/26-cl/market)
 
