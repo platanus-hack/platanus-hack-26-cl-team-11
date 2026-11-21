@@ -173,6 +173,27 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 - Versión para teléfono y el componente real en `frontend/` (React), con sus primitivas `rd-*`.
 - Ensayo con Stageshow (`film.mjs --gate`) y su `REHEARSAL.md`.
 
+## Hilo entre agentes
+
+Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado por Codex en
+`grafo/globo.html`). Especificación completa: `grafo/hilo/README.md`.
+
+- **Streaming** (`grafo/hilo/stream.js`, regla `Stream` de Stageshow): todas las palabras se ponen
+  desde el inicio en su lugar final, ocultas; cada una se enciende con opacidad y un desenfoque de
+  3 px en 0,35 s. La burbuja nunca cambia de tamaño mientras se escribe. Cursor de tinta al final.
+  El dato privado es un marcador «dato privado» con candado; el valor original nunca llega.
+- **Llamadas a herramienta** (`grafo/hilo/tools.js`): una tarjeta chunky por conector (Calendario,
+  Tu política, Equipo, Pulso del equipo, Permisos, Presentaciones, Tablero, GitHub, Granola,
+  WhatsApp, Salud) con una escena viva de lo que hace: la agenda se escanea, dos agendas se juntan
+  hasta coincidir, el candado se cierra, las caras van respondiendo, el sello cae, la rama se une.
+  El estado («Consultando» → recibo) cambia en su propio lugar, con un cruce suave.
+- **Excepción de color:** cada conector tiene su tinte, como las miniaturas del globo. El tinte vive
+  solo en el ícono de la tarjeta, su escena y su recibo. Nunca en texto corrido, botones ni fondos
+  de pantalla.
+- El pulso del equipo nunca muestra valores individuales: solo aportes contados contra el mínimo
+  y un nivel común.
+- Galería de trabajo: `grafo/hilo/herramientas.html` (pasa `film.mjs --gate`, ver `REHEARSAL.md`).
+
 ## Texto de la interfaz
 
 - Español de Chile, tuteo, frases cortas. Se habla desde el lado de la persona: «Tu decisión de
@@ -255,6 +276,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Hilo: streaming sin reacomodo (Stream de Stageshow) y tarjetas de herramienta chunky con escena y tinte por conector (el tinte solo vive en la tarjeta). | Mati |
 | 21-nov-2026 | Globo: grupos de hasta 9 en tres rondas con personas puente; miniaturas sobre los hilos (a color solo en el grupo con color). Hilo de chat diseñado en `grafo/hilo/`. | Mati |
 | 21-nov-2026 | Globo: grupos de 3 a 6 en dos rondas; a lo más un grupo con color; desenfoque gradual por profundidad; sin «burbuja» de acuerdo: hilos que se recogen, brillo y chip «Listo». | Mati |
 | 21-nov-2026 | Globo: cara en todos los nodos, nodos de atrás desenfocados bajo un velo de vidrio, varios grupos negociando con aro de grupo, tocar un grupo lo destaca, efectos de nacimiento y acuerdo. | Mati |
