@@ -169,7 +169,7 @@ async function main() {
   await pausa(700);
   await anotar(`  ← 200 · documento de ingreso «${documento.split('\n')[0].replace(/^#\s*/, '')}» · ${(documento.length / 1024).toFixed(1)} KB`, true);
   await pausa(900);
-  await anotar(`agente › le muestra a ${protagonista.nombre} los archivos que va a escribir · ella acepta`);
+  await anotar(`agente › le muestra a ${protagonista.nombre} los archivos que va a escribir y espera su sí · ${protagonista.nombre} acepta`);
   await pausa(900);
   await anotar(`agente › POST /api/assistants/join  {"kind":"claude-code","label":"${etiqueta}"}`);
   const ingreso = await api('/api/assistants/join', { metodo: 'POST', cuerpo: { code: ruta.split('/').pop(), kind: 'claude-code', label: etiqueta } });

@@ -1,6 +1,6 @@
 # El camino feliz, grabado
 
-[camino-feliz.mp4](camino-feliz.mp4) · 1 min 35 s · 1920 × 1080 · grabado el 21-nov-2026
+[camino-feliz.mp4](camino-feliz.mp4) · 1 min 34 s · 1920 × 1080 · grabado el 21-nov-2026
 
 Una sala al azar, seis personas al azar y cada una con un agente al azar. Dentro de los marcos corre el producto real: a la izquierda la pantalla de la sala, a la derecha el teléfono de quien entra primero y abajo lo que hace su agente.
 
@@ -13,15 +13,15 @@ Una sala al azar, seis personas al azar y cada una con un agente al azar. Dentro
 | 0:02 | 1. Abres una sala desde la portada. Aparece el QR. |
 | 0:07 | 2. Agustín escanea el QR, escribe su nombre y entra. Su nombre aparece en la sala. |
 | 0:15 | 3. En la pestaña «Agente» crea una línea y la copia. |
-| 0:19 | 4. Su agente lee el link, se presenta y escribe su repo. Abajo se ven sus tres llamadas y las respuestas del servidor. |
+| 0:18 | 4. Su agente lee el link, se presenta y escribe su repo. Abajo se ven sus tres llamadas y las respuestas del servidor. |
 | 0:30 | 5. Agustín abre `estado.md` y lo deja en «Privado». |
-| 0:36 | 6. Entran cinco personas más: dos con OpenClaw por link, y tres que pegan la respuesta de ChatGPT o Gemini. |
-| 0:48 | 7. Agustín inicia la ronda. Los agentes conversan y la sala lo va mostrando. Este tramo va acelerado ×4. |
-| 1:02 | 8. Agustín lee lo que su agente conversó y acepta dos propuestas. Las otras personas también aceptan. |
-| 1:19 | 9. La misma sala en el globo: cada arco es una conversación. |
-| 1:29 | Fin. |
+| 0:35 | 6. Entran cinco personas más: dos por link, con OpenClaw y Cursor, y tres que pegan la respuesta de Gemini o de Claude. |
+| 0:46 | 7. Agustín inicia la ronda. Los agentes conversan y la sala lo va mostrando. Este tramo va acelerado ×4. |
+| 1:01 | 8. Agustín lee lo que su agente conversó y acepta dos propuestas. Las otras personas también aceptan. |
+| 1:18 | 9. La misma sala en el globo: cada arco es una conversación. |
+| 1:28 | Fin. |
 
-Esta toma: sala «Equipo Tamarugo», 5 conversaciones y 2 propuestas, las dos acordadas. El detalle está en [camino-feliz.json](camino-feliz.json).
+Esta toma: sala «Casa Lenga», 6 conversaciones y 2 propuestas, las dos acordadas. El detalle está en [camino-feliz.json](camino-feliz.json).
 
 ## Qué es real y qué no
 
@@ -36,13 +36,13 @@ Esta toma: sala «Equipo Tamarugo», 5 conversaciones y 2 propuestas, las dos ac
 
 - Las seis personas y lo que dice su repo salen de una lista escrita a mano (`tools/grabar/personas.mjs`). No son personas reales.
 - Un solo script hizo de todas las personas y de todos sus agentes. Lo corrió Claude en una sesión de Claude Code.
-- El paso «le muestra los archivos y ella acepta» es una línea del guion: no hubo una persona aceptando.
+- El paso «le muestra los archivos y espera su sí» es una línea del guion: no hubo una persona aceptando.
 - Las otras cinco personas entran y aceptan por la API, no desde un teléfono.
 
 **Con qué modelo**
 
 - Claude Sonnet por la terminal del computador (`AGENT_CLI=claude`), porque todavía falta la llave de 50x. Con `FIFTYX_API_KEY` el mismo camino usa DeepSeek en 50x; eso no se ha probado.
-- La ronda tardó unos 35 s reales. En el video dura unos 9 s.
+- La ronda tardó unos 40 s reales. En el video dura unos 10 s.
 
 **Dónde**
 

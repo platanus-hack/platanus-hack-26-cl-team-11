@@ -1,56 +1,56 @@
 {
-  "sala": "Equipo Tamarugo",
+  "sala": "Casa Lenga",
   "base": "http://localhost:8797",
   "pasos": [
     {
       "numero": 1,
       "texto": "Abres una sala",
-      "segundo": 1.6
+      "segundo": 1.7
     },
     {
       "numero": 2,
       "texto": "Agustín escanea el QR con su teléfono",
-      "segundo": 7.0
+      "segundo": 6.8
     },
     {
       "numero": 3,
       "texto": "Crea una línea para su agente",
-      "segundo": 15.0
+      "segundo": 14.6
     },
     {
       "numero": 4,
       "texto": "Su agente lee el link, se presenta y escribe su repo",
-      "segundo": 18.7
+      "segundo": 18.4
     },
     {
       "numero": 5,
       "texto": "Agustín decide qué se comparte",
-      "segundo": 30.2
+      "segundo": 29.7
     },
     {
       "numero": 6,
       "texto": "Llegan más personas, cada una con el agente que ya usa",
-      "segundo": 35.5
+      "segundo": 34.9
     },
     {
       "numero": 7,
       "texto": "Empieza la ronda",
-      "segundo": 48.4
+      "segundo": 46.4
     },
     {
       "numero": 8,
       "texto": "Agustín lee la conversación de su agente y acepta la propuesta",
-      "segundo": 62.4
+      "segundo": 60.8
     },
     {
       "numero": 9,
       "texto": "La misma sala en el globo: cada arco es una conversación",
-      "segundo": 79.1
+      "segundo": 77.5
     },
     {
       "numero": "Listo",
       "texto": "De un QR a una propuesta aceptada, sin reunión",
-      "segundo": 89.4
+      "segundo": 87.7
     }
   ],
   "personas": [
@@ -60,29 +60,29 @@
       "como": "link"
     },
     {
-      "nombre": "Sofía",
+      "nombre": "Benjamín",
+      "agente": "OpenClaw",
+      "como": "link"
+    },
+    {
+      "nombre": "Camila",
       "agente": "Gemini",
       "como": "pegado"
     },
     {
       "nombre": "Florencia",
-      "agente": "OpenClaw",
+      "agente": "Cursor",
       "como": "link"
-    },
-    {
-      "nombre": "Valentina",
-      "agente": "ChatGPT",
-      "como": "pegado"
-    },
-    {
-      "nombre": "Vicente",
-      "agente": "ChatGPT",
-      "como": "pegado"
     },
     {
       "nombre": "Joaquín",
-      "agente": "OpenClaw",
-      "como": "link"
+      "agente": "Claude",
+      "como": "pegado"
+    },
+    {
+      "nombre": "Valentina",
+      "agente": "Claude",
+      "como": "pegado"
     }
   ],
   "conversaciones": [
@@ -93,43 +93,49 @@
       "respuesta": "si"
     },
     {
+      "pide": "Camila",
+      "ayuda": "Benjamín",
+      "tema": "Animación en canvas",
+      "respuesta": "si"
+    },
+    {
+      "pide": "Benjamín",
+      "ayuda": "Florencia",
+      "tema": "OAuth de Google",
+      "respuesta": "parcial"
+    },
+    {
+      "pide": "Valentina",
+      "ayuda": "Camila",
+      "tema": "Guion del pitch",
+      "respuesta": "si"
+    },
+    {
+      "pide": "Valentina",
+      "ayuda": "Joaquín",
+      "tema": "Guion del pitch",
+      "respuesta": "si"
+    },
+    {
       "pide": "Valentina",
       "ayuda": "Agustín",
       "tema": "Guion del pitch",
       "respuesta": "si"
-    },
-    {
-      "pide": "Valentina",
-      "ayuda": "Joaquín",
-      "tema": "Guion del pitch",
-      "respuesta": "si"
-    },
-    {
-      "pide": "Vicente",
-      "ayuda": "Sofía",
-      "tema": "Métricas de uso",
-      "respuesta": "parcial"
-    },
-    {
-      "pide": "Vicente",
-      "ayuda": "Joaquín",
-      "tema": "Métricas de uso",
-      "respuesta": "parcial"
     }
   ],
   "propuestas": [
     {
-      "texto": "Propongo que Agustín y Joaquín ayuden a Valentina con la apertura de su pitch de tres minutos: Agustín con ideas de redacción para el arranque, y Joaquín con cómo abrir desde la mirada de demostraciones y ventas con clientes. Ambos tienen que confirmar si pueden.",
+      "texto": "Camila podría ayudar a Valentina a definir la apertura del guion del pitch de tres minutos, y Agustín a darle una primera frase que enganche. Ambos tendrían que aceptarlo antes de coordinar.",
       "estado": "acordada"
     },
     {
-      "texto": "Propongo que Florencia ayude a Agustín a revisar el acuerdo con la agencia, ya que conoce de contratos y ha revisado términos de otros acuerdos. Florencia, ¿puedes confirmar si te acomoda, y Agustín te cuenta qué puntos necesita revisar?",
+      "texto": "Propongo que Florencia ayude a Agustín a revisar el contrato con la agencia, ya que conoce del tema. Florencia, ¿puedes confirmar si te acomoda?",
       "estado": "acordada"
     }
   ],
-  "codigo": "H9BSH7",
-  "segundos": 95,
-  "cuadros": 1761,
+  "codigo": "35N62S",
+  "segundos": 92,
+  "cuadros": 1736,
   "modelo": "claude-sonnet-5-5 por la terminal local (AGENT_CLI=claude)",
   "ronda_acelerada": 4
 }
