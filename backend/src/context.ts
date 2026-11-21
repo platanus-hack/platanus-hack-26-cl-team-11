@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createVault, type Vault } from './crypto.js';
 import { openStore, type Store } from './db.js';
 import { openHubStore, type HubStore } from './hub/store.js';
+import { OAUTH_PROVIDERS } from './oauth/registry.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
@@ -25,9 +26,18 @@ export interface AppContext {
 
 const defaultDataDir = () => join(dirname(fileURLToPath(import.meta.url)), '..', 'data');
 
+const credentialsFrom = (env: NodeJS.ProcessEnv, provider: string): OAuthCredentials | undefined => {
+  const prefix = provider.toUpperCase();
+  const clientId = env[`${prefix}_CLIENT_ID`];
+  const clientSecret = env[`${prefix}_CLIENT_SECRET`];
+  return clientId && clientSecret ? { clientId, clientSecret } : undefined;
+};
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
-  const google = env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } : undefined;
-  return { publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null, oauth: { google } };
+  return {
+    publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null,
+    oauth: Object.fromEntries(Object.keys(OAUTH_PROVIDERS).map((provider) => [provider, credentialsFrom(env, provider)])),
+  };
 }
 
 export function createContext(options: { location?: string; fetch?: Fetch; config?: Config } = {}): AppContext {

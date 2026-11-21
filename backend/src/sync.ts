@@ -5,9 +5,24 @@ import { ConnectorError, type Connection, type OAuthConnector, type OAuthTokens,
 
 const LOOKBACK_DAYS = 14;
 const REFRESH_MARGIN_MS = 60_000;
+const STALE_CONNECTION = 'Esta fuente ahora se conecta con tu cuenta. Vuelve a conectarla.';
+
+const parseTokens = (secret: string): Partial<OAuthTokens> | null => {
+  try {
+    return JSON.parse(secret) as Partial<OAuthTokens> | null;
+  } catch {
+    return null;
+  }
+};
+
+function readTokens(secret: string): OAuthTokens {
+  const tokens = parseTokens(secret);
+  if (typeof tokens?.accessToken !== 'string' || typeof tokens.expiresAt !== 'number') throw new ConnectorError(STALE_CONNECTION, 400);
+  return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken ?? null, expiresAt: tokens.expiresAt };
+}
 
 async function freshAccessToken(ctx: AppContext, personToken: string, connector: OAuthConnector, connection: Connection): Promise<string> {
-  const tokens = JSON.parse(connection.secret) as OAuthTokens;
+  const tokens = readTokens(connection.secret);
   if (tokens.expiresAt - REFRESH_MARGIN_MS > Date.now() || !tokens.refreshToken) return tokens.accessToken;
   const provider = OAUTH_PROVIDERS[connector.provider];
   const credentials = ctx.config.oauth[connector.provider];

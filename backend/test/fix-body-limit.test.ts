@@ -38,7 +38,7 @@ test('every write route with a body refuses one over the limit', async () => {
   const oversized: Array<[string, string]> = [
     ['POST', `/api/people/${ana.token}/teams`],
     ['POST', `/api/people/${ana.token}/teams/join`],
-    ['POST', `/api/people/${ana.token}/connections/github`],
+    ['POST', `/api/people/${ana.token}/connections/granola`],
     ['PUT', `/api/people/${ana.token}/policy`],
     ['POST', `/api/people/${ana.token}/teams/${team.id}/board`],
     ['POST', `/api/people/${ana.token}/board/${proposal.id}/replies`],

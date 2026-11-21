@@ -9,6 +9,8 @@ import type { Fetch } from '../src/types.js';
 
 if (!CONNECTORS.some((connector) => connector.id === 'linear')) CONNECTORS.push(linear);
 
+const tokensOf = (accessToken: string) => JSON.stringify({ accessToken, refreshToken: null, expiresAt: Date.now() + 60 * 60 * 1000 });
+
 const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
 const githubEvents = [{ id: '1', type: 'PushEvent', created_at: recent, repo: { name: 'acme/pagos' }, payload: { size: 3 } }];
@@ -65,9 +67,9 @@ test('syncAll syncs every connection of every person', async () => {
   const ctx = createContext({ location: ':memory:', fetch: sourcesFetch() });
   const ana = ctx.store.addPerson('Ana');
   const tomas = ctx.store.addPerson('Tomás');
-  ctx.store.saveConnection(ana.token, 'github', 'ana', 'ghp_good');
-  ctx.store.saveConnection(ana.token, 'linear', 'ana@example.com', 'lin_api_good');
-  ctx.store.saveConnection(tomas.token, 'github', 'tomas', 'ghp_good');
+  ctx.store.saveConnection(ana.token, 'github', 'ana', tokensOf('gho_good'));
+  ctx.store.saveConnection(ana.token, 'linear', 'ana@example.com', tokensOf('lin_oauth_good'));
+  ctx.store.saveConnection(tomas.token, 'github', 'tomas', tokensOf('gho_good'));
 
   assert.deepEqual(await syncAll(ctx), { synced: 3, failed: 0 });
 
@@ -84,15 +86,15 @@ test('a failing connection is counted, keeps its error and does not stop the oth
   const ctx = createContext({ location: ':memory:', fetch: sourcesFetch() });
   const ana = ctx.store.addPerson('Ana');
   const tomas = ctx.store.addPerson('Tomás');
-  ctx.store.saveConnection(ana.token, 'github', 'ana', 'bad');
-  ctx.store.saveConnection(ana.token, 'linear', 'ana@example.com', 'lin_api_good');
-  ctx.store.saveConnection(tomas.token, 'github', 'tomas', 'bad');
-  ctx.store.saveConnection(tomas.token, 'linear', 'tomas@example.com', 'lin_api_good');
+  ctx.store.saveConnection(ana.token, 'github', 'ana', tokensOf('bad'));
+  ctx.store.saveConnection(ana.token, 'linear', 'ana@example.com', tokensOf('lin_oauth_good'));
+  ctx.store.saveConnection(tomas.token, 'github', 'tomas', tokensOf('bad'));
+  ctx.store.saveConnection(tomas.token, 'linear', 'tomas@example.com', tokensOf('lin_oauth_good'));
 
   assert.deepEqual(await syncAll(ctx), { synced: 2, failed: 2 });
 
-  assert.equal(ctx.store.findConnection(ana.token, 'github')?.lastError, 'GitHub rechazó la llave.');
-  assert.equal(ctx.store.findConnection(tomas.token, 'github')?.lastError, 'GitHub rechazó la llave.');
+  assert.equal(ctx.store.findConnection(ana.token, 'github')?.lastError, 'GitHub dio por vencido el acceso. Vuelve a conectar tu cuenta.');
+  assert.equal(ctx.store.findConnection(tomas.token, 'github')?.lastError, 'GitHub dio por vencido el acceso. Vuelve a conectar tu cuenta.');
   assert.equal(ctx.store.findConnection(ana.token, 'linear')?.lastError, null);
   assert.equal(ctx.store.findConnection(tomas.token, 'linear')?.lastError, null);
   assert.equal(ctx.store.listEvents(ana.token).length, 1);
@@ -112,7 +114,7 @@ test('startScheduler runs on its interval and the stop function prevents further
   const traffic = newTraffic();
   const ctx = createContext({ location: ':memory:', fetch: sourcesFetch(traffic) });
   const ana = ctx.store.addPerson('Ana');
-  ctx.store.saveConnection(ana.token, 'github', 'ana', 'ghp_good');
+  ctx.store.saveConnection(ana.token, 'github', 'ana', tokensOf('gho_good'));
 
   const stop = startScheduler(ctx, 10);
   assert.equal(traffic.calls, 0);
@@ -132,7 +134,7 @@ test('a tick is skipped while the previous run is still in flight', async () => 
   const traffic = newTraffic();
   const ctx = createContext({ location: ':memory:', fetch: sourcesFetch(traffic, 60) });
   const ana = ctx.store.addPerson('Ana');
-  ctx.store.saveConnection(ana.token, 'github', 'ana', 'ghp_good');
+  ctx.store.saveConnection(ana.token, 'github', 'ana', tokensOf('gho_good'));
 
   const stop = startScheduler(ctx, 5);
   await wait(200);

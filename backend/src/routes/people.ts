@@ -33,6 +33,7 @@ export function peopleRoutes({ store, config }: AppContext) {
           how: connector.how,
           connect: connector.kind,
           provider: connector.kind === 'oauth' ? connector.provider : null,
+          configured: connector.kind !== 'oauth' || Boolean(config.oauth[connector.provider]),
           sync: sync[connector.id] ?? null,
           connection: connection ? { account: connection.account, lastSyncedAt: connection.lastSyncedAt, lastError: connection.lastError } : null,
         };

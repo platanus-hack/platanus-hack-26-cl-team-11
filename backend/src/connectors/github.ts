@@ -1,7 +1,5 @@
-import type { EventDraft, KeyConnector } from '../types.js';
-import { getJson } from './http.js';
-
-const BASE = 'https://api.github.com';
+import { getGithubJson } from '../oauth/github.js';
+import type { EventDraft, OAuthConnector } from '../types.js';
 
 interface GithubEvent {
   id: string;
@@ -15,12 +13,6 @@ interface GithubEvent {
     pull_request?: { title?: string; html_url?: string; merged?: boolean };
   };
 }
-
-const headers = (secret: string) => ({
-  authorization: `Bearer ${secret}`,
-  accept: 'application/vnd.github+json',
-  'user-agent': 'ronda-hack',
-});
 
 function toDraft(event: GithubEvent): EventDraft | null {
   if (event.type === 'PushEvent') {
@@ -50,18 +42,16 @@ function toDraft(event: GithubEvent): EventDraft | null {
   return null;
 }
 
-export const github: KeyConnector = {
+export const github: OAuthConnector = {
   id: 'github',
   label: 'GitHub',
-  how: 'Token personal',
-  kind: 'key',
-  async identify(secret, fetchImpl) {
-    const user = await getJson<{ login: string }>(fetchImpl, `${BASE}/user`, headers(secret), 'GitHub');
-    return user.login;
-  },
+  how: 'Cuenta de GitHub',
+  kind: 'oauth',
+  provider: 'github',
+  scopes: ['read:user'],
 
-  async pull(secret, account, since, fetchImpl) {
-    const events = await getJson<GithubEvent[]>(fetchImpl, `${BASE}/users/${encodeURIComponent(account)}/events?per_page=100`, headers(secret), 'GitHub');
+  async pull(accessToken, account, since, fetchImpl) {
+    const events = await getGithubJson<GithubEvent[]>(fetchImpl, `/users/${encodeURIComponent(account)}/events?per_page=100`, accessToken);
     return events
       .filter((event) => new Date(event.created_at) >= since)
       .map(toDraft)

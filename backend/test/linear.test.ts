@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { linear } from '../src/connectors/linear.js';
 import { CONNECTORS } from '../src/connectors/registry.js';
 import { createContext } from '../src/context.js';
+import { linear as linearProvider } from '../src/oauth/linear.js';
 import { syncSource } from '../src/sync.js';
 import { ConnectorError, type Fetch } from '../src/types.js';
 
@@ -67,32 +68,39 @@ const rejection = async (attempt: Promise<unknown>): Promise<ConnectorError> => 
   return failure;
 };
 
-test('identify returns the email of the key owner', async () => {
+test('identify returns the email of the account owner', async () => {
   const seen: SeenRequest[] = [];
-  const account = await linear.identify('lin_api_good', linearFetch(() => [], seen));
+  const account = await linearProvider.identify('lin_oauth_good', linearFetch(() => [], seen));
 
   assert.equal(account, 'ana@example.com');
   assert.equal(seen.length, 1);
   assert.equal(seen[0]?.url, 'https://api.linear.app/graphql');
   assert.equal(seen[0]?.method, 'POST');
   assert.equal(seen[0]?.contentType, 'application/json');
+  assert.equal(seen[0]?.authorization, 'Bearer lin_oauth_good');
   assert.ok(seen[0]?.query.includes('viewer'));
+  assert.ok(seen[0]?.query.includes('email'));
 });
 
-test('a key rejected with 401 maps to status 400 and the Spanish message', async () => {
-  const failure = await rejection(linear.identify('bad', linearFetch(() => [])));
+test('an access rejected with 401 maps to status 400 and the Spanish message', async () => {
+  const failure = await rejection(linearProvider.identify('bad', linearFetch(() => [])));
   assert.equal(failure.status, 400);
-  assert.equal(failure.message, 'Linear rechazó la llave.');
+  assert.equal(failure.message, 'Linear dio por vencido el acceso. Vuelve a conectar tu cuenta.');
 });
 
-test('an authentication error inside a 200 response is also a rejected key', async () => {
-  const failure = await rejection(linear.identify('lin_api_x', respondingWith(() => Response.json(authenticationFailure))));
+test('an authentication error inside a 200 response is also a rejected access', async () => {
+  const failure = await rejection(linear.pull('lin_oauth_x', 'ana@example.com', since, respondingWith(() => Response.json(authenticationFailure))));
   assert.equal(failure.status, 400);
-  assert.equal(failure.message, 'Linear rechazó la llave.');
+  assert.equal(failure.message, 'Linear dio por vencido el acceso. Vuelve a conectar tu cuenta.');
+});
+
+test('an account without an email is not accepted', async () => {
+  const failure = await rejection(linearProvider.identify('lin_oauth_good', respondingWith(() => Response.json({ data: { viewer: {} } }))));
+  assert.equal(failure.message, 'Linear no entregó el correo de la cuenta.');
 });
 
 test('pull maps every assigned issue to a task event', async () => {
-  const drafts = await linear.pull('lin_api_good', 'ana@example.com', since, linearFetch(() => [issue()]));
+  const drafts = await linear.pull('lin_oauth_good', 'ana@example.com', since, linearFetch(() => [issue()]));
 
   assert.deepEqual(drafts, [
     {
@@ -116,12 +124,12 @@ test('pull maps every assigned issue to a task event', async () => {
   ]);
 });
 
-test('pull sends the raw key without Bearer and passes since as a variable', async () => {
+test('pull sends the access token as Bearer and passes since as a variable', async () => {
   const seen: SeenRequest[] = [];
-  await linear.pull('lin_api_good', 'ana@example.com', since, linearFetch(() => [], seen));
+  await linear.pull('lin_oauth_good', 'ana@example.com', since, linearFetch(() => [], seen));
 
   assert.equal(seen.length, 1);
-  assert.equal(seen[0]?.authorization, 'lin_api_good');
+  assert.equal(seen[0]?.authorization, 'Bearer lin_oauth_good');
   assert.equal(seen[0]?.method, 'POST');
   assert.deepEqual(seen[0]?.variables, { since: since.toISOString() });
   assert.ok(seen[0]?.query.includes('$since'));
@@ -130,34 +138,34 @@ test('pull sends the raw key without Bearer and passes since as a variable', asy
 
 test('a network failure, a rate limit and a server error each get their own message', async () => {
   const offline = await rejection(
-    linear.pull('lin_api_good', 'ana@example.com', since, (async () => {
+    linear.pull('lin_oauth_good', 'ana@example.com', since, (async () => {
       throw new Error('offline');
     }) as Fetch),
   );
   assert.equal(offline.message, 'No se pudo contactar a Linear.');
   assert.equal(offline.status, 502);
 
-  const limited = await rejection(linear.pull('lin_api_good', 'ana@example.com', since, respondingWith(() => new Response('{}', { status: 429 }))));
+  const limited = await rejection(linear.pull('lin_oauth_good', 'ana@example.com', since, respondingWith(() => new Response('{}', { status: 429 }))));
   assert.equal(limited.status, 429);
 
-  const broken = await rejection(linear.pull('lin_api_good', 'ana@example.com', since, respondingWith(() => new Response('oops', { status: 500 }))));
+  const broken = await rejection(linear.pull('lin_oauth_good', 'ana@example.com', since, respondingWith(() => new Response('oops', { status: 500 }))));
   assert.equal(broken.message, 'Linear respondió 500.');
   assert.equal(broken.status, 502);
 });
 
-test('a GraphQL error that is not about the key is not reported as a rejected key', async () => {
+test('a GraphQL error that is not about the access is not reported as a rejected access', async () => {
   const failure = await rejection(
-    linear.pull('lin_api_good', 'ana@example.com', since, respondingWith(() => Response.json({ errors: [{ message: 'Cannot query field', extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } }] }))),
+    linear.pull('lin_oauth_good', 'ana@example.com', since, respondingWith(() => Response.json({ errors: [{ message: 'Cannot query field', extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } }] }))),
   );
   assert.equal(failure.status, 502);
-  assert.notEqual(failure.message, 'Linear rechazó la llave.');
+  assert.notEqual(failure.message, 'Linear dio por vencido el acceso. Vuelve a conectar tu cuenta.');
 });
 
 test('syncing twice imports an issue once and a later update becomes a new event', async () => {
   let issues = [issue()];
   const ctx = createContext({ location: ':memory:', fetch: linearFetch(() => issues) });
   const { token } = ctx.store.addPerson('Ana');
-  ctx.store.saveConnection(token, 'linear', 'ana@example.com', 'lin_api_good');
+  ctx.store.saveConnection(token, 'linear', 'ana@example.com', JSON.stringify({ accessToken: 'lin_oauth_good', refreshToken: null, expiresAt: Date.now() + 60 * 60 * 1000 }));
 
   assert.equal(await syncSource(ctx, token, 'linear'), 1);
   assert.equal(await syncSource(ctx, token, 'linear'), 0);
