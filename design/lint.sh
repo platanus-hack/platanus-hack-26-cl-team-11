@@ -11,7 +11,7 @@ if [ "$#" -gt 0 ]; then
 else
   files=$( { git ls-files; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u )
 fi
-files=$(printf '%s\n' "$files" | grep -E '\.(css|scss|sass|less|html?|jsx|tsx|vue|svelte|astro)$' | grep -vE '^(design/|docs/|node_modules/|dist/|build/|\.next/)' )
+files=$(printf '%s\n' "$files" | grep -E '\.(css|scss|sass|less|html?|jsx|tsx|vue|svelte|astro)$' | grep -vE '^(design/|docs/|\.agents/|\.claude/|node_modules/|dist/|build/|\.next/)' )
 [ -z "$files" ] && { echo "design/lint: sin archivos de UI que revisar."; exit 0; }
 
 fail=0
