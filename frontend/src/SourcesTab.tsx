@@ -53,7 +53,7 @@ export function SourcesTab({ token, page, notice, focusId = null, onChange }: So
 
   return (
     <div className="app-block">
-      <SectionHead first title="Fuentes" />
+      <SectionHead title="Fuentes" />
       {notice && (
         <p className="rd-note" role="status">
           {notice}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { googleLinkPath, type OnboardingStep, type OnboardingStepId, type SignalKey, type PersonLogin } from './api';
 import { CopyButton } from './CopyButton';
 import { FaceEditor } from './FaceEditor';
@@ -21,9 +21,10 @@ interface SettingsTabProps {
   login: PersonLogin | null;
   firstSteps: OnboardingStep[];
   onOpenStep: (step: OnboardingStepId) => void;
+  sources: ReactNode;
 }
 
-export function SettingsTab({ token, name, login, firstSteps, onOpenStep }: SettingsTabProps) {
+export function SettingsTab({ token, name, login, firstSteps, onOpenStep, sources }: SettingsTabProps) {
   const { policy, busy, problem, change } = usePolicy(token);
   const [openKey, setOpenKey] = useState<SignalKey | null>(null);
   const link = window.location.origin + window.location.pathname;
@@ -31,6 +32,8 @@ export function SettingsTab({ token, name, login, firstSteps, onOpenStep }: Sett
   return (
     <>
       <OnboardingSection steps={firstSteps} onOpen={onOpenStep} />
+
+      {sources}
 
       <FaceEditor token={token} name={name} />
 

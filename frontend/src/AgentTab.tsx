@@ -26,9 +26,13 @@ export function AgentTab({ token, active }: { token: string; active: boolean }) 
   const { error: loadError } = usePolling(load);
 
   const count = view?.messages.length ?? 0;
+  const settled = useRef<number | null>(null);
   useEffect(() => {
-    if (active) end.current?.scrollIntoView({ block: 'end' });
-  }, [active, count, pending]);
+    if (!view) return;
+    const grew = settled.current !== null && (count > settled.current || pending !== null);
+    settled.current = count;
+    if (active && grew) end.current?.scrollIntoView({ block: 'nearest' });
+  }, [active, view, count, pending]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -47,7 +51,7 @@ export function AgentTab({ token, active }: { token: string; active: boolean }) 
 
   return (
     <div className="app-block">
-      <SectionHead first title="Tu agente" />
+      <SectionHead title="Tu agente" />
       {view && (
         <div className="rd-list">
           <Item icon={<SourceLogo id="whatsapp" />} title="Escríbele aquí o por WhatsApp" subtitle={mirrorText(view)} />

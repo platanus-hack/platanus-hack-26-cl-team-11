@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_TAB, TABS, type TabId } from './tabs';
 
 const NOTICE_PARAM = 'aviso';
-const NOTICE_TAB: TabId = 'fuentes';
+const NOTICE_TAB: TabId = 'ajustes';
 
 const fallbackTab = (): TabId => (new URLSearchParams(window.location.search).has(NOTICE_PARAM) ? NOTICE_TAB : DEFAULT_TAB);
 const tabOf = (hash: string): TabId => TABS.find((tab) => tab.id === hash.replace(/^#/, ''))?.id ?? fallbackTab();

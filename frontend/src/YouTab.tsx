@@ -1,8 +1,11 @@
 import type { Signals, Summary } from './api';
+import { AgentTab } from './AgentTab';
 import { Face } from './Face';
 import { SummarySection } from './SummarySection';
 
 interface YouTabProps {
+  token: string;
+  active: boolean;
   name: string;
   signals: Signals | null;
   summary: Summary | null;
@@ -11,10 +14,11 @@ interface YouTabProps {
 const MAX_BULLETS = 3;
 const FALLBACK_LINE = 'Conecta una fuente y aquí aparece cómo vienes.';
 
-export function YouTab({ name, signals, summary }: YouTabProps) {
+export function YouTab({ token, active, name, signals, summary }: YouTabProps) {
   const lines = summary?.lines.slice(0, MAX_BULLETS) ?? [];
 
   return (
+    <>
     <div className="app-block">
       <div className="app-you">
         <Face name={name} size="hub" state={signals?.energy.level === 'alta' ? 'lista' : 'reposo'} />
@@ -33,5 +37,7 @@ export function YouTab({ name, signals, summary }: YouTabProps) {
       {signals && summary && <SummarySection signals={signals} summary={summary} />}
       <p className="rd-note">Esto lo ves solo tú.</p>
     </div>
+    <AgentTab token={token} active={active} />
+    </>
   );
 }

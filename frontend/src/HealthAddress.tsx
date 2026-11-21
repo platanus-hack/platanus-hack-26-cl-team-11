@@ -11,7 +11,7 @@ const CHECK_EVERY_MS = 2000;
 const CLOCK_SLACK_MS = 5000;
 export const HEALTH_RETURN_PARAM = 'salud';
 
-const returnUrl = () => `${window.location.origin}${window.location.pathname}?${HEALTH_RETURN_PARAM}=1#fuentes`;
+const returnUrl = () => `${window.location.origin}${window.location.pathname}?${HEALTH_RETURN_PARAM}=1#ajustes`;
 
 const runUrlOf = (shortcutName: string, ingestUrl: string) => {
   const back = encodeURIComponent(returnUrl());

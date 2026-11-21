@@ -70,11 +70,19 @@ export function ConnectPage({ token }: { token: string }) {
   };
 
   const content: Record<TabId, ReactNode> = {
-    fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
-    tu: <YouTab name={page.name} signals={signals} summary={summary} />,
+    tu: <YouTab token={token} active={tab === 'tu'} name={page.name} signals={signals} summary={summary} />,
     equipo: <TeamSection token={token} />,
     globo: <GlobeTab token={token} active={tab === 'globo'} />,
-    ajustes: <SettingsTab token={token} name={page.name} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
+    ajustes: (
+      <SettingsTab
+        token={token}
+        name={page.name}
+        login={page.login ?? null}
+        firstSteps={firstSteps}
+        onOpenStep={openStep}
+        sources={<SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />}
+      />
+    ),
   };
 
   return (
