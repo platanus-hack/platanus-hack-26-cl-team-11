@@ -42,7 +42,7 @@ Para mostrar el multijugador con el público:
 
 Todo el recorrido está grabado: [demo/camino-feliz.mp4](demo/camino-feliz.mp4), con el detalle de qué es real en [demo/README.md](demo/README.md).
 
-Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales, y con una ronda real usando el Claude de la terminal (`AGENT_CLI=claude`). Con 50x todavía no se ha probado: falta la llave.
+Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales, y con una ronda real usando el Claude de la terminal (`AGENT_CLI=claude`). Con 50x corrió el 21-nov-2026: una ronda en local y una simulación de 4 personas en producción.
 
 ## Qué es real y qué puede ser simulado
 

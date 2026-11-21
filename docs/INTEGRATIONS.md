@@ -233,7 +233,9 @@ Límites:
 - Leer un mensaje de texto necesita el modelo. Conectar el teléfono y los botones funcionan sin él.
 - Con el número de prueba de Kapso (sandbox) solo se le puede escribir al teléfono registrado en esa sesión. Para que entre el público hace falta un número propio conectado en Kapso.
 
-Estado: construido y probado con un Kapso falso. Falta probarlo contra Kapso.
+Estado: construido y probado con un Kapso falso. En producción están cargadas las variables y el webhook está registrado en el número de prueba de Kapso (21-nov-2026). Falta probarlo con un teléfono.
+
+El proyecto de Kapso de la hack es uno aparte del de Vita, que tiene los números de los clientes: la llave del servidor solo ve el número de prueba.
 
 ### Cómo se activa
 

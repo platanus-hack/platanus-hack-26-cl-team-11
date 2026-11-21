@@ -34,7 +34,7 @@
 
 ### Multijugador
 
-- [ ] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación con 50x. En local la ronda ya corre de verdad con `AGENT_CLI=claude` (así se grabó `docs/demo/`); en producción sigue sin modelo.
+- [x] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación con 50x. Hecho el 21-nov-2026: `npm run agents:check` contra 50x terminó en 11 segundos con 2 conversaciones y 1 propuesta, y en producción una simulación de 4 personas terminó en 30 segundos con 2 conversaciones.
 - [ ] **El globo dentro de `/sala/<código>`.** Hoy es una página de prueba (`design/grafo/sala.html`). Falta que Mati decida cómo nace un nodo, cómo se ve antes y después de conectar su agente, y la dirección del arco.
 - [ ] **Puerta MCP** para conectar apps de chat sin copiar y pegar, y **respuestas en vivo** de un asistente que esté abierto durante la ronda. No construidas.
 - [ ] **«Preguntar antes» por archivo.** Hoy un archivo en ese estado espera a que la persona lo cambie. Falta que el agente le pregunte por WhatsApp.
@@ -44,10 +44,10 @@
 
 - [x] **Framework de agentes.** Ninguno: llamadas directas al modelo con salida estructurada, en `backend/src/agents/`. Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
 - [x] **Transporte entre agentes:** la base compartida. Cada conversación se guarda como un hilo con sus mensajes.
-- [ ] **Puente de WhatsApp:** el proveedor es Kapso y la demo lo lleva (decisión de Ian, 21-nov). Está construido y probado con un Kapso falso ([INTEGRATIONS.md](INTEGRATIONS.md#whatsapp)). Falta cargar la llave en Render, registrar el webhook y probarlo con un teléfono. Falta decidir el número: con el de prueba de Kapso solo puede escribir un teléfono; para el público hace falta uno propio.
+- [ ] **Puente de WhatsApp:** el proveedor es Kapso y la demo lo lleva (decisión de Ian, 21-nov). Está construido y probado con un Kapso falso ([INTEGRATIONS.md](INTEGRATIONS.md#whatsapp)). Las variables están en Render y el webhook está registrado en el número de prueba de Kapso, en un proyecto de Kapso separado del de los clientes de Vita (21-nov). Falta probarlo con un teléfono. Falta decidir el número: con el de prueba solo puede escribir el teléfono registrado en la sesión; para el público hace falta uno propio.
 - [ ] **Dónde corre cada agente** y cómo se aísla su memoria privada. Hoy todos corren dentro del mismo servidor, y la memoria privada se separa por el token de cada persona en una sola base.
 - [ ] **Qué integraciones son reales** en la demo y cuáles sintéticas. Hoy: Apple Health está probada con un iPhone real; GitHub, Linear, Google Calendar, Gmail y Granola están construidas y sin probar contra el servicio.
-- [ ] **Probar la ronda de agentes contra el modelo real.** En local ya corrió con el Claude de la terminal. Faltan las credenciales del modelo en Render; `npm run agents:check` la prueba en local.
+- [x] **Probar la ronda de agentes contra el modelo real.** Corrió con DeepSeek en 50x, en local y en producción (21-nov-2026).
 - [ ] **Probar las preguntas del tablero contra el modelo real.** Los agentes responden una pregunta y arman una sola respuesta ([ARCHITECTURE.md](ARCHITECTURE.md#preguntarle-al-equipo)); solo ha corrido con un modelo falso.
 - [ ] **Conectar el globo a datos reales.** El globo de `design/grafo/` usa conversaciones simuladas. La ruta de agentes ya entrega las flechas ([API.md](API.md#agentes)).
 
