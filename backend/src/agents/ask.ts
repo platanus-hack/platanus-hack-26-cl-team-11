@@ -69,7 +69,8 @@ export const assemblePrompt = (question: string, contributions: Contribution[]) 
     asData({ pregunta: question }),
     'Estas son las respuestas que dieron los agentes de su equipo:',
     asData(contributions.map((contribution) => ({ id: contribution.id, nombre: contribution.name, sabe: contribution.knows, respuesta: contribution.answer }))),
-    'Arma una sola respuesta para tu persona, en dos a cinco frases. Di quién sabe qué, usando los nombres. Si dos respuestas se contradicen, dilo.',
+    'Arma una sola respuesta para tu persona, en dos a cinco frases. Di quién sabe qué, usando los nombres, y deja fuera a quien no aporta nada a la pregunta.',
+    'Solo si dos respuestas se contradicen, dilo. Si no hay contradicción, no lo menciones.',
     'No agregues nada que no esté en las respuestas.',
     'En «sources» devuelve los ids exactos de las respuestas que usaste.',
   ].join('\n\n');
