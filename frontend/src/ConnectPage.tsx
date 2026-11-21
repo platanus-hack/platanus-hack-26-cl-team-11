@@ -54,7 +54,7 @@ export function ConnectPage({ token }: { token: string }) {
     tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
     agente: <AgentTab token={token} />,
     equipo: <TeamSection token={token} />,
-    ajustes: <SettingsTab token={token} firstSteps={firstSteps} onOpenStep={openStep} />,
+    ajustes: <SettingsTab token={token} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };
 
   return (

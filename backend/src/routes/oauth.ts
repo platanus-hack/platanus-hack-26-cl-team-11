@@ -3,7 +3,10 @@ import { Hono, type Context } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
+import { openLoginStore } from '../logins.js';
+import { googleProfile } from '../oauth/google.js';
 import { OAUTH_PROVIDERS } from '../oauth/registry.js';
+import { rateLimit } from '../rateLimit.js';
 import { syncSource } from '../sync.js';
 import { ConnectorError, type OAuthConnector, type OAuthProvider } from '../types.js';
 import { NOT_FOUND } from './shared.js';
@@ -20,7 +23,14 @@ interface OAuthState {
   provider: string;
   at: number;
   nonce: string;
+  login?: boolean;
 }
+
+const LOGIN_PROVIDER = 'google';
+const LOGIN_SCOPES = ['profile'];
+const LOGINS_PER_MINUTE = 30;
+const MAX_NAME_LENGTH = 80;
+const ACCOUNT_TAKEN = 'Esa cuenta de Google ya está asociada a otra página de Ronda.';
 
 const hashOf = (nonce: string) => createHash('sha256').update(nonce).digest('hex');
 const challengeOf = (verifier: string) => createHash('sha256').update(verifier).digest('base64url');
@@ -53,6 +63,8 @@ const missingCredentials = (provider: string) => {
 export function oauthRoutes(ctx: AppContext) {
   const routes = new Hono();
   const { store, vault, config } = ctx;
+  const logins = openLoginStore(ctx.db);
+  const limitedLogins = rateLimit(LOGINS_PER_MINUTE);
 
   const credentialsOf = (provider: string) => (Object.hasOwn(config.oauth, provider) ? config.oauth[provider] : undefined);
 
@@ -85,11 +97,56 @@ export function oauthRoutes(ctx: AppContext) {
       const state = JSON.parse(vault.open(sealed)) as Partial<OAuthState> | null;
       if (typeof state?.token !== 'string' || typeof state.at !== 'number' || typeof state.nonce !== 'string' || state.provider !== provider) return null;
       if (Date.now() - state.at > STATE_TTL_MS) return null;
-      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce };
+      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce, login: state.login === true };
     } catch {
       return null;
     }
   };
+
+  const startLogin = (c: Context, personToken: string) => {
+    const provider = findProvider(LOGIN_PROVIDER);
+    const credentials = credentialsOf(LOGIN_PROVIDER);
+    if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
+    const nonce = randomBytes(32).toString('base64url');
+    const authorizeUrl = provider.authorizeUrl({
+      credentials,
+      redirectUri: redirectUriFor(c.req.url, LOGIN_PROVIDER),
+      scopes: LOGIN_SCOPES,
+      state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true } satisfies OAuthState)),
+      codeChallenge: challengeOf(nonce),
+    });
+    setCookie(c, cookieNameOf(LOGIN_PROVIDER), nonce, { ...cookiePlaceOf(c.req.url, LOGIN_PROVIDER), httpOnly: true, sameSite: 'Lax', maxAge: STATE_TTL_MS / 1000 });
+    return c.redirect(authorizeUrl, 302);
+  };
+
+  const finishLogin = async (c: Context, state: OAuthState, code: string, nonce: string) => {
+    const provider = findProvider(LOGIN_PROVIDER);
+    const credentials = credentialsOf(LOGIN_PROVIDER);
+    if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
+    const tokens = await provider.exchange(code, credentials, redirectUriFor(c.req.url, LOGIN_PROVIDER), ctx.fetch, nonce);
+    const profile = await googleProfile(tokens.accessToken, ctx.fetch);
+    const asking = state.token ? store.findPerson(state.token) : undefined;
+    if (asking) {
+      const outcome = logins.link(profile.email, asking.token);
+      const page = `/conectar/${asking.token}`;
+      return c.redirect(outcome === 'de_otra_persona' ? `${page}?aviso=${encodeURIComponent(ACCOUNT_TAKEN)}#ajustes` : `${page}#ajustes`, 302);
+    }
+    const known = logins.personOf(profile.email);
+    const person = (known ? store.findPerson(known) : undefined) ?? store.addPerson((profile.name ?? profile.email.split('@')[0] ?? profile.email).slice(0, MAX_NAME_LENGTH));
+    logins.link(profile.email, person.token);
+    return c.redirect(`/conectar/${person.token}`, 302);
+  };
+
+  routes.get('/login', (c) => c.json({ google: credentialsOf(LOGIN_PROVIDER) !== undefined }));
+
+  routes.get('/login/google/start', limitedLogins, (c) => startLogin(c, ''));
+
+  routes.get('/people/:token/login/google/start', (c) => {
+    if (!startedFromOwnPage(c)) return c.json(NOT_FROM_OWN_PAGE, 403);
+    const person = store.findPerson(c.req.param('token'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    return startLogin(c, person.token);
+  });
 
   routes.get('/people/:token/oauth/:provider/start', (c) => {
     if (!startedFromOwnPage(c)) return c.json(NOT_FROM_OWN_PAGE, 403);
@@ -121,6 +178,16 @@ export function oauthRoutes(ctx: AppContext) {
     const nonce = getCookie(c, cookieNameOf(providerId));
     deleteCookie(c, cookieNameOf(providerId), cookiePlaceOf(c.req.url, providerId));
     if (!nonce || !sameHash(hashOf(nonce), state.nonce) || !consumeNonce(state.nonce)) return c.json(INVALID_STATE, 400);
+    if (state.login) {
+      const loginCode = c.req.query('code');
+      if (c.req.query('error') || !loginCode) return c.redirect(state.token ? `/conectar/${state.token}#ajustes` : '/', 302);
+      try {
+        return await finishLogin(c, state, loginCode, nonce);
+      } catch (failure) {
+        if (!(failure instanceof ConnectorError)) throw failure;
+        return c.redirect(`/?aviso=${encodeURIComponent(failure.message)}`, 302);
+      }
+    }
     const person = store.findPerson(state.token);
     if (!person) return c.json(NOT_FOUND, 404);
     const personPage = `/conectar/${person.token}`;
@@ -135,6 +202,7 @@ export function oauthRoutes(ctx: AppContext) {
       const account = await provider.identify(tokens.accessToken, ctx.fetch);
       for (const connector of connectorsOf(providerId)) {
         store.saveConnection(person.token, connector.id, account, JSON.stringify(tokens));
+        if (providerId === LOGIN_PROVIDER) logins.link(account, person.token);
         await syncSource(ctx, person.token, connector.id).catch(() => undefined);
       }
       return c.redirect(personPage, 302);

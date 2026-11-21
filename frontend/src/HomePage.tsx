@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { createPerson, type CreatedPerson } from './api';
+import { useEffect, useState, type FormEvent } from 'react';
+import { createPerson, fetchLoginOptions, GOOGLE_LOGIN_PATH, type CreatedPerson } from './api';
 import { RoomStart } from './RoomStart';
 
 export function HomePage() {
@@ -7,6 +7,11 @@ export function HomePage() {
   const [created, setCreated] = useState<CreatedPerson | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [googleLogin, setGoogleLogin] = useState(false);
+
+  useEffect(() => {
+    fetchLoginOptions().then((options) => setGoogleLogin(options.google), () => setGoogleLogin(false));
+  }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -32,6 +37,16 @@ export function HomePage() {
         <br />
         <span className="rd-gradient-text">con tu señal.</span>
       </h1>
+      {googleLogin && (
+        <section className="rd-card rd-glass">
+          <span className="rd-label">Tu página</span>
+          <div className="rd-actions">
+            <a className="rd-button app-link" href={GOOGLE_LOGIN_PATH}>
+              Entrar con Google
+            </a>
+          </div>
+        </section>
+      )}
       <section className="rd-card rd-glass">
         <span className="rd-label">Nueva persona</span>
         <form className="rd-actions" onSubmit={submit}>

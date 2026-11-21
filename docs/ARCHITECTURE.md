@@ -81,7 +81,11 @@ Desconectar una fuente borra la conexión y todos sus eventos.
 
 ## Identidad
 
-Cada persona tiene un token largo y aleatorio. Su link `/conectar/<token>` es su identidad: no hay cuentas ni contraseñas. Quien tenga el link ve sus registros, así que se entrega solo a su dueño.
+Cada persona tiene un token largo y aleatorio. Su link `/conectar/<token>` es su identidad. Quien tenga el link ve sus registros y actúa como esa persona, así que se entrega solo a su dueño.
+
+Encima del link hay un ingreso con Google (`logins.ts`, rutas en `routes/oauth.ts`). Asocia un correo a una persona, para volver a la misma página desde cualquier dispositivo sin guardar el link y para que una cuenta no abra dos páginas. Entrar por primera vez crea la página; una página que ya existe se asocia desde Ajustes, y también queda asociada al conectar Google Calendar o Gmail.
+
+El ingreso con Google todavía no reemplaza al link: las rutas siguen aceptando el token sin pedir sesión. Hasta que eso cambie, lo que puede hacer quien administra un equipo lo puede hacer quien tenga su link.
 
 ## Pantallas
 

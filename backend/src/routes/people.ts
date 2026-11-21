@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
 import { openDeliveryStore } from '../deliveries.js';
+import { openLoginStore } from '../logins.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const RECENT_EVENTS = 12;
@@ -9,6 +10,7 @@ const RECENT_EVENTS = 12;
 export function peopleRoutes({ db, store, config }: AppContext) {
   const routes = new Hono();
   const deliveries = openDeliveryStore(db);
+  const logins = openLoginStore(db);
 
   routes.post('/people', async (c) => {
     const body = asObject(await c.req.text());
@@ -29,6 +31,7 @@ export function peopleRoutes({ db, store, config }: AppContext) {
       healthIngestPath: health?.kind === 'push' ? `/api/ingest/${health.ingestSlug}/${person.token}` : null,
       publicBaseUrl: config.publicBaseUrl,
       healthShortcut: config.healthShortcut ?? null,
+      login: { email: logins.emailOf(person.token) ?? null, available: config.oauth.google !== undefined },
       sources: CONNECTORS.map((connector) => {
         const connection = connections.find((item) => item.source === connector.id);
         return {

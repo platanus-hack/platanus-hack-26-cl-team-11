@@ -45,6 +45,17 @@ export async function getGoogleJson<T>(fetchImpl: Fetch, url: string, accessToke
   return (await response.json()) as T;
 }
 
+export interface GoogleProfile {
+  email: string;
+  name: string | null;
+}
+
+export async function googleProfile(accessToken: string, fetchImpl: Fetch): Promise<GoogleProfile> {
+  const profile = await getGoogleJson<{ email?: string; name?: string }>(fetchImpl, USERINFO_URL, accessToken, 'tu cuenta de Google');
+  if (!profile.email) throw new ConnectorError('Google no entregó el correo de la cuenta.');
+  return { email: profile.email, name: profile.name?.trim() || null };
+}
+
 export const google: OAuthProvider = {
   id: 'google',
 

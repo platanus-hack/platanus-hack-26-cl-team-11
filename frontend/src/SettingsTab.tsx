@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { OnboardingStep, OnboardingStepId, SignalKey } from './api';
+import { googleLinkPath, type OnboardingStep, type OnboardingStepId, type SignalKey, type PersonLogin } from './api';
 import { CopyButton } from './CopyButton';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
@@ -14,11 +14,12 @@ import { WhatsAppSection } from './WhatsAppSection';
 
 interface SettingsTabProps {
   token: string;
+  login: PersonLogin | null;
   firstSteps: OnboardingStep[];
   onOpenStep: (step: OnboardingStepId) => void;
 }
 
-export function SettingsTab({ token, firstSteps, onOpenStep }: SettingsTabProps) {
+export function SettingsTab({ token, login, firstSteps, onOpenStep }: SettingsTabProps) {
   const { policy, busy, problem, change } = usePolicy(token);
   const [openKey, setOpenKey] = useState<SignalKey | null>(null);
   const link = window.location.origin + window.location.pathname;
@@ -91,6 +92,24 @@ export function SettingsTab({ token, firstSteps, onOpenStep }: SettingsTabProps)
             subtitle={link}
             end={<CopyButton text={link} label="Copiar tu link" />}
           />
+          {login && (login.email || login.available) && (
+            <Item
+              icon={
+                <ItemIcon>
+                  <Glyph name="key" />
+                </ItemIcon>
+              }
+              title="Entrar con Google"
+              subtitle={login.email ?? 'Para volver a tu página desde cualquier dispositivo'}
+              end={
+                login.email ? undefined : (
+                  <a className="rd-button rd-button--quiet rd-button--small app-link" href={googleLinkPath(token)} aria-label="Asociar tu cuenta de Google">
+                    Asociar
+                  </a>
+                )
+              }
+            />
+          )}
           <Item
             icon={
               <ItemIcon>

@@ -13,6 +13,16 @@ En producción: `https://ronda-n8if.onrender.com/api`. En local: `http://localho
 - **Fechas.** ISO 8601 en UTC. Para decidir qué es «hoy», las señales usan la hora de Santiago.
 - **Sin límite de frecuencia.** Cualquiera puede crear personas, equipos y publicaciones. Está anotado en [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
+## Ingreso con Google
+
+| Ruta | Recibe | Responde |
+|---|---|---|
+| `GET /api/login` | — | `{ google }`: si el servidor puede ofrecer el ingreso |
+| `GET /api/login/google/start` | — | 302 a Google. Al volver, lleva a la página de la persona de ese correo; si no existe, la crea con el nombre de la cuenta |
+| `GET /api/people/<token>/login/google/start` | — | 302 a Google. Al volver, asocia ese correo a esta página. Si el correo ya es de otra página, vuelve con un aviso y no cambia nada |
+
+El retorno usa la misma dirección que conectar Google (`/api/oauth/google/callback`) y pide solo el correo y el nombre. La página de la persona trae `login: { email, available }`.
+
 ## Personas
 
 | Ruta | Recibe | Responde |

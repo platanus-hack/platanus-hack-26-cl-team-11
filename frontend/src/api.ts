@@ -41,11 +41,17 @@ export interface HealthShortcut {
   name: string;
 }
 
+export interface PersonLogin {
+  email: string | null;
+  available: boolean;
+}
+
 export interface PersonPage {
   name: string;
   healthIngestPath: string;
   publicBaseUrl: string | null;
   healthShortcut: HealthShortcut | null;
+  login?: PersonLogin;
   sources: Source[];
   events: PersonEvent[];
 }
@@ -402,3 +408,7 @@ const whatsappPath = (token: string) => `${personPath(token)}/whatsapp`;
 export const fetchWhatsApp = (token: string) => request<WhatsAppStatus>(whatsappPath(token));
 export const startWhatsAppLink = (token: string) => request<WhatsAppLink>(`${whatsappPath(token)}/link`, post());
 export const disconnectWhatsApp = (token: string) => request<WhatsAppStatus>(whatsappPath(token), { method: 'DELETE' });
+
+export const GOOGLE_LOGIN_PATH = '/api/login/google/start';
+export const googleLinkPath = (token: string) => `${personPath(token)}/login/google/start`;
+export const fetchLoginOptions = () => request<{ google: boolean }>('/api/login');
