@@ -33,7 +33,7 @@ test('sin datos no inventa frases', () => {
   assert.deepEqual(summary.lines, []);
   assert.deepEqual(summary.meetings, []);
   assert.equal(summary.sleep.lastHours, null);
-  assert.deepEqual(summary.move, { workoutMinutes: null, steps: null });
+  assert.deepEqual(summary.move, { workoutMinutes: null, steps: null, stepsTrend: null });
 });
 
 test('cuenta las reuniones de hoy, nombra la próxima y deja fuera las rechazadas', () => {
@@ -59,7 +59,32 @@ test('compara el sueño de la semana con el de antes', () => {
 test('trae el deporte y los pasos de hoy', () => {
   const day = NOW.toISOString().slice(0, 10);
   const summary = summaryOf([event('apple_health', 'salud_diaria', `${day}T10:00:00.000Z`, { date: day, sleep_hours: 7, steps: 6400, workout_minutes: 35 })]);
-  assert.deepEqual(summary.move, { workoutMinutes: 35, steps: 6400 });
+  assert.deepEqual(summary.move, { workoutMinutes: 35, steps: 6400, stepsTrend: null });
+});
+
+test('una noche que no es la de anoche no se cuenta como anoche', () => {
+  const summary = summaryOf([night(1, 8.3)]);
+  assert.equal(summary.sleep.lastHours, null);
+  assert.deepEqual(summary.sleep.latest, { hours: 8.3, day: '2026-11-20' });
+  assert.equal(summary.sleep.trend, null);
+  assert.equal(summary.lines.some((line) => line.startsWith('Anoche')), false);
+});
+
+test('compara anoche con el promedio propio, o con la noche anterior si hay poco historial', () => {
+  const withHistory = summaryOf([night(0, 8), night(1, 7), night(2, 6), night(4, 8)]);
+  assert.deepEqual(withHistory.sleep.trend, { baseline: 7, basis: 'promedio' });
+  const withYesterday = summaryOf([night(0, 8), night(1, 6.5)]);
+  assert.deepEqual(withYesterday.sleep.trend, { baseline: 6.5, basis: 'anterior' });
+  assert.equal(summaryOf([night(0, 8), night(3, 6.5)]).sleep.trend, null);
+});
+
+test('compara los pasos de hoy con los de los días anteriores', () => {
+  const steps = (daysAgo: number, count: number) => {
+    const day = new Date(NOW.getTime() - daysAgo * DAY_MS).toISOString().slice(0, 10);
+    return event('apple_health', 'salud_diaria', `${day}T10:00:00.000Z`, { date: day, steps: count });
+  };
+  assert.deepEqual(summaryOf([steps(0, 2432), steps(1, 9000), steps(2, 7000), steps(3, 8000)]).move.stepsTrend, { baseline: 8000, basis: 'promedio' });
+  assert.deepEqual(summaryOf([steps(0, 2432), steps(1, 9000)]).move.stepsTrend, { baseline: 9000, basis: 'anterior' });
 });
 
 test('lista lo que está en curso y avisa lo que vence', () => {

@@ -159,13 +159,18 @@ export interface SummaryTask {
   due: string | null;
 }
 
+export interface SummaryTrend {
+  baseline: number;
+  basis: 'promedio' | 'anterior';
+}
+
 export interface Summary {
   lines: string[];
   meetings: SummaryMeeting[];
   working: SummaryTask[];
   topics: string[];
-  sleep: { lastHours: number | null; weekHours: number | null; usualHours: number | null };
-  move: { workoutMinutes: number | null; steps: number | null };
+  sleep: { lastHours: number | null; latest: { hours: number; day: string } | null; trend: SummaryTrend | null; weekHours: number | null; usualHours: number | null };
+  move: { workoutMinutes: number | null; steps: number | null; stepsTrend: SummaryTrend | null };
   asOf: string;
 }
 

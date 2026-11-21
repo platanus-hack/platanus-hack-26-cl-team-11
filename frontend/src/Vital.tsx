@@ -3,6 +3,14 @@ import { Glyph, type GlyphName } from './Glyph';
 import { useCountUp } from './useCountUp';
 
 export type VitalKind = 'energy' | 'load' | 'sleep' | 'move';
+export type TrendDirection = 'up' | 'down' | 'flat';
+
+export interface VitalTrend {
+  direction: TrendDirection;
+  text: string;
+}
+
+const ARROW: Record<TrendDirection, string> = { up: 'M6 10V2M2.5 5.5 6 2l3.5 3.5', down: 'M6 2v8M2.5 6.5 6 10l3.5-3.5', flat: 'M2 6h8' };
 
 interface VitalProps {
   kind: VitalKind;
@@ -15,9 +23,10 @@ interface VitalProps {
   amount?: number;
   decimals?: number;
   unit?: string;
+  trend?: VitalTrend;
 }
 
-export function Vital({ kind, glyph, label, note, fill, order, text, amount = 0, decimals = 0, unit }: VitalProps) {
+export function Vital({ kind, glyph, label, note, fill, order, text, amount = 0, decimals = 0, unit, trend }: VitalProps) {
   const counted = useCountUp(amount);
   const style = { '--fill': Math.round(Math.min(100, Math.max(0, fill))), '--i': order } as CSSProperties;
 
@@ -30,6 +39,14 @@ export function Vital({ kind, glyph, label, note, fill, order, text, amount = 0,
           {unit && <span className="rd-stat__unit">{unit}</span>}
         </span>
         <span className="rd-note">{note}</span>
+        {trend && (
+          <span className="rd-note rd-vital__trend">
+            <svg viewBox="0 0 12 12" aria-hidden="true">
+              <path d={ARROW[trend.direction]} />
+            </svg>
+            {trend.text}
+          </span>
+        )}
       </div>
       <div className="rd-vital__ring" aria-hidden="true">
         <svg viewBox="0 0 64 64">

@@ -31,8 +31,20 @@ export interface SummaryTask {
   due: string | null;
 }
 
+export interface SummaryTrend {
+  baseline: number;
+  basis: 'promedio' | 'anterior';
+}
+
+export interface SummaryNight {
+  hours: number;
+  day: string;
+}
+
 export interface SummarySleep {
   lastHours: number | null;
+  latest: SummaryNight | null;
+  trend: SummaryTrend | null;
   weekHours: number | null;
   usualHours: number | null;
 }
@@ -40,6 +52,7 @@ export interface SummarySleep {
 export interface SummaryMove {
   workoutMinutes: number | null;
   steps: number | null;
+  stepsTrend: SummaryTrend | null;
 }
 
 export interface Summary {
@@ -55,6 +68,8 @@ export interface Summary {
 const WEEK_NIGHTS = 7;
 const MIN_WEEK_NIGHTS = 3;
 const MIN_USUAL_NIGHTS = 3;
+const TREND_DAYS = 14;
+const MIN_TREND_DAYS = 3;
 const SHORT_WEEK_RATIO = 0.92;
 const LONG_WEEK_RATIO = 1.05;
 const TIRED_MOODS = ['cansada', 'mal'];
@@ -112,27 +127,50 @@ function tomorrowLine(meetings: SummaryMeeting[] | null, timeZone: string): stri
   return `Mañana tienes ${countText(meetings.length, 'reunión', 'reuniones')}. La primera es «${first.title}» a las ${clockOf(first.start, timeZone)}.`;
 }
 
+interface DayValue {
+  day: string;
+  value: number;
+}
+
+function trendOf(earlier: DayValue[], today: string): SummaryTrend | null {
+  const recent = earlier.filter((entry) => daysBetween(entry.day, today) >= 1 && daysBetween(entry.day, today) <= TREND_DAYS);
+  if (recent.length >= MIN_TREND_DAYS) return { baseline: mean(recent.map((entry) => entry.value)), basis: 'promedio' };
+  const previous = recent.find((entry) => daysBetween(entry.day, today) === 1);
+  return previous ? { baseline: previous.value, basis: 'anterior' } : null;
+}
+
 function sleepOf(events: StoredEvent[], today: string, timeZone: string): SummarySleep {
   const nights = nightsUntil(events, today, timeZone);
   const week = nights.filter((night) => daysBetween(night.day, today) <= WEEK_NIGHTS);
   const before = nights.filter((night) => daysBetween(night.day, today) > WEEK_NIGHTS);
-  const last = nights[0] && daysBetween(nights[0].day, today) <= 1 ? nights[0].hours : null;
+  const latest = nights[0] && daysBetween(nights[0].day, today) <= WEEK_NIGHTS ? nights[0] : null;
+  const last = latest && latest.day === today ? latest.hours : null;
   return {
     lastHours: last,
+    latest: latest ? { hours: latest.hours, day: latest.day } : null,
+    trend: last === null ? null : trendOf(nights.slice(1).map((night) => ({ day: night.day, value: night.hours })), today),
     weekHours: week.length >= MIN_WEEK_NIGHTS ? mean(week.map((night) => night.hours)) : null,
     usualHours: before.length >= MIN_USUAL_NIGHTS ? mean(before.map((night) => night.hours)) : null,
   };
 }
 
 function moveToday(events: StoredEvent[], today: string, timeZone: string): SummaryMove {
-  let latest: StoredEvent | null = null;
+  const latestByDay = new Map<string, StoredEvent>();
   for (const event of events) {
     if (!isFrom(event, 'apple_health', 'salud_diaria')) continue;
     const day = textOf(rawOf(event).date) ?? dayKeyOf(new Date(event.occurredAt), timeZone);
-    if (day === today && (!latest || event.id > latest.id)) latest = event;
+    const known = latestByDay.get(day);
+    if (!known || event.id > known.id) latestByDay.set(day, event);
   }
-  const raw = latest ? rawOf(latest) : {};
-  return { workoutMinutes: numberOf(raw.workout_minutes), steps: numberOf(raw.steps) };
+  const todayEvent = latestByDay.get(today);
+  const raw = todayEvent ? rawOf(todayEvent) : {};
+  const steps = numberOf(raw.steps);
+  const earlier: DayValue[] = [];
+  for (const [day, event] of latestByDay) {
+    const value = numberOf(rawOf(event).steps);
+    if (day !== today && value !== null) earlier.push({ day, value });
+  }
+  return { workoutMinutes: numberOf(raw.workout_minutes), steps, stepsTrend: steps === null ? null : trendOf(earlier, today) };
 }
 
 function sleepLine(sleep: SummarySleep): string | null {
