@@ -18,7 +18,7 @@ export interface RoundEstimate {
   measured: boolean;
 }
 
-export type EstimateDeps = Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds'>;
+export type EstimateDeps = Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter'>;
 
 const mean = (values: number[]) => (values.length === 0 ? 0 : values.reduce((total, value) => total + value, 0) / values.length);
 

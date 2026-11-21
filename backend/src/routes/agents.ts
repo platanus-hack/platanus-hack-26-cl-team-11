@@ -17,36 +17,36 @@ const INVALID_ALLOW = { error: 'El permiso debe ser verdadero o falso.' } as con
 
 const MAX_TOPIC_LENGTH = 500;
 
+export const viewThread = (thread: Thread, viewerToken: string) => {
+  const mine = viewerToken === thread.requesterToken || viewerToken === thread.helperToken;
+  return {
+    id: thread.id,
+    topic: thread.topic,
+    requesterName: thread.requesterName,
+    helperName: thread.helperName,
+    help: thread.help,
+    mine,
+    messages: mine ? thread.messages.map((message) => ({ fromName: message.fromName, text: message.text, createdAt: message.createdAt })) : null,
+  };
+};
+
+export const viewProposal = (proposal: Proposal, viewerToken: string) => ({
+  id: proposal.id,
+  topic: proposal.topic,
+  text: proposal.text,
+  createdAt: proposal.createdAt,
+  status: proposal.status,
+  parties: proposal.parties.map((party) => ({ name: party.name, role: party.role, answer: party.answer, me: party.token === viewerToken })),
+  myAnswer: proposal.parties.find((party) => party.token === viewerToken)?.answer ?? null,
+});
+
+export const isVisibleTo = (proposal: Proposal, viewerToken: string) =>
+  proposal.status === 'acordada' || proposal.parties.some((party) => party.token === viewerToken);
+
 export function agentRoutes(ctx: AppContext) {
   const { store, teams, agents } = ctx;
   const routes = new Hono();
   const cardDeps = cardDepsFrom(ctx);
-
-  const viewThread = (thread: Thread, viewerToken: string) => {
-    const mine = viewerToken === thread.requesterToken || viewerToken === thread.helperToken;
-    return {
-      id: thread.id,
-      topic: thread.topic,
-      requesterName: thread.requesterName,
-      helperName: thread.helperName,
-      help: thread.help,
-      mine,
-      messages: mine ? thread.messages.map((message) => ({ fromName: message.fromName, text: message.text, createdAt: message.createdAt })) : null,
-    };
-  };
-
-  const viewProposal = (proposal: Proposal, viewerToken: string) => ({
-    id: proposal.id,
-    topic: proposal.topic,
-    text: proposal.text,
-    createdAt: proposal.createdAt,
-    status: proposal.status,
-    parties: proposal.parties.map((party) => ({ name: party.name, role: party.role, answer: party.answer, me: party.token === viewerToken })),
-    myAnswer: proposal.parties.find((party) => party.token === viewerToken)?.answer ?? null,
-  });
-
-  const isVisibleTo = (proposal: Proposal, viewerToken: string) =>
-    proposal.status === 'acordada' || proposal.parties.some((party) => party.token === viewerToken);
 
   routes.get('/people/:token/teams/:teamId/agents', (c) => {
     const person = store.findPerson(c.req.param('token'));

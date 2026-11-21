@@ -47,6 +47,7 @@ export interface RoundDeps {
   onEvent?: (teamId: string, type: RoomEventType, payload: JsonObject) => void;
   onProposal?: (proposal: Proposal) => void;
   maxNeeds?: number;
+  cardFilter?: (card: AgentCard) => boolean;
 }
 
 interface OpenNeed {
@@ -113,8 +114,13 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
   deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic });
 }
 
-export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
-  const cards = deps.teams.membersOf(teamId).map((member) => cardFor(deps, member, now));
+const keepEveryCard = () => true;
+
+export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
+  const cards = deps.teams
+    .membersOf(teamId)
+    .map((member) => cardFor(deps, member, now))
+    .filter(deps.cardFilter ?? keepEveryCard);
   const since = new Date(now.getTime() - ACTIVE_PROPOSAL_DAYS * DAY_MS).toISOString();
   const openNeeds = cards
     .flatMap((requester) => {

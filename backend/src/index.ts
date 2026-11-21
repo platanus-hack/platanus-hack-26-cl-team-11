@@ -7,12 +7,14 @@ import { startAgentRoutine } from './agents/routine.js';
 import { createApp } from './app.js';
 import { createContext } from './context.js';
 import { designAssets } from './designAssets.js';
+import { startMesaTicker } from './mesa/ticker.js';
 import { startScheduler } from './scheduler.js';
 
 const ctx = createContext();
 const app = createApp(ctx);
 startScheduler(ctx);
 startAgentRoutine(ctx);
+startMesaTicker(ctx);
 app.route('/', designAssets());
 const frontendDist = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'frontend', 'dist');
 

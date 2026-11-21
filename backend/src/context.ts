@@ -9,6 +9,7 @@ import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agen
 import { openAgentStore, type AgentStore } from './agents/store.js';
 import { openAssistantStore, type AssistantStore } from './assistants/store.js';
 import { createVault, type Vault } from './crypto.js';
+import { DEFAULT_MESA_DAILY_TOKEN_CAP, DEFAULT_MESA_OPERATORS, openMesaStore, type MesaStore } from './mesa/store.js';
 import { openStore, type Store } from './db.js';
 import { openHubStore, type HubStore } from './hub/store.js';
 import { OAUTH_PROVIDERS } from './oauth/registry.js';
@@ -31,6 +32,8 @@ export interface Config {
   oauth: Record<string, OAuthCredentials | undefined>;
   agentRoundHour?: number | null;
   healthShortcut?: HealthShortcut | null;
+  mesaOperators?: string[];
+  mesaDailyTokenCap?: number;
 }
 
 export interface AppContext {
@@ -40,6 +43,7 @@ export interface AppContext {
   hub: HubStore;
   agents: AgentStore;
   rooms: RoomStore;
+  mesa: MesaStore;
   assistants: AssistantStore;
   repo: RepoStore;
   digests: DigestStore;
@@ -77,8 +81,20 @@ const healthShortcutFrom = (env: NodeJS.ProcessEnv): HealthShortcut | null => {
   return url.startsWith(SECURE_LINK_PREFIX) ? { url, name: env.HEALTH_SHORTCUT_NAME?.trim() || DEFAULT_HEALTH_SHORTCUT_NAME } : null;
 };
 
+const mesaOperatorsFrom = (value: string | undefined): string[] => {
+  const emails = (value ?? '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean);
+  return emails.length > 0 ? emails : [...DEFAULT_MESA_OPERATORS];
+};
+
+const mesaDailyTokenCapFrom = (value: string | undefined): number => {
+  const cap = Number(value);
+  return value !== undefined && value.trim() !== '' && Number.isFinite(cap) && cap >= 0 ? Math.floor(cap) : DEFAULT_MESA_DAILY_TOKEN_CAP;
+};
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
+    mesaOperators: mesaOperatorsFrom(env.MESA_OPERATORS),
+    mesaDailyTokenCap: mesaDailyTokenCapFrom(env.MESA_DAILY_TOKEN_CAP),
     agentRoundHour: agentRoundHourFrom(env.AGENT_ROUND_HOUR),
     healthShortcut: healthShortcutFrom(env),
     publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null,
@@ -116,6 +132,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     hub: openHubStore(db),
     agents: openAgentStore(db),
     rooms: openRoomStore(db),
+    mesa: openMesaStore(db),
     assistants: openAssistantStore(db),
     repo: openRepoStore(db),
     digests: openDigestStore(db),

@@ -11,6 +11,7 @@ export interface SourceSync {
 export interface Store {
   addPerson(name: string): Person;
   findPerson(token: string): Person | undefined;
+  listPeople(): Person[];
   saveEvent(personToken: string, draft: EventDraft): StoredEvent | null;
   listEvents(personToken: string, limit?: number): StoredEvent[];
   listLatestReceived(personToken: string, limit: number): StoredEvent[];
@@ -118,6 +119,11 @@ export function openStore(db: DatabaseSync, vault: Vault): Store {
     findPerson(token) {
       const row = db.prepare('SELECT token, name FROM people WHERE token = ?').get(token) as Person | undefined;
       return row ? { token: row.token, name: row.name } : undefined;
+    },
+
+    listPeople() {
+      const rows = db.prepare('SELECT token, name FROM people ORDER BY created_at, rowid').all() as unknown as Person[];
+      return rows.map((row) => ({ token: row.token, name: row.name }));
     },
 
     saveEvent(personToken, draft) {

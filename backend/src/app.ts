@@ -15,6 +15,7 @@ import { oauthRoutes } from './routes/oauth.js';
 import { peopleRoutes } from './routes/people.js';
 import { pulseRoutes } from './routes/pulse.js';
 import { REPO_COMMIT_PATH, REPO_PASTE_SUFFIX, repoRoutes } from './routes/repo.js';
+import { mesaRoutes } from './routes/mesa.js';
 import { roomRoutes } from './routes/rooms.js';
 import { chatRoutes } from './routes/chat.js';
 import { faceRoutes } from './routes/faces.js';
@@ -56,6 +57,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', hubRoutes(ctx));
   api.route('/', agentRoutes(ctx));
   api.route('/', roomRoutes(ctx));
+  api.route('/', mesaRoutes(ctx));
   api.route('/', assistantRoutes(ctx));
   api.route('/', repoRoutes(ctx));
   api.route('/', simRoutes(ctx));
