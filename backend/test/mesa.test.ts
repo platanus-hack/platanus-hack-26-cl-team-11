@@ -96,7 +96,7 @@ test('a round in the public table is estimated first, then run by hand, and the 
   assert.equal(idle.configured, true);
   assert.equal(idle.operator, true);
   assert.equal(idle.round, null);
-  assert.equal(idle.estimate.needs, 0);
+  assert.ok(idle.estimate.needs > 0, 'sin pedidos, igual conversan sobre lo que cada persona hace');
   assert.deepEqual(idle.asks.map((ask) => ask.topic), [TOPIC]);
 
   ctx.agents.decideTopic(tokenOf('Ana'), TOPIC, true);
@@ -161,7 +161,8 @@ test('with an interval, a round starts by itself only when someone published som
   const first = runMesaTick(ctx, start);
   assert.equal(first.outcome, 'iniciada');
   await first.done;
-  assert.deepEqual(prompts, []);
+  assert.ok(prompts.length > 0, 'sin pedidos, los agentes conversan igual');
+  const chatted = prompts.length;
 
   assert.equal(runMesaTick(ctx, later(10)).outcome, 'esperando');
   assert.equal(runMesaTick(ctx, later(61)).outcome, 'sin_novedad');
@@ -171,11 +172,11 @@ test('with an interval, a round starts by itself only when someone published som
   const second = runMesaTick(ctx, later(62));
   assert.equal(second.outcome, 'iniciada');
   await second.done;
-  assert.equal(prompts.length, 3);
+  assert.equal(prompts.length, chatted + 3);
   assert.equal(ctx.agents.latestRound(MESA_TEAM_ID)?.status, 'lista');
 
   assert.equal(runMesaTick(ctx, later(200)).outcome, 'sin_novedad');
-  assert.equal(prompts.length, 3);
+  assert.equal(prompts.length, chatted + 3);
 });
 
 test('automatic rounds stop at the daily token cap, and a round already running is never doubled', async () => {

@@ -16,19 +16,19 @@
   var HELP = { si: 'Puede ayudar.', parcial: 'Puede orientar.', no: 'No puede esta vez.' };
   var ROLE = { si: 'Puede ayudar', parcial: 'Puede orientar', no: 'No puede' };
   var CLOSED = {
-    nadie: ['Nadie en la mesa tiene relación con este tema', 'El pedido sigue abierto para la próxima ronda'],
-    sin_ayuda: ['Nadie puede ayudar por ahora', 'El pedido sigue abierto para la próxima ronda'],
-    falla: ['El modelo no respondió', 'Se intenta de nuevo en la próxima ronda']
+    nadie: ['Nadie más está en este tema', 'Lo vuelven a intentar la próxima vez'],
+    sin_ayuda: ['Nadie puede ayudar por ahora', 'Lo vuelven a intentar la próxima vez'],
+    falla: ['El modelo no respondió', 'Lo vuelven a intentar la próxima vez']
   };
   var RESULT = { propuesta: 'quedó una propuesta', nadie: 'nadie con relación al tema', sin_ayuda: 'nadie pudo ayudar', falla: 'el modelo no respondió' };
 
   var slotOf = new Map(), needs = [], byKey = new Map();
   var arriving = [], since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
 
-  document.getElementById('step0').textContent = 'Mesa';
-  document.getElementById('step1').firstChild.textContent = 'Ronda ';
+  document.getElementById('step0').textContent = 'Todos';
+  document.getElementById('step1').firstChild.textContent = 'Conversando ';
   var tag = document.querySelector('.uv-top .rd-tag');
-  if (tag) tag.textContent = 'Mesa pública';
+  if (tag) tag.textContent = 'En vivo';
 
   var count = function (n, one, many) { return n.toLocaleString('es-CL') + ' ' + (n === 1 ? one : many); };
   var agentOf = function (slot) { return slot === 0 ? 'Tu agente' : 'El agente de ' + people[slot].name; };
@@ -68,15 +68,15 @@
     var seated = [];
     slotOf.forEach(function (slot) { seated.push(slot); });
     seated.sort(function (a, b) { return a - b; });
-    idle('Mesa pública', count(seated.length, 'persona con algo publicado', 'personas con algo publicado'), seated.slice(0, LOBBY_ROWS).map(function (slot) {
-      return { faces: [slot], title: slot === 0 ? 'Tú' : people[slot].name, sub: 'En la mesa' };
+    idle('Agentes', count(seated.length, 'persona con algo publicado', 'personas con algo publicado'), seated.slice(0, LOBBY_ROWS).map(function (slot) {
+      return { faces: [slot], title: slot === 0 ? 'Tú' : people[slot].name, sub: 'Su agente está listo para conversar' };
     }));
   }
 
   function reset() {
     needs = []; byKey = new Map(); finished = null; summarized = false; showing = null;
     SHOWN.length = 0; SCRIPTS.length = 0; SCENES.length = 1;
-    idle('Ronda en curso', 'Los agentes leen lo que cada persona publicó');
+    idle('Conversando', 'Los agentes leen lo que cada persona publicó');
   }
 
   function summary(title) {
@@ -242,7 +242,7 @@
     }
     var next = needs.filter(function (need) { return !need.done; })[0];
     if (next) show(next);
-    else if (finished && !summarized) summary('Ronda terminada');
+    else if (finished && !summarized) summary('Terminaron de conversar');
   };
 
   function take(ev) {
@@ -266,7 +266,7 @@
     if (!first) return;
     var start = data.events.filter(function (ev) { return ev.type === 'ronda_empieza'; })[0];
     if (!start) lobby();
-    else if (!running && Date.parse(data.now) - Date.parse(start.at) > RECENT_MS) { needs.forEach(settle); summary('Última ronda'); }
+    else if (!running && Date.parse(data.now) - Date.parse(start.at) > RECENT_MS) { needs.forEach(settle); summary('La última conversación'); }
   }
 
   var pace = function () { return running || Date.now() < urgentUntil ? RUNNING_MS : IDLE_MS; };

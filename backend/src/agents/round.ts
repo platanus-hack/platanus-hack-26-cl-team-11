@@ -49,6 +49,7 @@ export interface RoundDeps {
   onProposal?: (proposal: Proposal) => void;
   maxNeeds?: number;
   cardFilter?: (card: AgentCard) => boolean;
+  chatter?: number;
   onStream?: (teamId: string, text: LiveText) => void;
 }
 
@@ -171,7 +172,23 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
 
 const keepEveryCard = () => true;
 
-export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
+const CHATTER_TOPIC = 'en qué está';
+const MAX_CHATTER_TOPIC = 80;
+
+function chatterOf(cards: AgentCard[], limit: number): OpenNeed[] {
+  return cards
+    .filter((card) => card.statements.length > 0 || card.expertise.length > 0)
+    .slice(0, limit)
+    .map((requester) => ({
+      requester,
+      need: {
+        topic: (requester.expertise[0] ?? CHATTER_TOPIC).slice(0, MAX_CHATTER_TOPIC),
+        statement: `${requester.name} está en esto: ${requester.statements[0] ?? requester.expertise.join(', ')}. Busca con quién cruzarse: alguien que sepa del tema, esté en algo parecido o le pueda servir.`,
+      },
+    }));
+}
+
+export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter' | 'chatter'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
   const cards = deps.teams
     .membersOf(teamId)
     .map((member) => cardFor(deps, member, now))
@@ -183,6 +200,7 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
       return requester.needs.filter((need) => !active.has(topicKeyOf(need.topic))).map((need) => ({ requester, need }));
     })
     .slice(0, deps.maxNeeds ?? MAX_NEEDS_PER_ROUND);
+  if (openNeeds.length === 0 && deps.chatter && cards.length >= MIN_TEAM_SIZE) return { cards, openNeeds: chatterOf(cards, deps.chatter) };
   return { cards, openNeeds };
 }
 

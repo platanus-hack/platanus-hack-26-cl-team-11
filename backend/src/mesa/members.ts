@@ -9,6 +9,7 @@ import type { TeamMember, TeamStore } from '../teams/store.js';
 import { MESA_TEAM_ID } from './store.js';
 
 const LOGIN_PROVIDER = 'google';
+const MESA_CHATTER = 4;
 
 export const hasPublished = (card: AgentCard): boolean => card.statements.length + card.expertise.length + card.needs.length > 0;
 
@@ -19,12 +20,13 @@ const mesaTeams = (ctx: AppContext): TeamStore => ({
   membersOf: (teamId) => (teamId === MESA_TEAM_ID ? mesaMembersOf(ctx) : ctx.teams.membersOf(teamId)),
 });
 
-export const mesaCardDeps = (ctx: AppContext): CardDeps => ({ ...cardDepsFrom(ctx), teams: mesaTeams(ctx), cardFilter: hasPublished });
+export const mesaCardDeps = (ctx: AppContext): CardDeps => ({ ...cardDepsFrom(ctx), teams: mesaTeams(ctx), cardFilter: hasPublished, chatter: MESA_CHATTER });
 
 export const mesaRoundDeps = (ctx: AppContext, model: AgentModel): RoundDeps => ({
   ...roundDepsFrom(ctx, model),
   teams: mesaTeams(ctx),
   cardFilter: hasPublished,
+  chatter: MESA_CHATTER,
   onEvent: (teamId, type, payload) => ctx.rooms.record(teamId, type, payload),
   onStream: (_teamId, text) => ctx.mesaLive.put(text),
 });

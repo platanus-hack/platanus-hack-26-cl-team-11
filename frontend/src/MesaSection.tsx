@@ -44,9 +44,9 @@ function TokenStat({ total }: { total: number }) {
 function needsOf(view: MesaView) {
   const { estimate } = view;
   if (estimate.people < 2) return 'Faltan al menos dos personas con algo publicado.';
-  if (estimate.needs === 0 && estimate.digests === 0) return 'Nadie tiene un pedido abierto: una ronda ahora no gasta nada.';
+  if (estimate.needs === 0 && estimate.digests === 0) return 'No hay nada publicado para conversar todavía.';
   const reading = estimate.digests > 0 ? ` · ${countOf(estimate.digests, 'repo por leer', 'repos por leer')}` : '';
-  return `${countOf(estimate.needs, 'pedido abierto', 'pedidos abiertos')}${reading} · entre ${estimate.calls.min} y ${countOf(estimate.calls.max, 'llamada', 'llamadas')} al modelo`;
+  return `${countOf(estimate.needs, 'tema', 'temas')}${reading} · entre ${estimate.calls.min} y ${countOf(estimate.calls.max, 'llamada', 'llamadas')} al modelo`;
 }
 
 function secondsOf(round: MesaView['round']) {
@@ -55,21 +55,21 @@ function secondsOf(round: MesaView['round']) {
 }
 
 function repeatOf(view: MesaView) {
-  if (view.intervalSeconds === null) return 'Corre solo cuando la inicias.';
+  if (view.intervalSeconds === null) return 'Solo cuando aprietas el botón.';
   const perRound = view.estimate.tokens.total || view.usage.lastRound?.tokens || 0;
   const perHour = (HOUR_SECONDS / Math.max(view.intervalSeconds, secondsOf(view.round))) * perRound;
-  const rule = 'Corre sola cuando alguien publica algo nuevo.';
-  return perRound > 0 ? `${rule} Con novedades en cada ronda, hasta ≈ ${amount(perHour)} tokens por hora.` : rule;
+  const rule = 'Solo si alguien publicó algo nuevo.';
+  return perRound > 0 ? `${rule} Como mucho ≈ ${amount(perHour)} tokens por hora.` : rule;
 }
 
 function spendOf(view: MesaView, now: number) {
   const { lastRound, lastDayTokens, dailyCap } = view.usage;
   const day = `Últimas 24 horas: ${amount(lastDayTokens)} de ${amount(dailyCap)} tokens.`;
-  if (!view.round || !lastRound) return `Todavía no corre ninguna ronda. ${day}`;
-  if (view.round.status === 'en_curso') return `Los agentes están conversando. ${day}`;
+  if (!view.round || !lastRound) return `Todavía no conversan. ${day}`;
+  if (view.round.status === 'en_curso') return `Están conversando. ${day}`;
   const when = formatAgo(view.round.finishedAt ?? view.round.startedAt, now).toLowerCase();
   const talks = countOf(view.threads.length, 'conversación', 'conversaciones');
-  return `Última ronda, ${when}: ${talks}, ${lastRound.measured ? '' : '≈ '}${amount(lastRound.tokens)} tokens en ${countOf(lastRound.calls, 'llamada', 'llamadas')}. ${day}`;
+  return `La última vez, ${when}: ${talks}, ${lastRound.measured ? '' : '≈ '}${amount(lastRound.tokens)} tokens en ${countOf(lastRound.calls, 'llamada', 'llamadas')}. ${day}`;
 }
 
 export function MesaSection({ token, onRound }: { token: string; onRound: (startedHere: boolean) => void }) {
@@ -94,7 +94,7 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
   if (!view) {
     return (
       <div className="app-block">
-        <SectionHead title="Mesa pública" />
+        <SectionHead title="Agentes" />
         <p className="rd-note" role={error ? 'alert' : undefined}>
           {error ?? <MontuInline />}
         </p>
@@ -109,15 +109,15 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
   return (
     <>
       <div className="app-block">
-        <SectionHead title="Mesa pública" end={<span className="rd-chip rd-glass">{state}</span>} />
-        <p className="rd-note">Los agentes de todos conversan con lo que cada persona comparte. Hoy hay {countOf(view.estimate.people, 'persona', 'personas')} con algo publicado.</p>
+        <SectionHead title="Agentes" end={<span className="rd-chip rd-glass">{state}</span>} />
+        <p className="rd-note">Los agentes conversan entre ellos con lo que cada persona comparte y proponen en qué ayudarse. Hoy hay {countOf(view.estimate.people, 'persona', 'personas')} con algo publicado.</p>
         {problem && (
           <p className="rd-note" role="alert">
             {problem}
           </p>
         )}
         <section className="rd-card rd-glass app-mesa">
-          <span className="rd-label">Próxima ronda</span>
+          <span className="rd-label">Si conversan ahora</span>
           <TokenStat total={view.estimate.tokens.total} />
           <p className="rd-note">{needsOf(view)}</p>
           {!view.configured && <p className="rd-note">Faltan las credenciales del modelo en el servidor.</p>}
@@ -125,11 +125,11 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
             <>
               <div className="rd-actions">
                 <button className="rd-button" type="button" disabled={busy || running} onClick={() => act(() => startMesaRound(token).then(() => onRound(true)))}>
-                  {running ? 'Agentes conversando…' : 'Iniciar ronda'}
+                  {running ? 'Conversando…' : 'Que conversen'}
                 </button>
               </div>
-              <span className="rd-label">Repetir</span>
-              <div className="rd-seg rd-seg--wrap" role="group" aria-label="Cada cuánto se repite la ronda">
+              <span className="rd-label">Que vuelvan a conversar solos</span>
+              <div className="rd-seg rd-seg--wrap" role="group" aria-label="Cada cuánto vuelven a conversar">
                 {INTERVALS.map((option) => (
                   <button key={option.label} type="button" aria-pressed={view.intervalSeconds === option.seconds} disabled={busy} onClick={() => act(() => setMesaInterval(token, option.seconds))}>
                     {option.label}
@@ -140,7 +140,7 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
             </>
           )}
           {view.configured && !view.operator && (
-            <p className="rd-note">{view.intervalSeconds === null ? 'La inicia el equipo de Montu.' : `Se repite cada ${labelOf(view.intervalSeconds)} cuando alguien publica algo nuevo.`}</p>
+            <p className="rd-note">{view.intervalSeconds === null ? 'Las inicia el equipo de Montu.' : `Vuelven a conversar cada ${labelOf(view.intervalSeconds)} si alguien publicó algo nuevo.`}</p>
           )}
           <p className="rd-note">{spendOf(view, Date.now())}</p>
         </section>
@@ -151,12 +151,12 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
                 <Glyph name="globe" />
               </ItemIcon>
             }
-            title="Tu agente en la mesa"
-            subtitle={!view.member ? 'Fuera de la mesa' : view.publishing ? 'Participa con lo que compartes' : 'Todavía no compartes nada'}
+            title="Tu agente conversa con los demás"
+            subtitle={!view.member ? 'No conversa con nadie' : view.publishing ? 'Participa con lo que compartes' : 'Todavía no compartes nada'}
             end={
               <RowButton
                 label={view.member ? 'Salir' : 'Entrar'}
-                name={view.member ? 'Sacar a tu agente de la mesa pública' : 'Entrar con tu agente a la mesa pública'}
+                name={view.member ? 'Que tu agente no converse con los demás' : 'Que tu agente converse con los demás'}
                 disabled={busy}
                 onClick={() => act(() => setMesaMembership(token, !view.member))}
               />
@@ -179,7 +179,7 @@ export function MesaSection({ token, onRound }: { token: string; onRound: (start
       )}
       {view.threads.length > 0 && (
         <div className="app-block">
-          <SectionHead title="Conversaciones de la última ronda" />
+          <SectionHead title="Lo que conversaron" />
           <div className="rd-list">
             {view.threads.map((thread) => (
               <ThreadRow key={thread.id} thread={thread} open={openThread === thread.id} onToggle={() => setOpenThread((current) => (current === thread.id ? null : thread.id))} />
