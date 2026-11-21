@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
+import { duelRoutes } from './duels/routes.js';
 import { agentRoutes } from './routes/agents.js';
 import { assistantRoutes, joinDocRoutes } from './routes/assistants.js';
 import { boardRoutes } from './routes/board.js';
@@ -35,6 +36,7 @@ export function createApp(ctx: AppContext) {
 
   api.use('*', (c, next) => (setsItsOwnLimit(c.req.path) ? next() : limitBody(c, next)));
   api.get('/health', (c) => c.json({ ok: true }));
+  api.route('/duelos', duelRoutes(ctx));
   api.route('/', peopleRoutes(ctx));
   api.route('/', connectionRoutes(ctx));
   api.route('/', ingestRoutes(ctx));
