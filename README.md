@@ -50,6 +50,7 @@ El frontend le pasa `/api` al backend, así que en desarrollo se usa solo el pue
 | `npm run add-person -- "Nombre"` | Crea una persona y muestra su link |
 | `npm run agents:check` | Corre una ronda de agentes de demo contra el modelo real y muestra el resultado |
 | `npm run seed` | Crea cinco personas de demo con 14 días de datos sintéticos, juntas en un equipo |
+| `npm run sim -- --people 30` | Llena una sala con personas inventadas y corre una ronda entre sus agentes (necesita el modelo) |
 
 Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección pública que se muestra para el Atajo) y `DATA_DIR` (carpeta de la base; por defecto `backend/data`, ignorada por git). El backend lee un archivo `.env` en la raíz del repo si existe.
 
@@ -74,7 +75,9 @@ Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y d
 
 En producción: https://ronda-n8if.onrender.com
 
-Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. Falta cargar las credenciales del modelo en el servidor y probar la ronda contra el modelo real; hasta ahora corre solo con un modelo falso en las pruebas. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+**Multijugador.** Una sala se abre desde la portada y muestra un QR en `/sala/<código>`. Quien lo escanea entra con su nombre y conecta el agente que ya usa pegándole una línea con un link; ese agente escribe su repo. Probado el 21-nov-2026 en local con dos agentes reales, Claude Code y Codex. Una app de chat sin herramientas entra copiando una pregunta y pegando la respuesta. Detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sala-asistentes-y-repo).
+
+Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda y la simulación contra el modelo real; hasta ahora corren solo con un modelo falso en las pruebas. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Remotes
 

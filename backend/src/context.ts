@@ -13,6 +13,7 @@ import { openHubStore, type HubStore } from './hub/store.js';
 import { OAUTH_PROVIDERS } from './oauth/registry.js';
 import { openRepoStore, type RepoStore } from './repo/store.js';
 import { openRoomStore, type RoomStore } from './rooms/store.js';
+import { openSimStore, type SimStore } from './sim/personas.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
@@ -32,6 +33,7 @@ export interface AppContext {
   assistants: AssistantStore;
   repo: RepoStore;
   digests: DigestStore;
+  sim: SimStore;
   model: AgentModel | null;
   vault: Vault;
   fetch: Fetch;
@@ -90,6 +92,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     assistants: openAssistantStore(db),
     repo: openRepoStore(db),
     digests: openDigestStore(db),
+    sim: openSimStore(db),
     model: options.model === undefined ? modelFrom(process.env, options.fetch ?? fetch) : options.model,
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),

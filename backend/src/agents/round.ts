@@ -45,6 +45,7 @@ export interface RoundDeps {
   repo?: RepoStore;
   digests?: DigestStore;
   onEvent?: (teamId: string, type: RoomEventType, payload: JsonObject) => void;
+  maxNeeds?: number;
 }
 
 interface OpenNeed {
@@ -110,7 +111,7 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
   deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic });
 }
 
-export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
+export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
   const cards = deps.teams.membersOf(teamId).map((member) => cardFor(deps, member, now));
   const since = new Date(now.getTime() - ACTIVE_PROPOSAL_DAYS * DAY_MS).toISOString();
   const openNeeds = cards
@@ -118,7 +119,7 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
       const active = deps.agents.activeTopicKeys(teamId, requester.token, since);
       return requester.needs.filter((need) => !active.has(topicKeyOf(need.topic))).map((need) => ({ requester, need }));
     })
-    .slice(0, MAX_NEEDS_PER_ROUND);
+    .slice(0, deps.maxNeeds ?? MAX_NEEDS_PER_ROUND);
   return { cards, openNeeds };
 }
 

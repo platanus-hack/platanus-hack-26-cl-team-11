@@ -20,7 +20,8 @@
     "seed": "npm run seed -w backend --",
     "lint:design": "design/lint.sh",
     "prepare": "git config core.hooksPath .githooks || true",
-    "agents:check": "npm run agents:check -w backend"
+    "agents:check": "npm run agents:check -w backend",
+    "sim": "npm run sim -w backend --"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

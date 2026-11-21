@@ -13,7 +13,7 @@ const MAX_ROOM_PEOPLE = 400;
 const MAX_EVENTS_PER_READ = 200;
 const JOINS_PER_MINUTE = 120;
 
-export function roomRoutes({ store, teams, rooms, assistants, agents }: AppContext) {
+export function roomRoutes({ store, teams, rooms, assistants, agents, sim }: AppContext) {
   const routes = new Hono();
   const limited = rateLimit(JOINS_PER_MINUTE);
 
@@ -24,12 +24,23 @@ export function roomRoutes({ store, teams, rooms, assistants, agents }: AppConte
       id: publicIdOf(member.token),
       name: member.name,
       assistants: assistants.assistantsOf(member.token).map((assistant) => assistant.kind),
+      synthetic: sim.isSynthetic(member.token),
     }));
 
   const stateOf = (room: Room) => {
     const round = agents.latestRound(room.teamId);
     const threads = round
-      ? agents.threadsOf(round.id).map((thread) => ({ id: thread.id, from: publicIdOf(thread.requesterToken), to: publicIdOf(thread.helperToken), topic: thread.topic, help: thread.help }))
+      ? agents.threadsOf(round.id).map((thread) => ({
+          id: thread.id,
+          from: publicIdOf(thread.requesterToken),
+          to: publicIdOf(thread.helperToken),
+          topic: thread.topic,
+          help: thread.help,
+          messages:
+            sim.isSynthetic(thread.requesterToken) && sim.isSynthetic(thread.helperToken)
+              ? thread.messages.map((message) => ({ from: publicIdOf(message.fromToken), text: message.text }))
+              : null,
+        }))
       : [];
     return {
       code: room.code,

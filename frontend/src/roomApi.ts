@@ -61,12 +61,26 @@ export interface RoomPerson {
   id: string;
   name: string;
   assistants: AssistantKind[];
+  synthetic: boolean;
+}
+
+export type HelpAnswer = 'si' | 'parcial' | 'no';
+
+export interface RoomThread {
+  id: string;
+  from: string;
+  to: string;
+  topic: string;
+  help: HelpAnswer | null;
+  messages: Array<{ from: string; text: string }> | null;
 }
 
 export interface RoomState {
   code: string;
   name: string;
   people: RoomPerson[];
+  round: { id: string; status: 'en_curso' | 'lista' | 'fallida' } | null;
+  threads: RoomThread[];
   lastEventId: number;
 }
 
@@ -82,6 +96,7 @@ const repoFilePath = (token: string, path: string) => `${personPath(token)}/repo
 export const createRoom = (name: string) => request<{ code: string; name: string }>('/api/rooms', post({ name }));
 export const fetchRoom = (code: string) => request<RoomSummary>(roomPath(code));
 export const fetchRoomState = (code: string) => request<RoomState>(`${roomPath(code)}/state`);
+export const simulateRoom = (code: string, people: number) => request<{ people: number }>(`${roomPath(code)}/simulate`, post({ people }));
 export const joinRoom = (code: string, who: { name: string } | { token: string }) => request<Joined>(`${roomPath(code)}/join`, post(who));
 
 export const fetchAssistants = (token: string) => request<{ assistants: Assistant[] }>(`${personPath(token)}/assistants`);

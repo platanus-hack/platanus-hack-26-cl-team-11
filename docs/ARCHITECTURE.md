@@ -26,6 +26,7 @@ backend/
     rooms/              salas: un equipo abierto con código corto y su registro de lo que pasa
     assistants/         asistentes conectados: código de un uso, token propio y el documento de ingreso
     repo/               repo de cada persona: archivos con permiso e historial
+    sim/                simulación: personas inventadas con su repo, para ver una sala llena
     connectors/         un archivo por fuente
       registry.ts       la lista de fuentes
     oauth/              un archivo por proveedor OAuth
@@ -219,6 +220,20 @@ Reglas:
 - **Lo que se revisa en código es forma, no significado**: la ruta, 8 KB por archivo, 20 archivos por cambio, 200 por repo y formatos conocidos de credenciales. Un cambio que rompe una regla no guarda nada.
 - **Cada cambio deja un registro** en el servidor de contexto, bajo el asistente que lo hizo, y avisa a las salas de la persona.
 - **Una ronda también deja registro en la sala**: empieza, se abre un hilo, llega la respuesta, nace una propuesta, termina. La pantalla ve quién le escribe a quién y el tema, nunca el texto.
+
+## Simulación
+
+`sim/` llena una sala con personas inventadas para ver a muchos agentes conversar. Cada persona inventada entra por el mismo camino que una real: queda en la sala, recibe un repo de tres archivos y su agente participa en la ronda.
+
+- El modelo inventa a las personas de a 10 por llamada: rol, en qué trabaja, una necesidad en más o menos la mitad y los temas que domina. Los nombres salen de una lista fija.
+- Como el servidor ya tiene esos datos ordenados, guarda la lectura del repo sin volver a llamar al modelo.
+- Una persona inventada queda marcada. En la pantalla de la sala dice «Persona simulada», y solo de una conversación entre dos personas inventadas se muestra el texto.
+- Tope: 60 personas inventadas por sala y 30 pedidos por ronda.
+
+| Cómo | Qué hace |
+|---|---|
+| `POST /api/rooms/<código>/simulate` con `{ "people": 30 }` | Inventa las personas y parte una ronda. También está como botón en `/sala/<código>` |
+| `npm run sim -- --people 30 [--sala <código>]` | Lo mismo desde la terminal, contra la base local. Sin `--sala` crea una sala nueva. Muestra las conversaciones y las propuestas |
 
 ## Servidor de contexto (datos de prueba)
 
