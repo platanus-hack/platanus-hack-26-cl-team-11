@@ -277,7 +277,7 @@ Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cue
 - [x] **OAuth a mano o con una plataforma.** Quedó hecho a mano para Google, GitHub y Linear, en `backend/src/oauth/`. No se usó Composio, Nango ni Pipedream Connect.
 - [x] **Dónde se despliega.** En Render, con HTTPS público. Detalle en [DEPLOY.md](DEPLOY.md).
 - [x] **Cifrado** de tokens y llaves. Hecho con AES-256-GCM; detalle en [ARCHITECTURE.md](ARCHITECTURE.md#credenciales).
-- [ ] **Base definitiva.** El backend usa SQLite en disco. Si se pasa a Postgres, cambian `backend/src/db.ts` y las tiendas de `teams/`, `board/`, `policy/`, `agents/` y `hub/`.
+- [x] **Base definitiva.** Producción usa Postgres desde el 21-nov-2026; en local sigue SQLite. Detalle en [DEPLOY.md](DEPLOY.md#base-de-datos).
 - [x] **Credenciales de cada aplicación OAuth.** Las tres aplicaciones están creadas y sus variables cargadas en Render; ver «Aplicaciones OAuth».
 - [ ] **Probar el Atajo compartido de Apple Health en un iPhone** y cargar su link de iCloud en `HEALTH_SHORTCUT_URL`; ver «El Atajo compartido, ya armado».
 - [ ] **Probar cada fuente contra el servicio real.** Solo Apple Health está probada.

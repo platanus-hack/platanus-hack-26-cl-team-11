@@ -262,7 +262,7 @@ Forma de `GET …/mesa`:
 
 ## Dónde se guarda
 
-Una sola base SQLite, `ronda.db`, en la carpeta `DATA_DIR`. Cada pieza crea sus tablas al arrancar; no hay migraciones.
+Una sola base: Postgres en producción (`DATABASE_URL`) y SQLite en local (`ronda.db`, en la carpeta `DATA_DIR`). Cada pieza crea sus tablas al arrancar; no hay migraciones. Cómo conviven las dos está en [DEPLOY.md](DEPLOY.md#base-de-datos).
 
 | Tablas | Pieza | Archivo |
 |---|---|---|

@@ -25,7 +25,7 @@ Ya está creado; esto queda como referencia.
 2. Quien despliega conectó su propia cuenta de GitHub en Render. Sin ese paso Render responde «the repository, branch, or Blueprint file could not be accessed», aunque el permiso del repo esté bien.
 3. Se creó el Blueprint desde la línea de comandos: `render ea blueprints create --repo <repo> --branch main` y luego `render ea blueprints approve <id>`. El equivalente en el panel es **New → Blueprint**.
 
-El servicio usa el plan pagado más chico, porque el disco persistente no existe en el plan gratuito.
+El servicio usa el plan pagado más chico. Partió así porque el disco persistente no existe en el plan gratuito; desde que la base está en Postgres ya no usa disco.
 
 ### Operarlo desde la terminal
 
@@ -39,9 +39,9 @@ render deploys create srv-dc0j2qrm8hqs73emf3ig   # volver a desplegar a mano
 
 | Variable | Origen | Para qué |
 |---|---|---|
-| `NODE_VERSION` | `render.yaml` | Node 22; el backend usa el SQLite que trae Node |
+| `NODE_VERSION` | `render.yaml` | Node 22 |
 | `PORT` | `render.yaml` | Puerto en que escucha |
-| `DATA_DIR` | `render.yaml` | Apunta al disco persistente, `/var/data` |
+| `DATABASE_URL` | `render.yaml`, desde la base `montu-db` | Dirección de Postgres. Sin ella el backend usa SQLite en `DATA_DIR` |
 | `SECRET_KEY` | La genera Render | Cifra las credenciales guardadas. Si cambia, las conexiones existentes dejan de poder leerse |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | A mano, en el panel de Render | Activan Google Calendar y Gmail |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | A mano, en el panel de Render | Activan GitHub |
@@ -91,12 +91,21 @@ Para probar el modelo antes de cargarlas, define la misma variable en tu termina
 - **Apple Health:** el Atajo envía a la dirección personal que muestra cada página `/conectar/<token>`.
 - **Datos de demo:** desde la pestaña Shell del servicio, `npm run seed`.
 
+## Base de datos
+
+Producción guarda todo en Postgres desde el 21-nov-2026: la base `montu-db` de Render (Postgres 18, plan gratis, misma región que el servicio). El servicio recibe su dirección interna en `DATABASE_URL`; las dos cosas están declaradas en `render.yaml`.
+
+- **Las consultas se siguen escribiendo como para SQLite.** `backend/src/pg/` las traduce a Postgres (`dialect.ts`) y las ejecuta desde un hilo aparte (`worker.ts`), así las tiendas no cambiaron. Sin `DATABASE_URL`, el backend usa SQLite en `DATA_DIR`, igual que antes: eso es lo que corre en cada computador.
+- **Las pruebas corren contra Postgres**, uno embebido que no necesita instalación. Una consulta que Postgres no acepta falla en `npm test`. Para correrlas contra un Postgres real: `TEST_DATABASE_URL=postgres://localhost:5432/<base de prueba> npm test -w backend`.
+- **Los datos anteriores se copiaron una vez.** En el primer arranque con `DATABASE_URL`, el servidor copió las 2.345 filas de las 45 tablas de `ronda.db` y guardó el archivo completo en la tabla `sqlite_backups`. El informe quedó en `sqlite_imports`. Con ese registro, no vuelve a importar.
+- **El plan gratis vence el 21-dic-2026** y no tiene respaldos. Si el proyecto sigue, hay que pasarlo a un plan pagado antes de esa fecha; el cambio se hace sobre la misma base.
+
 ## Límites
 
-- **Una sola instancia.** Un servicio con disco no escala a varias, y cada despliegue lo deja unos 30 segundos sin responder: Render apaga el servidor anterior antes de prender el nuevo, porque el disco solo se conecta a uno. Mientras la base viva en el disco, Render no puede cambiar al servidor nuevo solo cuando está listo.
-- **Qué ve la persona durante ese corte.** La página abre igual, desde una copia guardada en su navegador (`frontend/public/sw.js`), y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`). Kapso reintenta los mensajes de WhatsApp a los 10 y a los 40 segundos. No están cubiertos el Atajo de Apple Health, que no reintenta, ni el retorno de una autorización OAuth que caiga justo en el corte.
-- **SQLite en disco.** Render guarda una copia diaria del disco por siete días. Si el proyecto sigue, pasar a Postgres cambia solo `backend/src/db.ts` y las tiendas de `teams/`, `board/` y `policy/`.
-- **El disco no existe durante la compilación**, solo al correr.
+- **Sin disco, los despliegues no cortan el servicio.** Render prende el servidor nuevo, espera que `/api/health` responda y recién ahí le pasa el tráfico. Durante ese cambio hay dos servidores a la vez por unos segundos; los dos escriben en la misma base.
+- **Si igual hay un corte**, la página abre desde una copia guardada en el navegador (`frontend/public/sw.js`) y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`).
+- **Cada consulta bloquea el servidor mientras Postgres responde**, uno o dos milisegundos dentro de Render. Alcanza para la hack; con mucho tráfico habría que pasar las tiendas a consultas asíncronas.
+- **Si Postgres corta la conexión**, el servidor se reconecta y repite la consulta, salvo en medio de una transacción.
 
 ## Probar el despliegue en local
 

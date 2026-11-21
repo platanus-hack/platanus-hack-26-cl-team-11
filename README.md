@@ -30,7 +30,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 
 ## Cómo levantarlo
 
-Requiere Node 22.5 o superior (`nvm use` toma la versión de `.nvmrc`). No hace falta Docker ni base de datos: el backend usa el SQLite que trae Node.
+Requiere Node 22.5 o superior (`nvm use` toma la versión de `.nvmrc`). No hace falta Docker ni base de datos: en local el backend usa el SQLite que trae Node. Producción usa Postgres ([docs/DEPLOY.md](docs/DEPLOY.md#base-de-datos)).
 
 ```bash
 npm install
