@@ -1,5 +1,7 @@
 // Cuentas de tiempo de la segunda grabación: cuánto dura cada cuadro del video después de las ediciones
 // declaradas (un tramo acelerado, esperas con tope y cuadros que no se muestran), y en qué segundo parte cada paso.
+// «tope» corta cada cuadro del tramo por separado. Para que una espera entera dure como máximo el tope, aunque la
+// pantalla siga cambiando mientras tanto, los tramos se arman con tramosDeEspera.
 
 const MINIMO_S = 0.01;
 const TIPOS = ['acelera', 'tope', 'omite'];
@@ -24,6 +26,20 @@ export function duraciones(cuadros, tramos = [], { ultimo = 1.5 } = {}) {
     const real = siguiente ? Math.max(MINIMO_S, siguiente.instante - cuadro.instante) : ultimo;
     return editar(real, tramos.findLast((tramo) => posicion >= tramo.desde && posicion < tramo.hasta));
   });
+}
+
+// Tramos para una espera que va del cuadro `desde` al cuadro `hasta` (sin incluirlo): de la espera completa quedan
+// `tope` segundos como máximo. El último cuadro que se alcanza a ver se corta en ese límite y los que siguen no se muestran.
+// Sirve igual con la pantalla quieta (un solo cuadro largo) que con una animación de fondo (muchos cuadros cortos).
+export function tramosDeEspera(cuadros, desde, hasta, tope) {
+  if (!Number.isInteger(desde) || !Number.isInteger(hasta) || desde < 0 || !(hasta > desde) || !cuadros[desde] || !(tope > 0)) return [];
+  const limite = cuadros[desde].instante + tope;
+  const fin = Math.min(hasta, cuadros.length);
+  let corte = desde + 1;
+  while (corte < fin && cuadros[corte].instante < limite) corte += 1;
+  const tramos = [{ desde: corte - 1, hasta: corte, tipo: 'tope', valor: Math.max(0, limite - cuadros[corte - 1].instante) }];
+  if (corte < fin) tramos.push({ desde: corte, hasta: fin, tipo: 'omite' });
+  return tramos;
 }
 
 export function comienzos(duracionesPorCuadro) {

@@ -5,17 +5,18 @@
 //   node tools/grabar/grabar2.mjs --base http://localhost:8797 --out docs/demo/diez-personas.mp4 --frames <carpeta fuera del repo> --capturas <carpeta fuera del repo>
 //
 // Otras opciones: --permiso pantalla|api · --sin-globo · --parcial-vale · --toma N · --max-segundos N.
-// Deja el video, la captura final y un resumen en JSON junto al video. Los cuadros quedan en su carpeta: este guion no borra nada.
+// Deja el video, la captura final y un resumen en JSON junto al video. Los cuadros quedan en su carpeta, con la lista
+// que lee ffmpeg (lista.txt): este guion no borra nada.
 import { execFile } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { ELENCO, PERSONAS_DEMO, SALA, idDe, porId } from './elenco2.mjs';
-import { capitulos, duraciones, reloj } from './tiempos2.mjs';
+import { capitulos, duraciones, reloj, tramosDeEspera } from './tiempos2.mjs';
 
 const TITULO = 'Diez personas, sus fuentes y sus agentes';
 const ACELERA_RONDA = 6;
@@ -90,12 +91,15 @@ const ejecutar = promisify(execFile);
 const ANCHO = 1920;
 const ALTO = 1080;
 const FILTRO = 'fps=30,format=yuv420p';
+const DECIMALES_DE_DURACION = 6;
+const MENOR_DURACION_S = 10 ** -DECIMALES_DE_DURACION;
 const TOPE_ESPERA_S = 1.2;
 const ULTIMO_CUADRO_S = 1.5;
 const ESPERA_MS = 15_000;
 const ESPERA_RONDA_MS = 300_000;
 const RELOJ_CADA_MS = 500;
 const ASIENTO_MS = 150;
+const ENCENDIDO_MS = 500;
 const LECTURA_MINIMA_MS = 900;
 const LECTURA_MAXIMA_MS = 4000;
 const ENTRE_LLEGADAS_S = 1.3;
@@ -124,6 +128,7 @@ const enLista = (nombres) => (nombres.length > 1 ? `${nombres.slice(0, -1).join(
 const nuevos = (cuantos) => (cuantos === 1 ? '1 registro nuevo.' : `${cuantos} registros nuevos.`);
 const origenDe = (senal) => `Sale de: ${senal.basis.map((origen) => ORIGEN[origen] ?? origen).join(', ')}`;
 const kilos = (texto) => (String(texto).length / 1024).toLocaleString('es-CL', { maximumFractionDigits: 1 });
+const decimas = (valor) => Math.round(valor * 10) / 10;
 
 const fuentesDe = (persona) => [
   ...(persona.salud.length > 0 ? ['Apple Health'] : []),
@@ -171,6 +176,14 @@ async function carpetaNueva(pedida, nombre) {
   return carpeta;
 }
 
+async function tomaPublicableEn(archivoDelResumen) {
+  try {
+    return JSON.parse(await readFile(archivoDelResumen, 'utf8')).publicable === true;
+  } catch {
+    return false;
+  }
+}
+
 function crearVelo() {
   const secretos = new Set();
   const cubrir = (texto) => {
@@ -204,7 +217,9 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
   let protegido = -1;
   const pelicula = () => (performance.now() - partio - descuentoMs) / 1000;
 
-  const fallar = (que, falla) => new Error(cubrir(`Escena ${actual} · ${que}.${falla ? ` ${String(falla.message ?? falla).split('\n')[0]}` : ''}`));
+  const fallar = (que, falla) => new Error(cubrir(`Escena ${actual} · ${que}.${falla ? ` ${String(falla.message ?? falla).split('\n')[0]}` : ''}`), falla ? { cause: falla } : undefined);
+
+  const conEscena = (falla) => (falla instanceof Error && falla.message.startsWith('Escena ') ? falla : fallar('el guion se detuvo', falla));
 
   const aparece = (elemento, que, { ms = ESPERA_MS, estado = 'visible' } = {}) =>
     elemento.waitFor({ state: estado, timeout: ms }).catch((falla) => {
@@ -231,17 +246,25 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
     protegido = cuadros.length - 1;
   };
 
-  const esperaCortable = async (espera) => {
-    const desde = Math.max(cuadros.length - 1, protegido + 1, 0);
-    const comienzo = performance.now();
-    const valor = await espera;
-    const tardo = performance.now() - comienzo;
+  const cuadroDeAhora = () => Math.max(cuadros.length - 1, protegido + 1, 0);
+
+  const cortarEspera = async (desde) => {
     await pausa(ASIENTO_MS);
     const hasta = cuadros.length - 1;
-    if (hasta > desde) {
-      tramos.push({ desde, hasta, tipo: 'tope', valor: TOPE_ESPERA_S });
-      descuentoMs += Math.max(0, tardo - TOPE_ESPERA_S * 1000);
-    }
+    const partes = tramosDeEspera(cuadros, desde, hasta, TOPE_ESPERA_S);
+    if (partes.length === 0) return;
+    tramos.push(...partes);
+    const sobra = cuadros[hasta].instante - cuadros[desde].instante - TOPE_ESPERA_S;
+    if (!(sobra > 0)) return;
+    descuentoMs += sobra * 1000;
+    resumen.ediciones.esperasCortadas += 1;
+    resumen.ediciones.segundosCortados += sobra;
+  };
+
+  const esperaCortable = async (espera) => {
+    const desde = cuadroDeAhora();
+    const valor = await espera;
+    await cortarEspera(desde);
     return valor;
   };
 
@@ -249,8 +272,11 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
     const comienzo = performance.now();
     return {
       hasta(hastaCuadro = cuadros.length - 1) {
-        if (hastaCuadro > desdeCuadro) tramos.push({ desde: desdeCuadro, hasta: hastaCuadro, tipo: 'omite' });
-        descuentoMs += performance.now() - comienzo;
+        const fuera = performance.now() - comienzo;
+        descuentoMs += fuera;
+        if (!(hastaCuadro > desdeCuadro)) return;
+        tramos.push({ desde: desdeCuadro, hasta: hastaCuadro, tipo: 'omite' });
+        resumen.ediciones.segundosDeRecarga += fuera / 1000;
       },
     };
   };
@@ -265,9 +291,8 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
   };
 
   const completar = async (minimoMs = LECTURA_MINIMA_MS, maximoMs = LECTURA_MAXIMA_MS) => {
-    await captura();
     const falta = (SEGUNDOS[actual] - (pelicula() - inicioDeEscena)) * 1000;
-    await leer(Math.max(minimoMs, Math.min(falta, maximoMs)));
+    await Promise.all([captura(), leer(Math.max(minimoMs, Math.min(falta, maximoMs)))]);
   };
 
   const enElMismoLugar = (una, otra) => Boolean(una && otra) && Math.abs(una.x - otra.x) < 0.5 && Math.abs(una.y - otra.y) < 0.5;
@@ -288,7 +313,7 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
     await elemento.evaluate((nodo) => nodo.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     await pausa(MIRADA_MS);
     if (enElMismoLugar(antes, await elemento.boundingBox())) return;
-    await pausa(DESPLAZAMIENTO_MS);
+    await pausa(DESPLAZAMIENTO_MS - 2 * MIRADA_MS);
     await quieto(elemento);
   };
 
@@ -319,7 +344,9 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
 
   const escribir = async (elemento, que, texto) => {
     await tocar(elemento, que);
-    await elemento.pressSequentially(texto, { delay: TECLA_MS });
+    await elemento.pressSequentially(texto, { delay: TECLA_MS, timeout: ESPERA_MS + texto.length * TECLA_MS }).catch((falla) => {
+      throw fallar(`no se pudo escribir en ${que}`, falla);
+    });
     await pausa(300);
   };
 
@@ -332,16 +359,14 @@ function crearRodaje({ pagina, cuadros, tramos, resumen, capturas, decir, cubrir
     await escena('soltar');
     await escena('cambiarTelefono', `/conectar/${ficha}#${pestanaInicial}`, rotulo);
     await pausa(ASIENTO_MS);
-    const desde = Math.max(cuadros.length - 1, protegido + 1, 0);
-    const comienzo = performance.now();
+    const desde = cuadroDeAhora();
     await aparece(listo, `la pantalla de «${rotulo}»`, { estado: 'attached' });
-    tramos.push({ desde, hasta: cuadros.length, tipo: 'tope', valor: TOPE_ESPERA_S });
-    descuentoMs += Math.max(0, performance.now() - comienzo - TOPE_ESPERA_S * 1000);
     await escena('encenderTelefono');
-    await pausa(500);
+    await cortarEspera(desde);
+    await pausa(ENCENDIDO_MS - ASIENTO_MS);
   };
 
-  return { sala, telefono, region, escena, cuadros, fallar, aparece, paso, anotar, leer, esperaCortable, omitir, acelerar, completar, acercar, apuntar, pulsar, tocar, escribir, pestana, cambiarTelefono };
+  return { sala, telefono, region, escena, cuadros, fallar, conEscena, aparece, paso, anotar, leer, esperaCortable, omitir, acelerar, completar, acercar, apuntar, pulsar, tocar, escribir, pestana, cambiarTelefono };
 }
 
 async function rodar(r, d) {
@@ -366,6 +391,7 @@ async function rodar(r, d) {
   await paso(2, ROTULOS.e2);
   const crearLinea = agente.getByRole('button', { name: 'Crear la línea', exact: true });
   await cambiarTelefono(fichas.get('antonia'), 'agente', 'Teléfono de Antonia', crearLinea);
+  await anotar('guion como Antonia › crea la línea para su agente y la copia');
   await tocar(crearLinea, 'el botón «Crear la línea»');
   const lineaEnPantalla = agente.locator('.rd-code').first();
   await aparece(lineaEnPantalla, 'la línea para el agente');
@@ -406,6 +432,7 @@ async function rodar(r, d) {
   await leer(1100);
   const dosFilas = () => aparece(fuentes.getByText(cuenta, { exact: true }).nth(1), 'las dos filas de Google conectadas');
   if (opciones.permiso === 'pantalla') {
+    await anotar('guion como Antonia › toca «Conectar» en Google Calendar y «Permitir» en la pantalla de prueba');
     await tocar(fuentes.getByRole('link', { name: 'Conectar Google Calendar', exact: true }), '«Conectar» de Google Calendar');
     const permitir = telefono.getByRole('link', { name: 'Permitir', exact: true });
     await esperaCortable(aparece(permitir, 'la pantalla de permiso simulada'));
@@ -458,6 +485,7 @@ async function rodar(r, d) {
   const deAntonia = await prep.verificar(cliente, fichas, ['antonia']);
   if (deAntonia.length > 0) throw fallar(`el producto no dice de Antonia lo que el guion espera antes de mostrar su carga:\n${deAntonia.join('\n')}`);
   await paso(6, ROTULOS.e6);
+  await anotar('guion como Antonia › abre «Carga» en su teléfono');
   await tocar(filaDeSenal('Carga', antonia.espera.load.statement), 'la fila «Carga» de Antonia');
   await aparece(tu.getByText(origenDe(antonia.espera.load), { exact: true }), `«${origenDe(antonia.espera.load)}»`);
   await acercar(detalleDeSenal, 'el detalle de la carga');
@@ -497,6 +525,7 @@ async function rodar(r, d) {
   const deLaSala = (await prep.verificarSala?.(cliente, codigo)) ?? [];
   if (deLaSala.length > 0) throw fallar(`la sala no quedó como el guion espera antes de la ronda:\n${deLaSala.join('\n')}`);
   const llamadasAntes = (await cliente.api('/demo/estado')).llamadas?.total ?? 0;
+  await esperaCortable(aparece(equipo.getByText(ELENCO.at(-1).nombre, { exact: true }).first(), 'a las diez personas en el teléfono de Antonia'));
   await acercar(sala.getByRole('heading', { level: 1 }), 'el título de la sala');
   await anotar('guion como Antonia › toca «Iniciar ronda» en su teléfono');
   await tocar(equipo.getByRole('button', { name: 'Iniciar ronda', exact: true }), '«Iniciar ronda»');
@@ -546,7 +575,8 @@ async function rodar(r, d) {
 
   const conAyuda = pedidoDe('antonia', (pedido) => pedido.propuesta !== null && pedido.hilos.some((hilo) => hilo.help === 'si'));
   const ayudantes = conAyuda.propuesta.ayudantes;
-  const noAceptaElGuion = ['antonia', ...(eleccion.propuestaDeIgnacio ? [eleccion.propuestaDeIgnacio] : [])];
+  const propuestasDeIgnacio = resultado.pedidos.filter((pedido) => idDe(pedido.pide) === 'ignacio' && pedido.propuesta).map((pedido) => pedido.propuesta.id);
+  const noAceptaElGuion = ['antonia', ...propuestasDeIgnacio];
   const alAceptar = async (nombre) => {
     await anotar(`el guion acepta por ${nombre}`);
     await pausa(450);
@@ -692,6 +722,10 @@ async function main() {
   const limpio = (valor) => prep.sinFichas(velo.cubrirTodo(valor), fichas);
   const decir = (linea) => console.log(limpio(linea));
 
+  const archivoDelResumen = opciones.salida.replace(/\.mp4$/, '.json');
+  if (await tomaPublicableEn(archivoDelResumen)) {
+    throw new Error(`Ya hay una toma publicable en ${archivoDelResumen}. Este guion no la pisa: muévela junto con su video y su captura, o graba con otro --out.`);
+  }
   const carpetaDeCuadros = await carpetaNueva(opciones.cuadros, 'cuadros');
   const capturas = opciones.capturas ? await carpetaNueva(opciones.capturas, 'capturas') : null;
   await mkdir(path.dirname(opciones.salida), { recursive: true });
@@ -731,15 +765,16 @@ async function main() {
     hiloElegido: null,
     propuestas: [],
     ronda: { segundosReales: null, factor: ACELERA_RONDA, llamadas: null },
-    ediciones: { topeEsperaS: TOPE_ESPERA_S, omitidos: 0 },
+    ediciones: { topeEsperaS: TOPE_ESPERA_S, omitidos: 0, esperasCortadas: 0, segundosCortados: 0, segundosDeRecarga: 0 },
     segundos: null,
     cuadros: 0,
   };
   const cuadros = [];
   const tramos = [];
   const escrituras = [];
-  const archivoDelResumen = opciones.salida.replace(/\.mp4$/, '.json');
-  const guardarResumen = () => writeFile(archivoDelResumen, `${JSON.stringify(limpio(resumen), null, 2)}\n`);
+  let finDelRodaje = null;
+  const conDecimas = (ediciones) => ({ ...ediciones, segundosCortados: decimas(ediciones.segundosCortados), segundosDeRecarga: decimas(ediciones.segundosDeRecarga) });
+  const guardarResumen = () => writeFile(archivoDelResumen, `${JSON.stringify(limpio({ ...resumen, ediciones: conDecimas(resumen.ediciones) }), null, 2)}\n`);
   const noPublicable = async (motivo) => {
     Object.assign(resumen, { publicable: false, motivo: limpio(motivo), cuadros: cuadros.length });
     await guardarResumen();
@@ -766,13 +801,16 @@ async function main() {
     const cdp = await contexto.newCDPSession(pagina);
     cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
       const archivo = path.join(carpetaDeCuadros, `c${String(cuadros.length).padStart(6, '0')}.jpg`);
-      cuadros.push({ archivo, instante: metadata.timestamp });
+      cuadros.push({ archivo, instante: metadata.timestamp, llego: performance.now() });
       escrituras.push(writeFile(archivo, Buffer.from(data, 'base64')));
       cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
     });
     await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 90, maxWidth: ANCHO, maxHeight: ALTO, everyNthFrame: 1 });
 
-    const completa = await rodar(r, { prep, cliente, fichas, codigo, opciones, resumen, guardarSecreto: velo.guardar, pagina });
+    const completa = await rodar(r, { prep, cliente, fichas, codigo, opciones, resumen, guardarSecreto: velo.guardar, pagina }).catch((falla) => {
+      throw r.conEscena(falla);
+    });
+    finDelRodaje = performance.now();
     await cdp.send('Page.stopScreencast');
     await Promise.all(escrituras);
     if (completa) await pagina.screenshot({ path: opciones.salida.replace(/\.mp4$/, '.png') });
@@ -787,17 +825,18 @@ async function main() {
   resumen.cuadros = cuadros.length;
   if (resumen.variante === 'retoma') return noPublicable(`la ronda pide una retoma. ${resumen.motivo}`);
 
-  const porCuadro = duraciones(cuadros, tramos, { ultimo: ULTIMO_CUADRO_S });
+  const quietoAlFinalS = cuadros.length > 0 && finDelRodaje !== null ? (finDelRodaje - cuadros.at(-1).llego) / 1000 : 0;
+  const porCuadro = duraciones(cuadros, tramos, { ultimo: Math.max(ULTIMO_CUADRO_S, quietoAlFinalS) });
   const largo = porCuadro.reduce((suma, duracion) => suma + duracion, 0);
-  const enElVideo = cuadros.flatMap((cuadro, posicion) => (porCuadro[posicion] > 0 ? [{ archivo: cuadro.archivo, duracion: porCuadro[posicion] }] : []));
+  const enElVideo = cuadros.flatMap((cuadro, posicion) => (porCuadro[posicion] >= MENOR_DURACION_S ? [{ archivo: cuadro.archivo, duracion: porCuadro[posicion] }] : []));
   resumen.pasos = capitulos(resumen.pasos, porCuadro);
   resumen.ediciones.omitidos = cuadros.length - enElVideo.length;
   resumen.segundos = Math.round(largo);
   if (enElVideo.length === 0) return noPublicable('la grabación no dejó ningún cuadro.');
-  if (largo > opciones.maxSegundos) return noPublicable(`el video dura ${Math.round(largo)} s y el máximo es ${opciones.maxSegundos} s.`);
 
   const guia = path.join(carpetaDeCuadros, 'lista.txt');
-  await writeFile(guia, `${enElVideo.map(({ archivo, duracion }) => `file '${archivo}'\nduration ${duracion.toFixed(3)}`).join('\n')}\nfile '${enElVideo.at(-1).archivo}'\n`);
+  await writeFile(guia, `${enElVideo.map(({ archivo, duracion }) => `file '${archivo}'\nduration ${duracion.toFixed(DECIMALES_DE_DURACION)}`).join('\n')}\nfile '${enElVideo.at(-1).archivo}'\n`);
+  if (largo > opciones.maxSegundos) return noPublicable(`el video dura ${Math.round(largo)} s y el máximo es ${opciones.maxSegundos} s. No se armó, pero la lista para ffmpeg quedó en ${guia}`);
   try {
     await ejecutar('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', guia, '-vf', FILTRO, '-c:v', 'libx264', '-crf', '22', '-preset', 'medium', '-movflags', '+faststart', opciones.salida]);
   } catch (falla) {
@@ -811,9 +850,18 @@ async function main() {
   decir(`Antes de publicar, una persona lee los dos mensajes de «hiloElegido» en ${archivoDelResumen}. Los cuadros quedaron en ${carpetaDeCuadros}`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+const esLaEntrada = () => {
+  try {
+    return realpathSync(process.argv[1] ?? '') === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+};
+
+if (esLaEntrada()) {
   main().catch((falla) => {
     console.error(velo.cubrir(falla instanceof Error ? (falla.stack ?? falla.message) : String(falla)));
+    if (falla?.cause instanceof Error) console.error(velo.cubrir(`Causa: ${falla.cause.stack ?? falla.cause.message}`));
     process.exitCode = 1;
   });
 }

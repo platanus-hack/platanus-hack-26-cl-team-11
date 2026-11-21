@@ -96,6 +96,7 @@ function montar(elenco: Elenco) {
     fetch: createDemoFetch(elenco.PERSONAS_DEMO, { alLlamar: (ruta: string) => llamadas.push(ruta) }) as typeof fetch,
     config: { publicBaseUrl: null, agentRoundHour: null, oauth: { google: DEMO, github: DEMO, linear: DEMO } },
     model: null,
+    whatsapp: null,
   });
   const app = createApp(ctx);
   const sinSecretos = (texto: string) => secretos.reduce((limpio, secreto) => limpio.replaceAll(secreto, '…'), texto);

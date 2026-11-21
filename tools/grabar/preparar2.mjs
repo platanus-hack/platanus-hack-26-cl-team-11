@@ -5,7 +5,8 @@
 //   node tools/grabar/preparar2.mjs --ensayo [--base http://localhost:8797] [--parcial-vale]
 //
 // El ensayo necesita arriba el servidor de demo (tools/grabar/servidor-demo.mts) con un DATA_DIR nuevo. Abre una sala nueva cada vez.
-import { pathToFileURL } from 'node:url';
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { ELENCO, HOY, SALA, ZONA, porId } from './elenco2.mjs';
 
 const BASE = 'http://localhost:8797';
@@ -591,7 +592,15 @@ async function main() {
   process.exitCode = codigo;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+const esLaEntrada = () => {
+  try {
+    return realpathSync(process.argv[1] ?? '') === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+};
+
+if (esLaEntrada()) {
   main().catch((falla) => {
     console.error(falla instanceof Error ? falla.message : String(falla));
     process.exitCode = 1;

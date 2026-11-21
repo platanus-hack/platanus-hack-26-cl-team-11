@@ -201,5 +201,5 @@ if (esLaEntrada()) {
   const { ayuda, veces, problema } = leerOpciones(process.argv.slice(2));
   if (problema) console.log(`${problema}\n`);
   if (ayuda || problema) console.log(USO);
-  else await ensayar(veces);
+  else await ensayar(veces).catch((falla: unknown) => console.log(`La sonda se detuvo antes de terminar: ${falla instanceof Error ? falla.message : 'error desconocido'}`));
 }

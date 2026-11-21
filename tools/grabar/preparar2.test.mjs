@@ -4,7 +4,9 @@
 //   node --test tools/grabar/preparar2.test.mjs
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -1245,8 +1247,13 @@ test('el archivo se puede importar sin que corra nada, y como entrada solo ensay
   const sinPedirlo = await ejecutar(process.execPath, [GUION]).then(() => assert.fail('Sin --ensayo termina con código 1.'), (falla) => falla);
   assert.deepEqual([sinPedirlo.code, sinPedirlo.stdout, sinPedirlo.stderr], [1, ayuda.stdout, '']);
 
+  const enlace = join(await mkdtemp(join(tmpdir(), 'ronda-preparar2-')), 'grabar');
+  await symlink(dirname(GUION), enlace);
+  const porEnlace = await ejecutar(process.execPath, [join(enlace, 'preparar2.mjs'), '--ayuda']);
+  assert.equal(porEnlace.stdout, ayuda.stdout, 'Llamado por una ruta con enlace simbólico (una copia en /tmp, por ejemplo) también tiene que correr.');
+
   const fuente = await readFile(GUION, 'utf8');
-  assert.deepEqual([...fuente.matchAll(/^import .* from '([^']+)';$/gm)].map((hallazgo) => hallazgo[1]), ['node:url', './elenco2.mjs']);
+  assert.deepEqual([...fuente.matchAll(/^import .* from '([^']+)';$/gm)].map((hallazgo) => hallazgo[1]), ['node:fs', 'node:url', './elenco2.mjs']);
   assert.equal(fuente.match(/\bimport\(/g), null);
   assert.deepEqual(fuente.split('\n').filter((linea) => linea.includes('console.log')), ['const imprimir = (valor, fichas = []) => console.log(sinFichas(valor, fichas));']);
   assert.equal(fuente.match(/playwright|chromium|ffmpeg|\.env\b/gi), null);

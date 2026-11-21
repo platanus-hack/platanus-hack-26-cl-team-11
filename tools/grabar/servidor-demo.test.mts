@@ -338,6 +338,25 @@ test('el servidor no lee llaves de modelo ni un archivo de entorno', () => {
   assert.deepEqual([...fuente.matchAll(/process\.env\.([A-Z_]+)/g)].map((hallazgo) => hallazgo[1]).filter((nombre, posicion, todos) => todos.indexOf(nombre) === posicion).sort(), ['AGENT_CLI_MODEL', 'DATA_DIR', 'DEMO_COMMIT', 'PORT']);
 });
 
+test('con llaves de Kapso en el entorno, el puente de WhatsApp sigue sin configurar', async () => {
+  const LLAVES = ['KAPSO_API_KEY', 'KAPSO_PHONE_NUMBER_ID', 'KAPSO_WEBHOOK_SECRET', 'KAPSO_WHATSAPP_NUMBER'];
+  const antes = LLAVES.map((llave) => process.env[llave]);
+  try {
+    for (const llave of LLAVES) process.env[llave] = 'de-prueba';
+    const { app, ctx } = crearServidorDemo({ location: ':memory:', modelo: modeloDePrueba, paginaPermiso });
+    assert.equal(ctx.whatsapp.configured, false);
+    assert.equal(((await (await app.request('/demo/estado')).json()) as Json).rondaSola, false);
+    const ficha = ctx.store.addPerson('Antonia').token;
+    assert.deepEqual(await (await app.request(`/api/people/${ficha}/whatsapp`)).json(), { configured: false, linked: false, phoneEnding: null });
+    assert.equal((await app.request(`/api/people/${ficha}/whatsapp/link`, { method: 'POST' })).status, 503);
+  } finally {
+    for (const [posicion, llave] of LLAVES.entries()) {
+      if (antes[posicion] === undefined) delete process.env[llave];
+      else process.env[llave] = antes[posicion];
+    }
+  }
+});
+
 test('la sonda de respuestas, con un modelo de prueba: fichas con disponibilidad baja, prompts del producto y tres llamadas a la vez como máximo', async () => {
   const CAUSA_PRIVADA = /\benerg|\bcarga\b|sueñ|dorm|durm|cansa|reuni|\bagenda|apple|granola|calendar/i;
   const UNA_FICHA = /[A-Za-z0-9_-]{24}/;

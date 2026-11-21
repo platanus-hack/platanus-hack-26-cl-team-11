@@ -75,7 +75,8 @@ Notas para llenar esta parte:
 
 - El reloj en pantalla parte con el toque en «Iniciar ronda» y se detiene cuando el guion ve terminada la ronda. Ese número queda en `ronda.segundosEnPantalla`. `ronda.segundosReales` es lo que midió el producto entre el comienzo y el fin de la ronda, y puede ser hasta 2 s menor.
 - `ronda.llamadas` son las llamadas al modelo durante la ronda. `ronda.servidor` trae el total del servidor desde que partió, con las fallidas y los reintentos.
-- `ediciones.omitidos` es la cantidad de cuadros que no se muestran (la recarga después del permiso). Con `--permiso api` es 0.
+- `ediciones.esperasCortadas` es cuántas esperas se cortaron a 1,2 s y `ediciones.segundosCortados`, cuántos segundos salieron en total. `ediciones.segundosDeRecarga` es lo que duró la recarga después del permiso, que no se muestra (0 con `--permiso api`). `ediciones.omitidos` es la cantidad de cuadros que no se muestran por esas dos razones.
+- Las caras de la pantalla de la sala tienen luz en movimiento, así que durante una espera la pantalla no queda quieta del todo: donde se cortó una espera, la luz de las caras da un salto chico. Si se nota al mirar la toma, se dice en «Ediciones del video».
 - Si la toma se grabó con `--permiso api` o con `--sin-globo`, se dice aquí y se borra lo que no aplica. Las opciones usadas quedan en `opciones`, dentro del resumen.
 
 ## Cómo volver a grabar
@@ -112,7 +113,15 @@ Opciones de `grabar2.mjs`:
 | `--sin-globo` | apagada | La escena 15 se queda en la pantalla de la sala. |
 | `--parcial-vale` | apagada | Acepta la variante V3, en que el agente de Catalina solo ofrece orientar. |
 | `--toma` | `1` | El número de la toma. Queda en el resumen. |
-| `--max-segundos` | `170` | Si el video pasa de ese largo, no se arma y el resumen queda con `publicable: false`. |
+| `--max-segundos` | `170` | Si el video pasa de ese largo, no se arma y el resumen queda con `publicable: false`. Los cuadros y la lista que lee ffmpeg (`lista.txt`) quedan en la carpeta de cuadros. |
+
+El guion no pisa una toma publicable. Si junto a `--out` ya hay un resumen con `publicable: true`, se detiene antes de empezar: para grabar otra toma se mueven el video, la captura y el resumen de la anterior, o se usa otro `--out`.
+
+Si una toma quedó sobre `--max-segundos` y se decide usarla igual, el video se arma desde la carpeta de cuadros con el mismo comando que usa el guion:
+
+```bash
+ffmpeg -f concat -safe 0 -i <carpeta de cuadros>/lista.txt -vf fps=30,format=yuv420p -c:v libx264 -crf 22 -preset medium -movflags +faststart docs/demo/diez-personas.mp4
+```
 
 Qué revisar antes de publicar una toma:
 

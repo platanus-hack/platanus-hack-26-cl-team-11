@@ -2,6 +2,8 @@
 // las respuestas de los proveedores salen de proveedor-demo.mjs, la pantalla de permiso es design/demo/permiso.html,
 // no hay ronda automática y el modelo es Claude por la terminal, fijo y con un reintento. Además hace una llamada de calentamiento
 // al partir, responde /demo/estado y no vuelve a sincronizar las fuentes cada 15 minutos (no llama a startScheduler).
+// El puente de WhatsApp queda sin configurar, como en un producto sin llaves de Kapso: no lee KAPSO_* del entorno.
+// Escucha solo en este computador (127.0.0.1): en una red compartida nadie más puede iniciar rondas ni gastar llamadas al modelo.
 // Solo lo arranca quien dirige la grabación.
 //
 //   DATA_DIR=<carpeta nueva fuera del repo> PORT=8797 DEMO_COMMIT=<sha> npx tsx tools/grabar/servidor-demo.mts
@@ -26,6 +28,7 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PAGINA_PERMISO = join(RAIZ, 'design', 'demo', 'permiso.html');
 const FRONTEND = join(RAIZ, 'frontend', 'dist');
 const PUERTO = 8797;
+const ANFITRION = '127.0.0.1';
 const EN_MEMORIA = ':memory:';
 const CREDENCIAL_DEMO = { clientId: 'demo', clientSecret: 'demo' };
 const PROVEEDORES_REALES = { ...OAUTH_PROVIDERS };
@@ -112,6 +115,7 @@ export function crearServidorDemo(opciones: { location?: string; modelo?: AgentM
     fetch: createDemoFetch(PERSONAS_DEMO) as Fetch,
     config: { publicBaseUrl: null, agentRoundHour: null, oauth: Object.fromEntries(Object.keys(PROVEEDORES_REALES).map((id) => [id, CREDENCIAL_DEMO])) },
     model: modelo,
+    whatsapp: null,
   });
   simularPermisos();
   const app = createApp(ctx);
@@ -151,7 +155,7 @@ export function crearServidorDemo(opciones: { location?: string; modelo?: AgentM
         hoy: HOY,
         sala: SALA,
         modelo: idDelModelo,
-        rondaSola: (ctx.config.agentRoundHour ?? null) !== null,
+        rondaSola: (ctx.config.agentRoundHour ?? null) !== null || ctx.whatsapp?.configured === true,
         llamadas: { ...llamadas, segundos: decimas(llamadas.segundos) },
       },
       200,
@@ -188,7 +192,7 @@ function arrancar() {
   const { app, ctx } = crearServidorDemo();
   startAgentRoutine(ctx);
   const puerto = Number(process.env.PORT || PUERTO);
-  serve({ fetch: app.fetch, port: puerto }, () => {
+  serve({ fetch: app.fetch, port: puerto, hostname: ANFITRION }, () => {
     console.log(`Servidor de demo en http://localhost:${puerto} · commit ${process.env.DEMO_COMMIT || 'sin anotar'} · hoy ${HOY} · sala «${SALA}» · modelo ${modeloDeLaTerminal()} · sin ronda automática`);
     void calentar(ctx.model);
   });
