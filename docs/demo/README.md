@@ -62,4 +62,4 @@ Necesita `ffmpeg`, el Chromium de Playwright (`npx playwright install chromium`)
 
 ## La segunda grabación
 
-«Diez personas, sus fuentes y sus agentes» está en preparación: guion, escenario y pruebas ya están en el repo, y el texto del video es un borrador con corchetes en [diez-personas.md](diez-personas.md). Cómo se graba y qué hace cada archivo: [tools/grabar/README.md](../../tools/grabar/README.md).
+La segunda grabación, «Diez personas, sus fuentes y sus agentes» (2 min 52 s): [diez-personas.mp4](diez-personas.mp4), con qué es real y qué no en [diez-personas.md](diez-personas.md). Cómo se graba y qué hace cada archivo: [tools/grabar/README.md](../../tools/grabar/README.md).

@@ -9,7 +9,7 @@ Hay dos grabaciones:
 | Grabación | Estado | Guion | Escenario | Resultado |
 |---|---|---|---|---|
 | **Camino feliz**: sala, QR, agente, repo, ronda y globo, con personas al azar. | Grabada (1 min 34 s). | `grabar.mjs` + `personas.mjs` | `design/demo/escenario.html` | [`docs/demo/README.md`](../../docs/demo/README.md) |
-| **Diez personas, sus fuentes y sus agentes**: una persona conecta sus fuentes (envío, cuenta, llave) y su asistente; diez personas conversan por sus agentes. | En preparación. El texto del video es un borrador con corchetes. | `grabar2.mjs` y el resto de los `*2` | `design/demo/escenario2.html` + `design/demo/permiso.html` | [`docs/demo/diez-personas.md`](../../docs/demo/diez-personas.md) |
+| **Diez personas, sus fuentes y sus agentes**: una persona conecta sus fuentes (envío, cuenta, llave) y su asistente; diez personas conversan por sus agentes. | Grabada (2 min 52 s, toma 2, variante V2). | `grabar2.mjs` y el resto de los `*2` | `design/demo/escenario2.html` + `design/demo/permiso.html` | [`docs/demo/diez-personas.md`](../../docs/demo/diez-personas.md) |
 
 ## Archivos
 
@@ -33,7 +33,8 @@ Hay dos grabaciones:
   elenco, compara lo que dice el producto con lo esperado, corre la ronda y elige la variante.
   Nunca imprime una ficha: las rutas salen como `/api/people/…` y `/conectar/…`.
 - `grabar2.mjs`: graba el video en el escenario 2. Opciones: `--permiso pantalla|api`,
-  `--sin-globo`, `--parcial-vale`, `--toma N`, `--max-segundos N`. No borra nada.
+  `--sin-globo`, `--sin-webgl` (computador sin GPU), `--parcial-vale`, `--toma N`,
+  `--max-segundos N`. No borra nada.
 - `tiempos2.mjs`: cuánto dura cada cuadro después de las ediciones declaradas (tramo acelerado,
   esperas con tope, cuadros que no se muestran) y en qué segundo parte cada paso.
 - `ensayo-respuesta.mts`: sonda previa. Mide qué responden los agentes de Catalina y Felipe cuando
