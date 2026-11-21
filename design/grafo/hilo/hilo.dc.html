@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Hilo entre agentes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.aura i{position:absolute;border-radius:50%;aspect-ratio:1}
+.aura i:nth-child(1){left:-20%;top:10%;width:90%;background:#4fb4ff;opacity:.30;filter:blur(90px)}
+.aura i:nth-child(2){left:20%;top:45%;width:90%;background:#b36bff;opacity:.24;filter:blur(100px)}
+.aura i:nth-child(3){left:40%;top:-10%;width:70%;background:#ff5fa8;opacity:.18;filter:blur(100px)}
+.grad{background:linear-gradient(100deg,#1e9bff 0%,#7b61ff 30%,#e840d8 55%,#ff3b6b 76%,#ff8a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.glass{background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.85);box-shadow:0 24px 60px rgba(40,30,90,.08);-webkit-backdrop-filter:blur(28px) saturate(1.4);backdrop-filter:blur(28px) saturate(1.4)}
+.feed{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 56px);mask-image:linear-gradient(to bottom,transparent 0,#000 56px)}
+.tok{display:inline-block;white-space:pre;will-change:opacity,filter,transform}
+.caret{display:inline-block;width:2px;height:1.05em;margin-left:1px;vertical-align:-3px;border-radius:1px;background:#1d1d1f;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.dots{display:inline-flex;gap:4px;align-items:center;height:20px}
+.dots i{width:6px;height:6px;border-radius:50%;background:#6e6e73;animation:dot 1.2s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:.9;transform:translateY(-3px)}}
+.tool{position:relative;overflow:hidden}
+.tool.run::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.9) 50%,rgba(255,255,255,0) 70%);transform:translateX(-100%);animation:sweep 1.5s cubic-bezier(.4,0,.2,1) infinite;pointer-events:none}
+@keyframes sweep{to{transform:translateX(100%)}}
+.spin{animation:spin .9s linear infinite;transform-origin:50% 50%}
+@keyframes spin{to{transform:rotate(360deg)}}
+.redact{display:inline-flex;align-items:center;gap:5px;padding:1px 8px 1px 6px;margin:0 2px;border-radius:999px;background:rgba(120,120,140,.14);vertical-align:1px}
+.redact{font-size:13px;font-weight:600;color:#6e6e73}
+.toolhead{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;cursor:pointer}
+.toolhead:focus-visible,.ctl:focus-visible{outline:2px solid #7b61ff;outline-offset:2px;border-radius:14px}
+.ctl{border:0;border-radius:999px;height:36px;padding:0 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:rgba(120,120,140,.14);color:#1d1d1f}
+code,pre{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,monospace}
+@media (prefers-reduced-motion: reduce){.caret,.dots i,.spin,.tool.run::after{animation:none}}
+</style>
+</helmet>
+<div style="{{rootStyle}}"><div style="position: relative; width: 100%; height: 100%; overflow: hidden; background: #f7f7fa; color: #1d1d1f; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; font-size: 15px; line-height: 1.42">
+  <div class="aura" aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none"><i></i><i></i><i></i></div>
+
+  <sc-if value="{{sheet}}" hint-placeholder-val="{{false}}">
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 150px; padding: 18px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; filter: blur(1.5px); opacity: .55">
+      <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.05">Tu mañana,<br><span class="grad">resuelta entre agentes.</span></span>
+    </div>
+  </sc-if>
+  <section class="glass" aria-label="Hilo entre agentes" style="{{panelStyle}}">
+    <sc-if value="{{sheet}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="align-self: center; width: 36px; height: 5px; border-radius: 3px; background: rgba(60,60,90,.22); margin-top: 8px"></span></sc-if>
+    <header style="display: flex; align-items: center; gap: 12px; padding: 20px 20px 16px">
+      <div style="display: flex; flex: 0 0 auto">
+        <span style="width: 34px; height: 34px; border-radius: 50%; background-image: url(/_blob/99f89ebce844c0146b9057f1306965b8); background-size: cover; box-shadow: 0 0 0 2px #ffffff, 0 6px 14px rgba(40,30,90,.14)"></span>
+        <span style="width: 34px; height: 34px; margin-left: -10px; border-radius: 50%; background-image: url(/_blob/8603a08d152decb5f7e246585a4965f3); background-size: cover; box-shadow: 0 0 0 2px #ffffff, 0 6px 14px rgba(40,30,90,.14)"></span>
+      </div>
+      <div style="display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto">
+        <span style="font-size: 13px; font-weight: 600; color: #6e6e73">Tu agente y el de Ian</span>
+        <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2">Encontrar media hora</span>
+      </div>
+      <span style="{{statusStyle}}"><span style="{{statusDot}}"></span>{{statusLabel}}</span>
+    </header>
+    <div style="height: 1px; background: rgba(60,60,90,.1); margin: 0 20px"></div>
+
+    <div class="feed" aria-live="polite" style="flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 16px 20px 18px">
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+        <div style="{{it.wrap}}">
+
+          <sc-if value="{{it.isMsg}}" hint-placeholder-val="{{true}}">
+            <div style="{{it.row}}">
+              <span aria-hidden="true" style="{{it.face}}"></span>
+              <div style="{{it.col}}">
+                <span style="font-size: 12px; font-weight: 600; color: #6e6e73">{{it.who}}</span>
+                <div style="{{it.bubble}}">
+                  <sc-if value="{{it.typing}}" hint-placeholder-val="{{false}}"><span class="dots" aria-label="Escribiendo"><i></i><i></i><i></i></span></sc-if>
+                  <sc-for list="{{it.tokens}}" as="tk" hint-placeholder-count="6">
+                    <sc-if value="{{tk.redact}}" hint-placeholder-val="{{false}}"><span class="redact tok" style="{{tk.style}}"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true" fill="none" stroke="#6e6e73" stroke-width="1.4"><rect x="1" y="5" width="8" height="6" rx="1.5"></rect><path d="M3 5V3.5a2 2 0 0 1 4 0V5"></path></svg>dato privado</span></sc-if>
+                    <sc-if value="{{tk.plain}}" hint-placeholder-val="{{true}}"><span class="tok" style="{{tk.style}}">{{tk.text}}</span></sc-if>
+                  </sc-for>
+                  <sc-if value="{{it.caret}}" hint-placeholder-val="{{false}}"><span class="caret" aria-hidden="true"></span></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{it.isTool}}" hint-placeholder-val="{{false}}">
+            <div class="{{it.cls}}" style="margin-left: 34px; border-radius: 16px; background: rgba(255,255,255,.72); border: 1px solid rgba(60,60,90,.1)">
+              <button type="button" class="toolhead" aria-expanded="{{it.expanded}}" onClick="{{it.toggle}}">
+                <span aria-hidden="true" style="width: 28px; height: 28px; flex: 0 0 auto; border-radius: 9px; background: rgba(120,120,140,.14); display: flex; align-items: center; justify-content: center">
+                  <sc-if value="{{it.running}}" hint-placeholder-val="{{false}}"><svg class="spin" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="rgba(29,29,31,.15)" stroke-width="1.8"></circle><path d="M8 2a6 6 0 0 1 6 6" stroke="#1d1d1f" stroke-width="1.8" stroke-linecap="round"></path></svg></sc-if>
+                  <sc-if value="{{it.doneOk}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="#1d1d1f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="15" style="{{it.check}}"></path></svg></sc-if>
+                  <sc-if value="{{it.donePrivate}}" hint-placeholder-val="{{false}}"><svg width="14" height="16" viewBox="0 0 14 16" fill="none" stroke="#1d1d1f" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="7" width="10" height="7.5" rx="2"></rect><path d="M4.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg></sc-if>
+                </span>
+                <span style="display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; line-height: 1.3">
+                  <span style="font-size: 14px; font-weight: 600">{{it.label}}</span>
+                  <code style="font-size: 12px; color: #6e6e73">{{it.name}}</code>
+                </span>
+                <span style="{{it.receiptStyle}}">{{it.receipt}}</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" fill="none" stroke="#aeaeb2" stroke-width="1.6" stroke-linecap="round" style="{{it.chev}}"><path d="M3 2l3 3-3 3"></path></svg>
+              </button>
+              <sc-if value="{{it.expanded}}" hint-placeholder-val="{{false}}">
+                <div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 10px; padding: 2px 14px 14px 50px; font-size: 12px">
+                  <span style="color: #6e6e73; font-weight: 600">Entrada</span><pre style="margin: 0; white-space: pre-wrap; overflow-wrap: anywhere">{{it.input}}</pre>
+                  <span style="color: #6e6e73; font-weight: 600">Salida</span><pre style="margin: 0; white-space: pre-wrap; overflow-wrap: anywhere">{{it.output}}</pre>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{it.isAsk}}" hint-placeholder-val="{{false}}">
+            <div style="margin-left: 34px; padding: 1.5px; border-radius: 18px; background: linear-gradient(100deg,#1e9bff 0%,#7b61ff 30%,#e840d8 55%,#ff3b6b 76%,#ff8a1f 100%); box-shadow: 0 18px 40px rgba(120,60,200,.16)">
+              <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 14px 12px; border-radius: 16.5px; background: rgba(255,255,255,.95)">
+                <span class="grad" style="font-size: 12px; font-weight: 600; align-self: flex-start">Tu decisión</span>
+                <span style="font-size: 16px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3">{{it.question}}</span>
+                <sc-if value="{{it.pending}}" hint-placeholder-val="{{true}}">
+                  <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6e6e73"><span class="dots" aria-hidden="true" style="height: 14px"><i></i><i></i><i></i></span>Tu agente espera tu respuesta. Ian no ve esta pregunta.</span>
+                  <div style="display: flex; gap: 8px">
+                    <button type="button" class="ctl" onClick="{{approve}}" style="flex: 1 1 auto; background: #1d1d1f; color: #ffffff">Aceptar</button>
+                    <button type="button" class="ctl" style="flex: 1 1 auto">Ajustar</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{it.approved}}" hint-placeholder-val="{{false}}">
+                  <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Aceptado por ti · {{it.when}}</span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </sc-for>
+    </div>
+
+    <footer style="display: flex; align-items: center; gap: 12px; padding: 12px 20px 16px; border-top: 1px solid rgba(60,60,90,.1)">
+      <button type="button" class="ctl" onClick="{{togglePlay}}" aria-label="{{playLabel}}" style="width: 36px; padding: 0; display: flex; align-items: center; justify-content: center">
+        <sc-if value="{{playing}}" hint-placeholder-val="{{true}}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" fill="#1d1d1f"><rect x="2" y="1.5" width="2.6" height="9" rx="1"></rect><rect x="7.4" y="1.5" width="2.6" height="9" rx="1"></rect></svg></sc-if>
+        <sc-if value="{{paused}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" fill="#1d1d1f"><path d="M3 1.5v9l7.5-4.5z"></path></svg></sc-if>
+      </button>
+      <div aria-hidden="true" style="flex: 1 1 auto; height: 4px; border-radius: 2px; background: rgba(120,120,140,.18); overflow: hidden"><div style="{{bar}}"></div></div>
+      <span style="font-size: 12px; color: #6e6e73; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right">{{clock}}</span>
+      <button type="button" class="ctl" onClick="{{replay}}">Repetir</button>
+    </footer>
+  </section>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["panel","sheet"],"default":"panel"},"still":{"editor":"boolean","default":false},"$preview":{"width":480,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { t: 0, playing: true, open: {}, approvedAt: null };
+    this.ME = 0; this.IAN = 1;
+    this.FACES = ['/_blob/99f89ebce844c0146b9057f1306965b8', '/_blob/8603a08d152decb5f7e246585a4965f3'];
+    this.NAMES = ['Tu agente', 'Agente de Ian'];
+    var msg = function (at, end, author, text) { return { type: 'message', at: at, end: end, author: author, text: text }; };
+    var tool = function (at, end, author, name, label, input, output, receipt, privateResult) { return { type: 'call', at: at, end: end, author: author, name: name, label: label, input: input, output: output, receipt: receipt, privateResult: !!privateResult }; };
+    this.events = [
+      msg(0.2, 2.6, 0, '¿Tienes media hora hoy para revisar la demo?'),
+      tool(2.9, 4.6, 0, 'agenda.disponibilidad', 'Leer tu agenda', { minutos: 30 }, { libre: ['10:00', '10:30'] }, 'Dos franjas'),
+      tool(3.4, 5.4, 1, 'agenda.disponibilidad', 'Leer la agenda de Ian', { minutos: 30 }, { libre: ['10:30', '11:00'] }, 'Dos franjas'),
+      tool(5.7, 7.4, 1, 'politica.consultar', 'Revisar qué puede compartir', { dato: 'motivo 10:00', para: 'Tu agente' }, { compartir: false }, 'Privado', true),
+      msg(7.7, 10.6, 1, 'A las 10:00 tengo [[x]] ¿Te sirve a las 10:30?'),
+      tool(10.9, 12.5, 0, 'agenda.cruzar', 'Cruzar las dos agendas', { duracion_min: 30 }, { desde: '10:30', hasta: '11:00' }, '10:30 a 11:00'),
+      { type: 'ask', at: 12.8, end: 15.6, author: 0, question: '¿Agendo la revisión con Ian a las 10:30?' },
+      { type: 'human', at: 16.0, end: 17.6, author: 0, text: 'Que sea en la sala chica, por favor.' },
+      msg(18.0, 20.2, 0, 'Listo, quedó a las 10:30 en la sala chica. Te envío la invitación.'),
+      tool(20.4, 22.0, 0, 'calendario.crear', 'Crear la invitación', { titulo: 'Revisar la demo', inicio: '10:30', fin: '11:00' }, { enviada: true }, 'Enviada')
+    ];
+    this.DUR = 23.5; this.HOLD = 3.5;
+    var self = this;
+    this.events.forEach(function (e) { if (e.type === 'message' || e.type === 'human') e.tokens = self.tokenize(e.text); });
+  }
+
+  tokenize(text) {
+    var out = [], re = /\[\[(.+?)\]\]|(\S+\s*)/g, m;
+    while ((m = re.exec(text))) out.push(m[1] ? { text: '', redact: true } : { text: m[2], redact: false });
+    return out;
+  }
+
+  componentDidMount() {
+    var self = this;
+    this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.props.still) { this.setState({ t: this.DUR + 1, playing: false }); return; }
+    if (this.reduced) { this.setState({ t: this.DUR, playing: false }); return; }
+    this.last = performance.now();
+    var loop = function (now) {
+      var dt = Math.min(0.1, (now - self.last) / 1000); self.last = now;
+      if (self.state.playing) {
+        var t = self.state.t + dt;
+        if (t > self.DUR + self.HOLD) self.setState({ t: 0, open: {}, approvedAt: null });
+        else self.setState({ t: t });
+      }
+      self.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+
+  componentWillUnmount() { cancelAnimationFrame(this.raf); }
+
+  clamp(x) { return Math.max(0, Math.min(1, x)); }
+  ease(x) { x = this.clamp(x); return 1 - Math.pow(1 - x, 3); }
+
+  faceStyle(author) {
+    return { width: '26px', height: '26px', flex: '0 0 auto', borderRadius: '50%', backgroundImage: 'url(' + this.FACES[author] + ')', backgroundSize: 'cover', boxShadow: '0 0 0 2px #ffffff, 0 4px 10px rgba(40,30,90,.12)', marginTop: '18px' };
+  }
+
+  renderVals() {
+    var self = this, t = this.state.t;
+    var approvedAt = this.state.approvedAt;
+    var items = [];
+    this.events.forEach(function (e, idx) {
+      if (t < e.at) return;
+      var age = t - e.at, enter = self.ease(age / 0.5);
+      var wrap = { opacity: enter, transform: 'translateY(' + ((1 - enter) * 10).toFixed(2) + 'px) scale(' + (0.985 + 0.015 * enter).toFixed(4) + ')', transformOrigin: e.author === 0 ? 'right bottom' : 'left bottom' };
+      var base = { wrap: wrap, isMsg: false, isTool: false, isAsk: false };
+      if (e.type === 'message' || e.type === 'human') {
+        var human = e.type === 'human';
+        var mine = e.author === self.ME, typeEnd = human ? e.at + 0.15 : e.at + 0.7, n = e.tokens.length;
+        var streamT = (t - typeEnd) / Math.max(0.1, e.end - typeEnd);
+        var shown = t < typeEnd ? 0 : Math.min(n, Math.floor(streamT * n) + 1);
+        var tokens = e.tokens.slice(0, shown).map(function (tk, i) {
+          var tAt = typeEnd + (i / n) * (e.end - typeEnd), p = self.ease((t - tAt) / 0.45);
+          var style = { opacity: p, filter: 'blur(' + ((1 - p) * 5).toFixed(2) + 'px)', transform: 'translateY(' + ((1 - p) * 4).toFixed(2) + 'px)' };
+          return { text: tk.text, redact: tk.redact, plain: !tk.redact, style: style };
+        });
+        items.push(Object.assign(base, {
+          isMsg: true,
+          typing: t < typeEnd,
+          caret: t >= typeEnd && t < e.end + 0.35,
+          tokens: tokens,
+          who: human ? 'Tú, en persona' : self.NAMES[e.author],
+          face: self.faceStyle(e.author),
+          row: { display: 'flex', gap: '8px', alignItems: 'flex-start', flexDirection: mine ? 'row-reverse' : 'row' },
+          col: { display: 'flex', flexDirection: 'column', gap: '4px', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '82%' },
+          bubble: human
+            ? { padding: '10px 14px', borderRadius: '18px 6px 18px 18px', background: '#ffffff', border: '1.5px solid #1d1d1f', minHeight: '20px' }
+            : mine
+            ? { padding: '10px 14px', borderRadius: '18px 6px 18px 18px', background: 'rgba(120,120,140,.14)', minHeight: '20px' }
+            : { padding: '10px 14px', borderRadius: '6px 18px 18px 18px', background: 'rgba(255,255,255,.96)', boxShadow: '0 6px 18px rgba(40,30,90,.07)', minHeight: '20px' }
+        }));
+      } else if (e.type === 'call') {
+        var running = t < e.end, done = !running, dp = self.ease((t - e.end) / 0.45), open = !!self.state.open[idx];
+        items.push(Object.assign(base, {
+          isTool: true,
+          cls: 'tool' + (running ? ' run' : ''),
+          running: running, doneOk: done && !e.privateResult, donePrivate: done && e.privateResult,
+          check: { strokeDashoffset: (15 * (1 - dp)).toFixed(2) },
+          label: e.label, name: e.name,
+          receipt: done ? e.receipt : 'Consultando',
+          receiptStyle: { fontSize: '12px', fontWeight: 600, padding: '4px 9px', borderRadius: '999px', whiteSpace: 'nowrap', background: done ? 'rgba(120,120,140,.14)' : 'transparent', color: done ? '#1d1d1f' : '#6e6e73', opacity: done ? 0.4 + 0.6 * dp : 1, transform: 'scale(' + (done ? 0.92 + 0.08 * dp : 1).toFixed(3) + ')' },
+          expanded: open,
+          chev: { transition: 'transform .25s ease', transform: open ? 'rotate(90deg)' : 'none', flex: '0 0 auto' },
+          input: self.pretty(e.input), output: done ? self.pretty(e.output) : '…',
+          toggle: function () { var o = Object.assign({}, self.state.open); o[idx] = !o[idx]; self.setState({ open: o }); }
+        }));
+      } else if (e.type === 'ask') {
+        var autoAt = approvedAt !== null ? approvedAt : (t >= e.end ? e.end : null);
+        items.push(Object.assign(base, { isAsk: true, question: e.question, pending: autoAt === null, approved: autoAt !== null, when: '8:46' }));
+      }
+    });
+    var ended = t >= this.events[this.events.length - 1].end;
+    var playing = this.state.playing;
+    var mm = Math.floor(t / 60), ss = Math.floor(t % 60);
+    var sheet = this.props.mode === 'sheet', W = sheet ? 390 : 480, H = sheet ? 844 : 900;
+    return {
+      rootStyle: { width: W + 'px', height: H + 'px' },
+      sheet: sheet,
+      panelStyle: sheet
+        ? { position: 'absolute', left: 0, right: 0, top: '128px', bottom: 0, borderRadius: '28px 28px 0 0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+        : { position: 'absolute', left: '20px', right: '20px', top: '20px', bottom: '20px', borderRadius: '28px', display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+      items: items,
+      statusLabel: ended ? 'Acuerdo' : items.some(function (x) { return x.isAsk && x.pending; }) ? 'Te espera' : 'Negociando',
+      statusStyle: { display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, background: 'rgba(255,255,255,.8)', flex: '0 0 auto' },
+      statusDot: ended ? { width: '7px', height: '7px', borderRadius: '50%', background: '#30d158' } : { width: '7px', height: '7px', borderRadius: '50%', background: 'linear-gradient(100deg,#1e9bff,#e840d8,#ff8a1f)' },
+      bar: { height: '100%', width: (Math.min(1, t / this.DUR) * 100).toFixed(2) + '%', background: '#1d1d1f', borderRadius: '2px' },
+      clock: mm + ':' + (ss < 10 ? '0' : '') + ss,
+      playing: playing, paused: !playing, playLabel: playing ? 'Pausar' : 'Reproducir',
+      togglePlay: function () { self.setState({ playing: !self.state.playing }); },
+      replay: function () { self.setState({ t: 0, open: {}, approvedAt: null, playing: true }); },
+      approve: function () { self.setState({ approvedAt: self.state.t }); }
+    };
+  }
+
+  pretty(obj) {
+    return Object.keys(obj).map(function (k) { var v = obj[k]; return k + ': ' + (Array.isArray(v) ? v.join(', ') : String(v)); }).join('\n');
+  }
+}
+</script>
+</body>
+</html>
