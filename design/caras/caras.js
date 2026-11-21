@@ -81,6 +81,7 @@
       beard: random() < 0.14
     };
     if (recipe.beard && (recipe.hair === 'flequillo' || recipe.hair === 'largo' || recipe.hair === 'melena')) recipe.beard = false;
+    if (recipe.glasses && recipe.eyes === 'feliz') recipe.eyes = 'punto';
     return recipe;
   }
 

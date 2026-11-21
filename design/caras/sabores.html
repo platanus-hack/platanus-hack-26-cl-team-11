@@ -45,6 +45,10 @@
   .cr-rest { display: grid; gap: var(--rd-space-4); padding-top: var(--rd-space-4); }
   @media (min-width: 1100px) { .cr-rest { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .cr-rest p { margin: 0; font-size: var(--rd-text-small); line-height: 1.45; }
+  .cr-real { display: grid; gap: var(--rd-space-4); }
+  @media (min-width: 900px) { .cr-real { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .cr-real figure { display: flex; flex-direction: column; gap: var(--rd-space-2); margin: 0; min-width: 0; }
+  .cr-real img { display: block; width: 100%; height: auto; border-radius: var(--rd-space-4); box-shadow: 0 0 0 1px var(--rd-hairline); }
   .cr-foot { padding-top: var(--rd-space-7); max-width: 760px; }
 </style>
 </head>
@@ -72,6 +76,18 @@
       </div>
     </section>
 
+    <section class="cr-flavors" aria-labelledby="real-title">
+      <div class="rd-card rd-glass cr-flavor">
+        <div class="rd-head"><h2 class="rd-title" id="real-title">En el globo real</h2><span class="rd-head__end"><span class="rd-chip rd-glass">Capturas de grafo/globo.html</span></span></div>
+        <p class="cr-flavor__lead">El mismo globo con tres juegos de caras. Solo cambian las siete imágenes de <code>faces/</code>; el código no se toca.</p>
+        <div class="cr-real">
+          <figure><span class="rd-label">Vita Faces, hoy</span><img src="globo/hoy-5.webp" alt="Globo con 5 personas y las Vita Faces actuales" width="900" height="600"><img src="globo/hoy-50.webp" alt="Globo con 50 personas y las Vita Faces actuales" width="900" height="600"></figure>
+          <figure><span class="rd-label">Vita Faces en vidrio</span><img src="globo/vidrio-5.webp" alt="Globo con 5 personas y Vita Faces en vidrio" width="900" height="600"><img src="globo/vidrio-50.webp" alt="Globo con 50 personas y Vita Faces en vidrio" width="900" height="600"></figure>
+          <figure><span class="rd-label">Tinta</span><img src="globo/tinta-5.webp" alt="Globo con 5 personas y caras de Tinta" width="900" height="600"><img src="globo/tinta-50.webp" alt="Globo con 50 personas y caras de Tinta" width="900" height="600"></figure>
+        </div>
+      </div>
+    </section>
+
     <main class="cr-flavors" id="flavors"></main>
 
     <section class="cr-flavors" aria-labelledby="rest-title">
@@ -95,7 +111,7 @@
       </div>
     </section>
 
-    <p class="rd-note cr-foot">Vita Faces en vidrio sale de <code>componer.py</code> con las piezas de vita-front. Tinta, Aura y Monograma salen de <code>caras.js</code> a partir del nombre. El globo de esta página es una maqueta: 64 caras sobre una esfera, con el fondo desenfocado igual que en el globo real.</p>
+    <p class="rd-note cr-foot">Vita Faces en vidrio sale de <code>componer.py</code> con las piezas de vita-front. Tinta, Aura y Monograma salen de <code>caras.js</code> a partir del nombre. El globo chico de cada tarjeta es una maqueta; las capturas de arriba son el globo real. <code>aplicar.py</code> deja cualquiera de los dos sabores en el formato de <code>faces/</code>.</p>
   </div>
 </div>
 
@@ -130,16 +146,16 @@
     {
       id: 'vidrio', title: 'Vita Faces en vidrio', chip: 'El cambio más corto',
       lead: 'El mismo personaje con tres ajustes: un solo fondo de vidrio, ropa de todos los días y nada de deporte.',
-      pro: ['Conserva el carisma y deja el color al degradado.', 'Misma grilla de 8 por 8 que el atlas actual: entra regenerando las imágenes, sin tocar el globo.'],
-      con: ['Sigue siendo la marca de Vita.', 'Una cabeza blanca sobre vidrio claro pierde algo de borde al fondo del globo.'],
+      pro: ['Conserva el carisma y saca los pasteles y el deporte.', 'Entra reemplazando las siete imágenes de faces/, sin tocar el globo.'],
+      con: ['Sigue siendo la marca de Vita.', 'En el globo real casi no se distingue de lo que hay hoy.'],
       team: function (person) { return sprite('vita-ronda-equipo.webp', 5, TEAM_STRIP[person.file], 0, 1); },
       crowd: function (index) { return sprite('vita-ronda.webp', 8, index % 8, Math.floor(index / 8)); }
     },
     {
       id: 'tinta', title: 'Tinta', chip: 'Propia de Ronda',
       lead: 'La cara es el disco de vidrio, dibujada con la misma tinta del texto. Sin color por persona.',
-      pro: ['Nace del sistema: vidrio y tinta, nada más.', 'Sale del nombre, sin imágenes, para 5 o para 300.', 'De lejos quedan el pelo y los ojos, que es lo que se alcanza a leer.'],
-      con: ['Menos carisma que una Vita Face.', 'Es un primer trazo: necesita una pasada de dibujo antes de mostrarse.'],
+      pro: ['Nace del sistema: vidrio y tinta. El degradado queda como único color.', 'Sale del nombre, para 5 o para 300, y también entra reemplazando las siete imágenes de faces/.', 'De lejos quedan el pelo y los ojos, que es lo que se alcanza a leer.'],
+      con: ['Menos carisma que una Vita Face.', 'Es un primer trazo: le falta una pasada de dibujo, sobre todo en los peinados.'],
       team: function (person) { return glass(Caras.tinta(person.name, { recipe: person.tinta })); },
       crowd: function (index, size) { return glass(Caras.tinta(NAMES[index], { small: size < 17 })); }
     },
@@ -279,8 +295,8 @@
     host.appendChild(card);
   });
 
-  document.getElementById('pick').textContent = 'Seguir con caras. Para la demo, Vita Faces en vidrio.';
-  document.getElementById('pick-why').textContent = 'Saca lo que hoy desentona, los pasteles y el deporte, sin perder el carisma ni rehacer las escenas que ya usan estas caras. Tinta es la opción si quieres que Ronda tenga caras propias y no las de Vita.';
+  document.getElementById('pick').textContent = 'Seguir con caras. Mi voto es Tinta.';
+  document.getElementById('pick-why').textContent = 'En el globo real es la única que deja al degradado como único color, y le da a Ronda caras propias. Vita Faces en vidrio cambia poco frente a hoy: es la salida si echas de menos el carisma.';
 })();
 </script>
 </body>
