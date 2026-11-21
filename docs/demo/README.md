@@ -59,3 +59,7 @@ node tools/grabar/grabar.mjs --base http://localhost:8797               # en otr
 Cada corrida elige otra sala, otras personas y otros agentes. Tarda unos dos minutos y deja el video, la captura final y el resumen en esta carpeta.
 
 Necesita `ffmpeg`, el Chromium de Playwright (`npx playwright install chromium`) y las dependencias de la skill Stageshow (`npm install` dentro de `.agents/skills/stageshow`), de donde toma Playwright. El escenario es `design/demo/escenario.html`.
+
+## La segunda grabación
+
+«Diez personas, sus fuentes y sus agentes» está en preparación: guion, escenario y pruebas ya están en el repo, y el texto del video es un borrador con corchetes en [diez-personas.md](diez-personas.md). Cómo se graba y qué hace cada archivo: [tools/grabar/README.md](../../tools/grabar/README.md).
