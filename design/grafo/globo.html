@@ -730,7 +730,8 @@ if (motionPreview || calendarPreview) {
   function resizeCalendarPreview() {
     const width = document.documentElement.clientWidth;
     const phone = width < 750;
-    const scale = phone ? Math.min(.78, width / 940) : Math.min(1,width / 1440);
+    const height = document.documentElement.clientHeight;
+    const scale = phone ? Math.min(.78, width / 940) : Math.min(1, width / 1440, height / 900);
     g.calendarZoom = scale;
     const top = 150 - 210*scale;
     const style = document.body.style;
@@ -773,6 +774,11 @@ if (calendarPreview || motionPreview) {
   const syncMotion=()=>{g.reduced=q.has("still") || motion.matches; g.refreshThread();};
   motion.addEventListener("change",syncMotion);
   syncMotion();
+}
+if ((calendarPreview || motionPreview) && q.has('open') && g.openThread) {
+  const kind = calendarPreview ? 'calendars' : motions;
+  const m = globeMotions.find(x => x.kind === kind) || globeMotions[0];
+  setTimeout(() => g.openThread(m.a, m.b), 700);
 }
 if (q.has('still')) { g.vis = g.vis.map((x, i) => i < g.state.n ? 1 : 0); g.p = g.look(g.state.n); g.edgeFade = 1; }
 sync();

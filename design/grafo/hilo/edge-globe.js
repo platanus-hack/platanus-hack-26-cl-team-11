@@ -50,8 +50,12 @@ const RondaEdgeGlobe = (() => {
       const v = 1 - u, mid = { x: v * v * a.x + 2 * u * v * c.x + u * u * b.x, y: v * v * a.y + 2 * u * v * c.y + u * u * b.y };
       let hit = null;
       if (t !== null) {
+        const isOpen = open.includes(m);
         const st = RondaEdge.state(eventsFor(m, people), t);
-        hit = RondaEdge.paint(ctx, { from: a, to: b, control: c }, st, { size, u, faces: [photos[m.a], photos[m.b]] });
+        // Con el hilo abierto, la palabra que se escribe ya viaja por el arco: no se duplican los puntos.
+        if (!(isOpen && st.phase === 'typing')) {
+          hit = RondaEdge.paint(ctx, { from: a, to: b, control: c }, st, { size: isOpen ? size * 1.3 : size, u, faces: [photos[m.a], photos[m.b]] });
+        }
       }
       if (!hit) {
         // Punto en reposo: este arco tiene un hilo que se puede abrir.

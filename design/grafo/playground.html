@@ -14,8 +14,9 @@
   .pg-tabs .rd-button { flex: 0 0 auto; height: 40px; background: transparent; color: var(--rd-ink); }
   .pg-tabs .rd-button[aria-selected="true"] { background: var(--rd-ink); color: var(--rd-on-ink); }
   .pg-note { margin: 14px 0 12px; max-width: 760px; }
-  .pg-box { position: relative; width: 100%; aspect-ratio: 1440 / 900; overflow: hidden; border-radius: var(--rd-radius-card); background: var(--rd-bg); box-shadow: var(--rd-shadow-card); }
-  .pg-frame { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; }
+  .pg-box { position: relative; width: 100%; height: calc(100vh - 150px); min-height: 560px; overflow: hidden; border-radius: var(--rd-radius-card); background: var(--rd-bg); box-shadow: var(--rd-shadow-card); }
+  .pg-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .pg-note { margin: 10px 0; }
 </style>
 </head>
 <body>
@@ -33,6 +34,7 @@
 </div>
 <script>
 const tabs = [
+  { id: 'demo', label: 'Demo', src: 'globo.html?n=5&motion=calendars&open=1', note: 'Se reproduce sola. A la derecha, el hilo entre los agentes de Ian y Lian; en el globo, su arco cuenta lo mismo al mismo tiempo: puntos cuando escriben, la miniatura mientras corre cada herramienta, un check al terminar.' },
   { id: 'globo', label: 'Globo', src: 'globo.html', note: 'Globo de 5 a 300 personas. Arrastra para girarlo; toca a alguien con aro para ver su grupo. Grupos de hasta 9 en tres rondas, miniaturas sobre los hilos, un solo grupo con color, profundidad gradual.' },
   { id: 'hilo', label: 'Hilo en vivo', src: 'globo.html?n=5&motion=calendars', note: 'Toca «Abrir hilo». Streaming sin reacomodo, tarjetas de herramienta por conector, recibos que cambian en su lugar.' },
   { id: 'permiso', label: 'Permiso', src: 'globo.html?n=5&motion=permission', note: 'Toca «Abrir hilo». El agente espera tu decisión: Aceptar o Ajustar. Solo tú ves esa solicitud.' },
@@ -47,9 +49,6 @@ function show(id) {
   frame.src = t.src; note.textContent = t.note; history.replaceState(null, '', '#' + t.id);
 }
 tabs.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'rd-button'; b.setAttribute('role', 'tab'); b.dataset.id = t.id; b.textContent = t.label; b.onclick = () => show(t.id); bar.append(b); });
-const box = document.getElementById('box');
-const fit = () => { frame.style.transform = 'scale(' + (box.clientWidth / 1440) + ')'; };
-new ResizeObserver(fit).observe(box); fit();
 show(location.hash.slice(1));
 </script>
 </body>
