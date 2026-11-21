@@ -6,6 +6,7 @@
  *   var entrada = RondaEntrada.mount(nodo, opciones)   arma la escena dentro de nodo
  *       opciones  names (las caras, por defecto el equipo), still (true: sin animación, para capturas)
  *   entrada.replay()     vuelve a empezar
+ *   entrada.leave()      la salida: la esfera se abre hacia afuera y las caras se van, para mostrar la pantalla de atrás
  *   entrada.destroy()
  *   RondaEntrada.introMs()   cuánto dura la entrada hasta quedar armada
  *
@@ -24,11 +25,14 @@
   var FACE_START_MS = 380;
   var FACE_STEP_MS = 95;
   var INTRO_MS = 2000;
+  var LEAVE_S = 0.75;
+  var FACE_LEAVE_STEP_MS = 45;
   var GRADIENT_TOKENS = ['--rd-g1', '--rd-g2', '--rd-g3', '--rd-g4', '--rd-g5'];
 
   var reducedMotion = function () { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
   var clamp = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
   var easeOut = function (x) { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+  var easeIn = function (x) { x = clamp(x); return x * x * x; };
 
   function seeded(seed) {
     var s = seed >>> 0;
@@ -87,10 +91,13 @@
       canvas.height = Math.max(1, Math.round(height * scale));
     }
 
-    function draw(t) {
+    function draw(t, leaving) {
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
       ctx.clearRect(0, 0, width, height);
-      var radius = Math.min(width, height) * 0.43, cx = width / 2, cy = height / 2;
+      var away = leaving === undefined ? 0 : easeIn(leaving / LEAVE_S);
+      var fade = 1 - clamp(leaving === undefined ? 0 : leaving / LEAVE_S);
+      if (fade <= 0) return;
+      var radius = Math.min(width, height) * 0.43 * (1 + away * 2.4), cx = width / 2, cy = height / 2;
       var turn = t * SPIN, cs = Math.cos(turn), sn = Math.sin(turn), ct = Math.cos(TILT), st = Math.sin(TILT);
       for (var i = 0; i < dots.length; i += 1) {
         var dot = dots[i];
@@ -103,7 +110,7 @@
         var y = dot.from[1] + (sy - dot.from[1]) * p;
         var z = dot.from[2] + (depth - dot.from[2]) * p;
         var near = (z + 1) / 2;
-        var alpha = clamp((t - dot.delay) / 0.35) * (0.14 + 0.72 * near * near);
+        var alpha = clamp((t - dot.delay) / 0.35) * (0.14 + 0.72 * near * near) * fade;
         if (alpha <= 0.01) continue;
         var size = dot.size * (0.7 + near * 0.9) * (dot.star ? 1.9 : 1);
         ctx.globalAlpha = alpha;
@@ -143,7 +150,7 @@
     host.appendChild(row);
 
     var view = sky(canvas, buildDots(stops));
-    var faces = [], timers = [], frame = 0, start = performance.now();
+    var faces = [], timers = [], frame = 0, start = performance.now(), leftAt = null;
 
     function clearFaces() {
       timers.forEach(clearTimeout);
@@ -172,8 +179,9 @@
     }
 
     function tick(now) {
-      view.draw((now - start) / 1000);
-      frame = requestAnimationFrame(tick);
+      var leaving = leftAt === null ? undefined : (now - leftAt) / 1000;
+      view.draw((now - start) / 1000, leaving);
+      if (leaving === undefined || leaving < LEAVE_S) frame = requestAnimationFrame(tick);
     }
 
     placeFaces();
@@ -189,8 +197,21 @@
     return {
       replay: function () {
         if (still) return;
+        cancelAnimationFrame(frame);
+        leftAt = null;
         start = performance.now();
         placeFaces();
+        frame = requestAnimationFrame(tick);
+      },
+      leave: function () {
+        if (leftAt !== null) return;
+        var slots = row.children, last = slots.length - 1;
+        for (var i = 0; i <= last; i += 1) {
+          slots[i].style.transitionDelay = Math.abs(i - last / 2) * FACE_LEAVE_STEP_MS + 'ms';
+          slots[i].classList.add('is-out');
+        }
+        if (still) { canvas.style.opacity = '0'; return; }
+        leftAt = performance.now();
       },
       destroy: function () {
         cancelAnimationFrame(frame);
@@ -200,5 +221,5 @@
     };
   }
 
-  window.RondaEntrada = { mount: mount, introMs: function () { return reducedMotion() ? 700 : INTRO_MS; } };
+  window.RondaEntrada = { mount: mount, introMs: function () { return reducedMotion() ? 700 : INTRO_MS; }, leaveMs: function () { return reducedMotion() ? 300 : LEAVE_S * 1000; } };
 })();

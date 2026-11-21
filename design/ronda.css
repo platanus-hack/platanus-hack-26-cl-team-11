@@ -359,6 +359,18 @@ html { background: var(--rd-bg); } /* la primera pintada ya es del color de la a
 .rd-entrada__cara.is-in { opacity: 1; }
 .rd-entrada__cara > span { width: 100%; height: 100%; }
 @media (max-width: 520px) { .rd-entrada { --rd-entrada-cara: 58px; --rd-entrada-corte: 4px; } }
+/* Salida de la entrada: el fondo se vuelve transparente mientras la esfera se abre y las caras se van, y la pantalla de atrás sube a su lugar */
+.rd-entrada__cara { transition: opacity .32s ease, transform .42s cubic-bezier(.5, 0, .75, 0); }
+.rd-entrada__cara.is-out { opacity: 0; transform: scale(.55) translateY(10px); }
+.rd-entrada__cielo { transition: opacity .3s ease; }
+.rd-loader--entrada.rd-loader--out { opacity: 1; visibility: visible; background-color: transparent; transition: background-color .6s ease .12s, visibility 0s .8s; }
+.rd-loader--entrada .rd-aura { transition: opacity .6s ease .1s; }
+.rd-loader--entrada.rd-loader--out .rd-aura { opacity: 0; }
+.rd-loader--entrada.rd-loader--out .rd-loader__name { animation: rd-loader-name-out .35s ease both; }
+@keyframes rd-loader-name-out { to { opacity: 0; transform: translateY(-8px); } }
+html[data-montu-entrada] #root > :not(.rd-loader) { animation: rd-pagina-entra .85s .18s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes rd-pagina-entra { from { opacity: 0; transform: translateY(18px) scale(.985); } }
+@media (prefers-reduced-motion: reduce) { .rd-entrada__cara { transition: none; } html[data-montu-entrada] #root > :not(.rd-loader) { animation: none; } }
 /* ---- Chat con tu agente: la misma conversación que por WhatsApp ---- */
 .rd-chat { display: flex; flex-direction: column; gap: var(--rd-space-2); }
 .rd-bubble { align-self: flex-start; max-width: 78%; margin: 0; padding: 10px 14px; border-radius: var(--rd-space-4); background: var(--rd-glass-solid); box-shadow: 0 0 0 1px var(--rd-hairline); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; animation: rd-vital-sube .35s cubic-bezier(.2, .8, .2, 1) both; }

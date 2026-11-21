@@ -8,10 +8,13 @@
 <link rel="stylesheet" href="../ronda.css">
 </head>
 <body class="rd-page">
+<div id="root">
+<main style="min-height:100vh;display:grid;place-items:center"><div style="display:flex;flex-direction:column;gap:16px;width:min(440px,86vw)"><img class="rd-mark" src="../logo/montu-mark.svg" alt=""><h1 class="rd-pagetitle">Entra a Montu</h1><a class="rd-button" href="#">Continuar con Google</a></div></main>
 <div class="rd-loader rd-loader--entrada" id="carga" role="img" aria-label="El equipo de Montu te mira">
   <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div id="escena"></div>
   <p class="rd-loader__name" id="nombre">Montu</p>
+</div>
 </div>
 <script src="../luz/luz.js"></script>
 <script src="../faces/caras.js"></script>
@@ -21,12 +24,24 @@
   var nombre = document.getElementById('nombre');
   if (still) nombre.style.animation = 'none';
   var entrada = RondaEntrada.mount(document.getElementById('escena'), { still: still });
-  document.getElementById('carga').addEventListener('click', function () {
+  var carga = document.getElementById('carga');
+  function salir() {
+    document.documentElement.dataset.montuEntrada = '';
+    carga.classList.add('rd-loader--out');
+    entrada.leave();
+  }
+  function volver() {
+    delete document.documentElement.dataset.montuEntrada;
+    carga.classList.remove('rd-loader--out');
     entrada.replay();
     nombre.style.animation = 'none';
     void nombre.offsetWidth;
     nombre.style.animation = '';
-  });
+    setTimeout(salir, 2700);
+  }
+  carga.addEventListener('click', salir);
+  document.addEventListener('keydown', function (event) { if (event.key === 'r') volver(); });
+  if (!still) setTimeout(salir, 2700);
 </script>
 </body>
 </html>

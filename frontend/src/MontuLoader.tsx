@@ -7,12 +7,13 @@ import '../../design/montu/entrada.js';
 interface MountedMontu {
   replay(): void;
   destroy(): void;
+  leave?(): void;
 }
 
 declare global {
   interface Window {
     RondaMontu: { mount(canvas: HTMLCanvasElement): MountedMontu; introMs(): number };
-    RondaEntrada: { mount(host: HTMLElement, options?: { still?: boolean }): MountedMontu; introMs(): number };
+    RondaEntrada: { mount(host: HTMLElement, options?: { still?: boolean }): MountedMontu; introMs(): number; leaveMs(): number };
   }
 }
 
@@ -21,7 +22,7 @@ type SplashStage = 'shown' | 'leaving' | 'gone';
 const SEEN_KEY = 'montu-carga-vista';
 const REPLAY_AFTER_MS = 20 * 60 * 1000;
 const HOLD_MS = 700;
-const FADE_MS = 500;
+const PAGE_ENTER_MS = 1100;
 const SHORTEST_VISIT_MS = 900;
 
 let pagesLoading = 0;
@@ -81,7 +82,7 @@ function MontuCanvas({ className }: { className: string }) {
   return <canvas ref={host} className={className} aria-hidden="true" />;
 }
 
-function MontuEntrance({ run }: { run: number }) {
+function MontuEntrance({ run, leaving = false }: { run: number; leaving?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const mounted = useRef<MountedMontu | null>(null);
 
@@ -98,6 +99,10 @@ function MontuEntrance({ run }: { run: number }) {
   useEffect(() => {
     if (run > 0) mounted.current?.replay();
   }, [run]);
+
+  useEffect(() => {
+    if (leaving) mounted.current?.leave?.();
+  }, [leaving]);
 
   return <div ref={host} aria-hidden="true" />;
 }
@@ -125,17 +130,26 @@ export function MontuSplash() {
 
   useEffect(() => {
     if (stage === 'gone' || (stage === 'shown' && loading)) return;
-    const wait = stage === 'shown' ? Math.max(0, visit.current.since + visit.current.atLeast - Date.now()) : FADE_MS;
+    const wait = stage === 'shown' ? Math.max(0, visit.current.since + visit.current.atLeast - Date.now()) : window.RondaEntrada.leaveMs() + 100;
     const timer = window.setTimeout(() => setStage(stage === 'shown' ? 'leaving' : 'gone'), wait);
-    if (stage === 'leaving') rememberSeen();
+    if (stage === 'leaving') {
+      rememberSeen();
+      document.documentElement.dataset.montuEntrada = '';
+    }
     return () => window.clearTimeout(timer);
   }, [stage, loading]);
+
+  useEffect(() => {
+    if (stage !== 'gone') return;
+    const timer = window.setTimeout(() => delete document.documentElement.dataset.montuEntrada, PAGE_ENTER_MS);
+    return () => window.clearTimeout(timer);
+  }, [stage]);
 
   if (stage === 'gone') return null;
   return (
     <div className={stage === 'leaving' ? 'rd-loader rd-loader--entrada rd-loader--out' : 'rd-loader rd-loader--entrada'} role="status" aria-label="Cargando Montu" onClick={() => (loading ? undefined : setStage('leaving'))}>
       <Aura />
-      <MontuEntrance run={0} />
+      <MontuEntrance run={0} leaving={stage === 'leaving'} />
       <p className="rd-loader__name">Montu</p>
     </div>
   );
