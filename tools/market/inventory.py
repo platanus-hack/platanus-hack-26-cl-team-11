@@ -583,6 +583,13 @@ def run(paper, cash, session=None):
             status = desk.status(feed)
             (DATA / f"{name}-status.json").write_text(json.dumps(status))
             print(json.dumps({k: status[k] for k in ("time", "cash", "lots", "committed", "sellableNow", "realized", "note")}), flush=True)
+            if account and account.cookie:
+                # The server rotates the cookie on each call; keep the saved copy current so a restart stays silent.
+                store = DATA / "session.txt"
+                current = store.read_text().strip() if store.exists() else None
+                if current != account.cookie:
+                    store.write_text(account.cookie)
+                    os.chmod(store, 0o600)
 
 
 if __name__ == "__main__":
@@ -595,7 +602,15 @@ if __name__ == "__main__":
     if args.paper:
         run(True, args.cash)
     else:
-        secret = getpass.getpass("Event session: ").strip()
+        store = DATA / "session.txt"
+        secret = store.read_text().strip() if store.exists() else ""
+        if secret:
+            print("Using the saved session. Delete session.txt to be asked again.", flush=True)
+        else:
+            secret = getpass.getpass("Event session: ").strip()
+            store.write_text(secret)
+            os.chmod(store, 0o600)
+            print("Saved. Future restarts will reuse it until it is rejected.", flush=True)
         with (DATA / "dealer.lock").open("a") as lock:
             take_over(lock)
             run(False, None, secret)
