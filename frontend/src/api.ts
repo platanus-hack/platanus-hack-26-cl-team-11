@@ -61,8 +61,25 @@ export interface CreatedPerson {
   name: string;
 }
 
+const RESTARTING_STATUSES = [502, 503, 504];
+const RETRY_WAITS_MS = [1500, 3000, 5000, 8000, 10_000, 12_000];
+const RESTARTING = 'El servidor se está reiniciando. Prueba de nuevo en un momento.';
+
+const pause = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
+async function fetchThroughRestart(path: string, init?: RequestInit): Promise<Response> {
+  for (const wait of RETRY_WAITS_MS) {
+    const response = await fetch(path, init).catch(() => null);
+    if (response && !RESTARTING_STATUSES.includes(response.status)) return response;
+    await pause(wait);
+  }
+  const last = await fetch(path, init).catch(() => null);
+  if (!last || RESTARTING_STATUSES.includes(last.status)) throw new Error(RESTARTING);
+  return last;
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+  const response = await fetchThroughRestart(path, init);
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const message = body && typeof body === 'object' && 'error' in body ? String(body.error) : `Error ${response.status}`;
