@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import markUrl from '../../design/logo/ronda-mark.svg';
 import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
@@ -23,12 +24,15 @@ function Backdrop({ children }: { children: ReactNode }) {
 function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
     <Backdrop>
-      <header className="rd-bar">
-        <a className="rd-brand" href="/">
-          Ronda
-        </a>
-      </header>
-      <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>
+      <div className={wide ? undefined : 'app-narrow'}>
+        <header className="rd-bar">
+          <a className="rd-brand" href="/">
+            <img className="rd-mark" src={markUrl} alt="" />
+            Ronda
+          </a>
+        </header>
+        <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>
+      </div>
     </Backdrop>
   );
 }
