@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
+import { boardRoutes } from './routes/board.js';
+import { checkinRoutes } from './routes/checkins.js';
 import { connectionRoutes } from './routes/connections.js';
 import { ingestRoutes } from './routes/ingest.js';
 import { oauthRoutes } from './routes/oauth.js';
@@ -25,6 +27,8 @@ export function createApp(ctx: AppContext) {
   api.route('/', oauthRoutes(ctx));
   api.route('/', signalRoutes(ctx));
   api.route('/', teamRoutes(ctx));
+  api.route('/', checkinRoutes(ctx));
+  api.route('/', boardRoutes(ctx));
 
   return new Hono().route('/api', api);
 }
