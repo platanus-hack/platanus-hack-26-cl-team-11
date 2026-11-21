@@ -114,7 +114,7 @@
 /* ---------- Mapa de contexto: tus fuentes alrededor de tu cara. Tocar una muestra lo que tiene. ---------- */
 .rd-source { position: absolute; transform: translate(-50%, -32px); display: flex; flex-direction: column; align-items: center; gap: 6px; width: 132px; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: center; transition: opacity .2s ease; }
 .rd-source__disc { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; transition: transform .2s ease, box-shadow .2s ease; }
-.rd-source__disc svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rd-source__disc svg { position: static; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .rd-source__name { font-size: var(--rd-text-small); font-weight: var(--rd-weight); line-height: 1.2; }
 .rd-source__when { font-size: var(--rd-text-small); color: var(--rd-muted); line-height: 1.2; }
 .rd-source--off { opacity: 0.45; }
