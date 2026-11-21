@@ -10,7 +10,7 @@ async function leave() {
   window.location.assign('/');
 }
 
-export function TopBar() {
+export function TopBar({ signedIn = true }: { signedIn?: boolean }) {
   return (
     <header className="app-top">
       <a className="rd-brand" href="/">
@@ -18,7 +18,7 @@ export function TopBar() {
         Montu
       </a>
       <OverflowMenu>
-        <CopyButton menu text={window.location.origin + window.location.pathname} label="Copiar tu link" />
+        {!signedIn && <CopyButton menu text={window.location.origin + window.location.pathname} label="Copiar el link de tu página" />}
         <button className="rd-menu__item" type="button" onClick={() => void leave()}>
           Cerrar sesión
         </button>

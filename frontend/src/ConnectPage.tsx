@@ -87,7 +87,7 @@ export function ConnectPage({ token }: { token: string }) {
 
   return (
     <div className="app-column rd-panel">
-      <TopBar />
+      <TopBar signedIn={Boolean(page.login?.email)} />
       <main>
         {error && (
           <p className="rd-note app-alert" role="alert">
