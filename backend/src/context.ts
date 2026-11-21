@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createFiftyXModel, fiftyXConfigFrom } from './agents/fiftyx.js';
 import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agents/model.js';
 import { openAgentStore, type AgentStore } from './agents/store.js';
 import { createVault, type Vault } from './crypto.js';
@@ -55,7 +56,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   };
 }
 
-const modelFrom = (env: NodeJS.ProcessEnv): AgentModel | null => {
+const modelFrom = (env: NodeJS.ProcessEnv, fetchImpl: Fetch): AgentModel | null => {
+  const fiftyX = fiftyXConfigFrom(env);
+  if (fiftyX) return createFiftyXModel(fiftyX, fetchImpl);
   const config = agentModelConfigFrom(env);
   return config ? createClaudeModel(config) : null;
 };
@@ -75,7 +78,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     teams,
     hub: openHubStore(db),
     agents: openAgentStore(db),
-    model: options.model === undefined ? modelFrom(process.env) : options.model,
+    model: options.model === undefined ? modelFrom(process.env, options.fetch ?? fetch) : options.model,
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),
   };

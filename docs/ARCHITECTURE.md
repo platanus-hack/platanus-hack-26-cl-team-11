@@ -171,9 +171,9 @@ Una ronda parte de dos formas: con «Iniciar ronda» en la pestaña Equipo, o so
 | `POST /api/people/<token>/agents/asks` | `{ "topic": "…", "allow": true }`: permite o niega que tu agente pida ayuda con ese tema |
 | `POST /api/people/<token>/agents/proposals/<id>/answer` | `{ "answer": "acepta" }` o `"rechaza"` |
 
-El modelo se llama desde `agents/model.ts` con el SDK de Anthropic. Las pruebas usan un modelo falso: nunca salen a la red. **La ronda no se ha probado contra el modelo real.** `npm run agents:check` corre una ronda de demo contra el modelo real y muestra el resultado.
+El modelo se llama detrás de una sola interfaz, `AgentModel` (`agents/model.ts`). Hay dos proveedores: 50x con DeepSeek (`agents/fiftyx.ts`), que se usa cuando está `FIFTYX_API_KEY`, y Anthropic con su SDK. El de 50x pide la respuesta con el esquema, la valida, la vuelve a pedir una vez si no lo cumple y nunca hace más de 4 llamadas a la vez. Las pruebas usan un modelo falso: nunca salen a la red. **La ronda no se ha probado contra el modelo real.** `npm run agents:check` corre una ronda de demo contra el modelo real y muestra el resultado.
 
-Cada llamada al modelo tiene un límite de 90 segundos. Una ronda que pasa de 10 minutos se da por fallida y deja de bloquear al equipo.
+Cada llamada al modelo tiene un límite de 30 segundos en 50x y de 90 en Anthropic. Una ronda que pasa de 10 minutos se da por fallida y deja de bloquear al equipo.
 
 ## Servidor de contexto (datos de prueba)
 

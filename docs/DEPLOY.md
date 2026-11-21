@@ -58,6 +58,8 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 
 | Variable | Valor | Para qué |
 |---|---|---|
+| `FIFTYX_API_KEY` | La llave de 50x | Los agentes conversan con DeepSeek en 50x. Si está definida, tiene prioridad sobre las variables de Anthropic |
+| `FIFTYX_BASE_URL` | Opcional. Por defecto `https://api.ai.50x.energy/v1` | Dirección de 50x |
 | `ANTHROPIC_API_KEY` | Una llave de la API de Anthropic | Acceso directo al modelo |
 | `ANTHROPIC_BASE_URL` | La dirección del proxy de la hack, si se usa en vez de una llave | Con solo esta variable, el servidor llama al proxy sin llave |
 | `ANTHROPIC_AUTH_TOKEN` | Un token, si el proxy lo pide en vez de una llave | Se manda como token de autorización. Basta una de las tres variables para que el modelo quede configurado |
@@ -66,7 +68,7 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 
 Se cargan en el panel de Render: **ronda → Environment → Add Environment Variable**. Render vuelve a desplegar al guardar. Nunca van en el repo.
 
-Para probar el modelo antes de cargarlas, define la misma variable en tu terminal y corre `npm run agents:check`. Arma un equipo de demo en memoria, corre una ronda contra el modelo real y muestra las conversaciones y las propuestas. No toca la base ni producción.
+Para probar el modelo antes de cargarlas, define la misma variable en tu terminal o en un archivo `.env` en la raíz del repo (git lo ignora) y corre `npm run agents:check`. Arma un equipo de demo en memoria, corre una ronda contra el modelo real y muestra las conversaciones y las propuestas. No toca la base ni producción.
 
 ## Después del primer despliegue
 

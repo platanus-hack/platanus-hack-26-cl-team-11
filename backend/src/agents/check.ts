@@ -3,7 +3,7 @@ import { openPolicyStore } from '../policy/store.js';
 import { seedDemo } from '../seed.js';
 import { cardFor, runRound } from './round.js';
 
-const NOT_CONFIGURED = 'Faltan las credenciales del modelo. Define ANTHROPIC_API_KEY o ANTHROPIC_BASE_URL y vuelve a correr este comando.';
+const NOT_CONFIGURED = 'Faltan las credenciales del modelo. Define FIFTYX_API_KEY (o ANTHROPIC_API_KEY o ANTHROPIC_BASE_URL) y vuelve a correr este comando.';
 
 async function main(): Promise<number> {
   const ctx = createContext({ location: ':memory:' });

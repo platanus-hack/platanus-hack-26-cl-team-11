@@ -35,12 +35,21 @@ export function agentModelConfigFrom(env: NodeJS.ProcessEnv): AgentModelConfig |
   return { apiKey, authToken, baseURL, model: env.AGENT_MODEL || DEFAULT_AGENT_MODEL };
 }
 
+export const MODEL_FAILURE = {
+  credentials: 'El modelo rechazó las credenciales del servidor.',
+  busy: 'El modelo está recibiendo demasiados pedidos. Prueba en un minuto.',
+  unreachable: 'No se pudo conectar con el modelo.',
+  silent: 'El modelo no respondió.',
+  incomplete: 'El modelo entregó una respuesta incompleta.',
+  status: (status: number | undefined) => `El modelo respondió con un error (${status ?? 'sin código'}).`,
+} as const;
+
 const describeFailure = (failure: unknown): string => {
-  if (failure instanceof Anthropic.AuthenticationError) return 'El modelo rechazó las credenciales del servidor.';
-  if (failure instanceof Anthropic.RateLimitError) return 'El modelo está recibiendo demasiados pedidos. Prueba en un minuto.';
-  if (failure instanceof Anthropic.APIConnectionError) return 'No se pudo conectar con el modelo.';
-  if (failure instanceof Anthropic.APIError) return `El modelo respondió con un error (${failure.status ?? 'sin código'}).`;
-  return 'El modelo no respondió.';
+  if (failure instanceof Anthropic.AuthenticationError) return MODEL_FAILURE.credentials;
+  if (failure instanceof Anthropic.RateLimitError) return MODEL_FAILURE.busy;
+  if (failure instanceof Anthropic.APIConnectionError) return MODEL_FAILURE.unreachable;
+  if (failure instanceof Anthropic.APIError) return MODEL_FAILURE.status(failure.status);
+  return MODEL_FAILURE.silent;
 };
 
 export function createClaudeModel(config: AgentModelConfig): AgentModel {
@@ -68,7 +77,7 @@ export function createClaudeModel(config: AgentModelConfig): AgentModel {
         throw new AgentModelError(describeFailure(failure));
       }
       if (response.stop_reason === 'refusal') throw new AgentModelError('El modelo no quiso responder ese pedido.');
-      if (response.stop_reason === 'max_tokens' || response.parsed_output === null) throw new AgentModelError('El modelo entregó una respuesta incompleta.');
+      if (response.stop_reason === 'max_tokens' || response.parsed_output === null) throw new AgentModelError(MODEL_FAILURE.incomplete);
       return response.parsed_output;
     },
   };

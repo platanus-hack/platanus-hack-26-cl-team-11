@@ -51,7 +51,7 @@ El frontend le pasa `/api` al backend, así que en desarrollo se usa solo el pue
 | `npm run agents:check` | Corre una ronda de agentes de demo contra el modelo real y muestra el resultado |
 | `npm run seed` | Crea cinco personas de demo con 14 días de datos sintéticos, juntas en un equipo |
 
-Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección pública que se muestra para el Atajo) y `DATA_DIR` (carpeta de la base; por defecto `backend/data`, ignorada por git).
+Variables opcionales, en `.env.example`: `PORT`, `PUBLIC_BASE_URL` (dirección pública que se muestra para el Atajo) y `DATA_DIR` (carpeta de la base; por defecto `backend/data`, ignorada por git). El backend lee un archivo `.env` en la raíz del repo si existe.
 
 ## Estructura
 
