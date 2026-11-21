@@ -5,8 +5,11 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
 import { createContext } from './context.js';
+import { startScheduler } from './scheduler.js';
 
-const app = createApp(createContext());
+const ctx = createContext();
+const app = createApp(ctx);
+startScheduler(ctx);
 const frontendDist = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'frontend', 'dist');
 
 if (existsSync(join(frontendDist, 'index.html'))) {
