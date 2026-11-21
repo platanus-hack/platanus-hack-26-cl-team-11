@@ -1,6 +1,6 @@
 # Arquitectura
 
-Cómo está armado el código y cómo se agrega una pieza nueva. Cómo levantarlo está en el [README](../README.md).
+Cómo está armado el código y cómo se agrega una pieza nueva. Cómo levantarlo está en el [README](../README.md). Todas las rutas, con lo que reciben y responden, están en [API.md](API.md).
 
 ## Mapa
 

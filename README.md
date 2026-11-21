@@ -18,6 +18,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/DEMO.md](docs/DEMO.md) | Alcance y guion de la demo. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Qué se construye en la hack, en qué orden y contra qué referentes de EE. UU. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Cómo está armado el código y cómo se agrega una fuente. |
+| [docs/API.md](docs/API.md) | Todas las rutas del backend: qué reciben y qué responden. |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Despliegue en Render y cómo corre el CI. |
 | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Cómo entra la señal de cada fuente; el receptor está en `backend/`. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisiones tomadas y preguntas abiertas. |
