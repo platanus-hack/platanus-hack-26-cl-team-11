@@ -19,6 +19,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Qué se construye en la hack, en qué orden y contra qué referentes de EE. UU. |
 | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Cómo entra la señal de cada fuente; el receptor está en `backend/`. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisiones tomadas y preguntas abiertas. |
+| [design/DESIGN.md](design/DESIGN.md) | Dirección visual, tokens y primitivas de UI. Obligatorio antes de tocar UI. |
 
 ## Cómo levantarlo
 

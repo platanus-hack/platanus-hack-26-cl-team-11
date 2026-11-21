@@ -46,6 +46,29 @@ Lo que no queda en un correo se pierde entre WhatsApp, Slack y lo que se habla e
   al grupo Vita de WhatsApp»).
 - Nunca van llaves, tokens ni contraseñas en el correo.
 
+## Regla 3: toda la UI sigue `design/DESIGN.md`
+
+Hay una sola dirección visual, aprobada por Mati. Ningún agente inventa estilo.
+
+- **Antes de escribir cualquier UI** (pantalla, componente, slide, gráfico, página de la demo),
+  lee `design/DESIGN.md` completo y abre `design/reference.html`.
+- La UI se arma con las primitivas `rd-*` de `design/ronda.css` y los tokens `--rd-*` de
+  `design/tokens.css`. Fuera de `design/` no se escribe ningún color, `font-family`, peso,
+  degradado ni sombra a mano.
+- Si falta una pieza, se agrega primero a `design/ronda.css` o `design/tokens.css`, en un commit
+  propio, y se anota en `design/DESIGN.md`. No se resuelve con estilos sueltos en la pantalla.
+- Si usas un framework (React, Tailwind, lo que sea), sus componentes envuelven las clases `rd-*`
+  y su tema apunta a los tokens `--rd-*`. No se instala una librería de componentes con look
+  propio (shadcn, MUI, Chakra, etc.).
+- Lo que `DESIGN.md` marca como **abierto** (por ejemplo el grafo) no se decide por cuenta propia:
+  se propone y se pregunta a Mati.
+- `design/archive/` son direcciones descartadas. No se usan como referencia.
+- Antes de terminar: `design/lint.sh` tiene que pasar, y una captura de tu pantalla tiene que
+  parecer la misma app que `design/reference.png`. En Claude Code lo verifica el hook
+  `.claude/hooks/design-lint.sh`.
+- Un cambio a la dirección misma (colores, tipografía, principios) solo lo aprueba Mati y se
+  registra en la tabla «Decisiones» de `design/DESIGN.md`.
+
 ## Commits
 
 - Un cambio, un commit. Mensaje `tipo: descripción` (`feat`, `fix`, `docs`, `chore`).
