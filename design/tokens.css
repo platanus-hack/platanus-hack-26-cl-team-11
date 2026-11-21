@@ -1,0 +1,80 @@
+/*
+ * Ronda · tokens de diseño. ÚNICA fuente de colores, tipografías, radios, sombras y espacios.
+ * Regla: fuera de este archivo no se escribe ningún color, font-family, radio ni sombra a mano.
+ * Si falta un token, se agrega acá primero (con un commit propio) y después se usa.
+ * Explicación de cada decisión: design/DESIGN.md.
+ */
+:root {
+  /* ---- Color: superficie y texto ---- */
+  --rd-bg: #f7f7fa;                         /* fondo de toda pantalla */
+  --rd-ink: #1d1d1f;                        /* texto principal y botón primario */
+  --rd-muted: #6e6e73;                      /* texto secundario, unidades, etiquetas */
+  --rd-faint: #aeaeb2;                      /* flechas y separadores de texto */
+  --rd-on-ink: #ffffff;                     /* texto sobre --rd-ink */
+  --rd-hairline: rgba(60, 60, 90, 0.1);     /* divisores dentro de una tarjeta */
+  --rd-edge-idle: rgba(60, 60, 90, 0.16);   /* líneas del grafo que no están negociando */
+  --rd-fill-soft: rgba(120, 120, 140, 0.14);/* botón secundario */
+  --rd-live: #30d158;                       /* punto «en línea». Solo eso. */
+
+  /* ---- Color: vidrio ---- */
+  --rd-glass: rgba(255, 255, 255, 0.66);
+  --rd-glass-solid: rgba(255, 255, 255, 0.94);
+  --rd-glass-border: rgba(255, 255, 255, 0.85);
+  --rd-glass-blur: blur(28px) saturate(1.4);
+
+  /* ---- Color: el degradado. Es LA marca. Se usa solo donde DESIGN.md lo permite. ---- */
+  --rd-g1: #1e9bff;
+  --rd-g2: #7b61ff;
+  --rd-g3: #e840d8;
+  --rd-g4: #ff3b6b;
+  --rd-g5: #ff8a1f;
+  --rd-gradient: linear-gradient(100deg, var(--rd-g1) 0%, var(--rd-g2) 30%, var(--rd-g3) 55%, var(--rd-g4) 76%, var(--rd-g5) 100%);
+
+  /* ---- Color: aura del fondo (manchas difuminadas) ---- */
+  --rd-aura-blue: #4fb4ff;
+  --rd-aura-violet: #b36bff;
+  --rd-aura-pink: #ff5fa8;
+  --rd-aura-orange: #ffa24a;
+
+  /* ---- Tipografía ---- */
+  --rd-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --rd-font-num: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif; /* solo números */
+
+  --rd-text-hero: 62px;    /* titular de pantalla. Uno por pantalla. */
+  --rd-text-title: 24px;   /* frase de la tarjeta de decisión */
+  --rd-text-num: 40px;     /* número grande tipo Apple Health */
+  --rd-text-brand: 21px;   /* nombre junto al isotipo */
+  --rd-text-body: 17px;
+  --rd-text-name: 16px;    /* nombre de persona, botones */
+  --rd-text-unit: 16px;    /* unidad junto a un número */
+  --rd-text-small: 13px;   /* etiquetas, estado, pie de tarjeta */
+
+  --rd-weight: 600;        /* único peso para todo lo que no es texto corrido */
+  --rd-weight-body: 400;
+  --rd-track-hero: -0.04em;
+  --rd-track-title: -0.025em;
+  --rd-track-num: -0.02em;
+
+  /* ---- Forma ---- */
+  --rd-radius-card: 28px;
+  --rd-radius-pill: 999px;
+  --rd-radius-mark: 27.5%; /* isotipo: cuadrado redondeado */
+  --rd-ring: 1.5px;        /* grosor del borde degradado */
+
+  /* ---- Sombra ---- */
+  --rd-shadow-card: 0 24px 60px rgba(40, 30, 90, 0.08);
+  --rd-shadow-glow: 0 24px 60px rgba(120, 60, 200, 0.18);
+  --rd-shadow-face: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 12px 28px rgba(40, 30, 90, 0.16);
+
+  /* ---- Espacio (múltiplos de 4) ---- */
+  --rd-space-1: 4px;
+  --rd-space-2: 8px;
+  --rd-space-3: 12px;
+  --rd-space-4: 16px;   /* espacio entre tarjetas */
+  --rd-space-6: 24px;   /* relleno de tarjeta */
+  --rd-space-7: 28px;   /* espacio entre columnas */
+  --rd-space-11: 44px;  /* margen lateral de pantalla */
+
+  /* ---- Movimiento ---- */
+  --rd-flow: 1.2s;      /* una vuelta de la luz que recorre una línea activa */
+}

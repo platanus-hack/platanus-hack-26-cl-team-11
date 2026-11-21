@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · pantalla de referencia</title>
+<link rel="icon" href="logo/ronda-mark.svg">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ronda.css">
+<style>
+  /* Lo único propio de esta pantalla: tamaño del lienzo del grafo. Sin colores ni tipografías. */
+  body { margin: 0; }
+  .ref-graph { width: 1000px; max-width: 100%; aspect-ratio: 5 / 3; margin-top: 24px; }
+  @media (min-width: 1100px) { .ref-graph { margin-left: -30px; } }
+</style>
+</head>
+<body>
+<div class="rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+
+    <header class="rd-bar">
+      <a class="rd-brand" href="#"><img class="rd-mark" src="logo/ronda-mark.svg" alt="">Ronda</a>
+      <span class="rd-chip rd-chip--status rd-glass"><span class="rd-dot"></span>Viernes 8:45 · 5 agentes en línea</span>
+    </header>
+
+    <main class="rd-layout">
+      <section>
+        <h1 class="rd-hero">Tu mañana,<br><span class="rd-gradient-text">resuelta entre agentes.</span></h1>
+
+        <div class="rd-graph ref-graph">
+          <svg viewBox="0 0 1000 600" aria-hidden="true">
+            <defs>
+              <linearGradient id="rd-live" gradientUnits="userSpaceOnUse" x1="480" y1="90" x2="800" y2="470">
+                <stop offset="0" stop-color="#1E9BFF"/><stop offset="0.45" stop-color="#B05CFF"/><stop offset="0.75" stop-color="#FF3B8B"/><stop offset="1" stop-color="#FF8A1F"/>
+              </linearGradient>
+            </defs>
+            <path class="rd-edge" d="M500 100Q545 289 676 462M500 100Q460 289 324 462M500 100Q417 216 215 238M785 238Q526 328 324 462M785 238Q500 264 215 238M676 462Q500 394 324 462M676 462Q468 328 215 238M324 462Q366 329 215 238"/>
+            <path class="rd-edge--glow" fill="none" d="M500 100Q583 224 785 238"/>
+            <path class="rd-edge rd-edge--live" d="M500 100Q583 224 785 238"/>
+            <path class="rd-edge--spark" fill="none" d="M500 100Q583 224 785 238"/>
+            <path class="rd-edge--glow" fill="none" d="M785 238Q634 329 676 462"/>
+            <path class="rd-edge rd-edge--live" d="M785 238Q634 329 676 462"/>
+            <path class="rd-edge--spark" fill="none" d="M785 238Q634 329 676 462"/>
+          </svg>
+          <span class="rd-chip rd-glass" style="left: 61.3%; top: 32.7%">¿Quién cubre las 11?</span>
+          <span class="rd-chip rd-glass" style="left: 68.2%; top: 56.6%">Review antes de las 10:30</span>
+
+          <div class="rd-node rd-node--top" style="left: 50%; top: 16.7%"><img class="rd-face" src="faces/mati.png" alt=""><span class="rd-person"><span class="rd-person__name">Tú</span><span class="rd-person__status">Pide cobertura</span></span></div>
+          <div class="rd-node rd-node--right" style="left: 78.5%; top: 39.7%"><img class="rd-face" src="faces/ian.png" alt=""><span class="rd-person"><span class="rd-person__name">Ian</span><span class="rd-person__status">Tiene la cifra</span></span></div>
+          <div class="rd-node rd-node--bottom" style="left: 67.6%; top: 77%"><img class="rd-face" src="faces/lian.png" alt=""><span class="rd-person"><span class="rd-person__name">Lian</span><span class="rd-person__status">Hueco de 9:30 a 10:15</span></span></div>
+          <div class="rd-node rd-node--bottom" style="left: 32.4%; top: 77%"><img class="rd-face rd-face--small" src="faces/andres.png" alt=""><span class="rd-person"><span class="rd-person__name">Andrés</span><span class="rd-person__status">Plan B listo</span></span></div>
+          <div class="rd-node rd-node--left" style="left: 21.5%; top: 39.7%"><img class="rd-face rd-face--small" src="faces/roberto.png" alt=""><span class="rd-person"><span class="rd-person__name">Roberto</span><span class="rd-person__status">En reuniones</span></span></div>
+        </div>
+      </section>
+
+      <aside class="rd-stack">
+        <div class="rd-decision">
+          <div class="rd-decision__body">
+            <span class="rd-decision__label rd-gradient-text">Tu decisión de hoy</span>
+            <p class="rd-title">Ian explica los datos al cliente a las 11. Lian revisa su cambio antes de las 10:30. Tú sigues como contacto.</p>
+            <div class="rd-actions">
+              <button type="button" class="rd-button">Aceptar</button>
+              <button type="button" class="rd-button rd-button--quiet">Ajustar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rd-card rd-card--split rd-glass">
+          <div>
+            <span class="rd-label">Sueño · privado</span>
+            <span class="rd-stat">5<span class="rd-stat__unit">h</span>12<span class="rd-stat__unit">min</span></span>
+            <span class="rd-note">No sale de tu agente.</span>
+          </div>
+          <div>
+            <span class="rd-label">Entre agentes</span>
+            <span class="rd-stat">14<span class="rd-stat__unit">mensajes</span></span>
+            <span class="rd-note">En 40 s. Tú leíste 0.</span>
+          </div>
+        </div>
+
+        <div class="rd-card rd-glass">
+          <span class="rd-label">Con 300 personas</span>
+          <div class="rd-stat-row">
+            <span class="rd-stat">44.850<span class="rd-stat__unit">pares</span></span>
+            <span class="rd-stat-row__arrow">→</span>
+            <span class="rd-stat"><span class="rd-gradient-text">1</span><span class="rd-stat__unit">decisión</span></span>
+          </div>
+          <span class="rd-note">Los agentes viven en O(n²). Tú vives en O(1).</span>
+        </div>
+      </aside>
+    </main>
+  </div>
+</div>
+</body>
+</html>
