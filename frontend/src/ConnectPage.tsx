@@ -1,6 +1,7 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
-import { fetchPerson, fetchSignals, type PersonPage, type Signals } from './api';
+import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals } from './api';
+import { ONBOARDING_STEPS, OnboardingSection } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
 import { SourcesTab } from './SourcesTab';
 import { TabBar } from './TabBar';
@@ -11,15 +12,20 @@ import { useHashTab } from './useHashTab';
 import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
 
+const HEALTH_SOURCE = 'apple_health';
+
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
   const [signals, setSignals] = useState<Signals | null>(null);
+  const [firstSteps, setFirstSteps] = useState<OnboardingStep[]>([]);
+  const [focusedSource, setFocusedSource] = useState<string | null>(null);
   const { tab, select } = useHashTab();
 
   const load = useCallback(async () => {
-    const [person, derived] = await Promise.all([fetchPerson(token), fetchSignals(token)]);
+    const [person, derived, onboarding] = await Promise.all([fetchPerson(token), fetchSignals(token), fetchOnboarding(token).catch(() => null)]);
     setPage(person);
     setSignals(derived.signals);
+    setFirstSteps(onboarding?.steps ?? []);
   }, [token]);
   const { error, refresh } = usePolling(load);
 
@@ -34,9 +40,13 @@ export function ConnectPage({ token }: { token: string }) {
 
   const notice = new URLSearchParams(window.location.search).get('aviso');
   const reload = () => void refresh();
+  const openStep = (step: OnboardingStepId) => {
+    setFocusedSource(step === 'salud' ? HEALTH_SOURCE : null);
+    select(ONBOARDING_STEPS[step].tab);
+  };
 
   const content: Record<TabId, ReactNode> = {
-    fuentes: <SourcesTab token={token} page={page} notice={notice} onChange={reload} />,
+    fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
     tu: <YouTab token={token} name={page.name} signals={signals} sources={page.sources} onSaved={reload} />,
     agente: <AgentTab token={token} />,
     equipo: <TeamSection token={token} />,
@@ -52,6 +62,7 @@ export function ConnectPage({ token }: { token: string }) {
             {error}
           </p>
         )}
+        <OnboardingSection steps={firstSteps} onOpen={openStep} />
         {TABS.map(({ id, name }) => (
           <section key={id} className="app-tab" aria-label={name} hidden={tab !== id}>
             {content[id]}

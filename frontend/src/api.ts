@@ -70,6 +70,15 @@ const put = (body: unknown) => send('PUT', body);
 export const personPath = (token: string) => `/api/people/${encodeURIComponent(token)}`;
 
 export const fetchPerson = (token: string) => request<PersonPage>(personPath(token));
+
+export type OnboardingStepId = 'equipo' | 'agente' | 'checkin' | 'whatsapp' | 'salud';
+
+export interface OnboardingStep {
+  id: OnboardingStepId;
+  done: boolean;
+}
+
+export const fetchOnboarding = (token: string) => request<{ steps: OnboardingStep[]; pending: number }>(`${personPath(token)}/onboarding`);
 export const createPerson = (name: string) => request<CreatedPerson>('/api/people', post({ name }));
 export const connectSource = (token: string, source: string, secret: string) =>
   request<{ account: string; imported: number }>(`${personPath(token)}/connections/${source}`, post({ secret }));

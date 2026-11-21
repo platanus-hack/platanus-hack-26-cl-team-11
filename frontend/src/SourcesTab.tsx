@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { PersonPage } from './api';
 import { SectionHead } from './SectionHead';
 import { SourceRow } from './SourceRow';
@@ -7,11 +7,17 @@ interface SourcesTabProps {
   token: string;
   page: PersonPage;
   notice: string | null;
+  focusId?: string | null;
   onChange: () => void;
 }
 
-export function SourcesTab({ token, page, notice, onChange }: SourcesTabProps) {
+export function SourcesTab({ token, page, notice, focusId = null, onChange }: SourcesTabProps) {
   const [openId, setOpenId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (focusId) setOpenId(focusId);
+  }, [focusId]);
+
   const ingestUrl = `${page.publicBaseUrl ?? window.location.origin}${page.healthIngestPath}`;
 
   return (
