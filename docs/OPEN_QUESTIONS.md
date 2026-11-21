@@ -30,8 +30,8 @@
 
 ### Técnica
 
-- [ ] **Framework de agentes.** El resto del stack ya está en el repo: TypeScript, Hono y SQLite en `backend/`, React con Vite en `frontend/`.
-- [ ] **Transporte entre agentes:** cola de mensajes, base de datos compartida u otro.
+- [x] **Framework de agentes.** Ninguno: llamadas directas al modelo con salida estructurada, en `backend/src/agents/`. Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
+- [x] **Transporte entre agentes:** la base compartida. Cada conversación se guarda como un hilo con sus mensajes.
 - [ ] **Puente de WhatsApp:** qué proveedor y qué número.
 - [ ] **Dónde corre cada agente** y cómo se aísla su memoria privada.
 - [ ] **Qué integraciones son reales** en la demo y cuáles sintéticas.

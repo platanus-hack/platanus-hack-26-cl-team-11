@@ -48,6 +48,19 @@ render deploys create srv-dc0j2qrm8hqs73emf3ig   # volver a desplegar a mano
 
 Las llaves nunca van en el repo ni en `render.yaml`.
 
+### Para activar los agentes
+
+Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pestaña Equipo muestra «Faltan las credenciales del modelo en el servidor».
+
+| Variable | Valor | Para qué |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Una llave de la API de Anthropic | Acceso directo al modelo |
+| `ANTHROPIC_BASE_URL` | La dirección del proxy de la hack, si se usa en vez de una llave | Con solo esta variable, el servidor llama al proxy sin llave |
+| `AGENT_MODEL` | Opcional. Por defecto `claude-opus-5-5` | Qué modelo conversa |
+| `AGENT_ROUND_HOUR` | Opcional. Hora de Santiago, de 0 a 23; por defecto 9. Cualquier otro valor apaga la ronda diaria | Desde qué hora corre sola la ronda de cada día |
+
+Se cargan en el panel de Render: **ronda → Environment → Add Environment Variable**. Render vuelve a desplegar al guardar. Nunca van en el repo.
+
 ## Después del primer despliegue
 
 - **Google:** registra `https://<dirección>/api/oauth/google/callback` como dirección de retorno en el cliente OAuth. Detalle en [INTEGRATIONS.md](INTEGRATIONS.md).

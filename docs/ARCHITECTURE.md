@@ -21,6 +21,7 @@ backend/
     teams/              equipos y membresías
     board/              tablero compartido: preguntas, pedidos, propuestas y votos
     policy/             qué permite compartir cada persona
+    agents/             agentes personales: ficha, conversación 1:1, propuestas y rutina diaria
     hub/                servidor de contexto: catálogo de fuentes, guardado y mapa (datos de prueba)
     connectors/         un archivo por fuente
       registry.ts       la lista de fuentes
@@ -97,6 +98,42 @@ No hay agente coordinador. Lo que comparte un equipo son dos piezas que no inter
 Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
 
 Un equipo se crea desde una persona. Los demás piden entrar con un código y quedan dentro cuando cada integrante aprueba. Todas las rutas de equipo verifican la membresía.
+
+## Agentes
+
+Cada persona tiene un agente y no hay coordinador ([AGENT_MODEL.md](AGENT_MODEL.md)). Los agentes conversan en **rondas**, una por equipo.
+
+```
+señales + permisos  →  ficha  →  pedido  →  conversación 1:1  →  propuesta  →  cada persona acepta
+```
+
+| Paso | Qué pasa | Dónde |
+|---|---|---|
+| Ficha | Lo que el agente puede decir de su persona: las frases con permiso «siempre», sus temas y una disponibilidad (alta, normal, baja) | `agents/cards.ts`, sin modelo |
+| Pedido | Cada bloqueo que se puede contar es un pedido de ayuda. Uno con permiso «preguntar» espera a que su dueño lo permita | `agents/cards.ts`, sin modelo |
+| A quién escribir | El agente de quien pide elige hasta 3 compañeros y le escribe al agente de cada uno | modelo |
+| Respuesta | El agente de cada compañero responde si su persona puede ayudar: sí, parcial o no | modelo |
+| Propuesta | El agente de quien pide redacta una propuesta con hasta 2 ayudantes | modelo |
+| Acuerdo | La propuesta queda «acordada» cuando quien pide y cada ayudante aceptan. Un rechazo la descarta | `agents/store.ts` |
+
+Reglas:
+
+- **El modelo nunca ve un dato privado.** Solo recibe la ficha. El sueño, la carga, el ánimo y la nota del check-in no entran a ningún mensaje al modelo; de energía y carga sale solo la disponibilidad, y con permiso «nunca» ni eso.
+- **Nada se compromete sin la persona.** El agente propone; cada persona acepta o no.
+- **La conversación la leen solo sus dos dueños.** El resto del equipo ve quién le escribió a quién y, cuando se acuerda, la propuesta.
+- **Un tema con propuesta abierta o acordada en los últimos 7 días no se vuelve a pedir.**
+- **Sin lenguaje natural en el código.** Decidir a quién escribir y si alguien puede ayudar lo hace el modelo con salida estructurada; el código solo valida identificadores y permisos.
+
+Una ronda parte de dos formas: con «Iniciar ronda» en la pestaña Equipo, o sola una vez al día desde la hora `AGENT_ROUND_HOUR` (hora de Santiago, 9 por defecto) para los equipos que tienen algún pedido abierto. Si el servidor se reinicia a mitad de una ronda, esa ronda queda marcada como fallida.
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/people/<token>/teams/<equipo>/agents` | Estado de la última ronda, lo que tu agente te pregunta antes de contar, las conversaciones y las propuestas que puedes ver |
+| `POST /api/people/<token>/teams/<equipo>/agents/rounds` | Inicia una ronda. Responde 202 y la ronda corre de fondo |
+| `POST /api/people/<token>/agents/asks` | `{ "topic": "…", "allow": true }`: permite o niega que tu agente pida ayuda con ese tema |
+| `POST /api/people/<token>/agents/proposals/<id>/answer` | `{ "answer": "acepta" }` o `"rechaza"` |
+
+El modelo se llama desde `agents/model.ts` con el SDK de Anthropic. Las pruebas usan un modelo falso: nunca salen a la red. **La ronda no se ha probado contra el modelo real.**
 
 ## Servidor de contexto (datos de prueba)
 

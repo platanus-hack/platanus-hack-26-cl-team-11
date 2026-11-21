@@ -72,7 +72,7 @@ Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y d
 
 En producción: https://ronda-n8if.onrender.com
 
-Los agentes y su conversación no están construidos. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. Falta cargar las credenciales del modelo en el servidor y probar la ronda contra el modelo real; hasta ahora corre solo con un modelo falso en las pruebas. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Remotes
 
