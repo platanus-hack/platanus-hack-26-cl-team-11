@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Montu · carga</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+</head>
+<body class="rd-page">
+<div class="rd-loader" id="carga" role="img" aria-label="Montu se arma como un grafo">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <canvas class="rd-loader__figure" id="figura"></canvas>
+  <p class="rd-loader__name" id="nombre">Montu</p>
+</div>
+<script src="montu.js"></script>
+<script>
+  var params = new URLSearchParams(location.search);
+  var at = params.has('t') ? Number(params.get('t')) : undefined;
+  var figura = document.getElementById('figura');
+  var nombre = document.getElementById('nombre');
+  var montu = RondaMontu.mount(figura, { at: at });
+  if (at !== undefined) nombre.style.animation = 'none';
+  if (at !== undefined && at < 2.4) nombre.style.opacity = 0;
+  document.getElementById('carga').addEventListener('click', function () {
+    montu.replay();
+    nombre.style.animation = 'none';
+    void nombre.offsetWidth;
+    nombre.style.animation = '';
+  });
+</script>
+</body>
+</html>
