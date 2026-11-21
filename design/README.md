@@ -2,6 +2,8 @@
 
 **Empieza por [`DESIGN.md`](DESIGN.md).** Es la regla de toda la UI del proyecto.
 
+**Miniaturas del grafo en rediseño.** El [handoff para diseño](HANDOFF_MINIATURAS.md) recoge el feedback de Mati y dónde retomar.
+
 ![Pantalla de referencia](reference.png)
 
 - `tokens.css` y `ronda.css`: tokens y primitivas. Toda pantalla se arma con ellos.

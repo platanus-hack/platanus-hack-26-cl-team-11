@@ -161,10 +161,15 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 
 ## Movimiento
 
-En las pantallas generales, la animación continua es la luz que recorre las conexiones activas. Las miniaturas del grafo tienen la coreografía descrita abajo. Lo demás aparece sin
+En las pantallas generales, la animación continua es la luz que recorre las conexiones activas. La coreografía de las miniaturas está en rediseño. Lo demás aparece sin
 rebotes ni giros. Se respeta `prefers-reduced-motion`.
 
-### Miniaturas de interacción
+### Miniaturas de interacción · en rediseño
+
+**Mati rechazó la primera ejecución visual.** La lámina y las especificaciones de esta sección documentan la versión existente para poder reemplazarla. El encargo vigente está en el [handoff de miniaturas](HANDOFF_MINIATURAS.md).
+
+<details>
+<summary>Archivo de la primera ejecución e integración técnica</summary>
 
 ![Las cinco miniaturas a escala de detalle](grafo/miniaturas.png)
 
@@ -203,6 +208,8 @@ La primitiva reutilizable es `<ronda-mini kind="calendars" class="rd-mini">`. Lo
 Después de editar, ejecutar `python3 design/grafo/mini/build.py` desde la raíz para actualizar
 el HTML portátil y las dos fuentes del globo. El ensayo está en [REHEARSAL.md](motion/REHEARSAL.md).
 
+</details>
+
 ## Lo que no se hace
 
 Cada punto es una dirección que Mati ya rechazó.
@@ -221,7 +228,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Dirección «Aura»: luz tipo Apple Intelligence, vidrio, bento, red de agentes al centro. | Mati |
 | 21-nov-2026 | Se conserva de Montu: tarjetas bento redondeadas y números tipo Apple Health. | Mati |
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
-| 21-nov-2026 | Miniaturas simultáneas en las conexiones, con superficies 3D chunky de inspiración PostHog y movimiento propio por acción. | Mati |
+| 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
 | 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |
