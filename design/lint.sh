@@ -26,12 +26,12 @@ check() { # $1 = regex, $2 = mensaje
 
 check '#[0-9a-fA-F]{3,8}\b'                                   'Color escrito a mano. Usa un token: var(--rd-*) de design/tokens.css.'
 check '\b(rgba?|hsla?|oklch|oklab)\('                         'Color escrito a mano. Usa un token: var(--rd-*) de design/tokens.css.'
-check 'font-family[[:space:]]*:'                              'Tipografía escrita a mano. Usa var(--rd-font) o var(--rd-font-num).'
+check 'font-family[[:space:]]*:[[:space:]]*[^v;]|font-family[[:space:]]*:[[:space:]]*var\(--[^r]' 'Tipografía escrita a mano. Usa var(--rd-font), var(--rd-font-num) o var(--rd-font-mono).'
 check 'font-weight[[:space:]]*:[[:space:]]*(bold|[789]00)'    'Peso prohibido. El único peso fuerte es var(--rd-weight) (600).'
 check '(linear|radial|conic)-gradient\('                      'Degradado escrito a mano. Solo var(--rd-gradient), y solo donde DESIGN.md lo permite.'
 check 'font-style[[:space:]]*:[[:space:]]*italic'             'Cursiva prohibida.'
 check '\b(bg|text|border|from|via|to|ring|fill|stroke|shadow|outline|decoration)-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white)(-[0-9]{2,3})?\b' 'Color de Tailwind. Mapea Tailwind a los tokens --rd-* y usa esas clases.'
-check '\bfont-(bold|extrabold|black|serif|mono)\b'            'Clase de tipografía fuera del sistema (peso 700+ o familia distinta).'
+check '(^|[^-a-zA-Z])font-(bold|extrabold|black|serif|mono)\b'            'Clase de tipografía fuera del sistema (peso 700+ o familia distinta).'
 check '\b(italic|uppercase)\b.*class|class.*\b(italic|uppercase)\b' 'Cursiva o mayúsculas sostenidas: prohibidas.'
 
 if [ "$fail" -eq 1 ]; then
