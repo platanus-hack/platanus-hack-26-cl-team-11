@@ -4,6 +4,7 @@ import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
 import { ONBOARDING_STEPS } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
+import { AGENT } from './SourcesOrbit';
 import { SourcesTab } from './SourcesTab';
 import { TabBar } from './TabBar';
 import { TABS, type TabId } from './tabs';
@@ -51,14 +52,14 @@ export function ConnectPage({ token }: { token: string }) {
   const notice = new URLSearchParams(window.location.search).get('aviso');
   const reload = () => void refresh();
   const openStep = (step: OnboardingStepId) => {
-    setFocusedSource(step === 'salud' ? HEALTH_SOURCE : null);
+    setFocusedSource(step === 'salud' ? HEALTH_SOURCE : step === 'agente' ? AGENT : null);
     select(ONBOARDING_STEPS[step].tab);
   };
 
   const content: Record<TabId, ReactNode> = {
     fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
     tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
-    agente: <AgentTab token={token} />,
+    agente: <AgentTab token={token} active={tab === 'agente'} />,
     equipo: <TeamSection token={token} />,
     ajustes: <SettingsTab token={token} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };

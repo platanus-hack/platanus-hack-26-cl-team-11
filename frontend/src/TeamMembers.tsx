@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Team } from './api';
 import { CopyButton } from './CopyButton';
 import { Glyph } from './Glyph';
@@ -13,18 +13,23 @@ interface TeamMembersProps {
   token: string;
   team: Team;
   first: boolean;
+  top?: ReactNode;
+  bottom?: ReactNode;
+  detailOf?: (position: number, name: string) => { shared?: string };
   onChange: () => Promise<void>;
 }
 
-export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) {
+export function TeamMembers({ token, team, first, top, bottom, detailOf, onChange }: TeamMembersProps) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="app-block">
       <SectionHead first={first} title={team.name} />
+      {top}
       <div className="rd-list">
-        {team.people.map((person) => (
+        {team.people.map((person, position) => (
           <TeamPersonRow
+            {...detailOf?.(position, person.name)}
             key={person.id}
             token={token}
             teamId={team.id}
@@ -63,6 +68,7 @@ export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) 
           />
         )}
       </div>
+      {bottom}
       <p className="rd-note">
         {team.roomCode ? 'Es una sala abierta: entra quien escanea su QR.' : 'Comparte el código solo con quienes son parte del equipo. Cada ingreso lo aprueba todo el equipo.'}
       </p>

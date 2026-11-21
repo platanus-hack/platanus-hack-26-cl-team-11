@@ -151,6 +151,52 @@ export interface Summary {
   asOf: string;
 }
 
+export interface ChatOption {
+  id: string;
+  label: string;
+}
+
+export interface ChatMessage {
+  key: string;
+  role: 'persona' | 'agente';
+  text: string;
+  at: string;
+  options: ChatOption[];
+}
+
+export interface ChatView {
+  messages: ChatMessage[];
+  configured: boolean;
+  whatsapp: WhatsAppStatus;
+}
+
+const jsonPost = (body: unknown) => ({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+
+export const fetchChat = (token: string) => request<ChatView>(`${personPath(token)}/chat`);
+export const sendChat = (token: string, text: string) => request<ChatView>(`${personPath(token)}/chat`, jsonPost({ text }));
+export const answerChat = (token: string, option: string) => request<ChatView>(`${personPath(token)}/chat/answer`, jsonPost({ option }));
+
+export type TeamValue<Value> = { available: true; value: Value; contributors: number } | { available: false; needed: number };
+
+export interface OverviewMember {
+  name: string;
+  me: boolean;
+  shares: boolean;
+  energy: LevelSignal['level'] | null;
+  sleepHours: number | null;
+  steps: number | null;
+  workoutMinutes: number | null;
+}
+
+export interface TeamOverview {
+  members: OverviewMember[];
+  energy: TeamValue<'baja' | 'media' | 'alta'>;
+  sleepHours: TeamValue<number>;
+  steps: TeamValue<number>;
+}
+
+export const fetchTeamOverview = (token: string, teamId: string) => request<TeamOverview>(`${personPath(token)}/teams/${encodeURIComponent(teamId)}/overview`);
+
 export interface Profile {
   goal: string | null;
   guide: string | null;

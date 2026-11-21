@@ -12,10 +12,13 @@ const STEP_NAME: Record<OnboardingStepId, string> = {
   salud: 'salud',
 };
 
-function statusOf(person: TeamPerson) {
+const RETIRED_STEP: OnboardingStepId = 'checkin';
+
+function statusOf(person: TeamPerson, shared: string | undefined) {
   const role = person.admin ? 'Administra' : null;
-  const setup = person.pending === null ? null : person.pending.length === 0 ? 'Todo conectado' : `Le falta: ${person.pending.map((step) => STEP_NAME[step]).join(', ')}`;
-  return [role, setup].filter(Boolean).join(' · ') || undefined;
+  const pending = person.pending?.filter((step) => step !== RETIRED_STEP) ?? null;
+  const setup = pending === null ? null : pending.length === 0 ? 'Todo conectado' : `Le falta: ${pending.map((step) => STEP_NAME[step]).join(', ')}`;
+  return [role, shared, setup].filter(Boolean).join(' · ') || undefined;
 }
 
 interface TeamPersonRowProps {
@@ -23,12 +26,13 @@ interface TeamPersonRowProps {
   teamId: string;
   person: TeamPerson;
   manage: boolean;
+  shared?: string;
   open: boolean;
   onToggle: () => void;
   onChange: () => Promise<void>;
 }
 
-export function TeamPersonRow({ token, teamId, person, manage, open, onToggle, onChange }: TeamPersonRowProps) {
+export function TeamPersonRow({ token, teamId, person, manage, shared, open, onToggle, onChange }: TeamPersonRowProps) {
   const { busy, error, run } = useAction();
   const manageable = manage && !person.me;
 
@@ -43,7 +47,7 @@ export function TeamPersonRow({ token, teamId, person, manage, open, onToggle, o
       <Item
         icon={<Face name={person.name} />}
         title={person.me ? `${person.name} (tú)` : person.name}
-        subtitle={statusOf(person)}
+        subtitle={statusOf(person, shared)}
         expanded={manageable ? open : undefined}
         onToggle={manageable ? onToggle : undefined}
       />

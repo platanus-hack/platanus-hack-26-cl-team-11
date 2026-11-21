@@ -1,133 +1,96 @@
-import { useCallback, useState } from 'react';
-import { formatAgo } from './ago';
-import { AssistantLogo } from './AssistantLogo';
-import { Glyph } from './Glyph';
-import { Item } from './Item';
-import { ItemIcon } from './ItemIcon';
-import { PairingLine } from './PairingLine';
-import { PasteBack } from './PasteBack';
-import { RepoFileRow } from './RepoFileRow';
-import { fetchAssistants, fetchRepo, removeAssistant, type Assistant, type RepoEntry } from './roomApi';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { answerChat, fetchChat, sendChat, type ChatView } from './api';
 import { RowButton } from './RowButton';
+import { Item } from './Item';
 import { SectionHead } from './SectionHead';
+import { SourceLogo } from './SourceLogo';
 import { useAction } from './useAction';
 import { usePolling } from './usePolling';
 
-type Way = 'link' | 'chat';
+const MAX_MESSAGE_LENGTH = 1000;
 
-export function AgentTab({ token }: { token: string }) {
-  const [assistants, setAssistants] = useState<Assistant[] | null>(null);
-  const [files, setFiles] = useState<RepoEntry[] | null>(null);
-  const [way, setWay] = useState<Way | null>('link');
-  const [openPath, setOpenPath] = useState<string | null>(null);
-  const { busy, error: removeError, run } = useAction();
+function mirrorText(view: ChatView) {
+  if (view.whatsapp.linked) return `Es el mismo agente de tu WhatsApp que termina en ${view.whatsapp.phoneEnding ?? ''}`;
+  if (view.whatsapp.configured) return 'Es el mismo agente que por WhatsApp. Conéctalo en Ajustes';
+  return 'Es el mismo agente que te va a hablar por WhatsApp';
+}
 
-  const load = useCallback(async () => {
-    const [connected, repo] = await Promise.all([fetchAssistants(token), fetchRepo(token)]);
-    setAssistants(connected.assistants);
-    setFiles(repo.files);
-  }, [token]);
-  const { error, refresh } = usePolling(load);
-  const reload = () => void refresh();
+export function AgentTab({ token, active }: { token: string; active: boolean }) {
+  const [view, setView] = useState<ChatView | null>(null);
+  const [draft, setDraft] = useState('');
+  const [pending, setPending] = useState<string | null>(null);
+  const { busy, error, run } = useAction();
+  const end = useRef<HTMLDivElement>(null);
 
-  const toggleWay = (next: Way) => setWay((current) => (current === next ? null : next));
-  const remove = (assistant: Assistant) =>
+  const load = useCallback(async () => setView(await fetchChat(token)), [token]);
+  const { error: loadError } = usePolling(load);
+
+  const count = view?.messages.length ?? 0;
+  useEffect(() => {
+    if (active) end.current?.scrollIntoView({ block: 'end' });
+  }, [active, count, pending]);
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text || busy) return;
+    setDraft('');
+    setPending(text);
     void run(async () => {
-      await removeAssistant(token, assistant.id);
-      await refresh();
+      try {
+        setView(await sendChat(token, text));
+      } finally {
+        setPending(null);
+      }
     });
+  }
 
   return (
-    <>
-      <div className="app-block">
-        <SectionHead first title="Tu agente" />
-        {(error ?? removeError) && (
-          <p className="rd-note" role="alert">
-            {error ?? removeError}
-          </p>
-        )}
-        {assistants?.length === 0 && <p className="rd-note">Conecta el agente que ya usas. Le cuenta a Montu en qué trabajas y qué necesitas, y tú decides qué se comparte.</p>}
-        {assistants && assistants.length > 0 && (
-          <div className="rd-list">
-            {assistants.map((assistant) => (
-              <Item
-                key={assistant.id}
-                icon={<AssistantLogo kind={assistant.kind} />}
-                title={
-                  <>
-                    {assistant.label}
-                    <span className="rd-dot" />
-                  </>
-                }
-                subtitle={assistant.lastSeenAt ? `Activo ${formatAgo(assistant.lastSeenAt, Date.now()).toLowerCase()}` : 'Conectado'}
-                end={<RowButton label="Quitar" name={`Quitar ${assistant.label}`} disabled={busy} onClick={() => remove(assistant)} />}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="app-block">
-        <SectionHead title="Conectar un agente" />
+    <div className="app-block">
+      <SectionHead first title="Tu agente" />
+      {view && (
         <div className="rd-list">
-          <div>
-            <Item
-              icon={
-                <ItemIcon>
-                  <Glyph name="link" />
-                </ItemIcon>
-              }
-              title="Pégale una línea"
-              subtitle="Claude Code, Codex, OpenClaw y los que pueden abrir un link"
-              expanded={way === 'link'}
-              onToggle={() => toggleWay('link')}
-            />
-            {way === 'link' && (
-              <div className="rd-item__detail">
-                <PairingLine token={token} connected={assistants?.length ?? 0} />
-              </div>
-            )}
-          </div>
-          <div>
-            <Item
-              icon={
-                <ItemIcon>
-                  <Glyph name="chat" />
-                </ItemIcon>
-              }
-              title="Es una app de chat"
-              subtitle="ChatGPT, Grok o Claude: copias una pregunta y pegas la respuesta"
-              expanded={way === 'chat'}
-              onToggle={() => toggleWay('chat')}
-            />
-            {way === 'chat' && (
-              <div className="rd-item__detail">
-                <PasteBack token={token} onSaved={reload} />
-              </div>
-            )}
-          </div>
+          <Item icon={<SourceLogo id="whatsapp" />} title="Escríbele aquí o por WhatsApp" subtitle={mirrorText(view)} />
         </div>
-      </div>
-
-      <div className="app-block">
-        <SectionHead title="Tu repo" />
-        {files?.length === 0 && <p className="rd-note">Todavía no hay nada. Aparece cuando tu agente escribe.</p>}
-        {files && files.length > 0 && (
-          <div className="rd-list">
-            {files.map((entry) => (
-              <RepoFileRow
-                key={entry.path}
-                token={token}
-                entry={entry}
-                open={openPath === entry.path}
-                onToggle={() => setOpenPath((current) => (current === entry.path ? null : entry.path))}
-                onChange={reload}
-              />
-            ))}
+      )}
+      {view && !view.configured && <p className="rd-note">Al servidor le falta el modelo: tu agente todavía no puede responder.</p>}
+      <div className="rd-chat app-chat" aria-live="polite">
+        {view?.messages.length === 0 && !pending && <p className="rd-note">Cuéntale cómo viene tu día o pregúntale algo a tu equipo.</p>}
+        {view?.messages.map((message) => (
+          <div key={message.key} className={`rd-bubble${message.role === 'persona' ? ' rd-bubble--mine' : ''}`}>
+            {message.text}
+            {message.options.length > 0 && (
+              <div className="rd-actions app-options">
+                {message.options.map((option) => (
+                  <RowButton key={option.id} label={option.label} disabled={busy} onClick={() => void run(async () => setView(await answerChat(token, option.id)))} />
+                ))}
+              </div>
+            )}
           </div>
+        ))}
+        {pending && (
+          <>
+            <p className="rd-bubble rd-bubble--mine">{pending}</p>
+            <span className="rd-bubble rd-bubble--typing" aria-label="Tu agente está escribiendo">
+              <i />
+              <i />
+              <i />
+            </span>
+          </>
         )}
-        <p className="rd-note">Tu agente usa solo lo que está en «Se comparte». Lo que está en «Te pregunta antes» espera a que tú lo cambies, y lo «Privado» no sale de tu repo ni llega a un modelo.</p>
+        <div ref={end} />
       </div>
-    </>
+      <form className="rd-actions" onSubmit={submit}>
+        <input className="rd-input app-grow" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Escríbele a tu agente" aria-label="Mensaje para tu agente" maxLength={MAX_MESSAGE_LENGTH} autoComplete="off" />
+        <button className="rd-button" type="submit" disabled={busy || !draft.trim()}>
+          Enviar
+        </button>
+      </form>
+      {(error ?? loadError) && (
+        <p className="rd-note" role="alert">
+          {error ?? loadError}
+        </p>
+      )}
+    </div>
   );
 }

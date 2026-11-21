@@ -17,7 +17,7 @@ interface StepCopy {
 
 export const ONBOARDING_STEPS: Record<OnboardingStepId, StepCopy> = {
   equipo: { title: 'Entra a tu equipo', pending: 'Con el código que te pasaron, o crea uno', done: 'Ya estás en un equipo', verb: 'Entrar', glyph: 'team', tab: 'equipo' },
-  agente: { title: 'Conecta tu agente', pending: 'Le cuenta a Montu en qué trabajas y qué necesitas', done: 'Tu agente ya está conectado', verb: 'Conectar', glyph: 'agent', tab: 'agente' },
+  agente: { title: 'Conecta tu agente', pending: 'Le cuenta a Montu en qué trabajas y qué necesitas', done: 'Tu agente ya está conectado', verb: 'Conectar', glyph: 'agent', tab: 'fuentes' },
   checkin: { title: 'Cuenta cómo llegas hoy', pending: 'Tu check-in toma medio minuto', done: 'Ya hiciste tu check-in', verb: 'Contar', glyph: 'person', tab: 'ajustes' },
   whatsapp: { title: 'Conecta WhatsApp', pending: 'Para hablar con tu agente desde el teléfono', done: 'Tu WhatsApp ya está conectado', verb: 'Conectar', glyph: 'chat', tab: 'ajustes' },
   salud: { title: 'Manda tus datos de salud', pending: 'Sueño y pasos desde tu iPhone, con un toque', done: 'Ya llegaron tus datos de salud', verb: 'Enviar', glyph: 'energy', tab: 'fuentes' },

@@ -3,6 +3,8 @@ import type { AppContext } from '../context.js';
 import { isVisibility, openPolicyStore, SIGNAL_KEYS, type Policy } from '../policy/store.js';
 import { teamPulse } from '../pulse.js';
 import { deriveSignals } from '../signals.js';
+import { deriveSummary } from '../summary.js';
+import { teamOverview } from '../teamOverview.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
@@ -51,6 +53,20 @@ export function pulseRoutes({ db, store, teams }: AppContext) {
         policy: policies.get(member.token),
       }));
     return c.json({ team: team.name, members: members.length, pulse: teamPulse(others) });
+  });
+
+  routes.get('/people/:token/teams/:teamId/overview', (c) => {
+    const person = store.findPerson(c.req.param('token'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    const team = teams.findTeam(c.req.param('teamId'));
+    if (!team || !teams.isMember(team.id, person.token)) return c.json(NOT_A_MEMBER, 403);
+    const now = new Date();
+    const inputs = teams.membersOf(team.id).map((member) => {
+      const events = store.listSignalEvents(member.token, now);
+      const signals = deriveSignals(events, now);
+      return { name: member.name, me: member.token === person.token, signals, summary: deriveSummary(events, signals, now), policy: policies.get(member.token) };
+    });
+    return c.json(teamOverview(inputs));
   });
 
   return routes;

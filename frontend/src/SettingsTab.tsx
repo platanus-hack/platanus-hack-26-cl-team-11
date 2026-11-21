@@ -6,6 +6,7 @@ import { Item } from './Item';
 import { OnboardingSection } from './OnboardingSection';
 import { ItemIcon } from './ItemIcon';
 import { PermissionRow } from './PermissionRow';
+import { RepoSection } from './RepoSection';
 import { RowButton } from './RowButton';
 import { SectionHead } from './SectionHead';
 import { SIGNAL_GROUPS } from './signalGroups';
@@ -78,6 +79,8 @@ export function SettingsTab({ token, login, firstSteps, onOpenStep }: SettingsTa
         </div>
         <p className="rd-note">Lo que dejes en «Privado» tampoco entra al pulso.</p>
       </div>
+
+      <RepoSection token={token} />
 
       <div className="app-block">
         <SectionHead title="Tu link" />

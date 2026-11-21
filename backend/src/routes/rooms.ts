@@ -19,7 +19,7 @@ export function roomRoutes({ store, teams, rooms, assistants, agents, sim }: App
 
   const nameFrom = (value: unknown) => (typeof value === 'string' ? value.trim().slice(0, MAX_NAME_LENGTH) : '');
 
-  const peopleOf = (room: Room) =>
+  const peopleOf = (room: Pick<Room, 'teamId'>) =>
     teams.membersOf(room.teamId).map((member) => ({
       id: publicIdOf(member.token),
       name: member.name,
@@ -27,7 +27,9 @@ export function roomRoutes({ store, teams, rooms, assistants, agents, sim }: App
       synthetic: sim.isSynthetic(member.token),
     }));
 
-  const stateOf = (room: Room) => {
+  const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
+
+  const stateOf = (room: Pick<Room, 'teamId' | 'code' | 'name'>) => {
     const round = agents.latestRound(room.teamId);
     const threads = round
       ? agents.threadsOf(round.id).map((thread) => ({
@@ -94,6 +96,14 @@ export function roomRoutes({ store, teams, rooms, assistants, agents, sim }: App
     const room = rooms.findRoom(c.req.param('code'));
     if (!room) return c.json(ROOM_NOT_FOUND, 404);
     return c.json(stateOf(room));
+  });
+
+  routes.get('/people/:token/teams/:teamId/world', (c) => {
+    const person = store.findPerson(c.req.param('token'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    const team = teams.findTeam(c.req.param('teamId'));
+    if (!team || !teams.isMember(team.id, person.token)) return c.json(NOT_A_MEMBER, 403);
+    return c.json(stateOf({ teamId: team.id, code: '', name: team.name }));
   });
 
   routes.get('/rooms/:code/events', (c) => {

@@ -2,8 +2,12 @@
 // Lo carga sala.html dentro de globo.html?sala=CÓDIGO. No cambia el globo: reemplaza sus datos de demo.
 // Propuesta pendiente de revisión de Mati (DESIGN.md, «Sigue abierto»).
 (function () {
-  var code = new URLSearchParams(location.search).get('sala');
-  if (!code || typeof g === 'undefined') return;
+  var params = new URLSearchParams(location.search);
+  var code = params.get('sala');
+  var own = params.get('estado') || '';
+  // ?estado=/api/… lee el estado de un equipo que no es sala (la pestaña Equipo). Solo rutas propias.
+  var source = own.indexOf('/api/people/') === 0 ? own : code ? '/api/rooms/' + encodeURIComponent(code) + '/state' : null;
+  if (!source || typeof g === 'undefined') return;
 
   var REFRESH_MS = 1500;
   var ATLAS_FACES = 64;
@@ -16,6 +20,23 @@
   var style = document.createElement('style');
   style.textContent = '.globo aside, .globo .rd-hero, .globo .rd-bar { display: none !important; }';
   document.head.appendChild(style);
+
+  // Dentro de la app (pestaña Equipo) va solo la esfera, encuadrada al marco, igual que embed.js.
+  if (own) {
+    var CENTER_X = 590, CENTER_Y = 545, HALF_X = 470, HALF_Y = 380;
+    style.textContent +=
+      'html, body { height: 100%; overflow: hidden; background: transparent; }' +
+      '.rd-page { min-height: 0; height: 100%; overflow: hidden; background: transparent; }' +
+      '.globo { margin: 0; transform-origin: 0 0; }' +
+      '.globo > .rd-aura, #thread-view { display: none !important; }';
+    var stage = document.querySelector('.globo');
+    var fit = function () {
+      var width = window.innerWidth, height = window.innerHeight, scale = Math.min(width / (HALF_X * 2), height / (HALF_Y * 2));
+      stage.style.transform = 'translate(' + (width / 2 - CENTER_X * scale).toFixed(2) + 'px, ' + (height / 2 - CENTER_Y * scale).toFixed(2) + 'px) scale(' + scale.toFixed(4) + ')';
+    };
+    window.addEventListener('resize', fit);
+    fit();
+  }
 
   var live = { people: [], threads: [] };
   var seen = '';
@@ -66,7 +87,7 @@
   };
 
   var refresh = function () {
-    fetch('/api/rooms/' + encodeURIComponent(code) + '/state')
+    fetch(source)
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (state) { if (state) apply(state); })
       .catch(function () {});

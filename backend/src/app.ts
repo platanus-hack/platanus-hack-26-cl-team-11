@@ -16,6 +16,7 @@ import { peopleRoutes } from './routes/people.js';
 import { pulseRoutes } from './routes/pulse.js';
 import { REPO_COMMIT_PATH, REPO_PASTE_SUFFIX, repoRoutes } from './routes/repo.js';
 import { roomRoutes } from './routes/rooms.js';
+import { chatRoutes } from './routes/chat.js';
 import { profileRoutes } from './routes/profile.js';
 import { signalRoutes } from './routes/signals.js';
 import { simRoutes } from './routes/sim.js';
@@ -61,6 +62,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', agentDoorRoutes(ctx));
   api.route('/', onboardingRoutes(ctx));
   api.route('/', profileRoutes(ctx));
+  api.route('/', chatRoutes(ctx));
 
   return new Hono().route('/api', api).route('/', joinDocRoutes(ctx));
 }
