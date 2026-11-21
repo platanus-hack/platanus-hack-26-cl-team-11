@@ -117,7 +117,7 @@ Se leen en `GET /api/people/<token>/signals`. Es la entrada que usarán los agen
 
 No hay agente coordinador. Lo que comparte un equipo son dos piezas que no interpretan ni deciden:
 
-- **Tablero** (`board/`). Cualquier integrante publica una pregunta, un pedido o una propuesta; los demás responden y votan las propuestas. Una respuesta marcada como no contable solo la leen quien publicó y quien respondió.
+- **Tablero** (`board/`). Cualquier integrante publica una pregunta, un pedido o una propuesta; los demás responden y votan las propuestas. Una respuesta marcada como no contable solo la leen quien publicó y quien respondió. Una pregunta la responden además los agentes: ver [Preguntarle al equipo](#preguntarle-al-equipo).
 - **Pulso** (`pulse.ts`). Devuelve el nivel mediano de energía y de carga y el total de bloqueos del equipo. Nunca devuelve una distribución ni un nombre. Se calcula sobre el resto del equipo, sin contar a quien lo mira, y con menos de 3 de ellos aportando a una señal no devuelve nada para esa señal.
 
 Cada persona controla su aporte en `policy/`: un permiso por señal (`siempre`, `preguntar`, `nunca`) y si participa del pulso. `nunca` la saca también del agregado.
@@ -175,6 +175,24 @@ Una ronda parte de dos formas: con «Iniciar ronda» en la pestaña Equipo, o so
 | `POST /api/people/<token>/teams/<equipo>/agents/rounds` | Inicia una ronda. Responde 202 y la ronda corre de fondo |
 | `POST /api/people/<token>/agents/asks` | `{ "topic": "…", "allow": true }`: permite o niega que tu agente pida ayuda con ese tema |
 | `POST /api/people/<token>/agents/proposals/<id>/answer` | `{ "answer": "acepta" }` o `"rechaza"` |
+
+### Preguntarle al equipo
+
+Una persona publica una pregunta en el tablero y recibe una sola respuesta armada con lo que saben los agentes de los demás, sin interrumpir a nadie (`agents/ask.ts`).
+
+```
+pregunta en el tablero  →  el agente de cada integrante responde  →  el agente de quien preguntó arma una respuesta
+```
+
+| Paso | Qué pasa | Dónde |
+|---|---|---|
+| A quién se le pregunta | A los agentes de los integrantes que comparten algo: una frase o un tema en su ficha, o un archivo del repo en «siempre». Hasta 40. A un agente sin nada que contar no se le pregunta | `respondersOf`, sin modelo |
+| Respuesta de cada agente | Recibe la pregunta, la ficha de su persona y sus archivos en «siempre». Dice si su persona sabe algo (sí, parcial, no) y lo cuenta en una a tres frases. Si sabe algo, su respuesta queda en el tablero a nombre del agente | modelo, 4 a la vez |
+| Respuesta armada | El agente de quien preguntó junta las respuestas en dos a cinco frases y dice de quiénes salieron | modelo |
+
+Valen las mismas reglas de la ronda: el modelo recibe solo lo que cada persona dejó en «siempre», y la pregunta y los archivos se le entregan como datos, no como instrucciones. Si ningún agente sabe algo, no se arma ninguna respuesta y la pantalla lo dice. Las personas pueden seguir respondiendo a mano.
+
+Parte sola al publicar una pregunta. Quien preguntó puede pedirla de nuevo. Un equipo responde hasta 3 preguntas a la vez; la cuarta queda publicada sin respuesta de agentes hasta que se pida.
 
 El modelo se llama detrás de una sola interfaz, `AgentModel` (`agents/model.ts`). Hay dos proveedores: 50x con DeepSeek (`agents/fiftyx.ts`), que se usa cuando está `FIFTYX_API_KEY`, y Anthropic con su SDK. El de 50x pide la respuesta con el esquema, la valida, la vuelve a pedir una vez si no lo cumple y nunca hace más de 4 llamadas a la vez. Las pruebas usan un modelo falso: nunca salen a la red. **La ronda no se ha probado contra el modelo real.** `npm run agents:check` corre una ronda de demo contra el modelo real y muestra el resultado.
 

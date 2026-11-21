@@ -37,7 +37,7 @@ interface PostView {
 const post = (body: unknown) => ({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 function setup() {
-  const ctx = createContext({ location: ':memory:' });
+  const ctx = createContext({ location: ':memory:', model: null });
   const app = new Hono().route('/api', boardRoutes(ctx));
   const ana = ctx.store.addPerson('Ana');
   const tomas = ctx.store.addPerson('Tomás');

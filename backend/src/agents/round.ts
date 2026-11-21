@@ -59,7 +59,7 @@ export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents' | 
   return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo });
 }
 
-async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
+export async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
   const results: PromiseSettledResult<void>[] = [];
   for (let start = 0; start < items.length; start += size) {
     results.push(...(await Promise.allSettled(items.slice(start, start + size).map(work))));
@@ -123,7 +123,7 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
   return { cards, openNeeds };
 }
 
-const problemOf = (reason: unknown): string => (reason instanceof AgentModelError ? reason.message : UNEXPECTED_FAILURE);
+export const problemOf = (reason: unknown): string => (reason instanceof AgentModelError ? reason.message : UNEXPECTED_FAILURE);
 
 export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' | 'digests' | 'model'>, teamId: string): Promise<string | null> {
   if (!deps.repo || !deps.digests) return null;

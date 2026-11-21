@@ -72,6 +72,8 @@ Para deduplicar, identifica el grupo por su conjunto de miembros dentro de la ro
 
 Cualquier persona, líder o no, le hace una pregunta a su agente. El agente la publica en el tablero y los demás responden con lo que su dueño permite. Quien preguntó recibe una sola respuesta armada.
 
+Hoy la persona escribe la pregunta en el tablero del panel web; el resto ocurre como está descrito ([ARCHITECTURE.md](ARCHITECTURE.md#preguntarle-al-equipo)).
+
 ### Pulso del equipo
 
 Cada agente entrega a la función de agregado las señales que su dueño autorizó (energía, carga, bloqueos). La función devuelve el total del grupo. Nadie, ni agente ni persona, ve la respuesta de otro.

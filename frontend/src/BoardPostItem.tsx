@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { closePost, type BoardPost } from './api';
+import { AgentAnswer } from './AgentAnswer';
+import { askAgents, closePost, type BoardPost } from './api';
 import { Face } from './Face';
 import { countOf, formatWhen } from './format';
 import { Item } from './Item';
@@ -10,9 +11,24 @@ import { RowButton } from './RowButton';
 import { useAction } from './useAction';
 import { VoteBar } from './VoteBar';
 
-export function BoardPostItem({ token, post, onChange }: { token: string; post: BoardPost; onChange: () => Promise<void> }) {
-  const [open, setOpen] = useState(false);
+interface BoardPostItemProps {
+  token: string;
+  post: BoardPost;
+  configured: boolean;
+  onChange: () => Promise<void>;
+}
+
+export function BoardPostItem({ token, post, configured, onChange }: BoardPostItemProps) {
+  const answering = post.answer?.status === 'en_curso';
+  const [open, setOpen] = useState(post.mine && answering);
   const { busy, error, run } = useAction();
+  const canAsk = post.mine && post.kind === 'pregunta' && configured && !answering;
+
+  const ask = () =>
+    void run(async () => {
+      await askAgents(token, post.id);
+      await onChange();
+    });
 
   const close = () =>
     void run(async () => {
@@ -38,6 +54,7 @@ export function BoardPostItem({ token, post, onChange }: { token: string; post: 
             {KIND_LABEL[post.kind]} · {formatWhen(post.createdAt)}
             {replies}
           </span>
+          {post.answer && <AgentAnswer answer={post.answer} />}
           {post.tally && <VoteBar token={token} postId={post.id} tally={post.tally} myVote={post.myVote} onVoted={onChange} />}
           {post.replies.map((reply) => (
             <ReplyItem key={reply.id} reply={reply} />
@@ -45,7 +62,8 @@ export function BoardPostItem({ token, post, onChange }: { token: string; post: 
           <ReplyForm token={token} postId={post.id} onSent={onChange} />
           {post.mine && (
             <div className="rd-actions">
-              <RowButton label={busy ? 'Cerrando…' : 'Cerrar publicación'} disabled={busy} onClick={close} />
+              {canAsk && <RowButton label={post.answer ? 'Preguntar de nuevo' : 'Preguntar a los agentes'} disabled={busy} onClick={ask} />}
+              <RowButton label="Cerrar publicación" disabled={busy} onClick={close} />
             </div>
           )}
           {error && (

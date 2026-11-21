@@ -8,9 +8,14 @@ import { usePolling } from './usePolling';
 
 export function BoardSection({ token, teamId }: { token: string; teamId: string }) {
   const [posts, setPosts] = useState<BoardPost[] | null>(null);
+  const [configured, setConfigured] = useState(false);
   const [composing, setComposing] = useState(false);
 
-  const load = useCallback(async () => setPosts((await fetchOpenPosts(token, teamId)).posts), [token, teamId]);
+  const load = useCallback(async () => {
+    const board = await fetchOpenPosts(token, teamId);
+    setPosts(board.posts);
+    setConfigured(board.configured);
+  }, [token, teamId]);
   const { error, refresh } = usePolling(load);
 
   async function published() {
@@ -31,7 +36,7 @@ export function BoardSection({ token, teamId }: { token: string; teamId: string 
       {posts?.length === 0 && <p className="rd-note">No hay publicaciones abiertas.</p>}
       <div className="rd-list">
         {posts?.map((post) => (
-          <BoardPostItem key={post.id} token={token} post={post} onChange={refresh} />
+          <BoardPostItem key={post.id} token={token} post={post} configured={configured} onChange={refresh} />
         ))}
       </div>
     </div>

@@ -47,7 +47,8 @@
 - [ ] **Puente de WhatsApp:** qué proveedor y qué número. Hoy no está construido: el check-in, los permisos y la aprobación de propuestas se hacen en el panel web. Ian avisó en el hilo del equipo (21-nov, 06:00) que WhatsApp queda fuera por ahora. Falta decidir si la demo lo lleva, porque [DEMO.md](DEMO.md) todavía lo cuenta como real.
 - [ ] **Dónde corre cada agente** y cómo se aísla su memoria privada. Hoy todos corren dentro del mismo servidor, y la memoria privada se separa por el token de cada persona en una sola base.
 - [ ] **Qué integraciones son reales** en la demo y cuáles sintéticas. Hoy: Apple Health está probada con un iPhone real; GitHub, Linear, Google Calendar, Gmail y Granola están construidas y sin probar contra el servicio.
-- [ ] **Probar la ronda de agentes contra el modelo real.** Solo ha corrido con un modelo falso. Faltan las credenciales del modelo en Render; `npm run agents:check` la prueba en local.
+- [ ] **Probar la ronda de agentes contra el modelo real.** En local ya corrió con el Claude de la terminal. Faltan las credenciales del modelo en Render; `npm run agents:check` la prueba en local.
+- [ ] **Probar las preguntas del tablero contra el modelo real.** Los agentes responden una pregunta y arman una sola respuesta ([ARCHITECTURE.md](ARCHITECTURE.md#preguntarle-al-equipo)); solo ha corrido con un modelo falso.
 - [ ] **Conectar el globo a datos reales.** El globo de `design/grafo/` usa conversaciones simuladas. La ruta de agentes ya entrega las flechas ([API.md](API.md#agentes)).
 
 ### Equipo

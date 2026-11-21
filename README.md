@@ -78,7 +78,7 @@ En producción: https://ronda-n8if.onrender.com
 
 **Multijugador.** Una sala se abre desde la portada y muestra un QR en `/sala/<código>`. Quien lo escanea entra con su nombre y conecta el agente que ya usa pegándole una línea con un link; ese agente escribe su repo. Probado el 21-nov-2026 en local con dos agentes reales, Claude Code y Codex. Una app de chat sin herramientas entra copiando una pregunta y pegando la respuesta. Detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#sala-asistentes-y-repo).
 
-Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda con 50x. En un computador la ronda ya corrió de verdad con el Claude de la terminal (`AGENT_CLI=claude`); la simulación todavía no se ha probado con un modelo real. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. También responden las preguntas del tablero: quien pregunta recibe una sola respuesta armada con lo que comparten los demás (probado solo con un modelo falso). El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda con 50x. En un computador la ronda ya corrió de verdad con el Claude de la terminal (`AGENT_CLI=claude`); la simulación todavía no se ha probado con un modelo real. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Remotes
 

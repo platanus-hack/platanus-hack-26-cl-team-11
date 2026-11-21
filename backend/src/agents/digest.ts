@@ -69,7 +69,7 @@ const positionOf = (path: string) => {
   return position === -1 ? FIRST_PATHS.length : position;
 };
 
-function filesWithinBudget(files: RepoFile[]): RepoFile[] {
+export function filesWithinBudget(files: RepoFile[]): RepoFile[] {
   const ordered = [...files].sort((a, b) => positionOf(a.path) - positionOf(b.path) || b.updatedAt.localeCompare(a.updatedAt) || a.path.localeCompare(b.path));
   const chosen: RepoFile[] = [];
   let used = 0;

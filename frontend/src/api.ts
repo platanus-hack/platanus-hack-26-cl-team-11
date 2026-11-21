@@ -187,7 +187,16 @@ export interface BoardReply {
   text: string | null;
   createdAt: string;
   tellable: boolean;
+  byAgent: boolean;
   mine: boolean;
+}
+
+export interface BoardAnswer {
+  status: 'en_curso' | 'lista' | 'fallida';
+  text: string | null;
+  sources: string[];
+  asked: number;
+  problem: string | null;
 }
 
 export interface VoteTally {
@@ -206,13 +215,14 @@ export interface BoardPost {
   status: 'abierto' | 'cerrado';
   mine: boolean;
   replies: BoardReply[];
+  answer: BoardAnswer | null;
   tally: VoteTally | null;
   myVote: VoteValue | null;
 }
 
 const boardPostPath = (token: string, postId: string) => `${personPath(token)}/board/${encodeURIComponent(postId)}`;
 
-export const fetchOpenPosts = (token: string, teamId: string) => request<{ posts: BoardPost[] }>(`${teamPath(token, teamId)}/board?status=abierto`);
+export const fetchOpenPosts = (token: string, teamId: string) => request<{ configured: boolean; posts: BoardPost[] }>(`${teamPath(token, teamId)}/board?status=abierto`);
 export const publishPost = (token: string, teamId: string, kind: PostKind, text: string) =>
   request<BoardPost>(`${teamPath(token, teamId)}/board`, post({ kind, text }));
 export const replyToPost = (token: string, postId: string, text: string, tellable: boolean) =>
@@ -220,6 +230,7 @@ export const replyToPost = (token: string, postId: string, text: string, tellabl
 export const voteOnPost = (token: string, postId: string, value: VoteValue) =>
   request<VoteTally & { myVote: VoteValue | null }>(`${boardPostPath(token, postId)}/votes`, post({ value }));
 export const closePost = (token: string, postId: string) => request<BoardPost>(`${boardPostPath(token, postId)}/close`, post());
+export const askAgents = (token: string, postId: string) => request<BoardPost>(`${boardPostPath(token, postId)}/ask`, post());
 
 export type RoundStatus = 'en_curso' | 'lista' | 'fallida';
 export type HelpAnswer = 'si' | 'parcial' | 'no';

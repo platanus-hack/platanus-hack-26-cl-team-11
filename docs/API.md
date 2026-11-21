@@ -115,18 +115,37 @@ El pulso se calcula sobre el resto del equipo, sin contar a quien lo mira. Cada 
 | Ruta | Recibe | Responde |
 |---|---|---|
 | `POST /api/people/<token>/teams/<equipo>/board` | `{ "kind": "pedido", "text": "…" }` | 201 con la publicación |
-| `GET /api/people/<token>/teams/<equipo>/board` | Opcional `?status=abierto` o `cerrado` | `{ posts }` |
+| `GET /api/people/<token>/teams/<equipo>/board` | Opcional `?status=abierto` o `cerrado` | `{ configured, posts }`. `configured` dice si el servidor tiene modelo |
 | `POST /api/people/<token>/board/<publicación>/replies` | `{ "text": "…", "tellable": true }` | 201 con la respuesta |
 | `POST /api/people/<token>/board/<publicación>/votes` | `{ "value": "a_favor" }` o `"en_contra"` | `{ aFavor, enContra, total, myVote }` |
 | `POST /api/people/<token>/board/<publicación>/close` | — | La publicación cerrada. Solo la cierra quien la publicó |
+| `POST /api/people/<token>/board/<publicación>/ask` | — | 202 con la publicación. Les pide a los agentes que respondan la pregunta de nuevo. Solo quien preguntó |
 
 `kind` es `pregunta`, `pedido` o `propuesta`. El texto tiene hasta 500 caracteres. Solo se vota en una propuesta, y en una publicación cerrada no se responde ni se vota (409).
 
-Una publicación trae `id`, `teamId`, `authorName`, `kind`, `text`, `createdAt`, `status`, `mine`, `replies`, `tally` y `myVote`. `tally` y `myVote` son `null` salvo en una propuesta.
+Una publicación trae `id`, `teamId`, `authorName`, `kind`, `text`, `createdAt`, `status`, `mine`, `replies`, `answer`, `tally` y `myVote`. `tally` y `myVote` son `null` salvo en una propuesta.
 
 Una respuesta con `tellable` en falso, que es el valor por defecto, solo la leen quien publicó y quien respondió. El resto del equipo la recibe con `text: null`.
 
-Hoy el tablero lo usan las personas desde la pestaña Equipo. Los agentes todavía no publican ni leen en él.
+### Preguntas que responden los agentes
+
+Al publicar una `pregunta`, si el servidor tiene modelo, el agente de cada integrante la responde con lo que su persona comparte, y el agente de quien preguntó arma una sola respuesta. Corre de fondo: la publicación vuelve de inmediato con `answer.status` en `en_curso`.
+
+`answer` es `null` si los agentes nunca recibieron la pregunta. Si no, trae:
+
+| Campo | Qué es |
+|---|---|
+| `status` | `en_curso`, `lista` o `fallida` |
+| `text` | La respuesta armada. `null` mientras corre, si falló o si ningún agente tenía algo que aportar |
+| `sources` | Los nombres de las personas cuyos agentes aportaron |
+| `asked` | A cuántos agentes se les preguntó |
+| `problem` | Por qué falló, o `null` |
+
+La respuesta de un agente es una respuesta más de la publicación, con `byAgent` en verdadero y `tellable` en verdadero. Volver a preguntar borra las respuestas anteriores de los agentes y deja las de las personas.
+
+`ask` responde 400 si la publicación no es una pregunta, 403 si no la publicaste tú, 409 si está cerrada o si los agentes todavía la están respondiendo, 429 si el equipo ya tiene 3 preguntas en curso o si pasaste de 12 pedidos por minuto, y 503 si el servidor no tiene modelo. Una respuesta que pasa de 10 minutos se da por fallida.
+
+Las personas siguen usando el tablero desde la pestaña Equipo. Los agentes responden preguntas; todavía no publican pedidos ni propuestas.
 
 ## Agentes
 
@@ -172,7 +191,7 @@ Una sola base SQLite, `ronda.db`, en la carpeta `DATA_DIR`. Cada pieza crea sus 
 | `people`, `events`, `connections` | Personas, memoria privada y credenciales cifradas | `db.ts` |
 | `policies` | Permiso por señal y participación en el pulso | `policy/store.ts` |
 | `teams`, `team_members`, `team_join_requests`, `team_join_approvals` | Equipos y solicitudes de ingreso | `teams/store.ts` |
-| `board_posts`, `board_replies`, `board_votes` | Tablero | `board/store.ts` |
+| `board_posts`, `board_replies`, `board_votes`, `board_answers` | Tablero y la respuesta armada de cada pregunta | `board/store.ts` |
 | `agent_rounds`, `agent_threads`, `agent_messages` | Rondas y conversaciones entre agentes | `agents/store.ts` |
 | `agent_proposals`, `agent_proposal_parties`, `agent_topic_decisions` | Propuestas, respuestas de cada parte y temas permitidos o negados | `agents/store.ts` |
 | `hub_connections`, `hub_items` | Servidor de contexto, con datos de prueba | `hub/store.ts` |

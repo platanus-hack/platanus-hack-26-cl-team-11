@@ -9,7 +9,7 @@ const FILLER = 'x'.repeat(20_000);
 const send = (method: string, body: unknown) => ({ method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 const setup = () => {
-  const ctx = createContext({ location: ':memory:' });
+  const ctx = createContext({ location: ':memory:', model: null });
   const app = createApp(ctx);
   const ana = ctx.store.addPerson('Ana');
   const team = ctx.teams.createTeam('Producto');
