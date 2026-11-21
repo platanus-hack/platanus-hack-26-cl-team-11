@@ -20,6 +20,7 @@ En producción: `https://ronda-n8if.onrender.com/api`. En local: `http://localho
 | `POST /api/people` | `{ "name": "Ana" }`, hasta 80 caracteres | 201 `{ token, name }` |
 | `GET /api/people/<token>` | — | La página de la persona: `name`, `healthIngestPath`, `publicBaseUrl`, `healthShortcut` (`{ url, name }` del Atajo compartido, o `null` si el servidor no tiene su link), `sources` y `events` (los 12 últimos recibidos) |
 | `GET /api/people/<token>/events` | — | `{ name, events }`: los 50 eventos más recientes, con su dato crudo |
+| `GET /api/people/<token>/onboarding` | — | `{ steps, pending }`: los primeros pasos en orden (`equipo`, `agente`, `checkin`, `whatsapp` solo si el servidor lo tiene configurado, y `salud`), cada uno con `done` según lo que la persona ya hizo |
 
 Cada elemento de `sources`:
 

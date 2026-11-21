@@ -19,6 +19,7 @@ import { signalRoutes } from './routes/signals.js';
 import { simRoutes } from './routes/sim.js';
 import { teamRoutes } from './routes/teams.js';
 import { WHATSAPP_WEBHOOK_PATH, whatsappRoutes } from './routes/whatsapp.js';
+import { onboardingRoutes } from './routes/onboarding.js';
 import { ConnectorError } from './types.js';
 
 const DEFAULT_MAX_BODY_BYTES = 10_000;
@@ -55,6 +56,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', repoRoutes(ctx));
   api.route('/', simRoutes(ctx));
   api.route('/', whatsappRoutes(ctx));
+  api.route('/', onboardingRoutes(ctx));
 
   return new Hono().route('/api', api).route('/', joinDocRoutes(ctx));
 }
