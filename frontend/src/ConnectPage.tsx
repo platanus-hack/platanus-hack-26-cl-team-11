@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals } from './api';
-import { ONBOARDING_STEPS, OnboardingSection } from './OnboardingSection';
+import { ONBOARDING_STEPS } from './OnboardingSection';
 import { SettingsTab } from './SettingsTab';
 import { SourcesTab } from './SourcesTab';
 import { TabBar } from './TabBar';
@@ -51,7 +51,7 @@ export function ConnectPage({ token }: { token: string }) {
     tu: <YouTab token={token} name={page.name} signals={signals} sources={page.sources} onSaved={reload} />,
     agente: <AgentTab token={token} />,
     equipo: <TeamSection token={token} />,
-    ajustes: <SettingsTab token={token} />,
+    ajustes: <SettingsTab token={token} firstSteps={firstSteps} onOpenStep={openStep} />,
   };
 
   return (
@@ -63,7 +63,6 @@ export function ConnectPage({ token }: { token: string }) {
             {error}
           </p>
         )}
-        <OnboardingSection steps={firstSteps} onOpen={openStep} />
         {TABS.map(({ id, name }) => (
           <section key={id} className="app-tab" aria-label={name} hidden={tab !== id}>
             {content[id]}

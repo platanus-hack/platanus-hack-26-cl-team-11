@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import type { SignalKey } from './api';
+import type { OnboardingStep, OnboardingStepId, SignalKey } from './api';
 import { CopyButton } from './CopyButton';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
+import { OnboardingSection } from './OnboardingSection';
 import { ItemIcon } from './ItemIcon';
 import { PermissionRow } from './PermissionRow';
 import { RowButton } from './RowButton';
@@ -11,13 +12,21 @@ import { SIGNAL_GROUPS } from './signalGroups';
 import { usePolicy } from './usePolicy';
 import { WhatsAppSection } from './WhatsAppSection';
 
-export function SettingsTab({ token }: { token: string }) {
+interface SettingsTabProps {
+  token: string;
+  firstSteps: OnboardingStep[];
+  onOpenStep: (step: OnboardingStepId) => void;
+}
+
+export function SettingsTab({ token, firstSteps, onOpenStep }: SettingsTabProps) {
   const { policy, busy, problem, change } = usePolicy(token);
   const [openKey, setOpenKey] = useState<SignalKey | null>(null);
   const link = window.location.origin + window.location.pathname;
 
   return (
     <>
+      <OnboardingSection steps={firstSteps} onOpen={onOpenStep} />
+
       <div className="app-block">
         <SectionHead first title="Permisos" />
         {!policy && !problem && <p className="rd-note">Cargando…</p>}

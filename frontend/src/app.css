@@ -32,6 +32,7 @@ body { margin: 0; }
 .app-check input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: var(--rd-ink); }
 .app-face { display: block; width: 40px; height: 40px; flex: 0 0 auto; }
 .app-face--node { width: 72px; height: 72px; }
+.app-face--hub { width: 104px; height: 104px; }
 .app-reply { display: flex; align-items: center; gap: var(--rd-space-3); }
 .app-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: var(--rd-space-4); padding: var(--rd-space-2) 0; }
 .app-stats > * { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -41,5 +42,5 @@ body { margin: 0; }
 .app-pick { width: 100%; padding: var(--rd-space-3) 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .rd-row > .app-pick { padding: 0; width: auto; flex: 1 1 auto; }
 .app-fit { flex: 0 0 auto; height: 36px; padding: 0 var(--rd-space-4); font-size: var(--rd-text-small); }
-@media (max-width: 700px) { .app-me { transform: translate(-50%, -22px); } .app-face--node { width: 44px; height: 44px; } }
+@media (max-width: 700px) { .app-me { transform: translate(-50%, -22px); } .app-face--node { width: 44px; height: 44px; } .app-face--hub { width: 64px; height: 64px; } }
 .app-qr { display: block; width: 100%; aspect-ratio: 1; padding: var(--rd-space-2); border-radius: var(--rd-space-4); background: var(--rd-glass-solid); color: var(--rd-ink); }

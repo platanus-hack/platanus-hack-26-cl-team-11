@@ -4,13 +4,15 @@ import { createPairing, type Pairing } from './roomApi';
 import { RowButton } from './RowButton';
 import { useAction } from './useAction';
 
-export function PairingLine({ token, connected }: { token: string; connected: number }) {
+export function PairingLine({ token, connected, auto = false }: { token: string; connected: number; auto?: boolean }) {
   const [pairing, setPairing] = useState<Pairing | null>(null);
   const { busy, error, run } = useAction();
 
-  useEffect(() => setPairing(null), [connected]);
-
   const create = () => void run(async () => setPairing(await createPairing(token)));
+
+  useEffect(() => {
+    if (auto) create();
+  }, [auto, connected]);
   const line = pairing ? `Lee ${window.location.origin}${pairing.path} y sigue las instrucciones.` : null;
 
   return (

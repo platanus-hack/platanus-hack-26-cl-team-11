@@ -33,29 +33,27 @@ export function OnboardingSection({ steps, onOpen }: OnboardingSectionProps) {
   if (finished === steps.length) return null;
 
   return (
-    <section className="app-tab" aria-label="Primeros pasos">
-      <div className="app-block">
-        <SectionHead title="Primeros pasos" end={<span className="rd-chip rd-glass">{`${finished} de ${steps.length}`}</span>} />
-        <div className="rd-list">
-          {steps.map((step) => {
-            const copy = ONBOARDING_STEPS[step.id];
-            return (
-              <Item
-                key={step.id}
-                icon={
-                  <ItemIcon>
-                    <Glyph name={step.done ? 'check' : copy.glyph} />
-                  </ItemIcon>
-                }
-                title={copy.title}
-                subtitle={step.done ? copy.done : copy.pending}
-                off={step.done}
-                end={step.done ? undefined : <RowButton label={copy.verb} name={copy.title} onClick={() => onOpen(step.id)} />}
-              />
-            );
-          })}
-        </div>
+    <div className="app-block">
+      <SectionHead title="Primeros pasos" end={<span className="rd-chip rd-glass">{`${finished} de ${steps.length}`}</span>} />
+      <div className="rd-list">
+        {steps.map((step) => {
+          const copy = ONBOARDING_STEPS[step.id];
+          return (
+            <Item
+              key={step.id}
+              icon={
+                <ItemIcon>
+                  <Glyph name={step.done ? 'check' : copy.glyph} />
+                </ItemIcon>
+              }
+              title={copy.title}
+              subtitle={step.done ? copy.done : copy.pending}
+              off={step.done}
+              end={step.done ? undefined : <RowButton label={copy.verb} name={copy.title} onClick={() => onOpen(step.id)} />}
+            />
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

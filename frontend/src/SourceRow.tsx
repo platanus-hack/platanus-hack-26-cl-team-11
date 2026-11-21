@@ -15,13 +15,14 @@ interface SourceRowProps {
   ingestUrl: string;
   healthShortcut: HealthShortcut | null;
   open: boolean;
+  solo?: boolean;
   onToggle: () => void;
   onChange: () => void;
 }
 
 const imported = (count: number) => (count === 1 ? '1 registro nuevo.' : `${count} registros nuevos.`);
 
-export function SourceRow({ token, source, ingestUrl, healthShortcut, open, onToggle, onChange }: SourceRowProps) {
+export function SourceRow({ token, source, ingestUrl, healthShortcut, open, solo = false, onToggle, onChange }: SourceRowProps) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -50,7 +51,7 @@ export function SourceRow({ token, source, ingestUrl, healthShortcut, open, onTo
   const connected = isConnected(source);
   const needsKey = source.connect === 'key' && !source.connection;
   const oauthUrl = source.connect === 'oauth' && source.provider && !source.connection && isConfigured(source) ? oauthStartUrl(token, source.provider) : null;
-  const opens = Boolean(source.connection) || source.connect === 'push';
+  const opens = !solo && (Boolean(source.connection) || source.connect === 'push');
 
   function detail() {
     if (!open) return null;
@@ -61,6 +62,7 @@ export function SourceRow({ token, source, ingestUrl, healthShortcut, open, onTo
   }
 
   function action() {
+    if (needsKey && solo) return undefined;
     if (needsKey) return <RowButton label="Conectar" name={`Conectar ${source.label}`} expanded={open} onClick={onToggle} />;
     if (oauthUrl)
       return (
