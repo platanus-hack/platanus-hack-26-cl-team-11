@@ -304,3 +304,26 @@ button.rd-item, a.rd-item { cursor: pointer; }
 .rd-seg > button[aria-pressed='true'] { background: #fff; color: var(--rd-ink); transform: translateY(-1px); box-shadow: 0 3px 0 #d2cdea, 0 8px 14px rgba(40, 30, 90, 0.08); }
 .rd-seg > button:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .rd-seg > button { transition: none; } }
+
+/* ---- Cómo vienes: una tarjeta de vidrio por señal, con un solo tinte y un aro que se llena ---- */
+.rd-vitals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rd-space-4); }
+.rd-vitals > :first-child:nth-last-child(odd) { grid-column: span 2; }
+.rd-vital { --tint: var(--rd-g2); --fill: 0; --i: 0; position: relative; overflow: hidden; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: var(--rd-space-2) var(--rd-space-3); padding: 22px var(--rd-space-6) var(--rd-space-6); border-radius: var(--rd-radius-card); animation: rd-vital-sube .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 90ms); }
+.rd-vital::before { content: ''; position: absolute; z-index: -1; right: -56px; top: -64px; width: 190px; height: 190px; border-radius: 50%; background: var(--tint); opacity: .26; filter: blur(40px); animation: rd-vital-deriva 9s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -2s); }
+.rd-vital--energy { --tint: var(--rd-g5); }
+.rd-vital--load { --tint: var(--rd-g2); }
+.rd-vital--sleep { --tint: var(--rd-g1); }
+.rd-vital--move { --tint: var(--rd-g4); }
+.rd-vital__text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rd-vital__ring { position: relative; width: 64px; height: 64px; display: grid; place-items: center; color: var(--tint); }
+.rd-vital__ring > svg { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; fill: none; stroke-width: 7; stroke-linecap: round; }
+.rd-vital__track { stroke: var(--tint); opacity: .16; }
+.rd-vital__arc { stroke: var(--tint); stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--fill)); transition: stroke-dashoffset .8s cubic-bezier(.2, .8, .2, 1); animation: rd-vital-aro 1.3s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 90ms + 200ms); }
+.rd-vital__glyph svg { display: block; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.rd-vital__glyph { display: grid; animation: rd-vital-late 3.2s ease-in-out infinite; animation-delay: calc(var(--i) * .4s); }
+@keyframes rd-vital-sube { from { opacity: 0; translate: 0 18px; scale: .97; } }
+@keyframes rd-vital-aro { from { stroke-dashoffset: 100; } }
+@keyframes rd-vital-deriva { to { translate: -38px 30px; scale: 1.18; } }
+@keyframes rd-vital-late { 50% { scale: 1.12; } }
+@media (max-width: 700px) { .rd-vitals { grid-template-columns: minmax(0, 1fr); } .rd-vitals > :first-child:nth-last-child(odd) { grid-column: auto; } }
+@media (prefers-reduced-motion: reduce) { .rd-vital, .rd-vital::before, .rd-vital__arc, .rd-vital__glyph { animation: none; transition: none; } }
