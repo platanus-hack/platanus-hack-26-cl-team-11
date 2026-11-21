@@ -74,7 +74,7 @@ async function postGraphql<T>(fetchImpl: Fetch, secret: string, query: string, v
   if (response.status === 401 || response.status === 403 || isAuthenticationFailure(errors)) throw new ConnectorError('Linear rechazó la llave.', 400);
   if (response.status === 429 || hasErrorCode(errors, RATE_LIMIT_ERROR_CODE)) throw new ConnectorError('Linear pidió esperar antes de reintentar.', 429);
   if (!response.ok) throw new ConnectorError(`Linear respondió ${response.status}.`);
-  if (errors.length > 0) throw new ConnectorError(`Linear rechazó la consulta: ${errors[0]?.message ?? 'sin detalle'}.`);
+  if (errors.length > 0) throw new ConnectorError(`Linear rechazó el pedido: ${errors[0]?.message ?? 'sin detalle'}.`);
   if (!body.data) throw new ConnectorError('Linear respondió sin datos.');
   return body.data;
 }

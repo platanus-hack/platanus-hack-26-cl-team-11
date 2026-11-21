@@ -13,6 +13,9 @@ export interface Store {
   findPerson(token: string): Person | undefined;
   saveEvent(personToken: string, draft: EventDraft): StoredEvent | null;
   listEvents(personToken: string, limit?: number): StoredEvent[];
+  listLatestReceived(personToken: string, limit: number): StoredEvent[];
+  listSignalEvents(personToken: string, now: Date): StoredEvent[];
+  pruneEvents(personToken: string, source: SourceId, fromIso: string, toIso: string, keepExternalIds: string[]): number;
   syncBySource(personToken: string): Partial<Record<SourceId, SourceSync>>;
   saveConnection(personToken: string, source: SourceId, account: string, secret: string): void;
   findConnection(personToken: string, source: SourceId): Connection | undefined;
@@ -41,6 +44,12 @@ interface ConnectionRow {
   last_synced_at: string | null;
   last_error: string | null;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SIGNAL_HISTORY_DAYS = 60;
+const RECENT_SIGNAL_SOURCES: SourceId[] = ['apple_health', 'checkin', 'github', 'google_calendar', 'granola'];
+const WHOLE_HISTORY_SIGNAL_SOURCES: SourceId[] = ['linear'];
+const EVENT_COLUMNS = 'id, source, type, occurred_at, summary, raw, received_at';
 
 const toEvent = (row: EventRow): StoredEvent => ({
   id: row.id,
@@ -112,19 +121,55 @@ export function openStore(db: DatabaseSync, vault: Vault): Store {
 
     saveEvent(personToken, draft) {
       const receivedAt = now();
-      const result = db
+      const saved = db
         .prepare(
-          'INSERT OR IGNORE INTO events (person_token, source, type, occurred_at, summary, raw, received_at, external_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          `INSERT INTO events (person_token, source, type, occurred_at, summary, raw, received_at, external_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT (person_token, source, external_id) WHERE external_id IS NOT NULL
+           DO UPDATE SET type = excluded.type, occurred_at = excluded.occurred_at, summary = excluded.summary, raw = excluded.raw, received_at = excluded.received_at
+           WHERE events.type IS NOT excluded.type OR events.occurred_at IS NOT excluded.occurred_at OR events.summary IS NOT excluded.summary OR events.raw IS NOT excluded.raw
+           RETURNING id`,
         )
-        .run(personToken, draft.source, draft.type, draft.occurredAt, draft.summary, JSON.stringify(draft.raw), receivedAt, draft.externalId ?? null);
-      return Number(result.changes) ? { ...draft, id: Number(result.lastInsertRowid), receivedAt } : null;
+        .get(personToken, draft.source, draft.type, draft.occurredAt, draft.summary, JSON.stringify(draft.raw), receivedAt, draft.externalId ?? null) as { id: number } | undefined;
+      return saved ? { ...draft, id: Number(saved.id), receivedAt } : null;
     },
 
     listEvents(personToken, limit = 50) {
       const rows = db
-        .prepare('SELECT id, source, type, occurred_at, summary, raw, received_at FROM events WHERE person_token = ? ORDER BY occurred_at DESC, id DESC LIMIT ?')
+        .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE person_token = ? ORDER BY occurred_at DESC, id DESC LIMIT ?`)
         .all(personToken, limit) as unknown as EventRow[];
       return rows.map(toEvent);
+    },
+
+    listLatestReceived(personToken, limit) {
+      const rows = db
+        .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE person_token = ? ORDER BY received_at DESC, id DESC LIMIT ?`)
+        .all(personToken, limit) as unknown as EventRow[];
+      return rows.map(toEvent);
+    },
+
+    listSignalEvents(personToken, now) {
+      const since = new Date(now.getTime() - SIGNAL_HISTORY_DAYS * DAY_MS).toISOString();
+      const rows = db
+        .prepare(
+          `SELECT ${EVENT_COLUMNS} FROM events
+           WHERE person_token = ?
+             AND (source IN (SELECT value FROM json_each(?))
+               OR (source IN (SELECT value FROM json_each(?)) AND (occurred_at >= ? OR received_at >= ?)))
+           ORDER BY occurred_at DESC, id DESC`,
+        )
+        .all(personToken, JSON.stringify(WHOLE_HISTORY_SIGNAL_SOURCES), JSON.stringify(RECENT_SIGNAL_SOURCES), since, since) as unknown as EventRow[];
+      return rows.map(toEvent);
+    },
+
+    pruneEvents(personToken, source, fromIso, toIso, keepExternalIds) {
+      const result = db
+        .prepare(
+          `DELETE FROM events
+           WHERE person_token = ? AND source = ? AND external_id IS NOT NULL AND occurred_at >= ? AND occurred_at < ?
+             AND external_id NOT IN (SELECT value FROM json_each(?))`,
+        )
+        .run(personToken, source, fromIso, toIso, JSON.stringify(keepExternalIds));
+      return Number(result.changes);
     },
 
     syncBySource(personToken) {

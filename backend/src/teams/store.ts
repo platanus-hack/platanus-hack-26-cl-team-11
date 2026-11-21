@@ -12,6 +12,16 @@ export interface TeamMember {
   name: string;
 }
 
+export type JoinStatus = 'pendiente' | 'miembro';
+
+export interface JoinRequest {
+  id: string;
+  teamId: string;
+  token: string;
+  name: string;
+  approvedBy: string[];
+}
+
 export interface TeamStore {
   createTeam(name: string): Team;
   findTeam(id: string): Team | undefined;
@@ -21,6 +31,11 @@ export interface TeamStore {
   membersOf(teamId: string): TeamMember[];
   teamsOf(personToken: string): Team[];
   isMember(teamId: string, personToken: string): boolean;
+  requestJoin(teamId: string, personToken: string): JoinStatus;
+  approveJoin(requestId: string, approverToken: string): JoinStatus;
+  findJoinRequest(requestId: string): JoinRequest | undefined;
+  joinRequestsOf(teamId: string): JoinRequest[];
+  pendingTeamsOf(personToken: string): Team[];
 }
 
 interface TeamRow {
@@ -28,6 +43,15 @@ interface TeamRow {
   name: string;
   join_code: string;
 }
+
+interface JoinRequestRow {
+  id: string;
+  team_id: string;
+  token: string;
+  name: string;
+}
+
+const REQUEST_COLUMNS = 'r.id AS id, r.team_id AS team_id, r.person_token AS token, p.name AS name';
 
 const toTeam = (row: TeamRow): Team => ({ id: row.id, name: row.name, joinCode: row.join_code });
 
@@ -45,9 +69,57 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
       joined_at TEXT NOT NULL,
       PRIMARY KEY (team_id, person_token)
     );
+    CREATE TABLE IF NOT EXISTS team_join_requests (
+      id TEXT PRIMARY KEY,
+      team_id TEXT NOT NULL REFERENCES teams (id),
+      person_token TEXT NOT NULL REFERENCES people (token),
+      requested_at TEXT NOT NULL,
+      UNIQUE (team_id, person_token)
+    );
+    CREATE TABLE IF NOT EXISTS team_join_approvals (
+      request_id TEXT NOT NULL REFERENCES team_join_requests (id),
+      approver_token TEXT NOT NULL REFERENCES people (token),
+      PRIMARY KEY (request_id, approver_token)
+    );
   `);
 
   const now = () => new Date().toISOString();
+
+  const toJoinRequest = (row: JoinRequestRow): JoinRequest => {
+    const approvals = db.prepare('SELECT approver_token FROM team_join_approvals WHERE request_id = ?').all(row.id) as unknown as Array<{ approver_token: string }>;
+    return { id: row.id, teamId: row.team_id, token: row.token, name: row.name, approvedBy: approvals.map((approval) => approval.approver_token) };
+  };
+
+  const addMember = (teamId: string, personToken: string) => {
+    db.prepare('INSERT OR IGNORE INTO team_members (team_id, person_token, joined_at) VALUES (?, ?, ?)').run(teamId, personToken, now());
+  };
+
+  const isMember = (teamId: string, personToken: string) =>
+    db.prepare('SELECT 1 FROM team_members WHERE team_id = ? AND person_token = ?').get(teamId, personToken) !== undefined;
+
+  const memberTokensOf = (teamId: string) =>
+    (db.prepare('SELECT person_token FROM team_members WHERE team_id = ?').all(teamId) as unknown as Array<{ person_token: string }>).map((row) => row.person_token);
+
+  const findJoinRequest = (requestId: string): JoinRequest | undefined => {
+    const row = db
+      .prepare(`SELECT ${REQUEST_COLUMNS} FROM team_join_requests r JOIN people p ON p.token = r.person_token WHERE r.id = ?`)
+      .get(requestId) as JoinRequestRow | undefined;
+    return row ? toJoinRequest(row) : undefined;
+  };
+
+  const dropJoinRequest = (requestId: string) => {
+    db.prepare('DELETE FROM team_join_approvals WHERE request_id = ?').run(requestId);
+    db.prepare('DELETE FROM team_join_requests WHERE id = ?').run(requestId);
+  };
+
+  const settleJoinRequest = (requestId: string): JoinStatus => {
+    const request = findJoinRequest(requestId);
+    if (!request) return 'pendiente';
+    if (!memberTokensOf(request.teamId).every((memberToken) => request.approvedBy.includes(memberToken))) return 'pendiente';
+    dropJoinRequest(request.id);
+    addMember(request.teamId, request.token);
+    return 'miembro';
+  };
 
   return {
     createTeam(name) {
@@ -66,12 +138,12 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
       return row ? toTeam(row) : undefined;
     },
 
-    addMember(teamId, personToken) {
-      db.prepare('INSERT OR IGNORE INTO team_members (team_id, person_token, joined_at) VALUES (?, ?, ?)').run(teamId, personToken, now());
-    },
+    addMember,
 
     removeMember(teamId, personToken) {
       db.prepare('DELETE FROM team_members WHERE team_id = ? AND person_token = ?').run(teamId, personToken);
+      const request = db.prepare('SELECT id FROM team_join_requests WHERE team_id = ? AND person_token = ?').get(teamId, personToken) as { id: string } | undefined;
+      if (request) dropJoinRequest(request.id);
     },
 
     membersOf(teamId) {
@@ -88,8 +160,39 @@ export function openTeamStore(db: DatabaseSync): TeamStore {
       return rows.map(toTeam);
     },
 
-    isMember(teamId, personToken) {
-      return db.prepare('SELECT 1 FROM team_members WHERE team_id = ? AND person_token = ?').get(teamId, personToken) !== undefined;
+    isMember,
+
+    requestJoin(teamId, personToken) {
+      if (isMember(teamId, personToken)) return 'miembro';
+      db.prepare('INSERT OR IGNORE INTO team_join_requests (id, team_id, person_token, requested_at) VALUES (?, ?, ?, ?)').run(
+        `sol_${randomBytes(8).toString('hex')}`,
+        teamId,
+        personToken,
+        now(),
+      );
+      const request = db.prepare('SELECT id FROM team_join_requests WHERE team_id = ? AND person_token = ?').get(teamId, personToken) as { id: string } | undefined;
+      return request ? settleJoinRequest(request.id) : 'pendiente';
+    },
+
+    approveJoin(requestId, approverToken) {
+      db.prepare('INSERT OR IGNORE INTO team_join_approvals (request_id, approver_token) VALUES (?, ?)').run(requestId, approverToken);
+      return settleJoinRequest(requestId);
+    },
+
+    findJoinRequest,
+
+    joinRequestsOf(teamId) {
+      const rows = db
+        .prepare(`SELECT ${REQUEST_COLUMNS} FROM team_join_requests r JOIN people p ON p.token = r.person_token WHERE r.team_id = ? ORDER BY r.requested_at, p.name`)
+        .all(teamId) as unknown as JoinRequestRow[];
+      return rows.map(toJoinRequest);
+    },
+
+    pendingTeamsOf(personToken) {
+      const rows = db
+        .prepare('SELECT t.id AS id, t.name AS name, t.join_code AS join_code FROM team_join_requests r JOIN teams t ON t.id = r.team_id WHERE r.person_token = ? ORDER BY r.requested_at')
+        .all(personToken) as unknown as TeamRow[];
+      return rows.map(toTeam);
     },
   };
 }

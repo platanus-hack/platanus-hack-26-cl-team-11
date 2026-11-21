@@ -29,6 +29,7 @@ export interface Signals {
   energy: LevelSignal;
   load: LevelSignal;
   blockers: Blocker[];
+  blockerBasis: string[];
   expertise: string[];
   visibility: SignalVisibility;
   asOf: string;
@@ -374,11 +375,14 @@ export function deriveSignals(events: StoredEvent[], now: Date, options: SignalO
   const checkins = checkinsUntil(events, today, timeZone);
   const tasks = latestTasks(events, timeZone);
   const reportedBlocker = checkinBlocker(checkins, today);
+  const latestCheckin = checkins[0];
+  const hasRecentCheckin = latestCheckin !== undefined && daysBetween(latestCheckin.day, today) <= CHECKIN_BLOCKER_MAX_AGE_DAYS;
 
   return {
     energy: deriveEnergy(nightsUntil(events, today, timeZone), checkins, today),
     load: deriveLoad(meetingsOn(events, today, timeZone), tasks, today),
     blockers: [...(reportedBlocker ? [reportedBlocker] : []), ...staleTaskBlockers(tasks, now, today, timeZone)],
+    blockerBasis: [...(hasRecentCheckin ? ['checkin'] : []), ...(tasks.length > 0 ? ['linear'] : [])],
     expertise: deriveExpertise(events, tasks),
     visibility: { ...DEFAULT_VISIBILITY },
     asOf: now.toISOString(),

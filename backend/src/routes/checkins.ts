@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import { bodyLimit } from 'hono/body-limit';
 import type { DatabaseSync } from 'node:sqlite';
 import type { AppContext } from '../context.js';
+import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
 import { deriveSignals } from '../signals.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
@@ -18,9 +18,7 @@ export interface CheckinEntry {
 const CHECKIN_SOURCE = 'checkin';
 const CHECKIN_TYPE = 'checkin';
 const MAX_TEXT_LENGTH = 280;
-const MAX_BODY_BYTES = 10_000;
 const RECENT_CHECKINS = 14;
-const SIGNAL_EVENT_LIMIT = 500;
 const INVALID_MOOD = { error: `El ánimo debe ser uno de: ${MOODS.join(', ')}.` } as const;
 
 type FreeText = { ok: true; value: string | null } | { ok: false; error: string };
@@ -59,10 +57,9 @@ function recentCheckins(db: DatabaseSync, personToken: string): CheckinEntry[] {
 
 export function checkinRoutes({ db, store }: AppContext) {
   const routes = new Hono();
+  const policies = openPolicyStore(db);
 
-  const limitBody = bodyLimit({ maxSize: MAX_BODY_BYTES, onError: (c) => c.json({ error: 'El check-in es demasiado largo.' }, 413) });
-
-  routes.post('/people/:token/checkins', limitBody, async (c) => {
+  routes.post('/people/:token/checkins', async (c) => {
     const person = store.findPerson(c.req.param('token'));
     if (!person) return c.json(NOT_FOUND, 404);
     const body = asObject(await c.req.text());
@@ -80,7 +77,8 @@ export function checkinRoutes({ db, store }: AppContext) {
       summary: summaryOf(body.mood, blocker.value),
       raw: { mood: body.mood, blocker: blocker.value, note: note.value },
     });
-    return c.json({ ok: true, signals: deriveSignals(store.listEvents(person.token, SIGNAL_EVENT_LIMIT), now) }, 201);
+    const signals = withChosenVisibility(deriveSignals(store.listSignalEvents(person.token, now), now), policies.chosen(person.token));
+    return c.json({ ok: true, signals }, 201);
   });
 
   routes.get('/people/:token/checkins', (c) => {

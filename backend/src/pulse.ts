@@ -35,7 +35,7 @@ function levelPulse(members: PulseMember[], key: 'energy' | 'load', minGroupSize
 }
 
 function blockerPulse(members: PulseMember[], minGroupSize: number): PulseCount {
-  const contributing = members.filter((member) => member.policy.includeInPulse && member.policy.blockers !== 'nunca');
+  const contributing = members.filter((member) => member.policy.includeInPulse && member.policy.blockers !== 'nunca' && member.signals.blockerBasis.length > 0);
   if (contributing.length < minGroupSize) return tooSmall(minGroupSize);
   return { available: true, total: contributing.reduce((sum, member) => sum + member.signals.blockers.length, 0), contributors: contributing.length };
 }

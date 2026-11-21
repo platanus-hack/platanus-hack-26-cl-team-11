@@ -11,6 +11,7 @@ const signals = (energy: SignalLevel, load: SignalLevel, blockers = 0): Signals 
   energy: { level: energy, statement: '', basis: [], visibility: 'preguntar' },
   load: { level: load, statement: '', basis: [], visibility: 'preguntar' },
   blockers: Array.from({ length: blockers }, (_, index) => ({ topic: `tema ${index}`, since: '', statement: '', source: 'checkin' as const, visibility: 'preguntar' as const })),
+  blockerBasis: ['checkin'],
   expertise: [],
   visibility: { ...DEFAULT_VISIBILITY },
   asOf: '',
@@ -67,7 +68,9 @@ test('the team pulse route requires membership and never names or identifies a m
   for (const person of people) ctx.teams.addMember(team.id, person.token);
   const outsider = ctx.store.addPerson('Externa');
   const ana = people.find((person) => person.name === 'Ana');
-  assert.ok(ana);
+  const tomas = people.find((person) => person.name === 'Tomás');
+  assert.ok(ana && tomas);
+  const others = DEMO_NAMES.length - 1;
 
   assert.equal((await app.request(`/api/people/${outsider.token}/teams/${team.id}/pulse`)).status, 403);
   assert.equal((await app.request(`/api/people/${ana.token}/teams/team_missing/pulse`)).status, 403);
@@ -76,7 +79,9 @@ test('the team pulse route requires membership and never names or identifies a m
   const body = JSON.parse(text) as { team: string; members: number; pulse: { energy: { available: boolean }; blockersOpen: { available: boolean; total?: number } } };
   assert.equal(body.members, DEMO_NAMES.length);
   assert.equal(body.pulse.energy.available, true);
-  assert.deepEqual(body.pulse.blockersOpen, { available: true, total: 1, contributors: DEMO_NAMES.length });
+  assert.deepEqual(body.pulse.blockersOpen, { available: true, total: 0, contributors: others });
+  const seenByTomas = (await (await app.request(`/api/people/${tomas.token}/teams/${team.id}/pulse`)).json()) as { pulse: { blockersOpen: unknown } };
+  assert.deepEqual(seenByTomas.pulse.blockersOpen, { available: true, total: 1, contributors: others });
   for (const person of people) {
     assert.ok(!text.includes(person.token));
     assert.ok(!text.includes(person.name));

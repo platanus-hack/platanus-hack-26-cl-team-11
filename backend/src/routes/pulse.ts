@@ -5,7 +5,6 @@ import { teamPulse } from '../pulse.js';
 import { deriveSignals } from '../signals.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
-const SIGNAL_EVENT_LIMIT = 500;
 const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
 const INVALID_VISIBILITY = { error: 'Cada permiso debe ser siempre, preguntar o nunca.' } as const;
 const INVALID_PULSE_FLAG = { error: 'La participación en el pulso debe ser verdadera o falsa.' } as const;
@@ -44,11 +43,14 @@ export function pulseRoutes({ db, store, teams }: AppContext) {
     const team = teams.findTeam(c.req.param('teamId'));
     if (!team || !teams.isMember(team.id, person.token)) return c.json(NOT_A_MEMBER, 403);
     const now = new Date();
-    const members = teams.membersOf(team.id).map((member) => ({
-      signals: deriveSignals(store.listEvents(member.token, SIGNAL_EVENT_LIMIT), now),
-      policy: policies.get(member.token),
-    }));
-    return c.json({ team: team.name, members: members.length, pulse: teamPulse(members) });
+    const members = teams.membersOf(team.id);
+    const others = members
+      .filter((member) => member.token !== person.token)
+      .map((member) => ({
+        signals: deriveSignals(store.listSignalEvents(member.token, now), now),
+        policy: policies.get(member.token),
+      }));
+    return c.json({ team: team.name, members: members.length, pulse: teamPulse(others) });
   });
 
   return routes;

@@ -3,6 +3,8 @@ import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
+const RECENT_EVENTS = 12;
+
 export function peopleRoutes({ store, config }: AppContext) {
   const routes = new Hono();
 
@@ -35,7 +37,7 @@ export function peopleRoutes({ store, config }: AppContext) {
           connection: connection ? { account: connection.account, lastSyncedAt: connection.lastSyncedAt, lastError: connection.lastError } : null,
         };
       }),
-      events: store.listEvents(person.token, 12),
+      events: store.listLatestReceived(person.token, RECENT_EVENTS),
     });
   });
 

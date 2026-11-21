@@ -48,11 +48,22 @@ export interface KeyConnector extends ConnectorInfo {
   pull(secret: string, account: string, since: Date, fetchImpl: Fetch): Promise<EventDraft[]>;
 }
 
+export interface PullWindow {
+  from: string;
+  to: string;
+}
+
+export interface WindowPull {
+  drafts: EventDraft[];
+  window: PullWindow | null;
+}
+
 export interface OAuthConnector extends ConnectorInfo {
   kind: 'oauth';
   provider: string;
   scopes: string[];
   pull(accessToken: string, account: string, since: Date, fetchImpl: Fetch): Promise<EventDraft[]>;
+  pullWindow?(accessToken: string, account: string, since: Date, fetchImpl: Fetch): Promise<WindowPull>;
 }
 
 export interface SoonConnector extends ConnectorInfo {

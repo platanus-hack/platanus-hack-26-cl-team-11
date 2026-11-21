@@ -1,5 +1,6 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { Hono } from 'hono';
 import { gmail } from '../src/connectors/gmail.js';
 import { googleCalendar } from '../src/connectors/googleCalendar.js';
@@ -34,6 +35,9 @@ const MINUTE_MS = 60 * 1000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
 
 const config: Config = { publicBaseUrl: 'https://ronda.test', oauth: { google: { clientId: 'id', clientSecret: 'secret' } } };
+const NONCE = 'nonce-de-prueba';
+const NONCE_HASH = createHash('sha256').update(NONCE).digest('hex');
+const OWN_PAGE = { headers: { 'sec-fetch-site': 'same-origin' } };
 
 const at = (offsetMs: number) => new Date(Date.now() + offsetMs).toISOString();
 const meetingStart = at(-2 * 60 * MINUTE_MS);
@@ -130,14 +134,15 @@ const setup = (routes: Routes = googleRoutes(), options: { config?: Config } = {
   const ctx = createContext({ location: ':memory:', fetch: fakeFetch(routes, calls), config: options.config ?? config });
   const app = new Hono().route('/api', oauthRoutes(ctx));
   const { token } = ctx.store.addPerson('Ana');
-  const stateFor = (overrides: Record<string, unknown> = {}) => ctx.vault.seal(JSON.stringify({ token, provider: 'google', at: Date.now(), ...overrides }));
-  const callback = (query: Record<string, string>) => app.request(`/api/oauth/google/callback?${new URLSearchParams(query)}`);
+  const stateFor = (overrides: Record<string, unknown> = {}) => ctx.vault.seal(JSON.stringify({ token, provider: 'google', at: Date.now(), nonce: NONCE_HASH, ...overrides }));
+  const callback = (query: Record<string, string>) =>
+    app.request(`/api/oauth/google/callback?${new URLSearchParams(query)}`, { headers: { cookie: `ronda_oauth_google=${NONCE}` } });
   return { ctx, store: ctx.store, app, token, calls, stateFor, callback };
 };
 
 test('start redirects to Google with the client, scopes, redirect uri and a sealed state', async () => {
   const { ctx, app, token } = setup();
-  const response = await app.request(`/api/people/${token}/oauth/google/start`);
+  const response = await app.request(`/api/people/${token}/oauth/google/start`, OWN_PAGE);
   assert.equal(response.status, 302);
 
   const location = new URL(response.headers.get('location') ?? '');
@@ -151,7 +156,9 @@ test('start redirects to Google with the client, scopes, redirect uri and a seal
   assert.deepEqual((location.searchParams.get('scope') ?? '').split(' ').sort(), [CALENDAR_SCOPE, GMAIL_SCOPE, 'email', 'openid'].sort());
   assert.ok(!location.search.includes('secret'));
 
-  const state = JSON.parse(ctx.vault.open(location.searchParams.get('state') ?? '')) as { token: string; provider: string; at: number };
+  const state = JSON.parse(ctx.vault.open(location.searchParams.get('state') ?? '')) as { token: string; provider: string; at: number; nonce: string };
+  const cookie = (response.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
+  assert.equal(state.nonce, createHash('sha256').update(cookie.slice('ronda_oauth_google='.length)).digest('hex'));
   assert.equal(state.token, token);
   assert.equal(state.provider, 'google');
   assert.ok(Math.abs(Date.now() - state.at) < MINUTE_MS);
@@ -159,20 +166,20 @@ test('start redirects to Google with the client, scopes, redirect uri and a seal
 
 test('start falls back to the request origin when there is no public base url', async () => {
   const { app, token } = setup(googleRoutes(), { config: { ...config, publicBaseUrl: null } });
-  const response = await app.request(`http://localhost:8787/api/people/${token}/oauth/google/start`);
+  const response = await app.request(`http://localhost:8787/api/people/${token}/oauth/google/start`, OWN_PAGE);
   assert.equal(new URL(response.headers.get('location') ?? '').searchParams.get('redirect_uri'), 'http://localhost:8787/api/oauth/google/callback');
 });
 
 test('start refuses an unknown person, an unknown provider and a provider without credentials', async () => {
   const { app, token } = setup();
-  const unknownPerson = await app.request('/api/people/nadie/oauth/google/start');
+  const unknownPerson = await app.request('/api/people/nadie/oauth/google/start', OWN_PAGE);
   assert.equal(unknownPerson.status, 404);
   assert.deepEqual(await unknownPerson.json(), { error: 'Link no válido.' });
-  assert.equal((await app.request(`/api/people/${token}/oauth/otro/start`)).status, 400);
-  assert.equal((await app.request(`/api/people/${token}/oauth/constructor/start`)).status, 400);
+  assert.equal((await app.request(`/api/people/${token}/oauth/otro/start`, OWN_PAGE)).status, 400);
+  assert.equal((await app.request(`/api/people/${token}/oauth/constructor/start`, OWN_PAGE)).status, 400);
 
   const unconfigured = setup(googleRoutes(), { config: { publicBaseUrl: null, oauth: {} } });
-  const response = await unconfigured.app.request(`/api/people/${unconfigured.token}/oauth/google/start`);
+  const response = await unconfigured.app.request(`/api/people/${unconfigured.token}/oauth/google/start`, OWN_PAGE);
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { error: 'Falta configurar google en el servidor: define GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET.' });
 });

@@ -1,5 +1,5 @@
 import { getGoogleJson } from '../oauth/google.js';
-import type { EventDraft, OAuthConnector } from '../types.js';
+import type { EventDraft, Fetch, OAuthConnector, WindowPull } from '../types.js';
 
 const EVENTS_URL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const UPCOMING_DAYS = 7;
@@ -23,6 +23,7 @@ interface CalendarEvent {
 
 interface CalendarList {
   items?: CalendarEvent[];
+  nextPageToken?: string;
 }
 
 interface Meeting {
@@ -62,6 +63,23 @@ const toDraft = (meeting: Meeting): EventDraft => ({
   raw: meeting,
 });
 
+async function pullWindow(accessToken: string, _account: string, since: Date, fetchImpl: Fetch): Promise<WindowPull> {
+  const window = { from: since.toISOString(), to: new Date(Date.now() + UPCOMING_DAYS * DAY_MS).toISOString() };
+  const query = new URLSearchParams({
+    timeMin: window.from,
+    timeMax: window.to,
+    singleEvents: 'true',
+    orderBy: 'startTime',
+    maxResults: String(MAX_EVENTS_PER_PULL),
+  });
+  const list = await getGoogleJson<CalendarList>(fetchImpl, `${EVENTS_URL}?${query}`, accessToken, 'Google Calendar');
+  const drafts = (list.items ?? [])
+    .map(toMeeting)
+    .filter((meeting): meeting is Meeting => meeting !== null && !meeting.declined)
+    .map(toDraft);
+  return { drafts, window: list.nextPageToken ? null : window };
+}
+
 export const googleCalendar: OAuthConnector = {
   id: 'google_calendar',
   label: 'Google Calendar',
@@ -69,19 +87,9 @@ export const googleCalendar: OAuthConnector = {
   kind: 'oauth',
   provider: 'google',
   scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+  pullWindow,
 
-  async pull(accessToken, _account, since, fetchImpl) {
-    const query = new URLSearchParams({
-      timeMin: since.toISOString(),
-      timeMax: new Date(Date.now() + UPCOMING_DAYS * DAY_MS).toISOString(),
-      singleEvents: 'true',
-      orderBy: 'startTime',
-      maxResults: String(MAX_EVENTS_PER_PULL),
-    });
-    const list = await getGoogleJson<CalendarList>(fetchImpl, `${EVENTS_URL}?${query}`, accessToken, 'Google Calendar');
-    return (list.items ?? [])
-      .map(toMeeting)
-      .filter((meeting): meeting is Meeting => meeting !== null && !meeting.declined)
-      .map(toDraft);
+  async pull(accessToken, account, since, fetchImpl) {
+    return (await pullWindow(accessToken, account, since, fetchImpl)).drafts;
   },
 };

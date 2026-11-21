@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
 import { boardRoutes } from './routes/board.js';
@@ -12,8 +13,12 @@ import { signalRoutes } from './routes/signals.js';
 import { teamRoutes } from './routes/teams.js';
 import { ConnectorError } from './types.js';
 
+const DEFAULT_MAX_BODY_BYTES = 10_000;
+const INGEST_PATH_PREFIX = '/api/ingest/';
+
 export function createApp(ctx: AppContext) {
   const api = new Hono();
+  const limitBody = bodyLimit({ maxSize: DEFAULT_MAX_BODY_BYTES, onError: (c) => c.json({ error: 'El contenido es demasiado largo.' }, 413) });
 
   api.onError((failure, c) => {
     if (failure instanceof ConnectorError) return c.json({ error: failure.message }, failure.status as ContentfulStatusCode);
@@ -21,6 +26,7 @@ export function createApp(ctx: AppContext) {
     return c.json({ error: 'Error interno.' }, 500);
   });
 
+  api.use('*', (c, next) => (c.req.path.startsWith(INGEST_PATH_PREFIX) ? next() : limitBody(c, next)));
   api.get('/health', (c) => c.json({ ok: true }));
   api.route('/', peopleRoutes(ctx));
   api.route('/', connectionRoutes(ctx));
