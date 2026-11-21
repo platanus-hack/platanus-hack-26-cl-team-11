@@ -86,11 +86,18 @@
     else { g.buildGroups(count); g.setState({ auto: false, focus: null, groupCount: g.groups.length }); }
   };
 
+  var announceReady = function () {
+    if (typeof window.salaLista !== 'function') return;
+    window.salaLista();
+    window.salaLista = null;
+  };
+
   var refresh = function () {
     fetch(source)
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (state) { if (state) apply(state); })
-      .catch(function () {});
+      .catch(function () {})
+      .then(announceReady);
   };
 
   g.setState({ auto: false });

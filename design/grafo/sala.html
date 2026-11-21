@@ -10,7 +10,9 @@
 <style>
   /* Página de prueba: el globo aprobado, dibujado con las personas reales de una sala. Propuesta, pendiente de Mati. */
   html, body { margin: 0; height: 100%; background: transparent; }
-  iframe { display: block; width: 100%; height: 100%; border: 0; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity 0.35s ease; }
+  iframe.lista { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { iframe { transition: none; } }
   .falta { padding: var(--rd-space-7); }
 </style>
 </head>
@@ -25,10 +27,14 @@
   if (!code && !own) document.getElementById('falta').hidden = false;
   else {
     frame.hidden = false;
+    const REVEAL_ANYWAY_MS = 4000;
+    const reveal = () => frame.classList.add('lista');
     frame.addEventListener('load', () => {
+      frame.contentWindow.salaLista = reveal;
       const script = frame.contentDocument.createElement('script');
-      script.src = './sala.js?v=2';
+      script.src = './sala.js?v=3';
       frame.contentDocument.body.appendChild(script);
+      setTimeout(reveal, REVEAL_ANYWAY_MS);
     });
     frame.src = './globo.html?n=5&sala=' + encodeURIComponent(code || 'equipo') + (own ? '&estado=' + encodeURIComponent(own) : '');
   }
