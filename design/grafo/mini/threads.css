@@ -62,15 +62,14 @@
 .thread-dots i:nth-child(2) {animation-delay:.15s}.thread-dots i:nth-child(3) {animation-delay:.3s}
 @keyframes thread-dot {0%,80%,100%{opacity:.25;transform:none}40%{opacity:.9;transform:translateY(-3px)}}
 .thread-event > .rt-card {flex:1;min-width:0;margin-left:34px}
-/* Share the second line between the connector and method, across the full card. */
-.thread-event .rt-head {display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:3px 9px}
+/* The title, connector and receipt each have a row beside the tile. */
+.thread-event .rt-head {display:grid;grid-template-columns:40px minmax(0,1fr);gap:3px 9px}
 .thread-event .rt-copy {display:contents}
 .thread-event .rt-tile {grid-column:1;grid-row:1 / 3}
 .thread-event .rt-label {grid-column:2;grid-row:1;align-self:center}
-.thread-event .rt-status {grid-column:3;grid-row:1;max-width:100px}
-.thread-event .rt-run,.thread-event .rt-done {box-sizing:border-box;min-width:0;max-width:100%;height:auto;min-height:25px;padding:3px 7px;line-height:1.15;white-space:normal}
-.thread-event .rt-meta {grid-column:2 / 4;grid-row:2}
-.thread-event .rt-card[data-state="running"] .rt-done,.thread-event .rt-card:not([data-state="running"]) .rt-run {visibility:hidden}
+.thread-event .rt-status {grid-column:2;grid-row:3;justify-self:start;justify-items:start}
+.thread-event .rt-run,.thread-event .rt-done {box-sizing:border-box;height:26px;padding:0 10px;white-space:nowrap}
+.thread-event .rt-meta {grid-column:2;grid-row:2}
 .thread-event .rt-card:not([data-state="running"]) .rt-spin {animation:none}
 .thread-decision {margin-left:34px;flex:1;min-width:0;border-radius:18px}
 .thread-decision .rd-decision__body {display:grid;gap:9px;border-radius:16.5px;padding:14px}
