@@ -1,6 +1,8 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {createRoot} from "react-dom/client";
 import {Stage} from "../../../.agents/skills/stageshow/kit/stage";
+import "./calendar-edge";
+import "./motion-paint";
 import "./objects";
 import "./edges";
 import CalendarStudy, {calendarTimeline} from "./calendar-study";

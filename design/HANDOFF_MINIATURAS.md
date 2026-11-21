@@ -2,6 +2,9 @@
 
 Tu encargo es rediseñar cómo se ve una interacción entre dos agentes cuando hay varias ocurriendo a la vez. **Mati aprobó el globo 3D y rechazó las cinco miniaturas actuales.** El comentario al verlas fue «no me gusta nada las miniaturas». El motivo concreto sigue abierto. La primera entrega que le serviría ver es una dirección visual nueva, en movimiento y a tamaño real sobre el globo.
 
+
+**Versión actual para revisión.** Las cinco interacciones tienen una nueva ejecución con el lenguaje del calendario aprobado. [Verlas sobre el globo en movimiento](grafo/globo.html?n=5&motion=all) · [Compararlas con sus nombres y abrir una escena](motion/minis.html). El handoff original y las referencias a la primera versión se conservan abajo.
+
 ## Qué mirar primero
 
 1. **El soporte aprobado.** Mira la captura del globo de cinco agentes anterior a las miniaturas. Fíjate en la jerarquía entre las caras, los arcos y el fondo de vidrio. La versión del globo aprobada quedó en el commit `97aa383`. [Captura del globo](grafo/globo-5.png)

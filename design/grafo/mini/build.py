@@ -31,13 +31,13 @@ page = f'''<!doctype html>
 
 # The standalone studies also run alongside versions of the globe that use a
 # different renderer and have no embedding markers.
-if "--stage-only" in sys.argv:
+if "--stage-only" in sys.argv or "// BEGIN GENERATED MINIATURES" not in (DESIGN / "grafo/globo.html").read_text():
     sys.exit(0)
 
 # The canvas artifact runs its component in isolation. Inline the same small
 # renderer in its lifecycle, including the approved colors for that sandbox.
 tokens = "\n".join(line.strip() for line in (DESIGN / "tokens.css").read_text().splitlines() if line.strip().startswith("--rd-mini-"))
-helpers = "\n".join((HERE / f).read_text() for f in ("objects.js", "edges.js", "globe.js"))
+helpers = "\n".join((HERE / f).read_text() for f in ("calendar-edge.js", "motion-paint.js", "objects.js", "edges.js", "globe.js"))
 start = "// BEGIN GENERATED MINIATURES"
 end = "// END GENERATED MINIATURES"
 for name, prefix in [("globo.html", "../motion/"), ("globo.dc.html", "")]:

@@ -13,6 +13,15 @@ function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds) {
   }
   // At a tight viewing angle the faces take precedence over the miniature.
   if (best < width*.42) return;
+  ctx.save();
+  ctx.translate(anchor.x,anchor.y);ctx.scale(scale,scale);
+  ctx.translate(-32,-22);
+  paintCalendar(ctx, seconds);
+  ctx.restore();
+  return {x:anchor.x,y:anchor.y,halfWidth:32*scale,halfHeight:22*scale};
+}
+
+function paintCalendar(ctx, seconds) {
   const phase = seconds;
   function rise(a,b) {
     const t = Math.max(0,Math.min(1,(phase-a)/(b-a)));
@@ -29,10 +38,7 @@ function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds) {
     gradient.addColorStop(0,top);gradient.addColorStop(1,bottom);
     return gradient;
   }
-  ctx.save();
-  ctx.translate(anchor.x,anchor.y);ctx.scale(scale,scale);
-  ctx.translate(-32,-22);
-  ctx.shadowColor='rgba(30,64,72,.25)';ctx.shadowBlur=6*scale;ctx.shadowOffsetY=3*scale;
+  ctx.shadowColor='rgba(30,64,72,.25)';ctx.shadowBlur=4;ctx.shadowOffsetY=2;
   box(0,1,64,42,10,'#b3c2c7');
   ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.shadowColor='transparent';
   box(0,0,64,40,10,'#bfcfd2');
@@ -57,6 +63,6 @@ function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds) {
   const state = phase<1.7 ? '¿30 min?' : phase<3.5 ? 'Ian' : phase<5.4 ? 'Lian' : '10:00';
   ctx.fillStyle='#415963';ctx.fillText(state,32,11-17*match);
   ctx.fillStyle='#014e60';ctx.fillText(phase>=11.4?'✓ 10:30':'10:30',32,28-17*match);
-  ctx.restore();ctx.restore();
-  return {x:anchor.x,y:anchor.y,halfWidth:32*scale,halfHeight:22*scale};
+  ctx.restore();
 }
+window.paintRondaCalendar=paintCalendar;

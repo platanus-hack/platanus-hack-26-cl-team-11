@@ -8,7 +8,7 @@
     const [a,b,c,d,e] = ids;
     return [
       {kind:"chat", from:a, to:b}, {kind:"calendars", from:b, to:c},
-      {kind:"health", from:e, to:c}, {kind:"permission", from:e, to:a},
+      {kind:"health", from:e, to:d}, {kind:"permission", from:e, to:a},
       {kind:"help", from:d, to:c},
     ];
   }
@@ -24,7 +24,7 @@
     object.className = "rd-mini";
     object.setAttribute("kind", activity.kind);
     object.style.setProperty("--mini-delay", (-index * .93) + "s");
-    object.style.setProperty("--mini-cycle", (4.4 + index * .24) + "s");
+    object.style.setProperty("--mini-cycle", window.RondaMotion.periods[activity.kind] + "s");
     const caption = document.createElement("span");
     caption.className = "rd-mini-caption";
     caption.textContent = label;

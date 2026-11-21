@@ -116,3 +116,17 @@ Cada llamada permite abrir la entrada y leer el resultado cuando termina.
 Se probaron el calendario, otra conexión activa y una conexión de fondo en Chrome
 a 1280 y 390 px. Se comprobaron la apertura por teclado del calendario, el cierre
 con Escape, la repetición del hilo y la lectura del resultado con movimiento reducido.
+
+### Las cinco miniaturas a escala real
+
+[Globo en vivo](../grafo/globo.html?n=5&motion=all) · [Vista con nombres](minis.html). Se puede ver una sola pieza cambiando el valor de `motion` por `chat`, `calendars`, `health`, `permission` o `help`. El globo y Stageshow comparten los dibujos.
+
+| Pieza | Movimiento y resultado |
+|---|---|
+| Chat | Se escribe la pregunta, la respuesta gana ancho y los puntos ruedan hasta «Sí». |
+| Calendario | Dos ranuras recorren sus horarios y coinciden en las 10:30. |
+| Salud | El pulso recorre el visor. Una persiana lo cubre, el corazón queda a la vista y el cierre encaja. |
+| Permiso | Un seguro recorre la guía hasta el visto bueno. Solo entonces asoma el pase de un uso. |
+| Ayuda | Cada cara acepta a su tiempo. Las dos se acercan y una conexión ocupa el espacio entre ellas. |
+
+Se revisó cada secuencia en cinco fotogramas y el conjunto sobre el globo a 1280 y 390 px en Chrome. Se ajustaron la legibilidad del pulso cerrado, la transición entre los puntos y el texto del chat, y el espacio entre las dos caras de ayuda. Se verificaron los cinco filtros individuales, la pausa y reanudación y el fotograma de movimiento reducido. El ensayo de Stageshow pasó el gate en escritorio, móvil y por estados. Algunas capturas de escritorio registraron intervalos sin muestras. El móvil corresponde a emulación.

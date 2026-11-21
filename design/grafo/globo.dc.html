@@ -520,7 +520,7 @@ class Component extends DCLogic {
             ctx.beginPath(); ctx.arc(bead.x, bead.y, colK > 0.5 ? 2.6 : 1.8, 0, 6.2832); ctx.fill();
           }
           ctx.globalAlpha = 1;
-          if (E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
+          if (!self.paintMotions && E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
         }
         var req = Gr.members[0];
         if (ag > 0.45 && req < count) blooms.push([req, smooth(0.45, 1, ag), colK, gAlpha]);
@@ -572,6 +572,7 @@ class Component extends DCLogic {
     }
     ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 
+    if (this.paintMotions) this.motionSpots=this.paintMotions(ctx,P,ctrl,t);
     chips.forEach(function (c) { if (c[3] > 0.01) { ctx.globalAlpha = c[3]; self.chip(ctx, c[0], c[1], c[2]); ctx.globalAlpha = 1; } });
 
     if (this.hover >= 0 && count > 1) {

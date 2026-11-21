@@ -82,6 +82,8 @@
 </dialog>
 <script src="./mini/threads.js"></script>
 <script src="./mini/calendar-edge.js"></script>
+<script src="./mini/motion-paint.js"></script>
+<script src="./mini/motion-globe.js"></script>
 <script>
 class DCLogic { constructor(p) { this.props = p || {}; } setState(o) { Object.assign(this.state, o); sync(); } }
 class Component extends DCLogic {
@@ -519,7 +521,7 @@ class Component extends DCLogic {
             ctx.beginPath(); ctx.arc(bead.x, bead.y, colK > 0.5 ? 2.6 : 1.8, 0, 6.2832); ctx.fill();
           }
           ctx.globalAlpha = 1;
-          if (E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
+          if (!self.paintMotions && E[3] && colK > 0.5 && grow > 0.95) { var mid = at(pa, c2, pb, 0.5); chips.push([E[3], mid.x, mid.y, gAlpha * colK]); }
         }
         var req = Gr.members[0];
         if (ag > 0.45 && req < count) blooms.push([req, smooth(0.45, 1, ag), colK, gAlpha]);
@@ -571,6 +573,7 @@ class Component extends DCLogic {
     }
     ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 
+    if (this.paintMotions) this.motionSpots=this.paintMotions(ctx,P,ctrl,t);
     chips.forEach(function (c) { if (c[3] > 0.01) { ctx.globalAlpha = c[3]; self.chip(ctx, c[0], c[1], c[2]); ctx.globalAlpha = 1; } });
 
     if (this.hover >= 0 && count > 1) {
@@ -651,7 +654,9 @@ class Component extends DCLogic {
 }
 const q = new URLSearchParams(location.search);
 const calendarPreview = q.get("solo") === "calendars";
-const g = new Component({ autoplay: !q.has('n') && !calendarPreview });
+const motions = q.get("motion");
+const motionPreview = motions==="all" || Object.hasOwn(window.RondaMotion.periods,motions);
+const g = new Component({ autoplay: !q.has('n') && !calendarPreview && !motionPreview });
 if (calendarPreview) {
   g.drawCalendar = drawCalendarEdge;
   g.openThread = mountThreadInspector(g);
@@ -661,6 +666,29 @@ if (calendarPreview) {
   document.title = "Calendario en el globo · Ronda";
   document.getElementById("c").setAttribute("aria-label","Globo de agentes. Toca un arco para abrir su hilo simulado. Arrastra para girar.");
   g.people[2].status = "Libre desde las 10:30";
+  g.paintMotions=(ctx,points,control,t)=>paintGraphMotions(ctx,points,control,g.calendarZoom,t,g.reduced,g.team,'calendars');
+}
+if (motionPreview) {
+  g.people[2].status="Libre desde las 10:30";
+  const pause=document.createElement("button");
+  pause.type="button";pause.className="rd-button rd-button--quiet";pause.textContent="Pausar miniaturas";
+  pause.style.alignSelf="flex-start";document.querySelector(".globo aside").append(pause);
+  let frozenAt=null,offset=0;
+  pause.onclick=()=>{
+    if (frozenAt===null) {frozenAt=g.nowT || 0;pause.textContent="Reanudar miniaturas";}
+    else {offset+=(g.nowT || 0)-frozenAt;frozenAt=null;pause.textContent="Pausar miniaturas";}
+  };
+  g.paintMotions=(ctx,points,control,t)=>paintGraphMotions(
+    ctx,points,control,g.calendarZoom,(frozenAt??t)-offset,g.reduced,g.team,motions
+  );
+  const motion=matchMedia("(prefers-reduced-motion: reduce)");
+  const updatePause=()=>{pause.hidden=q.has("still") || motion.matches;};
+  motion.addEventListener("change",updatePause);updatePause();
+  document.title="Interacciones en el globo · Ronda";
+  document.body.classList.add("calendar-preview");
+  document.getElementById("c").setAttribute("aria-label","Chat, calendario, salud, permiso y ayuda sobre las conexiones de cinco agentes. Arrastra para girar.");
+}
+if (motionPreview || calendarPreview) {
   function resizeCalendarPreview() {
     const width = document.documentElement.clientWidth;
     const phone = width < 750;
@@ -702,9 +730,9 @@ document.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', (
 document.getElementById('fclose').addEventListener('click', () => { g.turnTo = null; g.setState({ focus: null }); });
 if (q.has('n')) g.setN(+q.get('n'), false);
 g.componentDidMount();
-if (calendarPreview) {
+if (calendarPreview || motionPreview) {
   const motion=matchMedia("(prefers-reduced-motion: reduce)");
-  const syncMotion=()=>{g.reduced=q.has("still") || motion.matches; g.refreshThread();};
+  const syncMotion=()=>{g.reduced=q.has("still") || motion.matches; if(calendarPreview) g.refreshThread();};
   motion.addEventListener("change",syncMotion);
   syncMotion();
 }
