@@ -129,3 +129,11 @@ Para desplegar se usa el mismo script de la terminal con el proyecto Vercel de l
 Dos billeteras nuevas recibieron 1.000 fichas cada una. En el contrato de team-11 con objetivo de 2,74%, la primera publicó una venta de tres unidades a 44. La segunda envió dos veces en paralelo la misma compra de dos con límite 51. Se registró un único cruce, `f17`, por dos a 44. La primera billetera canceló la unidad restante y recuperó 56 fichas de reserva. Al vencimiento, la última cotización publicada fue 2,699064%, equivalente a 270 puntos base. La binaria pagó 0 al comprador y 100 por unidad al vendedor. Los saldos finales fueron 912 y 1.088. Consultar las dos series de datos por separado (libro y fuente de Platanus) reprodujo el precio y los abonos.
 
 [Contrato liquidado y evidencia de cierre](https://duelos-platanus-26.vercel.app/bolsa?marketId=px-0672a60fddd538ab4158f2bf)
+
+## Inventario en vivo · 14:57 UTC
+
+`inventory.py` partió con sesión a las 14:51 UTC y leyó 979 bananas en caja. Entre las 14:54:21 y las 14:55:25 compró 15 lotes de 20 bananas. Cada uno costó 19, igual que la cotización. Caja: 694. Los 15 recibos están en [órdenes verificadas](MARKET-ORDERS.md), donde la columna de valor total queda vacía para estas filas.
+
+En 8 de los 15 equipos otro participante vendió entre 5.652 y 7.871 acciones dentro de los 20 segundos siguientes a nuestra compra. Esos equipos (12, 22, 41, 48, 34, 6, 20 y 19) bajaron de cerca de 0,0090 a cerca de 0,0051. Las cantidades vendidas en team-12, 22, 41 y 6 coinciden con lotes comprados a las 12:04 con órdenes de 33 bananas. Nuestra compra de 20 bananas sube el precio cerca de 20% y eso bastó para cruzar el umbral de venta de ese participante. La reproducción sobre la cinta no modela esa reacción.
+
+A las 14:56 UTC los 15 lotes se podían vender por 197 bananas contra 285 de costo. No hay ventas ni pérdida realizada. Las compras nuevas quedaron en pausa con `{"buying": false}`. Las ventas siguen activas.
