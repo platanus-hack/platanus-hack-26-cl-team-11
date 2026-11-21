@@ -48,8 +48,8 @@ Un evento tiene fuente, tipo, cuándo ocurrió, un resumen de una línea y el da
 | Forma | Cómo funciona | Ejemplo |
 |---|---|---|
 | `push` | La fuente nos manda los datos a una dirección personal | Apple Health |
-| `key` | La persona pega una llave y nosotros traemos los datos | Granola, GitHub |
-| `oauth` | La persona autoriza con su cuenta y nosotros traemos los datos | Google |
+| `key` | La persona pega una llave y nosotros traemos los datos | Granola |
+| `oauth` | La persona autoriza con su cuenta y nosotros traemos los datos | Google, GitHub, Linear |
 
 Una fuente que todavía no existe se lista como `soon` para que aparezca en la página como «Próximamente».
 

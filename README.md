@@ -66,11 +66,11 @@ Funciona: crear una persona, conectar sus fuentes, guardar todo como eventos y d
 
 | Fuente | Estado |
 |---|---|
-| Apple Health | Recibe envíos; falta probar el Atajo en un iPhone |
-| Granola, GitHub, Linear | Se conectan con llave; probados solo con respuestas simuladas |
-| Google Calendar y Gmail | OAuth listo; falta crear las credenciales en Google Cloud |
+| Apple Health | Probado con un iPhone real |
+| GitHub, Linear, Google Calendar y Gmail | OAuth listo; faltan las credenciales de cada aplicación |
+| Granola | Se conecta con llave; probado solo con respuestas simuladas |
 
-El mapa de contexto (`/contexto/<token>`) muestra tus fuentes alrededor de tu cara; al tocar una ves qué trajo, cuándo fue el último dato y con qué otras fuentes se cruza. Sus datos son de prueba y los asistentes pueden dejar contexto en `POST /api/context/<token>/push` ([detalle](docs/ARCHITECTURE.md#servidor-de-contexto-datos-de-prueba)).
+En producción: https://ronda-n8if.onrender.com
 
 Los agentes y su conversación no están construidos. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

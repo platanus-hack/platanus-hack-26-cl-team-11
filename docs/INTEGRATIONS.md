@@ -21,14 +21,30 @@ Cada persona tiene una página `/conectar/<token>` con una fila por fuente. El l
 
 | Fuente | Cómo se conecta | Estado |
 |---|---|---|
-| Apple Health | Atajo de iOS que envía a una URL personal | Receptor funcionando; falta probar el Atajo en un iPhone |
-| Granola | Llave personal pegada | Construido; probado solo con respuestas simuladas |
-| GitHub | Token personal pegado | Construido; probado solo con respuestas simuladas |
-| Linear | Llave personal pegada | Construido; probado solo con respuestas simuladas |
+| Apple Health | Atajo de iOS que envía a una URL personal | **Probado con un iPhone real** el 21-nov-2026: llega el sueño y se deriva la energía |
+| GitHub | OAuth | Construido; falta crear la OAuth App y cargar sus credenciales |
+| Linear | OAuth | Construido; falta crear la aplicación OAuth y cargar sus credenciales |
 | Google Calendar | OAuth de Google | Construido; faltan credenciales de Google Cloud |
 | Gmail | El mismo OAuth de Google | Construido; guarda solo asunto, remitente y fecha |
+| Granola | Llave personal pegada | Construido; Granola no ofrece OAuth para un servidor |
 | Google Health | El mismo OAuth de Google | No empezado |
 | Whoop | — | Fuera de la hack |
+
+Salvo Apple Health, ninguna fuente está probada contra el servicio real: las pruebas usan respuestas simuladas.
+
+### Aplicaciones OAuth por crear
+
+Cada una entrega un identificador y un secreto, que se cargan como variables en Render. Nunca van en el repo.
+
+| Servicio | Dónde se crea | Dirección de retorno | Variables |
+|---|---|---|---|
+| GitHub | github.com/settings/developers → OAuth Apps | `https://ronda-n8if.onrender.com/api/oauth/github/callback` | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
+| Linear | Settings → API → OAuth applications | `https://ronda-n8if.onrender.com/api/oauth/linear/callback` | `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET` |
+| Google | Google Cloud → Credenciales → Cliente OAuth web | `https://ronda-n8if.onrender.com/api/oauth/google/callback` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+
+GitHub pide solo `read:user`, así que lee la actividad pública. Leer repos privados exige el permiso `repo`, que también da escritura, y por eso queda fuera. Linear pide `read`.
+
+Una fuente OAuth sin credenciales en el servidor aparece en la página como «Falta configurarla en el servidor».
 
 Las fuentes conectadas se vuelven a sincronizar solas cada 15 minutos.
 
@@ -81,12 +97,20 @@ curl -X POST http://localhost:8787/api/ingest/health/<token> \
 El iPhone necesita una dirección HTTPS pública. Para probar, expón el puerto con un túnel (por ejemplo `cloudflared tunnel --url http://localhost:8787`) y define `PUBLIC_BASE_URL` con esa dirección.
 
 1. Abre **Atajos** y crea uno nuevo.
-2. Agrega **Buscar muestras de salud**. Tipo: Sueño. Fecha de inicio: en los últimos 1 días.
-3. Agrega **Calcular estadísticas** sobre la duración, operación Suma, para obtener el total.
-4. Agrega **Diccionario** con las claves `date` (fecha actual, formato `yyyy-MM-dd`) y `sleep_hours` (el total anterior).
-5. Agrega **Obtener contenido de URL**. URL: tu dirección de envío. Método: POST. Cuerpo: JSON, con el diccionario.
-6. Ejecútalo una vez y acepta el permiso de Salud.
+2. Agrega **Buscar muestras de Salud**. Tipo: Sueño. Fecha de inicio: en los últimos 1 día.
+3. Agrega **Calcular estadísticas**: operación **Suma**, sobre la **Duración** de las muestras.
+4. Agrega **Obtener contenido de URL** con tu dirección de envío. Método: **POST**. Cuerpo: **JSON**.
+5. En el cuerpo, agrega un campo de texto con clave `sleep_hours` y, como valor, la variable **Suma**.
+6. Ejecútalo una vez y acepta los permisos de Salud y de red.
 7. En **Automatización**, crea una que lo ejecute al abrir una app que uses a diario, con «Ejecutar inmediatamente».
+
+Lo aprendido con el iPhone real:
+
+- **La duración llega en segundos y con coma decimal** (`"30000"` son 8,3 horas). El servidor la convierte.
+- **El filtro mira la hora de inicio.** Con 1 día, la noche tiene que haber empezado hace menos de 24 horas.
+- **Con un rango de varios días la suma mezcla noches.** El servidor la guarda pero no la usa como una noche.
+- **Sin muestras, la suma llega vacía.** Hace falta que algo escriba el sueño en Salud: un reloj, Whoop con su integración activada, o registrarlo a mano en Salud → Sueño → Agregar datos.
+- **Sin confirmar:** si una fuente escribe a la vez «en cama» y «dormido», la suma contaría doble.
 
 Los nombres de las acciones cambian un poco entre versiones de iOS. Si el total llega en una unidad distinta de horas, se ve en `GET /api/people/<token>/events`, que guarda el envío completo.
 
