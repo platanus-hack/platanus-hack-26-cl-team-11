@@ -7,6 +7,7 @@ import { OrderForm, type Quote } from './exchange/OrderForm';
 import {
   getToken,
   kinds,
+  marketTitle,
   n,
   states,
   subject,
@@ -24,6 +25,20 @@ const href = (id: string) => location.pathname + '?marketId=' + encodeURICompone
 type Operation = { command: Command; nonce: string; target: string };
 type Notice = { text: string; retry?: Operation };
 const receiptKey = 'mesa26.exchange.pending.v1';
+
+function activityHeaders(token: string): Record<string,string> {
+  const headers: Record<string,string> = token ? { Authorization: 'Bearer ' + token } : {};
+  try {
+    const key = 'mesa26.exchange.visitor.v1';
+    let visitor = localStorage.getItem(key);
+    if (!visitor || !/^[0-9a-f]{32}$/.test(visitor)) {
+      visitor = crypto.randomUUID().replaceAll('-', '');
+      localStorage.setItem(key,visitor);
+    }
+    headers['X-Exchange-Visitor'] = visitor;
+  } catch { /* Public browsing still works without local storage. */ }
+  return headers;
+}
 
 function remembered(): Operation | null {
   try {
@@ -52,7 +67,7 @@ function MarketDirectory({
   const rail = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState('');
   const sorted = markets
-    .filter((m) => !filter || m.kind === filter)
+    .filter((m) => Object.hasOwn(kinds, m.kind) && (!filter || m.kind === filter))
     .sort((a, b) => Number(b.status === 'open') - Number(a.status === 'open'));
   return (
     <section className="ex-directory" aria-label="Explorar contratos">
@@ -87,7 +102,7 @@ function MarketDirectory({
             {!sorted.some((m) => m.id === active) && <option value="">Selecciona un mercado</option>}
             {sorted.map((m) => (
               <option key={m.id} value={m.id}>
-                {teamText(m.title)} · {states[m.status]} · {when(m.expiry)}
+                {marketTitle(m)} · {states[m.status]} · {when(m.expiry)}
               </option>
             ))}
           </select>
@@ -137,7 +152,7 @@ function MarketDirectory({
 }
 
 function ContractDetail({ market, board }: { market: Market; board: Board | null }) {
-  const spot = board?.teams.find((t) => t.team === market.team);
+  const spot = market.kind === 'manual' ? undefined : board?.teams.find((t) => t.team === market.team);
   const fresh = spot && board && Date.now() - board.at < 120000 && market.status === 'open';
   return (
     <section className="rd-card rd-glass ex-section">
@@ -150,7 +165,8 @@ function ContractDetail({ market, board }: { market: Market; board: Board | null
         </a>
       </div>
       <h2 className="rd-title ex-contract-title">{subject(market)}</h2>
-      <p>{teamText(market.description)}</p>
+      <p>{market.kind === 'manual' ? market.rule : teamText(market.description)}</p>
+      {market.kind === 'manual' && <p className="rd-note">Mati resuelve esta pregunta después del cierre.</p>}
       <div className="ex-metrics">
         <div>
           <span className="rd-label">Último cruce</span>
@@ -209,7 +225,7 @@ export function Exchange() {
       }
       const response = await fetch(endpoint(id), {
         cache: 'no-store',
-        headers: token.current ? { Authorization: 'Bearer ' + token.current } : {},
+        headers: activityHeaders(token.current),
         signal: AbortSignal.timeout(12000),
       });
       const data = await response.json();
@@ -230,7 +246,7 @@ export function Exchange() {
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
-      await reload(selected);
+      if (!document.hidden) await reload(selected);
       if (active) timer = setTimeout(poll, 6000);
     };
     void poll();
@@ -291,7 +307,7 @@ export function Exchange() {
       remember(op);
       const res = await fetch(endpoint(op.target), {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + token.current, 'Content-Type': 'application/json' },
+        headers: { ...activityHeaders(token.current), 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...op.command, nonce: op.nonce }),
         signal: AbortSignal.timeout(18000),
       });
@@ -348,7 +364,7 @@ export function Exchange() {
       <header className="ex-hero">
         <div>
           <h1 className="rd-hero">Bolsa de contratos</h1>
-          <p>Opera con fichas de juego sobre los precios de los equipos de Platanus.</p>
+          <p>Opera con fichas de juego sobre los equipos y las preguntas del hack.</p>
         </div>
         <button type="button" className="rd-button rd-button--quiet ex-create" onClick={showCreate}>
           ＋ Crear mercado

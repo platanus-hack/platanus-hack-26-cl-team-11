@@ -31,7 +31,8 @@ function fixture(t) {
 test('a new desk quotes all nine kinds, preserves filled quantity on migration, and leaves participant orders intact', async (t) => {
   const f = fixture(t);
   let state = await f.request(null, null);
-  assert.equal(state.markets.length, 9);
+  assert.equal(new Set(state.markets.map((m) => m.kind)).size, 9);
+  assert.equal(new Set(state.markets.filter((m) => m.kind === 'binary').map((m) => m.team)).size, 5);
   assert(state.markets.every((m) => m.bestBid >= 1 && m.bestBid < m.bestAsk && m.bestAsk <= 99 && m.starterQuote));
   const m = state.markets.find((m) => m.kind === 'linear');
   assert(m.bestAsk < 20);

@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
-import { initialState, apply, replay, view, settle, expireOrders } from './exchange-engine.mjs';
+import { initialState, apply, replay, view, settle, expireOrders, marketKind } from './exchange-engine.mjs';
 import { propose, evaluate, EVENT_END, KINDS } from './exchange-contracts.mjs';
 import { starterQuote } from './exchange-quotes.mjs';
+import { questionFor, refundExpiredQuestions } from './exchange-predictions.mjs';
+export { createManual, resolveManual, refundExpiredQuestions } from './exchange-predictions.mjs';
 
 const minute = 60000;
 const strip = 60 * minute;
@@ -51,10 +53,9 @@ function deskSpecs(board, expiry) {
     return { ...spec, strike: basis, width };
   });
 }
-function postDeskQuotes(ledger, board, market, now, replace) {
-  const actor = house(market.kind);
+function postDeskQuotes(ledger, board, market, now, replace, actor = house(market.kind), qtyPerSide = 3) {
   const own = view(ledger.engine, actor, market.id, now).wallet;
-  const size = { buy: 3, sell: 3 };
+  const size = { buy: qtyPerSide, sell: qtyPerSide };
   if (replace) {
     // Update only the still-open quantity from the original demonstration quotes.
     size.buy = size.sell = 0;
@@ -83,7 +84,7 @@ function postDeskQuotes(ledger, board, market, now, replace) {
     );
     available -= qty * margin;
   }
-  ledger.deskQuotes[market.id] = { ...quote, at: board.at };
+  ledger.deskQuotes[market.id] = { ...quote, at: board.at, teamName: board.teams.find((t) => t.id === market.teamId)?.name };
 }
 function openDesk(ledger, board, now, updating) {
   const expiry = updating
@@ -106,6 +107,27 @@ function openDesk(ledger, board, now, updating) {
     featured.push(market.id);
     postDeskQuotes(ledger, board, market, now, false);
   }
+  if (ledger.predictionStrip !== expiry) {
+    // The first team already has a binary market in the original desk. A single additional ordinary wallet
+    // backs up to four more teams each hour and carries its profits/losses into all subsequent strips.
+    const actor = house('predictions');
+    apply(ledger.engine, actor, { type: 'join' }, now);
+    const predictionIds = [];
+    for (const team of board.teams.slice(1, 5)) {
+      const strike = Math.min(9999, Math.max(1, Math.round(team.price * 10000)));
+      const market = propose({ kind: 'binary', team: team.team, strike, expiry }, board, now);
+      if (featured.includes(market.id)) continue;
+      const quote = starterQuote(market, board);
+      const available = view(ledger.engine, actor, undefined, now).wallet.available;
+      const qty = Math.min(2, Math.floor(available / (quote.bid + 100 - quote.ask)));
+      if (!qty) break;
+      apply(ledger.engine, actor, { type: 'list', market }, now);
+      postDeskQuotes(ledger, board, market, now, false, actor, qty);
+      predictionIds.push(market.id);
+    }
+    ledger.predictionIds = predictionIds;
+    ledger.predictionStrip = expiry;
+  }
   ledger.nextStrip = expiry;
   ledger.featured = featured;
   return true;
@@ -113,8 +135,9 @@ function openDesk(ledger, board, now, updating) {
 async function updateMaturities(ledger, selected, prices, now) {
   ledger.missingSince ??= {};
   let changed = expireOrders(ledger.engine, now) > 0;
-  const pending = view(ledger.engine, null, undefined, now)
-    .markets.filter((m) => m.status === 'pending' && (ledger.nextOracle[m.id] ?? 0) <= now)
+  const markets = view(ledger.engine, null, undefined, now).markets;
+  if (refundExpiredQuestions(ledger, now, markets)) changed = true;
+  const pending = markets.filter((m) => m.kind !== 'manual' && m.status === 'pending' && (ledger.nextOracle[m.id] ?? 0) <= now)
     .sort((a, b) => Number(b.id === selected) - Number(a.id === selected) || a.expiry - b.expiry)
     .slice(0, 5);
   const resolutions = await Promise.all(
@@ -183,7 +206,8 @@ export async function operate(ledger, { actor, action, selected }, prices) {
   let changed = await updateMaturities(ledger, selected, prices, now);
   const missingOnly =
     now < ledger.nextStrip &&
-    (ledger.featured.length < tradingKinds.length || ledger.featured.some((id) => !ledger.deskQuotes?.[id]));
+    (ledger.predictionStrip !== ledger.nextStrip || ledger.featured.length < tradingKinds.length ||
+      ledger.featured.some((id) => !ledger.deskQuotes?.[id]));
   if ((now >= ledger.nextStrip || missingOnly) && now < EVENT_END) {
     let board;
     try {
@@ -201,17 +225,20 @@ export async function operate(ledger, { actor, action, selected }, prices) {
       throw problem('Primero abre tu billetera.', 403);
     if (action.type === 'list') {
       result = await userListing(ledger, actor, action, prices);
-    } else if (action.type === 'order') {
-      if (!Number.isInteger(action.price) || action.price < 1 || action.price > 99)
+    } else if (action.type === 'order' || action.type === 'bet') {
+      if (action.type === 'order' && (!Number.isInteger(action.price) || action.price < 1 || action.price > 99))
         throw problem('El límite va de 1 a 99 fichas.');
-      const { marketId, side, price, qty, nonce } = action;
-      const order = { type: 'order', marketId, side, price, qty, nonce };
+      const { marketId, side, price, qty, nonce, outcome, maxPrice } = action;
+      const order = action.type === 'bet' ? { type: 'bet', marketId, outcome, maxPrice, qty, nonce }
+        : { type: 'order', marketId, side, price, qty, nonce };
       result = replay(ledger.engine, actor, order);
       if (!result) {
-        const board = await prices.board();
-        now = Date.now();
-        if (!current(board, now)) throw problem('La fuente de precios está en pausa.', 503);
-        result = apply(ledger.engine, actor, order, now);
+        // Owner decisions use the posted rule, independently of the upstream price oracle.
+        if (marketKind(ledger.engine, marketId) !== 'manual') {
+          const board = await prices.board();
+          if (!current(board, Date.now())) throw problem('La fuente de precios está en pausa.', 503);
+        }
+        result = apply(ledger.engine, actor, order, Date.now());
       }
     } else if (action.type === 'cancel') {
       result = apply(
@@ -225,10 +252,14 @@ export async function operate(ledger, { actor, action, selected }, prices) {
     changed = true;
   }
   const nowView = Date.now();
-  const picked = (action?.type === 'list' ? result.marketId : null) || selected || ledger.featured[0];
+  const picked = (action?.type === 'list' || action?.type === 'bet' ? result.marketId : null) || selected || ledger.featured[0];
   const state = view(ledger.engine, actor, picked, nowView);
-  for (const market of state.markets) market.starterQuote = ledger.deskQuotes?.[market.id] ?? null;
-  state.featured = ledger.featured;
+  for (const market of state.markets) {
+    market.starterQuote = ledger.deskQuotes?.[market.id] ?? null;
+    const question = questionFor(market, market.starterQuote?.teamName);
+    if (question) market.question = question;
+  }
+  state.featured = [...ledger.featured, ...(ledger.predictionIds ?? [])];
   state.serverTs = nowView;
   return { changed, result: action ? { result, view: state } : state };
 }

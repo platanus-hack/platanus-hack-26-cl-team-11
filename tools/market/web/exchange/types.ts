@@ -1,6 +1,6 @@
 import type { Team } from '../market';
 
-export const kinds = {
+export const publicKinds = {
   binary: 'Sí / No',
   call: 'Call',
   put: 'Put',
@@ -12,10 +12,12 @@ export const kinds = {
   butterfly: 'Mariposa',
 } as const;
 
+export const kinds = { ...publicKinds, manual: 'Pregunta de Mati' } as const;
+export type PublicKind = keyof typeof publicKinds;
 export type Kind = keyof typeof kinds;
 export type Side = 'buy' | 'sell';
 export type Spec = {
-  kind: Kind;
+  kind: PublicKind;
   team: string;
   expiry: number;
   strike?: number;
@@ -31,7 +33,15 @@ export type Observation = {
   coveredThrough: number;
   baseline?: number;
 };
-export type Market = Spec & {
+type ManualSpec = {
+  kind: 'manual';
+  question: string;
+  rule: string;
+  resolver: string;
+  expiry: number;
+  decisionDeadline: number;
+};
+export type Market = (Spec | ManualSpec) & {
   id: string;
   title: string;
   description: string;
@@ -41,7 +51,16 @@ export type Market = Spec & {
   lastPrice: number | null;
   volume: number;
   payout: number | null;
-  evidence?: { source?: string; observations?: Observation[]; reason?: string } | null;
+  settledAt: number | null;
+  evidence?: {
+    source?: string;
+    observations?: Observation[];
+    reason?: string;
+    resolver?: string;
+    outcome?: 'yes' | 'no' | 'void';
+    at?: number;
+    automatic?: boolean;
+  } | null;
 };
 export type Level = { price: number; qty: number };
 export type Fill = Level & { id: string; marketId: string; at: number };
@@ -107,7 +126,11 @@ export function getToken(): string {
 }
 
 export const teamText = (text: string) => text.replace(/\bteam-(\d+)\b/g, 'Equipo $1');
+export function marketTitle(m: Market) {
+  return m.kind === 'manual' ? m.question : teamText(m.title);
+}
 export function subject(m: Market) {
+  if (m.kind === 'manual') return m.question;
   const team = teamText(m.team);
   if (m.kind === 'race') return team + ' vs. ' + teamText(m.rival ?? '');
   if (m.kind === 'linear') return team;

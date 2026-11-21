@@ -45,6 +45,10 @@ function getMarket(state, id) {
   return market;
 }
 
+export function marketKind(state, id) {
+  return getMarket(state, id).terms.kind;
+}
+
 function status(market, at) {
   if (market.resolution) return market.resolution.payout === null ? 'voided' : 'settled';
   return at < market.end ? 'open' : 'pending';
@@ -129,7 +133,7 @@ export function expireOrders(state, now = Date.now()) {
   return count;
 }
 
-function fillLeg(state, order, price, qty) {
+function fillLeg(state, order, price, qty, reservedPrice = order.price) {
   const wallet = state.wallets[key(order.owner)];
   const position = holding(wallet, order.marketId);
   const unit = margin(order.side, price);
@@ -143,7 +147,7 @@ function fillLeg(state, order, price, qty) {
     released += pairCredit(position, lot.unit + unit, lot.qty);
   }
   addLot(position[leg(order.side)], unit, newUnits);
-  wallet.available += cashUnits * margin(order.side, order.price) + released - qty * unit;
+  wallet.available += cashUnits * margin(order.side, reservedPrice) + released - qty * unit;
   order.remaining -= qty;
 }
 
@@ -151,6 +155,7 @@ function crossingOrders(state, actor, action) {
   const buying = action.side === 'buy';
   const candidates = values(state.orders)
     .filter(o => o.marketId === action.marketId && o.side !== action.side
+      && (action.type !== 'bet' || o.owner !== actor)
       && (buying ? o.price <= action.price : o.price >= action.price))
     .sort((a, b) => (buying ? a.price - b.price : b.price - a.price) || a.seq - b.seq);
   const matches = [];
@@ -168,16 +173,31 @@ function crossingOrders(state, actor, action) {
 function place(state, actor, wallet, action, at) {
   const market = getMarket(state, action.marketId);
   if (status(market, at) !== 'open') fail('market_closed', 'El contrato ya cerró.', 409);
+  const isBet = action.type === 'bet';
+  if (isBet) {
+    if (!['manual', 'binary', 'range'].includes(market.terms.kind))
+      fail('not_binary', 'Este contrato requiere una orden avanzada.');
+    if (action.outcome !== 'yes' && action.outcome !== 'no') fail('invalid_outcome', 'Elige Sí o No.');
+    if (!integer(action.maxPrice, 1, 99)) fail('invalid_price', 'El precio máximo va de 1 a 99 fichas.');
+    const yes = action.outcome === 'yes';
+    action = { ...action, side: yes ? 'buy' : 'sell', price: yes ? action.maxPrice : FACE - action.maxPrice };
+  }
   if (action.side !== 'buy' && action.side !== 'sell') fail('invalid_side', 'Lado inválido.');
   if (!integer(action.price, 0, FACE)) fail('invalid_price', 'El precio debe ser un entero de 0 a 100.');
   if (!integer(action.qty, 1, MAX_QTY)) fail('invalid_qty', 'La cantidad debe ser un entero de 1 a 1000.');
 
   const { matches, remaining } = crossingOrders(state, actor, action);
+  if (isBet && remaining) fail('insufficient_depth', 'La cantidad completa ya no está disponible a ese precio.', 409);
   if (remaining && values(state.orders).filter(o => o.owner === actor).length >= MAX_ORDERS) {
     fail('order_limit', 'Máximo de 32 órdenes abiertas por billetera.', 409);
   }
   const oppositeLots = wallet.holdings[key(action.marketId)]?.[opposite(action.side)] ?? [];
-  const required = Math.max(0, action.qty - units(oppositeLots)) * margin(action.side, action.price);
+  if (isBet && (oppositeLots.length || values(state.orders).some(o =>
+    o.owner === actor && o.marketId === action.marketId && o.side === action.side && o.hedges.length)))
+    fail('opposite_position', 'Ya tienes fichas del resultado opuesto. Puedes cerrar esa posición desde Órdenes.', 409);
+  // A bet only reserves cash for confirmed fills, at the exact price of each maker.
+  const required = isBet ? sum(matches, ({ maker, qty }) => margin(action.side, maker.price) * qty)
+    : Math.max(0, action.qty - units(oppositeLots)) * margin(action.side, action.price);
   if (required > wallet.available) fail('insufficient_funds', 'Saldo disponible insuficiente.', 409);
 
   const seq = state.nextId++;
@@ -188,7 +208,7 @@ function place(state, actor, wallet, action, at) {
   wallet.available -= required;
   for (const { maker, qty } of matches) {
     fillLeg(state, maker, maker.price, qty);
-    fillLeg(state, order, maker.price, qty);
+    fillLeg(state, order, maker.price, qty, isBet ? maker.price : order.price);
     if (!maker.remaining) delete state.orders[maker.id];
     market.lastPrice = maker.price;
     market.volume += qty;
@@ -198,6 +218,8 @@ function place(state, actor, wallet, action, at) {
     });
   }
   if (remaining) state.orders[order.id] = order;
+  if (isBet) return { ok: true, marketId: action.marketId, outcome: action.outcome, qty: action.qty,
+    filled: action.qty, remaining: 0, cost: required, maxPayout: FACE * action.qty };
   return { ok: true, orderId: order.id, filled: action.qty - remaining, remaining };
 }
 
@@ -215,7 +237,7 @@ function identifyRequest(state, actor, action) {
   const { type, nonce } = action;
   let digest;
   const actorKey = key(actor);
-  if (nonce !== undefined || type === 'order' || type === 'cancel') {
+  if (nonce !== undefined || type === 'order' || type === 'bet' || type === 'cancel') {
     if (typeof nonce !== 'string' || !/^[A-Za-z0-9_.:-]{1,128}$/.test(nonce)) {
       fail('invalid_nonce', 'Falta un identificador de operación válido.');
     }
@@ -248,7 +270,7 @@ export function apply(state, actor, action, now = Date.now()) {
   } else {
     const wallet = state.wallets[actorKey];
     if (!wallet) fail('join_required', 'Primero abre tu billetera.', 401);
-    if (type === 'order') result = place(state, actor, wallet, action, at);
+    if (type === 'order' || type === 'bet') result = place(state, actor, wallet, action, at);
     else if (type === 'cancel') result = cancel(state, actor, action.orderId);
     else fail('invalid_action', 'Acción desconocida.');
   }

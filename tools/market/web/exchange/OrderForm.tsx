@@ -28,7 +28,7 @@ export function OrderForm({
   const canClose = opposite ? opposite.qty - opposite.pledged : 0;
   const margin = Math.max(0, qty - canClose) * (side === 'buy' ? Number(price) : 100 - Number(price));
   const closed = market.status !== 'open' || market.expiry <= Date.now();
-  const isBinary = market.kind === 'binary';
+  const yesNo = ['binary', 'range', 'manual'].includes(market.kind);
   const valid =
     Number.isInteger(qty) &&
     qty >= 1 &&
@@ -50,7 +50,7 @@ export function OrderForm({
         <h2 className="rd-title">El mercado cerró</h2>
         <p className="rd-note">
           {market.status === 'open' || market.status === 'pending'
-            ? 'Esperando los precios oficiales al vencimiento.'
+            ? (market.kind === 'manual' ? 'Esperando la resolución de Mati.' : 'Esperando los precios oficiales al vencimiento.')
             : 'Revisa el detalle de liquidación de este contrato.'}
         </p>
       </section>
@@ -72,13 +72,13 @@ export function OrderForm({
                 setLimit(null);
               }}
             >
-              {s === 'buy' ? (isBinary ? 'Comprar · Sí' : 'Comprar') : isBinary ? 'Vender · No' : 'Vender'}
+              {s === 'buy' ? 'Comprar' : 'Vender'}{yesNo && ' Sí'}
             </button>
           ))}
         </div>
         <div className="ex-pair">
           <label className="ex-field">
-            <span className="rd-label">Precio límite</span>
+            <span className="rd-label">{yesNo ? 'Precio límite del Sí' : 'Precio límite'}</span>
             <input
               className="rd-input"
               type="number"
@@ -106,8 +106,12 @@ export function OrderForm({
         </div>
         <p className="rd-note">
           {side === 'buy'
-            ? 'Compras a este precio o menos. Al vencimiento recibes el pago del contrato.'
-            : 'Vendes a este precio o más. Al vencimiento recibes 100 fichas menos el pago al comprador.'}
+            ? yesNo
+              ? 'Compras Sí a este precio o menos. Primero cierras tus posiciones cortas. Cada Sí que conserves paga 100 fichas si se cumple la condición.'
+              : 'Compras a este precio o menos. Al vencimiento recibes el pago del contrato.'
+            : yesNo
+              ? 'Vendes Sí a este precio o más. Primero cierras tus posiciones de Sí. Por cada venta adicional abres un corto que paga 100 fichas si el resultado es No.'
+              : 'Vendes a este precio o más. Al vencimiento recibes 100 fichas menos el pago al comprador.'}
         </p>
         <div className="ex-line-item">
           <span>Reserva máxima</span>

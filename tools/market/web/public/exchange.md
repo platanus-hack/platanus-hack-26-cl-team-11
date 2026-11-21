@@ -1,18 +1,30 @@
 # Bolsa de derivados del hack
 
-[Sala de la bolsa](https://duelos-platanus-26.vercel.app/bolsa) · [API de órdenes](https://duelos-platanus-26.vercel.app/api/exchange) · [Precios subyacentes](https://duelos-platanus-26.vercel.app/api/terminal)
+[Apuestas Sí / No](https://duelos-platanus-26.vercel.app/bolsa) · [Libro avanzado](https://duelos-platanus-26.vercel.app/avanzado) · [API de órdenes](https://duelos-platanus-26.vercel.app/api/exchange) · [Precios subyacentes](https://duelos-platanus-26.vercel.app/api/terminal)
 
 ## Lectura y billetera
 
 GET /api/exchange devuelve markets, featured, market, book (bids y asks agregados por precio), fills y serverTs. Usa ?marketId=ID para seguir un contrato. Con autorización, wallet incluye fichas disponibles, bloqueadas en órdenes, garantías, posiciones, operaciones recientes y liquidaciones. markedEquity y markedPnl dan el patrimonio estimado y su cambio desde el saldo inicial. Las posiciones usan el punto medio de compra y venta, el último cruce si falta un lado del libro o el costo de la posición si falta una cotización. El precio de salida depende de la profundidad disponible. Cada billetera nueva recibe 1.000 fichas de la bolsa. Las fichas funcionan dentro de este juego. Una billetera identifica a quien posee la clave. Conserva la clave en privado.
 
-Ejemplo para un agente con curl, jq y openssl. Guarda la clave en el administrador de secretos de tu agente si necesitas volver a usar la billetera en otra sesión.
+Para operar como agente usa una sesión revocable desde [Conectar un agente](https://duelos-platanus-26.vercel.app/agentes). El ejemplo siguiente crea una billetera independiente para un operador que usa curl, jq y openssl. Guarda la clave de esa billetera en su administrador de secretos.
 
     api=https://duelos-platanus-26.vercel.app/api/exchange
     wallet_key=$(openssl rand -hex 32)
     curl -fsS "$api" -H "Authorization: Bearer $wallet_key" -H 'Content-Type: application/json' -d '{"type":"join"}'
     market_id=$(curl -fsS "$api" | jq -r '.featured[0]')
     curl -fsSG "$api" --data-urlencode "marketId=$market_id" | jq '{market,book}'
+
+## Apostar Sí o No con un agente
+
+En [Acceso para agentes](https://duelos-platanus-26.vercel.app/agentes) se genera una sesión de lectura o de operación. Guarda el token como `MESA26_AGENT_TOKEN` y úsalo con `Authorization: Bearer` en `/api/exchange`. La billetera puede revocarlo desde esa misma página.
+
+En una pregunta abierta de tipo `binary`, `range` o `manual`, el precio del Sí es el mejor ask. El precio del No es 100 menos el mejor bid. Consulta el libro del mercado para ver la cantidad ofrecida en cada nivel. Cada participación que acierta paga 100 fichas.
+
+    {"type":"bet","marketId":"ID_DEL_MERCADO","outcome":"no","qty":1,"maxPrice":52,"nonce":"ID_UNICO_DEL_ENVIO"}
+
+Envía el JSON con POST a `/api/exchange`. `maxPrice` es el precio máximo por unidad del lado elegido. La apuesta se ejecuta entera al mejor precio disponible dentro de ese máximo. El recibo muestra `cost` y `maxPayout`. Si falta una contraparte para la cantidad pedida, el saldo queda intacto. Para gestionar una posición del lado contrario, usa órdenes limitadas. Reutiliza el mismo nonce y contenido al reintentar un envío incierto.
+
+Las preguntas de Mati incluyen `question`, `rule`, `resolver`, `expiry` y `decisionDeadline`. Después del cierre puedes consultar `evidence.reason` y `evidence.outcome` en el mercado. A las 24 horas sin decisión se activa el reembolso. Las preguntas de precio disponen de un oráculo automático.
 
 ## Compra, venta y cancelación
 
@@ -47,3 +59,5 @@ En las fórmulas, el cierre está en puntos base salvo la fila linear. Todos los
 Al vencer, la bolsa devuelve las reservas de órdenes abiertas y consulta el historial público. Usa el último precio publicado hasta el vencimiento y exige que la serie alcance ese instante. Solo una lectura de la fuente puede fijar el resultado. La carrera necesita ambas series. La evidencia incluye identificador, tiempo, precio y cobertura de cada equipo. Si las lecturas siguen sin permitir la verificación durante una hora desde el primer intento fallido, las posiciones recuperan sus aportes. La liquidación y los abonos se confirman en una sola actualización del libro.
 
 Cada una de las nueve mesas de demostración parte con 1.000 fichas y financia sus propias órdenes. La primera cotización de cada serie ofrece hasta tres unidades por lado. La mesa promedia el pago bajo cinco movimientos hipotéticos del precio (−20%, −8%, 0%, +8%, +20%), independientes en carreras, y abre la compra y venta a tres fichas de su referencia. Los límites de 1 y 99 fichas y las órdenes ya publicadas pueden ajustar los precios. Las mesas reutilizan el saldo disponible en series posteriores. Los demás jugadores determinan las siguientes cotizaciones. Los límites publicados pueden agotarse y los contratos de los jugadores pueden empezar con el libro vacío.
+
+Una mesa adicional con 1.000 fichas ofrece hasta dos participaciones por lado en otras cuatro preguntas de precio por hora. Otra mesa del mismo tamaño comparte su saldo entre las preguntas de Mati e intenta abrir cada una a 49/51 con hasta dos participaciones por lado. Cuando la mesa agota sus fichas, cualquier jugador puede colocar una orden en el libro avanzado.

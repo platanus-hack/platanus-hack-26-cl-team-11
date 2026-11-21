@@ -9,7 +9,7 @@ import { Exchange } from './Exchange';
 import mark from '../../../design/logo/ronda-mark.svg';
 
 const duel = location.pathname === '/duelos';
-const exchange = location.pathname === '/bolsa';
+const exchange = location.pathname === '/avanzado';
 if (exchange) document.title = 'Bolsa de derivados · Ronda';
 createRoot(document.getElementById('root')!).render(
   <div className="rd-page">
@@ -26,9 +26,9 @@ createRoot(document.getElementById('root')!).render(
           Ronda
         </a>
         <nav className="market-nav">
-          <a href="/bolsa">Bolsa</a>
+          <a href="/bolsa">Apuestas</a>
           <a href="/terminal">Terminal</a>
-          <a href="/agent.md">Para agentes</a>
+          <a href="/agentes">Para agentes</a>
           <a href="/duelos">Duelos</a>
         </nav>
       </header>

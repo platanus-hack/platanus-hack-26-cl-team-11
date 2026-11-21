@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="white">
+  <title>Apuestas · Mesa 26</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d1d1f'/%3E%3Cg fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='16' cy='11' rx='10' ry='4'/%3E%3Cpath d='M6 11v5c0 5 20 5 20 0v-5M6 16v5c0 5 20 5 20 0v-5'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/design/tokens.css">
+  <link rel="stylesheet" href="/design/ronda.css">
+  <link rel="stylesheet" href="/apuestas.css">
+  <script type="module" src="/apuestas.js"></script>
+</head>
+<body class="rd-page betting">
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <header class="mast">
+    <div class="wrap mast-inner">
+      <a class="rd-brand" href="/bolsa" aria-label="Mesa 26, preguntas abiertas">
+        <svg aria-hidden="true" width="29" height="29" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+          <ellipse cx="16" cy="9" rx="11" ry="4.5"/><path d="M5 9v6c0 6 22 6 22 0V9M5 15v6c0 6 22 6 22 0v-6"/>
+        </svg>Mesa 26
+      </a>
+      <nav aria-label="Principal">
+        <a id="home-link" href="/bolsa">Preguntas</a>
+        <a id="account-link" href="/bolsa?vista=mis-apuestas">Mis apuestas</a>
+      </nav>
+      <span id="balance" class="balance"></span>
+    </div>
+  </header>
+  <main id="contenido" class="wrap">
+    <h1 class="rd-hero" id="heading">Apuestas</h1>
+    <div id="feedback" role="status" aria-live="polite"></div>
+    <div id="content"><p>Cargando preguntas…</p></div>
+    <noscript>Activa JavaScript para ver los precios y apostar.</noscript>
+  </main>
+  <footer class="wrap">
+    <nav aria-label="Más opciones"><a href="/avanzado">Mercado avanzado</a><a href="/agentes">Para agentes</a></nav>
+    <p>Platanus Hack 26 · Fichas de juego sin valor monetario · Hora de Santiago</p>
+    <details><summary>Datos de este navegador</summary>
+      <p>La billetera se guarda en este navegador. Un identificador aleatorio permite contar visitas y actividad.</p>
+    </details>
+  </footer>
+</body>
+</html>

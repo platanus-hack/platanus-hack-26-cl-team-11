@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { clock, pct } from '../market';
-import { bps, n, teamText, when, type Market, type Run, type View, type Wallet } from './types';
+import { bps, marketTitle, n, teamText, when, type Market, type Run, type View, type Wallet } from './types';
 import type { Quote } from './OrderForm';
 
 export function MarketActivity({ view, quote }: { view: View; quote: (q: Quote) => void }) {
@@ -64,6 +64,30 @@ export function MarketActivity({ view, quote }: { view: View; quote: (q: Quote) 
 export function Resolution({ market }: { market: Market }) {
   if (market.status === 'open') return null;
   const evidence = market.evidence;
+  if (market.kind === 'manual') {
+    const outcome = market.status === 'voided' ? 'Anulada' : market.payout === 100 ? 'Sí' : 'No';
+    const decidedAt = evidence?.at ?? market.settledAt;
+    return (
+      <section className="rd-card rd-glass ex-section">
+        <h2 className="rd-title">Resolución de la pregunta</h2>
+        {market.status === 'pending' ? (
+          <>
+            <p>La pregunta cerró. Mati tiene hasta el {when(market.decisionDeadline)} (Santiago) para resolverla.</p>
+            <p className="rd-note">Si vence ese plazo, se devuelven los aportes de las posiciones.</p>
+          </>
+        ) : (
+          <>
+            <p className="rd-title">{outcome}</p>
+            <p>{evidence?.automatic ? 'Anulación automática' : 'Decisión de ' + (evidence?.resolver ?? market.resolver)}
+              {decidedAt != null && ' · ' + when(decidedAt) + ' (Santiago)'}</p>
+            {evidence?.reason && <p>{evidence.reason}</p>}
+            <p className="rd-note">{market.status === 'voided' ? 'Se devolvieron los aportes de las posiciones.'
+              : 'Cada posición de Sí recibe ' + market.payout + ' fichas y cada posición corta recibe ' + (100 - market.payout!) + '.'}</p>
+          </>
+        )}
+      </section>
+    );
+  }
   return (
     <section className="rd-card rd-glass ex-section">
       <h2 className="rd-title">Liquidación</h2>
@@ -134,7 +158,7 @@ export function WalletPanel({
     const market = markets.find((m) => m.id === id);
     return (
       <button className="ex-link" type="button" onClick={() => select(id)}>
-        {market ? teamText(market.title) : id}
+        {market ? marketTitle(market) : id}
       </button>
     );
   }

@@ -1,8 +1,9 @@
-import type { Market, Kind } from './types';
+import type { Market, Kind, Spec } from './types';
 import { bps, n, teamText } from './types';
 
 const miniPaths: Record<Kind, string> = {
   binary: 'M2 21H15V5H30',
+  manual: 'M9 8C9 1 24 1 24 8C24 13 16 13 16 18M16 21V24',
   call: 'M2 21H11L24 6H30',
   put: 'M2 6H8L21 21H30',
   future: 'M2 21H6L26 5H30',
@@ -20,7 +21,7 @@ export function KindIcon({ kind }: { kind: Kind }) {
   );
 }
 
-function payout(m: Market, x: number): number {
+function payout(m: Market & Spec, x: number): number {
   const k = m.strike ?? 0;
   const w = m.width ?? 1;
   let y: number;
@@ -56,16 +57,17 @@ function payout(m: Market, x: number): number {
 }
 
 export function Payoff({ market, spot }: { market: Market; spot?: number }) {
-  if (market.kind === 'race')
+  if (market.kind === 'race' || market.kind === 'manual')
     return (
       <figure className="ex-figure">
-        <figcaption className="rd-label">Pago al comprador según el rendimiento de {teamText(market.team)}</figcaption>
+        <figcaption className="rd-label">
+          {market.kind === 'manual' ? 'Pago por cada contrato de Sí' : 'Pago al comprador según el rendimiento de ' + teamText(market.team)}
+        </figcaption>
         <div className="ex-race">
-          {[
-            ['Pierde', 0],
-            ['Empata', 50],
-            ['Gana', 100],
-          ].map(([text, value]) => (
+          {(market.kind === 'manual'
+            ? [['Sí', 100], ['No', 0]]
+            : [['Pierde', 0], ['Empata', 50], ['Gana', 100]]
+          ).map(([text, value]) => (
             <div key={text}>
               <span className="rd-note">{text}</span>
               <span className="rd-stat">

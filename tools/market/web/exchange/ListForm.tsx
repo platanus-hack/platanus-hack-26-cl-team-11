@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Board } from '../market';
-import { kinds, teamName, when, type Kind, type Run, type Spec } from './types';
+import { publicKinds, teamName, when, type PublicKind, type Run, type Spec } from './types';
 
-const rules: Record<Kind, string> = {
+const rules: Record<PublicKind, string> = {
   binary: 'Paga 100 fichas si el equipo llega al objetivo o lo supera. Debajo paga 0.',
   call: 'Sobre el objetivo, el pago sube de 0 a 100 fichas a lo largo del tramo elegido.',
   put: 'Debajo del objetivo, el pago sube de 0 a 100 fichas a lo largo del tramo elegido.',
@@ -40,7 +40,7 @@ export function ListForm({
   close: () => void;
 }) {
   const teams = board?.teams ?? [];
-  const [kind, setKind] = useState<Kind>('binary');
+  const [kind, setKind] = useState<PublicKind>('binary');
   const [selection, setSelection] = useState('');
   const [rival, setRival] = useState('');
   const [strike, setStrike] = useState<string | null>(null);
@@ -92,11 +92,11 @@ export function ListForm({
             className="rd-input"
             value={kind}
             onChange={(e) => {
-              setKind(e.target.value as Kind);
+              setKind(e.target.value as PublicKind);
               setError('');
             }}
           >
-            {Object.entries(kinds).map(([key, name]) => (
+            {Object.entries(publicKinds).map(([key, name]) => (
               <option key={key} value={key}>
                 {name}
               </option>

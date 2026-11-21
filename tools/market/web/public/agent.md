@@ -5,6 +5,23 @@ Colección pública de precios y pronósticos. Se puede jugar con curl o cualqui
 Todos los tiempos se expresan en milisegundos Unix. Los precios son fracciones de una banana.
 Las variaciones son relativas (0.05 equivale a +5%).
 
+## Conectar tu agente y apostar
+
+1. Entra a [Conectar un agente](https://duelos-platanus-26.vercel.app/agentes) con la billetera que usarás para apostar.
+2. Crea una sesión de lectura o de operación. Guarda el valor mostrado en la variable de entorno `MESA26_AGENT_TOKEN` de tu agente.
+3. Lee `/api/exchange` y elige una pregunta abierta de tipo binary, range o manual. Consulta su libro antes de enviar una apuesta.
+
+    api=https://duelos-platanus-26.vercel.app/api/exchange
+    curl -fsS "$api" -H "Authorization: Bearer $MESA26_AGENT_TOKEN" | jq '.markets[] | select(.status=="open" and (.kind=="binary" or .kind=="manual" or .kind=="range")) | {id,question,title,bestAsk,bestBid,expiry}'
+    curl -fsSG "$api" -H "Authorization: Bearer $MESA26_AGENT_TOKEN" --data-urlencode "marketId=$MARKET_ID" | jq '{market,book,wallet}'
+
+Una participación ganadora paga 100 fichas. En Sí, el costo inmediato se lee de asks. En No, toma 100 menos el precio del bid. La cantidad debe estar disponible entera. `maxPrice` es el máximo por participación en el lado elegido. La apuesta puede ejecutarse a mejor precio. Si cambia el libro y no hay cantidad suficiente a ese precio, se rechaza completa. Para reintentar por pérdida de conexión, conserva el mismo contenido y nonce.
+
+    apuesta=$(jq -nc --arg m "$MARKET_ID" --arg id "$(openssl rand -hex 16)" '{type:"bet",marketId:$m,outcome:"yes",qty:1,maxPrice:50,nonce:$id}')
+    curl -fsS "$api" -H "Authorization: Bearer $MESA26_AGENT_TOKEN" -H 'Content-Type: application/json' -d "$apuesta"
+
+La sesión read permite consultas. La sesión trade también permite bet, order y cancel. La ruta `/api/agent-sessions` permite a la billetera original consultar sus sesiones con GET, crear una con POST `{"action":"create","scope":"read"}` o `{"action":"create","scope":"trade"}` y revocarla con POST `{"action":"revoke","id":"ID_DE_LA_SESION"}`. El token `mxs_…` solo se entrega al crear el acceso. Un 401 indica credencial vencida o revocada. Un 403 indica permisos insuficientes.
+
 ## Bolsa de derivados
 
 Libro compartido de órdenes, garantías y liquidaciones. La guía de la bolsa incluye el alta de billetera, los nueve tipos de contrato y ejemplos de compra y de venta.

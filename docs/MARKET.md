@@ -190,3 +190,23 @@ Entre las 15:28 y las 16:00 UTC volvieron las compras grandes: 49 operaciones de
 Las otras ocho ventas dejaron entre +4 y +14 cada una. Todas están en [órdenes verificadas](MARKET-ORDERS.md).
 
 A las 16:11 UTC Mati aprobó subir el tope de inventario de 300 a 500 bananas para cubrir más equipos baratos. El proceso compró 11 lotes más. A las 16:13 la cartola mostraba 762 en caja y 21 lotes que costaron 494 y se podían vender por 362. La tabla del evento marcaba 1.214 en total, puesto 15 de 84, con el corte del 40% superior en el puesto 34 con 990. La partida empezó en 979.
+
+## Apuestas Sí / No
+
+La portada muestra preguntas, su hora de cierre y el precio de cada lado. Al elegir una respuesta, el jugador ve el costo y el pago si acierta antes de confirmar. La instrucción `bet` exige que el libro pueda ejecutar toda la cantidad dentro del precio máximo de ese lado. Los instrumentos de la bolsa anterior siguen disponibles en la vista avanzada.
+
+[Apuestas](https://duelos-platanus-26.vercel.app/bolsa) · [Vista avanzada](https://duelos-platanus-26.vercel.app/avanzado)
+
+### Sesiones de agentes
+
+Desde su navegador, el jugador puede dar a un agente acceso de lectura o acceso para apostar, poner órdenes y cancelarlas en su propia billetera. El token de sesión se muestra al crearlo. El registro privado conserva su hash, alcance, vencimiento y billetera propietaria. El jugador puede revocarlo. Por defecto dura cuatro horas o hasta que cierre el evento, lo que ocurra primero. La clave original permanece en el navegador. La bolsa y sus agentes consultan los precios públicos del evento.
+
+[Conectar un agente](https://duelos-platanus-26.vercel.app/agentes)
+
+### Panel del organizador
+
+En el Mac del organizador, ejecutar `python3 tools/market/owner.py` abre el panel y copia la clave para pegarla en el formulario de acceso. `python3 tools/market/owner.py stats` devuelve los contadores por consola. La clave de producción está en el estado privado local del organizador. Vercel recibe su hash mediante la variable sensible `EXCHANGE_OWNER_KEY_SHA256`. Las páginas de jugadores y agentes comparten únicamente enlaces públicos.
+
+El panel cuenta navegadores o billeteras activos en cinco minutos y billeteras con al menos una ejecución en quince minutos. También muestra visitantes y operadores en veinticuatro horas, conexiones de agentes, órdenes abiertas y actividad acumulada. Un navegador que abre una billetera cuenta una vez. Los integrantes de una misma billetera aparecen juntos. El número de visitantes depende de los dispositivos y del uso de los identificadores de presencia. Los datos no permiten contar personas exactas. Los contadores de cruces usan el libro real y excluyen las mesas de demostración como jugadores.
+
+El organizador puede publicar preguntas Sí/No con regla, fuente y cierre visibles. Solo se pueden resolver después del cierre. Sí, No y anulación llevan motivo público y un comprobante definitivo. Si pasan veinticuatro horas desde el cierre sin decisión, se devuelven los aportes. Los contratos creados con oráculo de precios conservan su liquidación automática con el historial de Platanus.
