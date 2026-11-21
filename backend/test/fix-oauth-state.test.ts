@@ -119,3 +119,23 @@ test('the cookie is bound to the callback path, hidden from scripts and secure o
   assert.equal(local.status, 302);
   assert.ok(!(local.headers.get('set-cookie') ?? '').split('; ').includes('Secure'));
 });
+
+test('a login started on the custom domain comes back to it when the provider returns to the default host', async () => {
+  const ctx = createContext({ location: ':memory:', fetch: googleFetch, config });
+  const app = createApp(ctx);
+  const started = await app.request('http://montu.example/api/login/google/start', { headers: { 'x-forwarded-proto': 'https' } });
+  assert.equal(started.status, 302);
+  const authorize = new URL(started.headers.get('location') ?? '');
+  assert.equal(authorize.searchParams.get('redirect_uri'), 'https://ronda.test/api/oauth/google/callback');
+  const state = authorize.searchParams.get('state') ?? '';
+  const cookie = (started.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
+
+  const returned = await app.request(`http://ronda.test/api/oauth/google/callback?${new URLSearchParams({ code: 'c1', state })}`, { headers: { 'x-forwarded-proto': 'https' } });
+  assert.equal(returned.status, 302);
+  assert.equal(returned.headers.get('location'), `https://montu.example/api/oauth/google/callback?${new URLSearchParams({ code: 'c1', state })}`);
+
+  const finished = await app.request(`http://montu.example/api/oauth/google/callback?${new URLSearchParams({ code: 'c1', state })}`, { headers: { 'x-forwarded-proto': 'https', cookie } });
+  assert.equal(finished.status, 302);
+  assert.match(finished.headers.get('location') ?? '', /^\/conectar\//);
+  assert.match(finished.headers.get('set-cookie') ?? '', /montu_sesion=/);
+});

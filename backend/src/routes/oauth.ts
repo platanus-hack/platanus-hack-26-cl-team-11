@@ -24,6 +24,7 @@ interface OAuthState {
   at: number;
   nonce: string;
   login?: boolean;
+  origin?: string;
 }
 
 const LOGIN_PROVIDER = 'google';
@@ -79,6 +80,13 @@ export function oauthRoutes(ctx: AppContext) {
   const cookieNameOf = (provider: string) => `ronda_oauth_${provider}`;
   const cookiePlaceOf = (requestUrl: string, provider: string) => ({ path: callbackPathOf(provider), secure: baseUrlFor(requestUrl).startsWith('https:') });
 
+  const requestOriginOf = (c: Context) => {
+    const url = new URL(c.req.url);
+    const forwardedProto = c.req.header('x-forwarded-proto')?.split(',')[0]?.trim();
+    const host = c.req.header('host') ?? url.host;
+    return `${forwardedProto ? `${forwardedProto}:` : url.protocol}//${host}`;
+  };
+
   const startedFromOwnPage = (c: Context) => {
     const site = c.req.header('sec-fetch-site');
     if (site !== undefined) return site === OWN_PAGE_SITE;
@@ -100,7 +108,7 @@ export function oauthRoutes(ctx: AppContext) {
       const state = JSON.parse(vault.open(sealed)) as Partial<OAuthState> | null;
       if (typeof state?.token !== 'string' || typeof state.at !== 'number' || typeof state.nonce !== 'string' || state.provider !== provider) return null;
       if (Date.now() - state.at > STATE_TTL_MS) return null;
-      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce, login: state.login === true };
+      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce, login: state.login === true, origin: typeof state.origin === 'string' ? state.origin : undefined };
     } catch {
       return null;
     }
@@ -115,7 +123,7 @@ export function oauthRoutes(ctx: AppContext) {
       credentials,
       redirectUri: redirectUriFor(c.req.url, LOGIN_PROVIDER),
       scopes: LOGIN_SCOPES,
-      state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true } satisfies OAuthState)),
+      state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true, origin: requestOriginOf(c) } satisfies OAuthState)),
       codeChallenge: challengeOf(nonce),
       login: true,
     });
@@ -210,7 +218,7 @@ export function oauthRoutes(ctx: AppContext) {
       credentials,
       redirectUri: redirectUriFor(c.req.url, providerId),
       scopes: [...new Set(connectorsOf(providerId).flatMap((connector) => connector.scopes))],
-      state: vault.seal(JSON.stringify({ token: person.token, provider: providerId, at: Date.now(), nonce: hashOf(nonce) } satisfies OAuthState)),
+      state: vault.seal(JSON.stringify({ token: person.token, provider: providerId, at: Date.now(), nonce: hashOf(nonce), origin: requestOriginOf(c) } satisfies OAuthState)),
       codeChallenge: challengeOf(nonce),
     });
     setCookie(c, cookieNameOf(providerId), nonce, { ...cookiePlaceOf(c.req.url, providerId), httpOnly: true, sameSite: 'Lax', maxAge: STATE_TTL_MS / 1000 });
@@ -223,6 +231,10 @@ export function oauthRoutes(ctx: AppContext) {
     if (!provider) return c.json(UNKNOWN_PROVIDER, 400);
     const state = openState(c.req.query('state'), providerId);
     if (!state) return c.json(INVALID_STATE, 400);
+    if (state.origin && state.origin !== requestOriginOf(c)) {
+      const here = new URL(c.req.url);
+      return c.redirect(`${state.origin}${here.pathname}${here.search}`, 302);
+    }
     const nonce = getCookie(c, cookieNameOf(providerId));
     deleteCookie(c, cookieNameOf(providerId), cookiePlaceOf(c.req.url, providerId));
     if (!nonce || !sameHash(hashOf(nonce), state.nonce) || !consumeNonce(state.nonce)) return c.json(INVALID_STATE, 400);
