@@ -10,8 +10,8 @@ Filmado con `film.mjs --gate` sobre `herramientas.html` (21-nov-2026).
   - íconos a medio píxel: van en una caja par de 16 px;
   - el plegable de entrada y salida terminaba a 1 px del borde: ahora llega al borde;
   - el aro del spinner era translúcido: ahora es opaco.
+- **Movimiento reducido** (`--reduced`): `rehearsal passed`. El único salto es el candado al cerrarse al terminar la consulta; es intencional porque con esta preferencia los cambios son inmediatos.
 - **Lo que no se revisó:**
   - a 390 px: el ancho lo resuelve el hilo de Codex, que dice haberlo probado;
-  - movimiento reducido filmado (`--reduced`);
   - las 15 tarjetas juntas sin huecos de muestreo: con 15 escenarios el filmador pierde cuadros;
   - el streaming dentro del hilo real (integrado por Codex en `globo.html`, `82e470a`).
