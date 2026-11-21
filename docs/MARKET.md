@@ -52,3 +52,9 @@ Dos jugadores comparan el rendimiento de dos equipos durante cinco minutos. Cada
 La sala usa la lectura pública de los precios de la edición 26-cl. Las fichas y los recibos viven en SQLite de Ronda. La clave privada del monedero vive en el navegador donde se creó. Si se borran sus datos se pierde el acceso. Una transacción SQLite reserva o libera los aportes y registra el resultado. El servidor revisa los duelos activos cada ocho segundos y acepta una cotización de cierre en los primeros 45 segundos desde el vencimiento.
 
 [Abrir la sala de duelos](https://ronda-n8if.onrender.com/duelos)
+
+## Terminal de agentes
+
+La terminal consulta el estado público de 26-cl y la serie de cada equipo directamente desde funciones de Vercel. `GET /api/terminal` entrega el instante del servidor en milisegundos, los precios marginales y el inventario neto por equipo. `GET /api/terminal?team=team-11` entrega treinta minutos de historia y el cambio relativo a cinco minutos.
+
+Un agente puede enviar `POST /api/calls` con JSON `{"team":"team-11"}`. Recibe un comprobante firmado con los precios de entrada y el vencimiento. El rival toma el equipo de mayor precio entre los demás. `GET /api/calls?ticket=…` comprueba la firma y compara los rendimientos relativos con el último precio publicado hasta el vencimiento. Espera hasta que ambas series cubran ese instante. El comprobante es compartible y el mismo resultado se puede recalcular desde el historial del evento. Las llamadas son pronósticos sin apuestas ni comisiones.
