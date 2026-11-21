@@ -13,6 +13,24 @@ Lo que vivimos como equipo chico:
 
 En un equipo de 5 esto se parcha con una daily. En una empresa de 300 no hay daily posible: nadie puede escuchar a 300 personas, y los resúmenes que suben por la jerarquía llegan tarde y filtrados.
 
+## La tesis: la complejidad crece más rápido que la gente
+
+Para que todos sepan cómo están todos, cada persona tendría que conversar con cada una de las demás. El número de conversaciones uno a uno posibles es `n × (n − 1) / 2`:
+
+| Personas | Conversaciones uno a uno |
+|---:|---:|
+| 5 | 10 |
+| 10 | 45 |
+| 50 | 1.225 |
+| 150 | 11.175 |
+| 300 | 44.850 |
+
+La gente crece en línea recta; la comunicación crece al cuadrado. Pasar de 5 a 300 personas es multiplicar el equipo por 60 y las conversaciones por casi 4.500.
+
+Ningún humano puede sostener eso. Por eso las empresas inventan jerarquías, reuniones y reportes: son formas de **perder información a propósito** para que la comunicación quepa en el día de una persona.
+
+Un agente sí puede. Puede conversar con cientos de pares, todos los días, sin cansarse y sin perder contexto. **La complejidad de comunicación de una organización debería ser manejada por agentes**, y las personas deberían recibir solo las pocas conversaciones que de verdad necesitan tener.
+
 ## La idea
 
 Cada persona tiene un **agente personal**. El agente conoce a su dueño: cómo durmió, cómo se siente, en qué trabaja, qué lo traba y en qué es bueno.
