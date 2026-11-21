@@ -76,19 +76,28 @@
 .rt-checkpath { stroke-dasharray: 12; stroke-dashoffset: calc(12px * (1 - var(--rt-d, 0))); }
 
 /* Escena */
-.rt-stage { padding: 2px 12px 8px; }
+.rt-stage { padding: 4px 12px 0; }
+.rt-plate {
+  border-radius: 14px;
+  padding: 8px 6px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rt-tint) 7%, white), color-mix(in srgb, var(--rt-tint) 13%, white));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 color-mix(in srgb, var(--rt-tint) 16%, white);
+}
 .rt-stage svg { display: block; width: 100%; height: 64px; overflow: visible; }
+.rt-scene { filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--rt-tint) 26%, white)); }
+.rt-facering { fill: white; }
+.rt-stamp-knob { fill: var(--rt-deep); }
 .rt-stage text { font-family: var(--rd-font); }
 .rt-tiny { font-size: 10px; font-weight: var(--rd-weight); fill: var(--rd-muted); }
 .rt-strong { fill: var(--rt-deep); font-size: 11px; }
 .rt-big { font-family: var(--rd-font-num); font-size: 20px; font-weight: var(--rd-weight); fill: var(--rd-ink); }
 .rt-hair { stroke: var(--rd-hairline); }
-.rt-slot { fill: var(--rd-fill-soft); transition: fill 0.3s ease; }
-.rt-busy { fill: color-mix(in srgb, var(--rd-ink) 12%, white); }
+.rt-slot { fill: white; transition: fill 0.3s ease; }
+.rt-busy { fill: color-mix(in srgb, var(--rd-ink) 10%, white); }
 .rt-free { fill: var(--rt-mid); transition: fill 0.3s ease; }
 .rt-scan { fill: var(--rt-tint); }
 .rt-match { fill: none; stroke: var(--rt-tint); stroke-width: 2; }
-.rt-line { fill: var(--rd-fill-soft); }
+.rt-line { fill: color-mix(in srgb, var(--rd-ink) 10%, white); }
 .rt-veil { fill: var(--rt-mid); }
 .rt-lockbody { fill: var(--rd-fill-soft); transition: fill 0.3s ease; }
 .rt-locked .rt-lockbody { fill: var(--rt-tint); }
@@ -100,9 +109,9 @@
 .rt-smile { fill: none; stroke: var(--rd-ink); stroke-width: 1.5; stroke-linecap: round; }
 .rt-dot { fill: var(--rd-live); stroke: white; stroke-width: 2; }
 .rt-threshold { stroke: var(--rt-tint); stroke-width: 1.2; stroke-dasharray: 4 4; }
-.rt-bar { fill: var(--rd-fill-soft); }
+.rt-bar { fill: white; }
 .rt-bar-on { fill: var(--rt-mid); }
-.rt-ticket { fill: var(--rd-fill-soft); transition: fill 0.3s ease; }
+.rt-ticket { fill: white; stroke: var(--rt-mid); stroke-width: 1.4; stroke-dasharray: 5 4; transition: fill 0.3s ease; }
 .rt-ticket-on { fill: var(--rt-soft); }
 .rt-stampmark { font-size: 14px; font-weight: var(--rd-weight); fill: var(--rt-deep); }
 .rt-stamp { fill: var(--rt-tint); }
@@ -115,7 +124,7 @@
 .rt-band { fill: var(--rt-mid); }
 .rt-badge { fill: var(--rt-tint); }
 .rt-tick { fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.rt-trunk { stroke: var(--rd-fill-soft); stroke-width: 4; stroke-linecap: round; }
+.rt-trunk { stroke: white; stroke-width: 4; stroke-linecap: round; }
 .rt-branch { fill: none; stroke: var(--rt-mid); stroke-width: 4; stroke-linecap: round; }
 .rt-commit { fill: white; stroke: var(--rt-tint); stroke-width: 2.5; }
 .rt-merge { fill: var(--rt-tint); }
@@ -124,12 +133,12 @@
 .rt-bubble-out { fill: var(--rt-mid); }
 .rt-ticks { fill: none; stroke: var(--rd-muted); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .rt-ticks-read { stroke: var(--rt-tint); }
-.rt-ecg-ghost { fill: none; stroke: var(--rd-fill-soft); stroke-width: 2.5; }
+.rt-ecg-ghost { fill: none; stroke: white; stroke-width: 2.5; }
 .rt-ecg { fill: none; stroke: var(--rt-tint); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Entrada y salida, plegable */
-.rt-io { border-top: 1px solid var(--rd-hairline); margin: 0 -1px -1px; }
-.rt-io summary { cursor: pointer; list-style: none; padding: 9px 14px; font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); display: flex; align-items: center; gap: 6px; }
+.rt-io { margin: 0 -1px -1px; }
+.rt-io summary { cursor: pointer; list-style: none; padding: 8px 14px 10px; font-size: 11px; font-weight: var(--rd-weight); color: var(--rd-muted); display: flex; align-items: center; gap: 6px; }
 .rt-io summary::-webkit-details-marker { display: none; }
 .rt-io summary::before { content: ''; width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform 0.25s ease; }
 .rt-io[open] summary::before { transform: rotate(45deg); }

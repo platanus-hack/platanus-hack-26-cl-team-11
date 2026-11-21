@@ -4,6 +4,10 @@
 // el estado cambia en su propio lugar (States), el spinner gira antes de verse, nada salta.
 window.RondaTools = (() => {
   const NS = 'http://www.w3.org/2000/svg';
+  const HERE = (document.currentScript && document.currentScript.src) || location.href;
+  const FACE_BASE = new URL('../../faces/', HERE).href;
+  const DEFAULT_FACES = ['ian', 'lian', 'andres', 'roberto', 'mati'].map(n => FACE_BASE + n + '.png');
+  let uid = 0;
   const clamp = x => Math.max(0, Math.min(1, x));
   const ease = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
   const smooth = (a, b, x) => { const u = clamp((x - a) / (b - a)); return u * u * (3 - 2 * u); };
@@ -41,6 +45,27 @@ window.RondaTools = (() => {
     if (n.startsWith('whatsapp.')) return 'chat';
     if (n.startsWith('salud.') || n.startsWith('wearable.')) return 'heart';
     return 'generic';
+  }
+
+  // Miniatura del globo que corresponde a cada herramienta (kinds de RondaMotion).
+  function motionKind(name) {
+    const n = String(name || '');
+    if (n.startsWith('agenda.') || n.startsWith('calendario.')) return 'calendars';
+    if (n.startsWith('politica.') || n.startsWith('respuesta.') || n.startsWith('salud.') || n.startsWith('wearable.')) return 'health';
+    if (n.startsWith('permiso.')) return 'permission';
+    if (n.startsWith('presentacion.')) return 'help';
+    if (n.startsWith('checkin.')) return 'checkin';
+    if (n.startsWith('pulso.')) return 'pulse';
+    if (n.startsWith('propuesta.') || n.startsWith('tablero.')) return 'guideline';
+    return 'chat';
+  }
+
+  // Una cara redonda real, con aro blanco, como en el resto de Ronda.
+  function face(g, x, y, r, url) {
+    const id = 'rtf' + (++uid);
+    const cp = s('clipPath', { id }, g); s('circle', { cx: x, cy: y, r }, cp);
+    s('circle', { cx: x, cy: y, r: r + 2, class: 'rt-facering' }, g);
+    s('image', { href: url, x: x - r, y: y - r, width: r * 2, height: r * 2, 'clip-path': `url(#${id})`, preserveAspectRatio: 'xMidYMid slice' }, g);
   }
 
   function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
@@ -96,11 +121,10 @@ window.RondaTools = (() => {
       };
     },
     people(g, call) {
-      const faces = [0, 1, 2, 3, 4].map(i => {
+      const urls = (call.faces && call.faces.length ? call.faces : DEFAULT_FACES).slice(0, 5);
+      const faces = urls.map((u, i) => {
         const c = s('g', { transform: `translate(${34 + i * 52} 30)` }, g);
-        s('circle', { r: 17, class: 'rt-face' }, c);
-        s('circle', { cx: -5, cy: -2, r: 1.8, class: 'rt-eye' }, c); s('circle', { cx: 5, cy: -2, r: 1.8, class: 'rt-eye' }, c);
-        s('path', { d: 'M-5 5q5 4 10 0', class: 'rt-smile' }, c);
+        face(c, 0, 0, 17, u);
         const dot = s('circle', { cx: 13, cy: 13, r: 5, class: 'rt-dot' }, c);
         return { c, dot };
       });
@@ -126,12 +150,13 @@ window.RondaTools = (() => {
       };
     },
     stamp(g, call) {
-      const ticket = s('rect', { x: 70, y: 26, width: 160, height: 34, rx: 8, class: 'rt-ticket' }, g);
-      const mark = s('text', { x: 150, y: 49, class: 'rt-stampmark', 'text-anchor': 'middle' }, g);
-      mark.textContent = 'Una vez';
+      const ticket = s('rect', { x: 80, y: 30, width: 140, height: 30, rx: 8, class: 'rt-ticket' }, g);
+      const mark = s('text', { x: 150, y: 50, class: 'rt-stampmark', 'text-anchor': 'middle' }, g);
+      mark.textContent = '✓ Una vez';
       const st = s('g', {}, g);
-      s('rect', { x: 128, y: 0, width: 44, height: 16, rx: 6, class: 'rt-stamp' }, st);
-      s('rect', { x: 142, y: -10, width: 16, height: 12, rx: 4, class: 'rt-stamp' }, st);
+      s('circle', { cx: 150, cy: -12, r: 7, class: 'rt-stamp-knob' }, st);
+      s('rect', { x: 146, y: -8, width: 8, height: 12, rx: 3, class: 'rt-stamp-knob' }, st);
+      s('rect', { x: 126, y: 2, width: 48, height: 12, rx: 5, class: 'rt-stamp' }, st);
       return (p, d) => {
         const hover = 2 + 3 * (Math.sin(clamp(p) * Math.PI * 3) * 0.5 + 0.5);
         const y = d > 0 ? hover + 9 * Math.sin(Math.min(1, d * 1.6) * Math.PI) : hover;
@@ -142,10 +167,13 @@ window.RondaTools = (() => {
     },
     intro(g, call) {
       const left = s('g', {}, g), right = s('g', {}, g);
-      s('rect', { x: 0, y: 18, width: 96, height: 28, rx: 14, class: 'rt-chip' }, left);
-      s('circle', { cx: 16, cy: 32, r: 9, class: 'rt-face' }, left);
-      s('rect', { x: 0, y: 18, width: 96, height: 28, rx: 14, class: 'rt-chip' }, right);
-      s('circle', { cx: 80, cy: 32, r: 9, class: 'rt-face' }, right);
+      const fu = call.faces && call.faces.length >= 2 ? call.faces : [DEFAULT_FACES[1], DEFAULT_FACES[3]];
+      s('rect', { x: 0, y: 16, width: 96, height: 32, rx: 16, class: 'rt-chip' }, left);
+      face(left, 17, 32, 11, fu[0]);
+      s('rect', { x: 34, y: 28, width: 46, height: 8, rx: 4, class: 'rt-line' }, left);
+      s('rect', { x: 0, y: 16, width: 96, height: 32, rx: 16, class: 'rt-chip' }, right);
+      face(right, 79, 32, 11, fu[1]);
+      s('rect', { x: 16, y: 28, width: 46, height: 8, rx: 4, class: 'rt-line' }, right);
       const link = s('line', { x1: 150, y1: 32, x2: 150, y2: 32, class: 'rt-link' }, g);
       const knot = s('circle', { cx: 150, cy: 32, r: 0, class: 'rt-knot' }, g);
       return (p, d) => {
@@ -250,9 +278,10 @@ window.RondaTools = (() => {
     head.append(tile, copy, status);
 
     const stage = h('div', 'rt-stage'); stage.setAttribute('aria-hidden', 'true');
+    const plate = h('div', 'rt-plate'); stage.append(plate);
     const svg = s('svg', { viewBox: '0 0 300 64', preserveAspectRatio: 'xMidYMid meet' });
-    const g = s('g', {}, svg);
-    stage.append(svg);
+    const g = s('g', { class: 'rt-scene' }, svg);
+    plate.append(svg);
     const paint = (SCENES[flavor] || SCENES.generic)(g, call);
 
     const io = h('details', 'rt-io');
@@ -285,5 +314,5 @@ window.RondaTools = (() => {
     };
   }
 
-  return { create, flavorOf, FLAVORS };
+  return { create, flavorOf, motionKind, FLAVORS };
 })();
