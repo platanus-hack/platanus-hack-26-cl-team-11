@@ -49,8 +49,6 @@ body { margin: 0; }
 .app-thread { padding: var(--rd-space-2) 0 var(--rd-space-4); }
 .app-world { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: var(--rd-radius-card); }
 .app-universe { display: block; width: 100%; height: min(78vh, 760px); border: 0; border-radius: var(--rd-radius-card); }
-.app-globe-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--rd-space-3); flex-wrap: wrap; }
-.app-globe-foot > .rd-note { margin: 0; }
 .app-mesa > .rd-actions { margin-top: var(--rd-space-2); }
 .app-mesa > .rd-actions + .rd-label { margin-top: var(--rd-space-3); }
 .app-mesa > .rd-note { margin: 0; }

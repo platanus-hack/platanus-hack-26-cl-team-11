@@ -30,8 +30,10 @@
   var slotOf = new Map(), needs = [], byKey = new Map();
   var arriving = [], since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
 
-  document.getElementById('step0').textContent = 'Todos';
+  // Tres estados: listos (nadie conversa), conversando (un hilo a la vez) y resumen (quién ayuda a quién).
+  document.getElementById('step0').textContent = 'Listos';
   document.getElementById('step1').firstChild.textContent = 'Conversando ';
+  document.getElementById('step2').textContent = 'Resumen';
   var tag = document.querySelector('.uv-top .rd-tag');
   if (tag) tag.textContent = 'En vivo';
 
@@ -67,21 +69,21 @@
     return need;
   }
 
-  function idle(title, sub, rows) { LIVE.title = title; LIVE.sub = sub; LIVE.rows = rows || []; startScene(0); }
+  function idle(step, title, sub, rows) { LIVE.step = step; LIVE.title = title; LIVE.sub = sub; LIVE.rows = rows || []; startScene(0); }
 
   function lobby() {
     var seated = [];
     slotOf.forEach(function (slot) { seated.push(slot); });
     seated.sort(function (a, b) { return a - b; });
-    idle('Agentes', count(seated.length, 'persona con algo publicado', 'personas con algo publicado'), seated.slice(0, LOBBY_ROWS).map(function (slot) {
-      return { faces: [slot], title: slot === 0 ? 'Tú' : people[slot].name, sub: 'Su agente está listo para conversar' };
+    idle(0, count(seated.length, 'agente', 'agentes'), 'Listos para conversar. Gira el globo y toca una cara para ver quién es.', seated.slice(0, LOBBY_ROWS).map(function (slot) {
+      return { faces: [slot], title: slot === 0 ? 'Tú' : people[slot].name, sub: slot === 0 ? 'Tu agente' : 'Su agente' };
     }));
   }
 
   function reset() {
     needs = []; byKey = new Map(); finished = null; summarized = false; showing = null;
     SHOWN.length = 0; SCRIPTS.length = 0; SCENES.length = 1;
-    idle('Conversando', 'Los agentes leen lo que cada persona publicó');
+    idle(1, 'Conversando', 'Los agentes leen lo que cada persona publicó');
   }
 
   function summary(title) {
@@ -89,8 +91,7 @@
     var threads = needs.reduce(function (total, need) { return total + need.threads; }, 0);
     var proposals = needs.filter(function (need) { return need.outcome === 'propuesta'; }).length;
     var parts = [count(threads, 'conversación', 'conversaciones'), count(proposals, 'propuesta', 'propuestas')];
-    if (finished && typeof finished.tokens === 'number') parts.push(finished.tokens.toLocaleString('es-CL') + ' tokens');
-    idle(title, needs.length ? parts.join(' · ') : 'Nadie tenía un pedido abierto', needs.map(function (need) {
+    idle(2, title, needs.length ? parts.join(' · ') : 'Nadie tenía un pedido abierto', needs.map(function (need) {
       var name = need.from === 0 ? 'ti' : people[need.from].name;
       var agreed = need.outcome === 'propuesta';
       var helpers = (need.helpers || []).map(function (id) { var slot = slotOf.get(id); return slot === undefined ? null : slot === 0 ? 'Tú' : people[slot].name; }).filter(Boolean);
@@ -120,7 +121,7 @@
   function heading(need) { header(need.g.topic, agentOf(need.from) + ' pide ayuda', need.g.members); }
 
   function show(need) {
-    showing = need;
+    showing = need; LIVE.step = 1;
     startScene(need.scene);
     heading(need);
     push(pairRow([need.from], agentOf(need.from) + ' busca a quién escribirle', 'Revisa lo que publicó cada persona'));
@@ -255,7 +256,7 @@
     }
     var next = needs.filter(function (need) { return !need.done; })[0];
     if (next) show(next);
-    else if (finished && !summarized) summary('Terminaron de conversar');
+    else if (finished && !summarized) summary('Resumen');
   };
 
   function take(ev) {
@@ -279,7 +280,7 @@
     if (!first) return;
     var start = data.events.filter(function (ev) { return ev.type === 'ronda_empieza'; })[0];
     if (!start) lobby();
-    else if (!running && Date.parse(data.now) - Date.parse(start.at) > RECENT_MS) { needs.forEach(settle); summary('La última conversación'); }
+    else if (!running && Date.parse(data.now) - Date.parse(start.at) > RECENT_MS) { needs.forEach(settle); summary('Resumen'); }
   }
 
   var pace = function () { return running || Date.now() < urgentUntil ? RUNNING_MS : IDLE_MS; };

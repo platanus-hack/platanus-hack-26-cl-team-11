@@ -28,8 +28,12 @@
   /* ?embed: dentro de la app (pestaña Globo) la marca y la nota de datos de prueba las pone la app. */
   .uv[data-embed] .uv-top { grid-template-columns: 1fr; justify-items: center; }
   .uv[data-embed] .uv-top .rd-brand, .uv[data-embed] .uv-top .rd-tag { display: none; }
-  /* ?vivo: la ronda real de la mesa. Dos pasos (Mesa, Ronda) y sin controles de quien presenta la demo. */
-  .uv[data-vivo] #step2, .uv[data-vivo] .uv-admin { display: none; }
+  /* ?vivo: la ronda real de la mesa. Tres estados (Listos, Conversando, Resumen) y sin controles de quien presenta la demo. */
+  .uv[data-vivo] .uv-admin { display: none; }
+  /* El globo se gira arrastrando; una cara bajo el puntero se agranda y dice quién es. */
+  .uv-stage #c { cursor: grab; touch-action: pan-y; }
+  .uv-stage[data-over] #c { cursor: pointer; }
+  .uv-stage[data-drag] #c { cursor: grabbing; }
 
   /* Controles de quien presenta: ocultos por defecto (botón, tecla H, ?ui=1). */
   .uv-admin { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 4; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -256,7 +260,7 @@ function pairRow(list, title, sub, check) {
   return n;
 }
 function setSteps() {
-  const k = scene.kind === 'ronda' || scene.kind === 'vivo' ? 0 : scene.kind === 'group' ? 1 : 2;
+  const k = LIVE && LIVE.step !== undefined ? LIVE.step : scene.kind === 'ronda' || scene.kind === 'vivo' ? 0 : scene.kind === 'group' ? 1 : 2;
   [0, 1, 2].forEach(j => { const s = document.getElementById('step' + j); if (j === k) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
   document.getElementById('stepn').textContent = scene.kind === 'group' ? (scene.i + 1) + '/' + SHOWN.length : '';
   root.dataset.scene = scene.kind;
@@ -366,6 +370,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const lc = document.getElementById('luz');
 const luz = new URLSearchParams(location.search).get('luz') !== '0' && window.RondaLuz ? RondaLuz.sphere(lc, { palette: [0, 9, 7, 5] }) : null;
 let gc = null, W = 0, H = 0, yaw = 0, pitch = 0.15, tYaw = 0, tPitch = 0.15, luzK = 0, calm = 0;
+const HITS = [], HOV = [], POINT = { over: -1, picked: -1, drag: null, moved: 0 };
 function resize() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); if (luz) { lc.width = Math.round(W / 2); lc.height = Math.round(H / 2); } }
 new ResizeObserver(resize).observe(cv); resize();
 function turnTo(members) {
@@ -451,13 +456,18 @@ function draw(T) {
   // Personas, de atrás hacia adelante, con niebla y desenfoque graduales.
   const order = P.map((p, i) => i).sort((a, b) => P[a].z - P[b].z);
   const youScene = scene.kind !== 'group';
+  HITS.length = 0;
   for (const i of order) {
     if (LIVE && !LIVE.on[i]) continue;
-    const p = P[i], fog = smooth(0.45, -0.75, p.z), blur = smooth(0.3, -0.55, p.z), focus = focusSet.has(i) || (youScene && i === 0);
+    const pointed = i === POINT.over || i === POINT.picked;
+    HOV[i] = (HOV[i] || 0) + ((pointed ? 1 : 0) - (HOV[i] || 0)) * 0.22;
+    const p = P[i], fog = smooth(0.45, -0.75, p.z), blur = smooth(0.3, -0.55, p.z), hv = HOV[i], focus = focusSet.has(i) || (youScene && i === 0) || hv > 0.5;
     const edge = 0.5 + 0.5 * Math.min(1, Math.abs(p.z) * 1.6), pp = pop.get(i) || 0;
     const back = focus ? 1 : 1 - calm * (1 - smooth(-0.45, 0.15, p.z) * 0.9) - calm * 0.1;   // el hemisferio de atrás casi desaparece
     if (back < 0.03) continue;
-    const r = (focus ? 22 : (9 - 2 * calm) * (1 + 0.45 * pp)) * kS * p.f * (focus ? 1 : edge);
+    const rest = (9 - 2 * calm) * (1 + 0.45 * pp) * kS * p.f * edge, big = 22 * kS * p.f;
+    const r = focusSet.has(i) || (youScene && i === 0) ? big : rest + (big - rest) * hv;
+    if (p.z > -0.35) HITS.push({ i, x: p.x, y: p.y, r: Math.max(r, 12) });
     ctx.save(); ctx.globalAlpha = (1 - 0.5 * fog) * (focus ? 1 : back * (1 - 0.35 * calm));
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, r + (focus ? 3 : 1.5), 0, 6.2832); ctx.fill();
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.2832); ctx.clip();
@@ -495,6 +505,29 @@ function draw(T) {
   }
 }
 
+// ───────── Puntero: arrastrar gira el globo; pasar por una cara o tocarla dice quién es ─────────
+const stage = document.querySelector('.uv-stage');
+function faceAt(e) { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  for (let k = HITS.length - 1; k >= 0; k--) { const h = HITS[k]; if (Math.hypot(h.x - x, h.y - y) <= h.r + 4) return h.i; } return -1; }
+cv.addEventListener('pointerdown', e => { POINT.drag = { x: e.clientX, y: e.clientY, yaw, pitch }; POINT.moved = 0; });
+addEventListener('pointermove', e => {
+  if (POINT.drag) {
+    const dx = e.clientX - POINT.drag.x, dy = e.clientY - POINT.drag.y; POINT.moved = Math.max(POINT.moved, Math.hypot(dx, dy));
+    if (POINT.moved > 4) { stage.setAttribute('data-drag', ''); yaw = POINT.drag.yaw + dx * 0.008; pitch = Math.max(-1.1, Math.min(1.1, POINT.drag.pitch + (e.pointerType === 'touch' ? 0 : dy * 0.006))); }
+    return;
+  }
+  if (e.target !== cv) { POINT.over = -1; stage.removeAttribute('data-over'); return; }
+  POINT.over = faceAt(e); stage.toggleAttribute('data-over', POINT.over >= 0);
+});
+addEventListener('pointerup', e => {
+  if (!POINT.drag) return;
+  if (POINT.moved <= 4 && e.target === cv) { const hit = faceAt(e); POINT.picked = hit === POINT.picked ? -1 : hit; }
+  else { tYaw = yaw - Math.sin(T * 0.12) * (scene.kind === 'group' ? 0.08 : 0.35); tPitch = pitch + 0.1; }
+  POINT.drag = null; stage.removeAttribute('data-drag');
+});
+addEventListener('pointercancel', () => { POINT.drag = null; stage.removeAttribute('data-drag'); });
+cv.addEventListener('pointerleave', () => { if (!POINT.drag) { POINT.over = -1; stage.removeAttribute('data-over'); } });
+
 // ───────── Reloj ─────────
 const q = new URLSearchParams(location.search);
 if (q.has('embed')) root.setAttribute('data-embed', '');
@@ -504,7 +537,7 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (!paused) { T += dt * SPEED; clock += dt * SPEED; }
   const drift = scene.kind === 'group' ? 0.08 : 0.35;
-  const k = 1 - Math.exp(-dt * 1.6); yaw += (tYaw + Math.sin(T * 0.12) * drift - yaw) * k; pitch += (tPitch - 0.1 - pitch) * k;
+  const k = 1 - Math.exp(-dt * 1.6); if (!POINT.drag) { yaw += (tYaw + Math.sin(T * 0.12) * drift - yaw) * k; pitch += (tPitch - 0.1 - pitch) * k; }
   if (scene.kind === 'ronda') rondaTick(clock);
   else if (scene.kind === 'semana') weekTick(clock);
   else if (current) {
@@ -530,11 +563,11 @@ setClean(!(q.get('ui') === '1' || (() => { try { return localStorage.getItem('uv
 // ?s= escena inicial (0 = uno a uno, 1..6 grupos, 7 = semana) y ?t= segundo dentro de ella. ?g= sigue funcionando.
 // ?vivo=/api/people/<token>/mesa/live: nada de la demo se dibuja; la esfera parte vacía y universo-vivo.js sienta a las personas reales.
 if ((q.get('vivo') || '').startsWith('/api/people/')) {
-  LIVE = { on: new Array(U.N).fill(false), title: 'Mesa pública', sub: '', rows: [], tick() {} };
+  LIVE = { on: new Array(U.N).fill(false), title: 'Agentes', sub: '', rows: [], tick() {} };
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=7'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=8'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }
