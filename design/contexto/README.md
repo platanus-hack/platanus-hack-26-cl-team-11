@@ -7,7 +7,7 @@ Se abren directo en el navegador, sin servidor:
 
 | Página | Qué muestra |
 |---|---|
-| `resumen.html` | La semana del equipo como red: conversaciones entre agentes y lo que llegó a ti (escena con Stageshow, ver `REHEARSAL.md`), nueve comparaciones entre tú y la mediana del equipo, pulso del equipo con tu línea, y lo que comparte cada persona. |
+| `resumen.html` | La semana del equipo como red, en cinco tarjetas con relieve: conversaciones entre agentes (red viva y barras por día), lo que llegó a ti (una cuenta por conversación, la herramienta que lo resolvió y los avisos), nueve comparaciones entre tú y la mediana del equipo en tres grupos, pulso del equipo en bloques por día, y lo que comparte cada persona. Escenas con Stageshow, ver `REHEARSAL.md`. |
 | `conexiones.html` | Directorio de 21 apps por categoría, con buscador y filtros. «Conectar» abre la superficie de conexión. |
 | `superficies.html` | Las cinco formas de conectar (cuenta, llave, Atajo, asistente, código QR) y los tres estados (conectando, recién conectada, ya conectada), lado a lado. |
 | `mapa.html` | Esfera de puntos en 3D que gira y se inclina sola. Las apps y las cinco personas van sobre la esfera y derivan; las de atrás se desenfocan. Cada app conectada tiñe su zona; al llegar un dato, un punto viaja de la app a la cara de la persona. Se arrastra para girar. |
@@ -20,7 +20,8 @@ Enlaces directos para revisar un estado:
 
 Archivos:
 
-- `contexto.css`: superficies tranquilas (`cx-slab`, `cx-btn`, `cx-chip`). El relieve queda solo en el ícono de cada app (`cx-tile`) y en el botón principal. Usa los tokens de `../tokens.css`; el tinte de cada app va en `--tint`.
+- `contexto.css`: en Conexiones y Mapa las superficies son tranquilas y el relieve queda en el ícono de cada app (`cx-tile`) y en el botón principal. En el Resumen (todo bajo `.cx-r`) vuelve el relieve con presupuesto. Usa los tokens de `../tokens.css`; el tinte va en `--tint`.
+- El Resumen usa además `../grafo/hilo/tools.js` y `tools.css`: la tarjeta de herramienta del hilo.
 - `apps.js`: catálogo de apps (qué lee, qué nunca lee, forma de conectar) y la superficie de conexión.
 - Íconos: `../sources/apps/`.
 
@@ -28,5 +29,5 @@ Reglas que salieron de las revisiones de Mati (21-nov):
 
 - titulares de una sola frase simple, íconos reales de las apps, y bajo el nombre de una app va solo su último dato;
 - los datos y gráficos muestran el efecto de red (tú frente a tu equipo, lo que hicieron los agentes), no seguimiento personal;
-- no toda superficie lleva relieve;
+- no toda superficie lleva relieve, pero sin relieve «pierde el sabor». Presupuesto del Resumen: un canto por tarjeta, un número grande y un objeto o gráfico con relieve; el relieve va en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior, las pestañas ni las etiquetas; un tinte por tarjeta;
 - toda escena pasa por Stageshow (AGENTS.md regla 4).

@@ -307,6 +307,7 @@ Cada punto es una dirección que Mati ya rechazó.
 
 | Fecha | Decisión | Quién |
 |---|---|---|
+| 21-nov-2026 | Resumen de `contexto/`: la versión sin relieve «perdió todo el sabor». Vuelve el look chunky que gustó, con presupuesto: un canto por tarjeta, un número grande y un objeto o gráfico con relieve por tarjeta; relieve en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior ni en las pestañas; un tinte por tarjeta. Conexiones y Mapa quedan como están. Reemplaza la frase «solo el ícono de cada app y el botón principal» de la fila siguiente. | Mati |
 | 21-nov-2026 | Los datos y gráficos del producto muestran el efecto de red (tú frente a la mediana de tu equipo, conversaciones entre agentes, lo que llegó a ti). Un panel de seguimiento personal «no agrega valor». No toda superficie lleva relieve: solo el ícono de cada app y el botón principal. | Mati |
 | 21-nov-2026 | Mapa de contexto aprobado («I love it»): esfera de puntos de vidrio que se mueve sola, apps y personas derivando sobre ella, las de atrás muy desenfocadas. | Mati |
 | 21-nov-2026 | Titulares de una sola frase simple que nombra la pantalla («Conexiones»). Sin frases ingeniosas de dos tiempos. | Mati |
@@ -342,7 +343,7 @@ un punto, todavía no lo revisó Mati en grande).
 | `luz/` | `luz.js`: la luz fluida del globo y de las caras Aura. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
-| `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (panel bento), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
+| `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (la semana del equipo como red, cinco tarjetas con relieve), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |
 | `archive/` | Direcciones descartadas. No usar. |
