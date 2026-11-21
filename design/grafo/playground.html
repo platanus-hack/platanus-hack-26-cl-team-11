@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · playground del grafo</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<style>
+  /* Playground: muestra en un lugar el globo, el hilo, las herramientas y el streaming. */
+  body { margin: 0; }
+  .pg-tabs { display: inline-flex; gap: 6px; padding: 5px; border-radius: var(--rd-radius-pill); align-self: flex-start; flex-wrap: wrap; }
+  .pg-tabs .rd-button { flex: 0 0 auto; height: 40px; background: transparent; color: var(--rd-ink); }
+  .pg-tabs .rd-button[aria-selected="true"] { background: var(--rd-ink); color: var(--rd-on-ink); }
+  .pg-note { margin: 14px 0 12px; max-width: 760px; }
+  .pg-box { position: relative; width: 100%; aspect-ratio: 1440 / 900; overflow: hidden; border-radius: var(--rd-radius-card); background: var(--rd-bg); box-shadow: var(--rd-shadow-card); }
+  .pg-frame { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<div class="rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar">
+      <span class="rd-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda · playground</span>
+      <span class="rd-chip rd-chip--status rd-glass"><span class="rd-dot"></span>Todo en vivo</span>
+    </header>
+    <div class="pg-tabs rd-glass" role="tablist" aria-label="Piezas" id="tabs"></div>
+    <p class="rd-note pg-note" id="note"></p>
+    <div class="pg-box" id="box"><iframe class="pg-frame" id="frame" title="Pieza"></iframe></div>
+  </div>
+</div>
+<script>
+const tabs = [
+  { id: 'globo', label: 'Globo', src: 'globo.html', note: 'Globo de 5 a 300 personas. Arrastra para girarlo; toca a alguien con aro para ver su grupo. Grupos de hasta 9 en tres rondas, miniaturas sobre los hilos, un solo grupo con color, profundidad gradual.' },
+  { id: 'hilo', label: 'Hilo en vivo', src: 'globo.html?n=5&motion=calendars', note: 'Toca «Abrir hilo». Streaming sin reacomodo, tarjetas de herramienta por conector, recibos que cambian en su lugar.' },
+  { id: 'permiso', label: 'Permiso', src: 'globo.html?n=5&motion=permission', note: 'Toca «Abrir hilo». El agente espera tu decisión: Aceptar o Ajustar. Solo tú ves esa solicitud.' },
+  { id: 'herramientas', label: 'Herramientas', src: 'hilo/herramientas.html', note: 'Las 15 tarjetas chunky, una por conector, con su escena viva. Se reproduce una vez; «Repetir» la vuelve a correr.' },
+  { id: 'escala', label: '300 personas', src: 'globo.html?n=300', note: '44.850 conversaciones posibles como neblina de luz. Tú y tus conversaciones al frente.' }
+];
+const bar = document.getElementById('tabs'), frame = document.getElementById('frame'), note = document.getElementById('note');
+function show(id) {
+  const t = tabs.find(x => x.id === id) || tabs[0];
+  [...bar.children].forEach(b => b.setAttribute('aria-selected', b.dataset.id === t.id ? 'true' : 'false'));
+  frame.src = t.src; note.textContent = t.note; history.replaceState(null, '', '#' + t.id);
+}
+tabs.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'rd-button'; b.setAttribute('role', 'tab'); b.dataset.id = t.id; b.textContent = t.label; b.onclick = () => show(t.id); bar.append(b); });
+const box = document.getElementById('box');
+const fit = () => { frame.style.transform = 'scale(' + (box.clientWidth / 1440) + ')'; };
+new ResizeObserver(fit).observe(box); fit();
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
