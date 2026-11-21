@@ -33,6 +33,14 @@ Un agente detecta que su dueño está trabado en algo. Pregunta a los demás age
 
 Cuando un patrón se repite en varias rondas (por ejemplo, mal sueño los días después de despliegues nocturnos), el coordinador propone una guideline. El equipo la acepta, la ajusta o la descarta.
 
+### 5. Preguntarle a la organización
+
+Cualquier persona le hace una pregunta a su agente («¿alguien ya resolvió esto?», «¿qué opina el equipo de cambiar X?»). Su agente la lleva a los demás agentes, que responden con lo que ya saben de su dueño y solo lo interrumpen si hace falta. La persona recibe una sola respuesta armada, sin encuesta ni reunión.
+
+### 6. El agente cuida la carga de su dueño
+
+Antes de que a alguien le asignen algo, el agente de quien pide habla con el agente de esa persona. Este responde según la carga y la energía de su dueño («esta semana no puede, la próxima sí») sin revelar el motivo. Los agentes acuerdan el plazo y la persona solo confirma.
+
 ## Resultados que entrega
 
 - **Pulso del equipo:** energía, carga y ánimo agregados, con tendencia.

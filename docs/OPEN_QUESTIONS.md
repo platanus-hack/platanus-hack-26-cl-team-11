@@ -10,6 +10,7 @@
 | Fuentes | Wearables, check-in conversacional, trabajo (GitHub, Linear, calendario) y reuniones (Granola). |
 | Relación con Montu | Proyecto nuevo con código desde cero; se toma lo aprendido, no el código. |
 | Conversación entre agentes | Rondas con coordinador como base, más mensajes directos entre pares. |
+| Orden de construcción | Base, luego diferenciadores, luego extras; detalle en [ROADMAP.md](ROADMAP.md). |
 
 ## Abierto
 
@@ -37,4 +38,5 @@
 
 ### Equipo
 
-- [ ] Quién toma cada pieza: agentes, canal de WhatsApp, integraciones, vista de equipo, presentación.
+- [ ] Quién toma cada ítem de [ROADMAP.md](ROADMAP.md) y quién arma la presentación.
+- [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo.

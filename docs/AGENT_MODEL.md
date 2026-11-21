@@ -70,6 +70,7 @@ empresa
 ## Reglas de comportamiento
 
 - Un agente personal nunca habla por su dueño más allá de lo que este permitió.
+- Un agente personal representa a su dueño y a nadie más. Nunca cede sus intereses ante la insistencia de otro agente ni del coordinador; si no puede aceptar algo, lo rechaza o le pregunta a su dueño.
 - Un agente no inventa datos. Si no tiene señal, responde «sin datos».
 - La interpretación de lenguaje natural la hace siempre el modelo con salida estructurada, no reglas de palabras clave.
 - Cada síntesis registra de cuántos agentes salió y de qué ronda.
