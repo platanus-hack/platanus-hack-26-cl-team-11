@@ -70,7 +70,7 @@ Límites del Atajo:
 - **Teléfono bloqueado.** Una automatización programada puede correr sin enviar nada. Por eso el envío parte con un toque de la persona en su página, con el teléfono desbloqueado.
 - **No es cero pasos.** La persona agrega el Atajo desde un link de iCloud una sola vez y acepta el permiso de Salud. No pasa por el App Store.
 - **Doble conteo.** Dos fuentes (iPhone y reloj) escriben las mismas horas. El servidor une los tramos que se pisan, así que el Atajo manda las muestras tal cual.
-- **No manda todo el historial.** Según reportes de la comunidad, con unos cientos de muestras por corrida el Atajo se cuelga o pide un permiso extra. Apple no documenta el tope. Se mandan 7 días de sueño y 30 días de lo que se resume por día.
+- **No manda todo el historial.** iOS frena un Atajo que comparte muchos datos de una vez, salvo que la persona active «Permitir compartir grandes cantidades de datos» en los ajustes de Atajos. Apple no documenta el tope. Probado el 21-nov-2026 en un iPhone: 159 datos (7 días de sueño más 30 días de pasos y de energía) se frenaron. Por eso se mandan 2 días de sueño y 7 días de lo que se resume por día, y el historial se va armando en el servidor con cada envío, que guarda un registro por día.
 - **Solo iPhone.** Quien usa Android no tiene este camino.
 - **Exige HTTPS público** con certificado válido. No funciona contra `localhost`.
 
@@ -137,9 +137,9 @@ El Atajo no se arma a mano: lo genera `tools/atajo-salud/build.py` y queda en `t
 
 | Qué | Rango | Campo |
 |---|---|---|
-| Sueño, un tramo por línea | 7 días | `sleep_samples` |
-| Pasos, agrupados por día | 30 días | `steps_by_day` |
-| Energía activa, agrupada por día | 30 días | `active_energy_by_day` |
+| Sueño, un tramo por línea | 2 días | `sleep_samples` |
+| Pasos, agrupados por día | 7 días | `steps_by_day` |
+| Energía activa, agrupada por día | 7 días | `active_energy_by_day` |
 
 Si se abre sin la dirección de la persona, avisa «Abre este Atajo desde tu página de Ronda» y termina. Al final muestra la frase `message` que responde el servidor.
 
@@ -155,7 +155,7 @@ Para dejarlo disponible:
 3. **Probarlo en el iPhone**, desde la página de Ronda (ver «Qué revisar» abajo).
 4. **Compartirlo.** En Atajos, **Compartir → Copiar enlace de iCloud**. Ese link va en `HEALTH_SHORTCUT_URL`, en el panel de Render.
 
-El archivo se armó con la estructura que documenta [Shortcuts Playground](https://github.com/viticci/shortcuts-playground-plugin) (MIT) para las acciones de Salud, que solo existen en iPhone y iPad. **Todavía no se ha ejecutado en un teléfono.** Qué revisar en la primera prueba:
+El archivo se armó con la estructura que documenta [Shortcuts Playground](https://github.com/viticci/shortcuts-playground-plugin) (MIT) para las acciones de Salud, que solo existen en iPhone y iPad. La primera versión se probó en un iPhone el 21-nov-2026: importó bien, leyó Salud y llegó hasta el envío, donde iOS la frenó por cantidad de datos. La versión liviana actual falta probarla. Qué revisar:
 
 - Que al abrirlo en el iPhone los tres bloques «Buscar muestras de salud» muestren su tipo (Sueño, Pasos, Calorías activas) y el rango de días. Si alguno aparece vacío, se elige a mano en ese bloque.
 - Que la respuesta diga cuántos días llegaron. Si responde que no pudo leer los datos, el campo `example` de la respuesta muestra en qué formato salió la fecha.

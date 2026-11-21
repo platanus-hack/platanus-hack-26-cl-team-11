@@ -15,15 +15,15 @@ HAS_NO_VALUE = 101
 CONTROL_START = 0
 CONTROL_END = 2
 TEXT_ITEM = 0
-SLEEP_DAYS = 7
-DAILY_DAYS = 30
+SLEEP_DAYS = 2
+DAILY_DAYS = 7
 ICON_GLYPH = 61440
 ICON_COLOR = 4282601983
 NO_INPUT_MESSAGE = 'Abre este Atajo desde tu página de Ronda, con el botón «Enviar datos».'
 
-SLEEP = {'type': 'Sleep', 'field': 'sleep_samples', 'days': SLEEP_DAYS, 'group_by': None, 'details': ['Start Date', 'End Date', 'Value'], 'note': 'Sueño de los últimos 7 días: una línea por tramo, con inicio, término y etapa.'}
-STEPS = {'type': 'Steps', 'field': 'steps_by_day', 'days': DAILY_DAYS, 'group_by': 'Day', 'details': ['Start Date', 'Value'], 'note': 'Pasos de los últimos 30 días, agrupados por día: una línea por día.'}
-ACTIVE_ENERGY = {'type': 'Active Calories', 'field': 'active_energy_by_day', 'days': DAILY_DAYS, 'group_by': 'Day', 'details': ['Start Date', 'Value'], 'note': 'Energía activa de los últimos 30 días, agrupada por día: una línea por día.'}
+SLEEP = {'type': 'Sleep', 'field': 'sleep_samples', 'days': SLEEP_DAYS, 'group_by': None, 'details': ['Start Date', 'End Date', 'Value'], 'note': f'Sueño de los últimos {SLEEP_DAYS} días: una línea por tramo, con inicio, término y etapa.'}
+STEPS = {'type': 'Steps', 'field': 'steps_by_day', 'days': DAILY_DAYS, 'group_by': 'Day', 'details': ['Start Date', 'Value'], 'note': f'Pasos de los últimos {DAILY_DAYS} días, agrupados por día: una línea por día.'}
+ACTIVE_ENERGY = {'type': 'Active Calories', 'field': 'active_energy_by_day', 'days': DAILY_DAYS, 'group_by': 'Day', 'details': ['Start Date', 'Value'], 'note': f'Energía activa de los últimos {DAILY_DAYS} días, agrupada por día: una línea por día.'}
 BLOCKS = [SLEEP, STEPS, ACTIVE_ENERGY]
 
 
