@@ -253,6 +253,9 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
     cara, nombre y rol («Pide ayuda» / «Puede ayudar»), y «N agentes, M conversaciones. Nadie más se
     entera.». Tocar fuera o «Cerrar» lo suelta.
 - Se reproduce solo 5 → 10 → 50 → 300; tocar un tamaño o un grupo lo detiene.
+- **Incrustado en otra página:** `grafo/globo.html?embed` deja solo la esfera, con fondo transparente y encuadrada al
+  marco (`grafo/embed.js`; el dibujo del globo no cambia). Muestra un equipo de diez que conversa sin parar, avisa cada
+  acuerdo a la página con `postMessage` y acepta pausa, velocidad y adelantar. Lo usa `contexto/resumen.html`.
 - `prefers-reduced-motion`: sin vaivén, sin luz que recorre, sin nacimientos ni destellos; todo
   cambio es inmediato.
 
@@ -391,6 +394,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | Fecha | Decisión | Quién |
 |---|---|---|
 | 21-nov-2026 | Caras: «me gustaron los ojos», esas son las caras de Ronda. Gota de vidrio con lámpara de lava y solo ojos, con estados (reposo, hover, presionada, activa, pensando, lista, ausente). Reemplazan a las Vita Faces en todo el producto. El único color por persona es la luz de su cara. | Mati |
+| 21-nov-2026 | Resumen de `contexto/`, sexta vuelta: bento con el globo al centro. El grafo del Resumen es el globo aprobado, incrustado (`grafo/globo.html?embed`), y no se detiene; la demo se puede pausar, adelantar y apurar. Las personas llevan la cara de Ronda (`RondaCaras`). Relieve solo en lo que se aprieta y en las marcas de los datos: las tarjetas son vidrio, sin canto. Una sola escala de radios (28, 16, 12, 6 y píldora). Una sola decisión por pantalla («no des tantas tareas»). Reemplaza el presupuesto de la fila de abajo. | Mati |
 | 21-nov-2026 | Resumen de `contexto/`: la versión sin relieve «perdió todo el sabor». Vuelve el look chunky que gustó, con presupuesto: un canto por tarjeta, un número grande y un objeto o gráfico con relieve por tarjeta; relieve en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior ni en las pestañas; un tinte por tarjeta. Conexiones y Mapa quedan como están: ahí el relieve va solo en el ícono de cada app y el botón principal. | Mati |
 | 21-nov-2026 | Los datos y gráficos del producto muestran el efecto de red (tú frente a la mediana de tu equipo, conversaciones entre agentes, lo que llegó a ti). Un panel de seguimiento personal «no agrega valor». No toda superficie lleva relieve; el alcance quedó fijado en la fila de arriba. | Mati |
 | 21-nov-2026 | Mapa de contexto aprobado («I love it»): esfera de puntos de vidrio que se mueve sola, apps y personas derivando sobre ella, las de atrás muy desenfocadas. | Mati |
@@ -429,7 +433,7 @@ un punto, todavía no lo revisó Mati en grande).
 | `luz/` | `luz.js`: la lámpara de lava del globo y de las caras. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
-| `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (la semana del equipo como red, cinco tarjetas con relieve), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
+| `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (bento con el globo al centro), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |
 | `archive/` | Direcciones descartadas. No usar. |

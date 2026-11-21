@@ -1,32 +1,35 @@
-# Ensayo · Resumen (red del equipo, con relieve)
+# Ensayo · Resumen (bento con el globo al centro)
 
-Página: `resumen.html`, filmada con `film.mjs --gate` el 21-nov-2026. Tiene dos escenas (`.ss-stage`), las dos tarjetas completas:
+Página: `resumen.html`, filmada con `film.mjs --gate` el 21-nov-2026. Dos escenas (`.ss-stage`), las dos tarjetas completas:
 
-1. «Conversaciones entre agentes»;
-2. «Llegó a ti», con la tarjeta de herramienta del hilo adentro (`RondaTools.create` de `grafo/hilo/tools.js`, sin recortes).
+1. «Conversaciones entre agentes»: el globo aprobado, incrustado (`../grafo/globo.html?embed`);
+2. «Llegó a ti»: tres avisos y una sola decisión.
 
-- **Gold de partida:** `subscriptions` (una ficha vuela a otra tarjeta y un total rueda) y `payout-flow` (coreografía sin cursor). La tarjeta de herramienta es la del hilo, ya aprobada.
+- **Gold de partida:** `bento` (un héroe, una ventana, un dato, un objeto), `subscriptions` (un total que rueda cuando el sistema hace algo) y `payout-flow` (coreografía sin cursor).
 - **Beats:**
-  1. Los agentes conversan de a un par: el trazo engruesa, toma el degradado y una cuenta lo recorre. El total rueda hasta 46, aparece una cuenta por conversación y suben las barras por día.
-  2. Mientras tanto la tarjeta de herramienta trabaja («Consultando»).
-  3. Cuatro veces una ficha «Para ti» sale del trazo y vuela a su hueco en «Llegó a ti». El hueco pasa a aviso, sube el contador, se enciende su cuenta y aparece el tramo oscuro en la barra de ese día. Con la primera ficha la herramienta termina («Lian puede»).
-  4. Queda quieto en 46 y 4. Cada 5 s conversa un par más: el total sube en 1, entra una cuenta y crece la barra de hoy. Para a las 9 conversaciones nuevas. Lo que llegó a ti no cambia.
-- **Capturado:** 1440 px y 390 px (12 cuadros cada 700 ms) y movimiento reducido (`--reduced --still`: estado final, sin escena).
-- **Gate:** `rehearsal passed` en los tres, con las dos tarjetas completas como escena. A 390 px y en quieto: `no-issues-detected`.
-- **Film → arreglo** (cada línea que imprimió el filmador al tratar «Llegó a ti» entera como escena):
-  - `uneven gutters` (tarjeta de herramienta y cada aviso): eran paneles sueltos sobre la tarjeta. Ahora van en una bandeja con el mismo margen a los lados y abajo; adentro son filas de una lista.
-  - `near aligned`: el texto de los avisos partía 8 px a la izquierda del título de la herramienta. Ahora comparten borde.
-  - `loose list` y `fat row`: una regla general (`.cx button { font: inherit }`) pisaba el tamaño y el interlineado de los avisos. Se corrigió en su origen y los avisos de una línea miden 50 px.
-  - `uneven inset`: la cara de cada aviso queda a 7 px del borde por los tres lados.
-  - `appears with no entrance` (caras, barras por día, botones «Responder» y «Votar»): lo que arma el script entra con opacidad.
-  - `hard edge` (tramo oscuro cortado mientras la barra subía): el tramo aparece cuando llega su aviso.
-  - `tight inset` (renglón «Entrada y salida») y `uneven gutters` (escena de la herramienta a 390 px): dos ajustes de caja sobre la tarjeta del hilo, solo en esta página, que no cambian su dibujo. La galería `grafo/hilo/herramientas.html` pasa el mismo control sin ellos.
-  - Los avisos empujaban «Pulso del equipo» hacia abajo cuatro veces: cada aviso tiene su hueco desde el principio.
-- **Título de la herramienta a 390 px:** 1 línea en los cuatro avisos, con el estado debajo, sin recorte ni solape (antes eran 3 líneas). En un contenedor de menos de 430 px la cabecera pasa a grilla. Se acortaron dos títulos: «Pedir revisión a Ian» y «Buscar quién tiene el guion».
-- **Supuestos:** las cifras son de prueba. «Equipo» es la mediana de 5 personas; nadie ve el dato de otra (`docs/PRIVACY.md`). Hoy es sábado 21: el domingo va sin datos.
+  1. Entran las cinco tarjetas, una tras otra. El globo ya está conversando: tu grupo (Tú, Ian, Lian) negocia a color.
+  2. Cada pocos segundos un grupo llega a acuerdo: sus hilos se recogen, aparece «Listo» y renace con otras personas. El total rueda (solo el dígito que cambió) y abajo ruedan el tema y quiénes lo cerraron.
+  3. No se detiene: los tres grupos recorren doce temas en vuelta. Se puede pausar, adelantar al próximo acuerdo o apurar a 2× y 4×; el globo se gira arrastrándolo, también en pausa.
+  4. «Aceptar» cierra tu decisión: la tarjeta queda como registro y tu grupo en el globo recoge sus hilos, dice «Listo» y abre el tema siguiente. «Ajustar» pide otra opción a los agentes y la trae en su lugar.
+- **Capturado:** 1440 px y 390 px (12 cuadros cada 700 ms), una pasada a cámara lenta (`--slow 4`) y movimiento reducido (`--reduced --still`) en los dos anchos.
+- **Gate:** `rehearsal passed` en las cinco corridas. En quieto la cobertura es completa.
+- **Film → arreglo** (cada línea que imprimió el filmador):
+  - `uneven gutters` (tarjeta de decisión y fila de la lista): la decisión estaba a media tarjeta, con 25 px a los lados y 264 px abajo. Ahora cierra la tarjeta, con el mismo margen a los lados y abajo; los avisos resueltos van arriba y su divisor ya no es un borde de fila.
+  - `framing` (decisión a 11 px del borde): se probó ensancharla; quedaba ni con margen completo ni a sangre. Volvió al margen completo.
+  - `clipped glyph` y `clipped` (caras): aparecieron con una copia propia de las caras. La página pasó a montar la pieza única (`RondaCaras`, `faces/caras.js`) y las líneas no volvieron.
+  - `uneven padding` (tarjeta de decisión): el halo de las caras que negocian sobresale de su fila y quedaba a 8 px del borde de arriba, contra 16 px a los lados. La tarjeta lleva más aire arriba.
+  - `touching` (un número vivo dentro de una frase): «de 46 conversaciones» pasó a «avisos esta semana». El número que cambia vive solo en el globo.
+  - `jump` de 23 px y `lands on a transform` (el total): eran dos textos fundiéndose con desenfoque. Ahora el número rueda dígito a dígito y los textos ruedan como un tambor, sin desenfoque (`Count` y `Roll` de Stageshow, sin React).
+  - `handoff shift` (el check del último acuerdo se volvía a crear en cada cambio): la marca queda montada y cambia una sola vez, de punto «en línea» a check.
+  - `jump` de 760 px (la tira de dígitos volviendo a su decena): cada dígito pasó a ser un tambor de dos figuras; ya no hay tira.
+- **Movimiento, a mano:** a velocidad real el filmador muestrea cada 90 a 110 ms y marca como `jump` el primer cuadro de cada rodada (13 px en los textos, 55 px en un dígito de 76 px). En la pasada `--slow 4` esas líneas no aparecen: la rodada es continua.
+- **Probado con Playwright** (estado, textos y cifras): pausa (el total no cambia en 7 s), adelantar (suma en menos de 2 s, también en pausa), 4× (10 conversaciones en 8 s contra 3 a 1×), «Ajustar», «Aceptar», filtro y fila compacta de «Tú y tu equipo», día del pulso y enlaces al mapa. Abierta desde el disco funciona igual.
+- **Supuestos:** las cifras son de prueba. El equipo es de 10 personas; «Equipo» es la mediana y nadie ve el dato de otra persona (`docs/PRIVACY.md`). Hoy es sábado 21: el domingo va sin datos.
 - **No revisado:**
-  - a 1440 px el filmador marca la cobertura como `inconclusive` por huecos de muestreo de más de 27 ms (a 390 px es completa);
-  - los cambios en el mismo lugar (`manual: same-box content change`: el total, el contador y el dibujo de la herramienta) se miraron en la tira de cuadros, no cuadro a cuadro;
-  - el cambio de herramienta al tocar otro aviso y el filtro de «Tú y tu equipo» se probaron con Playwright (estado, textos y anchos de barra), no se filmaron;
+  - el filmador marca la cobertura como `inconclusive` a velocidad real (la página dibuja WebGL y un lienzo grande, y la cámara alcanza unos 10 cuadros por segundo);
+  - lo que pasa dentro del globo: es un lienzo en un `iframe` y el filmador no ve su interior. Se miró en capturas;
+  - el movimiento propio de las caras (parpadeo, mirada, salto de «lista») y la línea `translucent icon` sobre sus ojos: es la pieza aprobada de `faces/caras.js`, sin cambios. Esa línea no cuenta para el gate;
+  - sin WebGL2 (así corre el filmador por defecto) la lava queda quieta; con WebGL2 se filmó pasando `CHROME_PATH` a un Chrome con `--use-angle=metal`;
+  - en teléfono los nombres de los costados del globo se desvanecen en el borde; la versión de teléfono del globo sigue abierta en `DESIGN.md`;
   - toque real en teléfono y Safari;
-  - `mapa.html` no pasó por `film.mjs`: es un canvas a página completa y estas rondas no lo tocaron.
+  - `mapa.html`, `conexiones.html` y `superficies.html` no cambiaron en esta ronda.
