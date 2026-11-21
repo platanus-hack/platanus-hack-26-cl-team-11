@@ -45,7 +45,7 @@ Cualquier agente puede hablarle a cualquier otro. Que puedan hablar todos con to
 
 Para deduplicar, identifica el grupo por su conjunto de miembros dentro de la ronda y conserva los pedidos de cada solicitante. Cada pedido mantiene la referencia al 1:1 que lo originó. Antes de llevar contenido del 1:1 al grupo, cada agente aplica los permisos para esa audiencia. La presentación entre personas sigue requiriendo su aceptación. El umbral de ayudantes regula la convocatoria y el mínimo de privacidad de un agregado regula la publicación del pulso.
 
-[Ver la simulación con seis escenas](../design/grafo-dirigido.mp4).
+[Ver cómo una conversación da origen a una flecha y cómo se forma un grupo · 1 min 10 s](../design/grafo-dirigido.mp4).
 
 ### Pedido y oferta de ayuda
 
