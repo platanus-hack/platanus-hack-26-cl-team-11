@@ -138,7 +138,7 @@ En 8 de los 15 equipos otro participante vendió entre 5.652 y 7.871 acciones de
 
 A las 14:56 UTC los 15 lotes se podían vender por 197 bananas contra 285 de costo. No hay ventas ni pérdida realizada. Las compras nuevas quedaron en pausa con `{"buying": false}`. Las ventas siguen activas.
 
-## Análisis de mercado · 15:10 UTC
+## Análisis de mercado · 15:07 UTC
 
 Cuatro analistas de solo lectura trabajaron sobre la cinta de 663 operaciones, la tabla de posiciones y el reglamento. No hicieron órdenes ni consultas al sitio. Sus cifras son reproducciones hipotéticas. Dos de ellas se comprobaron aparte sobre la misma cinta y coinciden: la venta ajena más rápida tras una compra fuerte tardó 1,45 segundos, y los lotes de 33 bananas se vendieron cuando su venta ya valía 1,68 veces su costo o más.
 
