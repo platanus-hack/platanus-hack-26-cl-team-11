@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · herramientas de los agentes</title>
+<link rel="icon" href="../../logo/ronda-mark.svg">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../../ronda.css">
+<link rel="stylesheet" href="./tools.css">
+<link rel="stylesheet" href="./stream.css">
+<style>
+  /* Galería de trabajo de las tarjetas de herramienta. ?t=<segundos> fija el reloj. */
+  body { margin: 0; }
+  .gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; margin-top: 24px; }
+  .demo { max-width: 420px; margin-top: 24px; padding: 18px 20px; border-radius: var(--rd-radius-card); font-size: 15px; line-height: 1.45; }
+</style>
+</head>
+<body>
+<div class="rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar"><span class="rd-brand"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</span></header>
+    <h1 class="rd-hero">Herramientas,<br><span class="rd-gradient-text">cada una con su forma.</span></h1>
+    <p class="demo rd-glass" id="demo"></p>
+    <section class="gal" id="gal" aria-label="Tarjetas de herramienta"></section>
+  </div>
+</div>
+<script src="./stream.js"></script>
+<script src="./tools.js"></script>
+<script>
+const calls = [
+  { name: 'agenda.disponibilidad', label: 'Leer la agenda de Ian', input: { minutos: 30 }, output: { libre: ['10:30', '11:00'] }, receipt: 'Dos franjas' },
+  { name: 'agenda.cruzar', label: 'Cruzar las dos agendas', participants: ['Ian', 'Lian'], input: { duracion_min: 30 }, output: { desde: '10:30', hasta: '11:00' }, receipt: '10:30 a 11:00' },
+  { name: 'politica.consultar', label: 'Revisar qué puede compartir', input: { dato: 'descanso' }, output: { compartir: false }, receipt: 'Privado', privateResult: true },
+  { name: 'equipo.consultar', label: 'Preguntar quién está libre', input: { tema: 'demo' }, output: { disponibles: 2 }, receipt: '2 disponibles' },
+  { name: 'pulso.umbral', label: 'Esperar el mínimo de aportes', input: { minimo: 3 }, output: { aportes: 3 }, receipt: 'Ya hay 3' },
+  { name: 'permiso.usar', label: 'Usar tu permiso una vez', input: { frase: 'Puedo cubrir a las 11' }, output: { usado: true }, receipt: 'Usado una vez' },
+  { name: 'presentacion.crear', label: 'Presentar a Lian con Sofía', input: { tema: 'pitch' }, output: { enviada: true }, receipt: 'Presentadas' },
+  { name: 'propuesta.redactar', label: 'Redactar una regla', input: { tema: 'reuniones' }, output: { borrador: true }, receipt: 'Borrador listo' },
+  { name: 'calendario.crear', label: 'Crear la invitación', input: { inicio: '10:30', fin: '11:00' }, output: { enviada: true }, receipt: 'Enviada' },
+  { name: 'github.pr', label: 'Revisar el cambio de Lian', input: { pr: 128 }, output: { estado: 'aprobado' }, receipt: 'Aprobado' },
+  { name: 'granola.resumen', label: 'Leer la reunión de ayer', input: { reunion: 'Demo' }, output: { puntos: 3 }, receipt: '3 puntos' },
+  { name: 'whatsapp.enviar', label: 'Avisar a Ian por WhatsApp', input: { para: 'Ian' }, output: { leido: true }, receipt: 'Leído' },
+  { name: 'salud.descanso', label: 'Leer tu descanso', input: { senal: 'sueño' }, output: { compartir: false }, receipt: 'Solo para ti', privateResult: true }
+];
+const q = new URLSearchParams(location.search), fixed = q.has('t') ? +q.get('t') : null;
+const cycle = 7;
+const cards = calls.map((c, i) => { c.at = 0.6 + i * 0.12; c.end = c.at + 2.8; const r = RondaTools.create(c); document.getElementById('gal').append(r.el); return r; });
+const stream = RondaStream.create('A las 10:00 tengo [[x]] ¿Te sirve a las 10:30? Así revisamos la demo con calma.');
+document.getElementById('demo').append(stream.el);
+const t0 = performance.now();
+function frame() {
+  const t = fixed !== null ? fixed : ((performance.now() - t0) / 1000) % cycle;
+  cards.forEach(c => c.update(t));
+  stream.update(Math.min(1, Math.max(0, (t - 0.3) / 3)), t > 3.6);
+  if (fixed === null) requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>
