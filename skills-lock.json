@@ -7,6 +7,13 @@
       "sourceType": "github",
       "skillPath": "stageshow/SKILL.md",
       "computedHash": "faaf72b41c206b98da5788093eb07fcdceb80dee90b5dc6dd921048196279474"
+    },
+    "vita-platanus-hack-26": {
+      "source": "Vita-cl/engineering",
+      "commit": "40ba5b961e85f20e5457b1572ea1e610aa0cf952",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/vita-platanus-hack-26/SKILL.md",
+      "computedHash": "d3c06050203eb28593902214ccdfd6c43b83a98e316de87f528d092f30eafab0"
     }
   }
 }
