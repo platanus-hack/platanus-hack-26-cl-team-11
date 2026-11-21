@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type CSSProperties } from 'react';
 import { fetchTeamOverview, type LevelSignal, type OverviewMember, type Team, type TeamOverview, type TeamValue } from './api';
-import { TeamMembers } from './TeamMembers';
+import { Face } from './Face';
+import { SectionHead } from './SectionHead';
 import { TeamWorld } from './TeamWorld';
 import { usePolling } from './usePolling';
 import { Vital } from './Vital';
@@ -9,40 +10,60 @@ const LEVEL_LABEL: Record<LevelSignal['level'], string> = { baja: 'Baja', media:
 const LEVEL_FILL: Record<LevelSignal['level'], number> = { baja: 33, media: 66, alta: 100, sin_datos: 0 };
 const FULL_NIGHT_HOURS = 8;
 const STEP_GOAL_EACH = 8000;
+const PRIVATE = 'Privado';
+const NO_DATA = 'Sin datos';
 
-const hours = (value: number) => value.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const hours = (value: number) => `${value.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} h`;
 const among = (value: TeamValue<unknown>) => (value.available ? `Entre ${value.contributors} personas` : `Faltan datos de ${value.needed} personas`);
+const levelOf = (level: LevelSignal['level'] | null) => (level === null ? PRIVATE : LEVEL_LABEL[level]);
 
-function sharedOf(member: OverviewMember) {
-  if (!member.shares) return 'No comparte sus datos';
-  const parts = [
-    member.energy && member.energy !== 'sin_datos' ? `Energía ${LEVEL_LABEL[member.energy].toLowerCase()}` : null,
-    member.sleepHours !== null ? `${hours(member.sleepHours)} h de sueño` : null,
-    member.workoutMinutes !== null ? `${Math.round(member.workoutMinutes)} min de deporte` : member.steps !== null ? `${Math.round(member.steps).toLocaleString('es-CL')} pasos` : null,
-  ].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : 'Sin datos todavía';
+function doingOf(member: OverviewMember) {
+  if (member.working) return `Trabaja en «${member.working}»`;
+  if (member.topics.length > 0) return `Anda en ${member.topics.join(', ')}`;
+  return 'Todavía no se sabe en qué está';
 }
 
-interface TeamOverviewSectionProps {
-  token: string;
-  team: Team;
-  first: boolean;
-  onChange: () => Promise<void>;
+function Stat({ tint, label, value }: { tint: string; label: string; value: string }) {
+  return (
+    <span className={`rd-persona__stat rd-tint--${tint}`}>
+      <span className="rd-persona__label">{label}</span>
+      <span className={`rd-persona__value${value === PRIVATE || value === NO_DATA ? ' rd-persona__value--off' : ''}`}>{value}</span>
+    </span>
+  );
 }
 
-export function TeamOverviewSection({ token, team, first, onChange }: TeamOverviewSectionProps) {
+function PersonCard({ member, order }: { member: OverviewMember; order: number }) {
+  const hidden = member.shares ? NO_DATA : PRIVATE;
+  const moved = member.workoutMinutes !== null ? `${Math.round(member.workoutMinutes)} min` : member.steps !== null ? Math.round(member.steps).toLocaleString('es-CL') : hidden;
+
+  return (
+    <div className="rd-persona rd-glass" style={{ '--i': order } as CSSProperties}>
+      <div className="rd-persona__head">
+        <Face name={member.name} />
+        <span className="rd-persona__who">
+          <span className="rd-persona__name">{member.me ? `${member.name} · tú` : member.name}</span>
+          <span className="rd-persona__doing">{doingOf(member)}</span>
+        </span>
+      </div>
+      <div className="rd-persona__stats">
+        <Stat tint="energy" label="Energía" value={levelOf(member.energy)} />
+        <Stat tint="load" label="Carga" value={levelOf(member.load)} />
+        <Stat tint="sleep" label="Sueño" value={member.sleepHours !== null ? hours(member.sleepHours) : hidden} />
+        <Stat tint="move" label={member.workoutMinutes !== null ? 'Deporte' : 'Pasos'} value={moved} />
+      </div>
+    </div>
+  );
+}
+
+export function TeamOverviewSection({ token, team, first }: { token: string; team: Team; first: boolean }) {
   const [overview, setOverview] = useState<TeamOverview | null>(null);
 
   const load = useCallback(async () => setOverview(await fetchTeamOverview(token, team.id)), [token, team.id]);
   const { error } = usePolling(load);
 
-  const detailOf = (position: number, name: string) => {
-    const member = overview?.members[position];
-    return member && member.name === name ? { shared: sharedOf(member) } : {};
-  };
-
-  const top = (
-    <>
+  return (
+    <div className="app-block">
+      <SectionHead first={first} title={team.name} />
       <TeamWorld token={token} team={team} />
       {error && (
         <p className="rd-note" role="alert">
@@ -50,24 +71,28 @@ export function TeamOverviewSection({ token, team, first, onChange }: TeamOvervi
         </p>
       )}
       {overview && (
-        <div className="rd-vitals">
-          <Vital kind="energy" glyph="energy" label="Energía del equipo" text={overview.energy.available ? LEVEL_LABEL[overview.energy.value] : 'Sin datos'} note={among(overview.energy)} fill={overview.energy.available ? LEVEL_FILL[overview.energy.value] : 0} order={0} />
-          {overview.sleepHours.available ? (
-            <Vital kind="sleep" glyph="sleep" label="Sueño promedio" amount={overview.sleepHours.value} decimals={1} unit="h" note={among(overview.sleepHours)} fill={(overview.sleepHours.value / FULL_NIGHT_HOURS) * 100} order={1} />
-          ) : (
-            <Vital kind="sleep" glyph="sleep" label="Sueño promedio" text="Sin datos" note={among(overview.sleepHours)} fill={0} order={1} />
-          )}
-          {overview.steps.available ? (
-            <Vital kind="move" glyph="move" label="Pasos del equipo" amount={overview.steps.value} note={`Sumados hoy, entre ${overview.steps.contributors} personas`} fill={(overview.steps.value / (STEP_GOAL_EACH * overview.steps.contributors)) * 100} order={2} />
-          ) : (
-            <Vital kind="move" glyph="move" label="Pasos del equipo" text="Sin datos" note={among(overview.steps)} fill={0} order={2} />
-          )}
-        </div>
+        <>
+          <div className="rd-vitals">
+            <Vital kind="energy" glyph="energy" label="Energía del equipo" text={overview.energy.available ? LEVEL_LABEL[overview.energy.value] : NO_DATA} note={among(overview.energy)} fill={overview.energy.available ? LEVEL_FILL[overview.energy.value] : 0} order={0} />
+            {overview.sleepHours.available ? (
+              <Vital kind="sleep" glyph="sleep" label="Sueño promedio" amount={overview.sleepHours.value} decimals={1} unit="h" note={among(overview.sleepHours)} fill={(overview.sleepHours.value / FULL_NIGHT_HOURS) * 100} order={1} />
+            ) : (
+              <Vital kind="sleep" glyph="sleep" label="Sueño promedio" text={NO_DATA} note={among(overview.sleepHours)} fill={0} order={1} />
+            )}
+            {overview.steps.available ? (
+              <Vital kind="move" glyph="move" label="Pasos del equipo" amount={overview.steps.value} note={`Sumados hoy, entre ${overview.steps.contributors} personas`} fill={(overview.steps.value / (STEP_GOAL_EACH * overview.steps.contributors)) * 100} order={2} />
+            ) : (
+              <Vital kind="move" glyph="move" label="Pasos del equipo" text={NO_DATA} note={among(overview.steps)} fill={0} order={2} />
+            )}
+          </div>
+          <div className="rd-people">
+            {overview.members.map((member, position) => (
+              <PersonCard key={position} member={member} order={position} />
+            ))}
+          </div>
+          <p className="rd-note">De cada persona ves lo que eligió compartir en Ajustes. Los números del equipo necesitan al menos tres personas.</p>
+        </>
       )}
-    </>
+    </div>
   );
-
-  const bottom = <p className="rd-note">De cada persona ves solo lo que eligió compartir en Ajustes. Los números del equipo necesitan al menos tres personas.</p>;
-
-  return <TeamMembers token={token} team={team} first={first} top={top} bottom={bottom} detailOf={detailOf} onChange={onChange} />;
 }

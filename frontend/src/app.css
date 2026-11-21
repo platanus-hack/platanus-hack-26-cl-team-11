@@ -31,6 +31,7 @@ body { margin: 0; }
 .app-check { display: flex; align-items: flex-start; gap: var(--rd-space-2); cursor: pointer; }
 .app-check input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: var(--rd-ink); }
 .app-face { display: block; width: 40px; height: 40px; flex: 0 0 auto; }
+.app-face--chat { width: 34px; height: 34px; }
 .app-face--node { width: 72px; height: 72px; }
 .app-face--hub { width: 104px; height: 104px; }
 .app-face--tab { width: 26px; height: 26px; }
@@ -43,12 +44,14 @@ body { margin: 0; }
 .app-you { display: flex; align-items: center; gap: var(--rd-space-6); padding: var(--rd-space-4) 0 var(--rd-space-6); }
 .app-you .rd-title { margin: 0 0 var(--rd-space-1); }
 .rd-panel .app-you .rd-title { font-size: var(--rd-text-title); }
+.app-thread { padding: var(--rd-space-2) 0 var(--rd-space-4); }
 .app-world { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: var(--rd-radius-card); }
 .app-chat { min-height: 180px; padding: var(--rd-space-3) 0; }
 .app-chat > .rd-note { margin: 0; }
 .app-options { margin-top: var(--rd-space-2); }
 .app-bullets { margin: var(--rd-space-1) 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: var(--rd-space-1); line-height: 1.45; }
 .app-bullets li::marker { color: var(--rd-faint); }
+.app-block > .rd-people + p { margin-top: var(--rd-space-2); }
 .app-block > .rd-head + .rd-vitals { margin-bottom: var(--rd-space-3); }
 .app-block > .rd-vitals + * { margin-top: var(--rd-space-4); }
 .app-more { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--rd-space-2); }

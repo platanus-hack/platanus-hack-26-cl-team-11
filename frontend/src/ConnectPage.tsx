@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { AgentTab } from './AgentTab';
 import { applyFaceLook } from './faceLook';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchFaces, fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
@@ -71,8 +70,7 @@ export function ConnectPage({ token }: { token: string }) {
 
   const content: Record<TabId, ReactNode> = {
     fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
-    tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
-    agente: <AgentTab token={token} active={tab === 'agente'} />,
+    tu: <YouTab name={page.name} signals={signals} summary={summary} />,
     equipo: <TeamSection token={token} />,
     ajustes: <SettingsTab token={token} name={page.name} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };

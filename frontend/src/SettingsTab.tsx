@@ -11,6 +11,7 @@ import { RepoSection } from './RepoSection';
 import { RowButton } from './RowButton';
 import { SectionHead } from './SectionHead';
 import { SIGNAL_GROUPS } from './signalGroups';
+import { TeamAdminSection } from './TeamAdminSection';
 import { usePolicy } from './usePolicy';
 import { WhatsAppSection } from './WhatsAppSection';
 
@@ -55,6 +56,8 @@ export function SettingsTab({ token, name, login, firstSteps, onOpenStep }: Sett
           ))}
         </div>
       </div>
+
+      <TeamAdminSection token={token} />
 
       <WhatsAppSection token={token} />
 

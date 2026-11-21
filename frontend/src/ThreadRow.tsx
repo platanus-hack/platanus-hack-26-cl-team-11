@@ -1,6 +1,7 @@
 import type { AgentThread, HelpAnswer } from './api';
 import { Face } from './Face';
 import { Item } from './Item';
+import { ThreadPlay } from './ThreadPlay';
 
 const HELP_LABEL: Record<HelpAnswer, string> = {
   si: 'Puede ayudar',
@@ -28,14 +29,8 @@ export function ThreadRow({ thread, open, onToggle }: ThreadRowProps) {
         onToggle={readable ? onToggle : undefined}
       />
       {open && thread.messages && (
-        <div className="rd-item__detail">
-          {thread.messages.map((message, position) => (
-            <p className="app-body" key={position}>
-              <span className="rd-note">Agente de {message.fromName}</span>
-              {'\n'}
-              {message.text}
-            </p>
-          ))}
+        <div className="app-thread">
+          <ThreadPlay thread={thread} messages={thread.messages} />
         </div>
       )}
     </div>

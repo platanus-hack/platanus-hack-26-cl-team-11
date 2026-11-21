@@ -3,7 +3,7 @@ import '../../design/luz/luz.js';
 import '../../design/faces/caras.js';
 
 export type FaceState = 'reposo' | 'activa' | 'pensando' | 'lista' | 'ausente';
-export type FaceSize = 'row' | 'node' | 'hub' | 'tab';
+export type FaceSize = 'chat' | 'row' | 'node' | 'hub' | 'tab';
 
 interface MountedFace {
   set(state: FaceState): MountedFace;

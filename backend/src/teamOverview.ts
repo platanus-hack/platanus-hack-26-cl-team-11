@@ -18,6 +18,9 @@ export interface OverviewMember {
   me: boolean;
   shares: boolean;
   energy: SignalLevel | null;
+  load: SignalLevel | null;
+  working: string | null;
+  topics: string[];
   sleepHours: number | null;
   steps: number | null;
   workoutMinutes: number | null;
@@ -32,6 +35,7 @@ export interface TeamOverview {
   steps: TeamValue<number>;
 }
 
+const MAX_TOPICS = 3;
 const LEVEL_ORDER: readonly KnownLevel[] = ['baja', 'media', 'alta'];
 
 const isKnown = (level: SignalLevel): level is KnownLevel => level !== 'sin_datos';
@@ -46,11 +50,16 @@ const isNumber = (value: number | null): value is number => value !== null;
 export function teamOverview(inputs: OverviewInput[], minGroupSize: number = MIN_GROUP_SIZE): TeamOverview {
   const members = inputs.map((input): OverviewMember => {
     const shares = input.me || input.policy.energy === 'siempre';
+    const sharesLoad = input.me || input.policy.load === 'siempre';
+    const sharesWork = input.me || input.policy.expertise === 'siempre';
     return {
       name: input.name,
       me: input.me,
       shares,
       energy: shares ? input.signals.energy.level : null,
+      load: sharesLoad ? input.signals.load.level : null,
+      working: sharesWork ? (input.summary.working[0]?.title ?? null) : null,
+      topics: sharesWork ? input.summary.topics.slice(0, MAX_TOPICS) : [],
       sleepHours: shares ? input.summary.sleep.lastHours : null,
       steps: shares ? input.summary.move.steps : null,
       workoutMinutes: shares ? input.summary.move.workoutMinutes : null,

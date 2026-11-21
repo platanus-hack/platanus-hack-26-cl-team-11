@@ -1,10 +1,8 @@
 import type { Signals, Summary } from './api';
 import { Face } from './Face';
-import { GoalSection } from './GoalSection';
 import { SummarySection } from './SummarySection';
 
 interface YouTabProps {
-  token: string;
   name: string;
   signals: Signals | null;
   summary: Summary | null;
@@ -13,7 +11,7 @@ interface YouTabProps {
 const MAX_BULLETS = 3;
 const FALLBACK_LINE = 'Conecta una fuente y aquí aparece cómo vienes.';
 
-export function YouTab({ token, name, signals, summary }: YouTabProps) {
+export function YouTab({ name, signals, summary }: YouTabProps) {
   const lines = summary?.lines.slice(0, MAX_BULLETS) ?? [];
 
   return (
@@ -33,7 +31,6 @@ export function YouTab({ token, name, signals, summary }: YouTabProps) {
         </div>
       </div>
       {signals && summary && <SummarySection signals={signals} summary={summary} />}
-      <GoalSection token={token} />
       <p className="rd-note">Esto lo ves solo tú.</p>
     </div>
   );

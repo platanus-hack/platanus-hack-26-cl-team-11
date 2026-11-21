@@ -50,7 +50,7 @@ export function TeamSection({ token }: { token: string }) {
       )}
       {list.teams.length === 0 && !waiting && <TeamStart token={token} onChange={refresh} />}
       {list.teams.map((team, position) => (
-        <TeamView key={team.id} token={token} team={team} first={position === 0 && !waiting} onChange={refresh} />
+        <TeamView key={team.id} token={token} team={team} first={position === 0 && !waiting} />
       ))}
     </>
   );

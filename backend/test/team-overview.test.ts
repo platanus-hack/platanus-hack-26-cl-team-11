@@ -31,7 +31,9 @@ test('de cada integrante se ve solo lo que comparte; lo propio se ve siempre', (
   const [ana, tomas, sofia] = overview.members;
   assert.equal(ana?.sleepHours, 5);
   assert.equal(tomas?.steps, 9000);
-  assert.deepEqual([sofia?.shares, sofia?.energy, sofia?.sleepHours, sofia?.steps], [false, null, null, null]);
+  assert.deepEqual([sofia?.shares, sofia?.energy, sofia?.load, sofia?.sleepHours, sofia?.steps], [false, null, null, null, null]);
+  assert.equal(ana?.load, 'sin_datos');
+  assert.deepEqual(sofia?.topics, []);
 });
 
 test('el promedio del equipo necesita tres personas y deja fuera a quien lo marcó privado', () => {

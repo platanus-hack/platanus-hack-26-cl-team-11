@@ -201,6 +201,9 @@ export interface OverviewMember {
   me: boolean;
   shares: boolean;
   energy: LevelSignal['level'] | null;
+  load: LevelSignal['level'] | null;
+  working: string | null;
+  topics: string[];
   sleepHours: number | null;
   steps: number | null;
   workoutMinutes: number | null;
