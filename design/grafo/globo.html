@@ -791,6 +791,7 @@ if ((calendarPreview || motionPreview) && q.has('open') && g.openThread) {
   const m = globeMotions.find(x => x.kind === kind) || globeMotions[0];
   setTimeout(() => g.openThread(m.a, m.b), 700);
 }
+if (q.has('embed')) document.body.appendChild(Object.assign(document.createElement('script'), { src: './embed.js' })); // el globo dentro de otra página: ver embed.js
 if (q.has('still')) { g.vis = g.vis.map((x, i) => i < g.state.n ? 1 : 0); g.p = g.look(g.state.n); g.edgeFade = 1; }
 sync();
 </script>
