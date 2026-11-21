@@ -15,6 +15,13 @@ documento.** Si algo no está acá, no se inventa: se pregunta a Mati o se agreg
 4. Antes de terminar: corre `design/lint.sh`, saca una captura de tu pantalla y ponla al lado de
    `design/reference.png`. Tienen que parecer la misma app.
 
+## Demos e ilustraciones de producto
+
+Todo lo que muestra el producto funcionando sin ser el producto (hero animado, pantallas del
+pitch, recorridos con cursor, teléfonos con una conversación) se hace con la skill **Stageshow**
+(`.agents/skills/stageshow/`, AGENTS.md regla 4). Este documento manda en el look; Stageshow manda
+en el oficio: encuadre, recorte, ritmo y revisión cuadro a cuadro.
+
 ## La idea en una frase
 
 **Los agentes viven en O(n²). Tú vives en O(1).** Muchas conexiones delgadas de fondo, y una sola

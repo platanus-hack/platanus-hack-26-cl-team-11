@@ -71,6 +71,29 @@ Hay una sola dirección visual, aprobada por Mati. Ningún agente inventa estilo
 - Un cambio a la dirección misma (colores, tipografía, principios) solo lo aprueba Mati y se
   registra en la tabla «Decisiones» de `design/DESIGN.md`.
 
+## Regla 4: toda demo o ilustración de producto se hace con la skill Stageshow
+
+Una demo ganadora no se improvisa. Stageshow trae las reglas de oficio, un kit y scripts que
+filman la animación y revisan cada cuadro.
+
+- Aplica a todo lo que **muestra el producto funcionando sin ser el producto**: la animación del
+  hero, las pantallas de la presentación, un recorrido con cursor, una tarjeta o bento que ilustra
+  una función, un teléfono con una conversación de WhatsApp, capturas para el pitch.
+- La skill está instalada en el repo: `.agents/skills/stageshow/` (Codex y otros) y
+  `.claude/skills/stageshow` (Claude Code). **Cárgala y lee su `SKILL.md` antes de empezar.** En
+  Claude Code: skill `stageshow`.
+- Sigue su flujo completo: parte del ejemplo «gold» más cercano, arma la pantalla, coreografía,
+  y **filma y revisa** con sus scripts (`film.mjs --gate`, `jumps.mjs`, `layout.mjs`). No se
+  entrega una demo que no pasó por el ensayo, y se deja el `REHEARSAL.md` que la skill pide.
+- **El look lo manda `design/DESIGN.md`, el oficio lo manda Stageshow.** Colores, tipografía,
+  vidrio, degradado y caras salen de los tokens `--rd-*`; encuadre, recorte, ritmo, cursor y
+  restricción de texto salen de Stageshow. Si chocan (por ejemplo Stageshow desaconseja morado y
+  brillos de «IA»), gana `DESIGN.md`: el degradado de Ronda se usa, pero solo en sus cuatro lugares.
+- No se copian al producto los íconos de apps ni las marcas de terceros que trae la skill como
+  ejemplo; no están cubiertos por su licencia.
+- La skill no se edita a mano. Se actualiza con
+  `npx skills add benjitaylor/skills --skill stageshow -a claude-code -a codex -y`.
+
 ## Commits
 
 - Un cambio, un commit. Mensaje `tipo: descripción` (`feat`, `fix`, `docs`, `chore`).
