@@ -4,17 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ronda · caras</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231e9bff'/%3E%3Cstop offset='.5' stop-color='%23e840d8'/%3E%3Cstop offset='1' stop-color='%23ff8a1f'/%3E%3C/linearGradient%3E%3CclipPath id='c'%3E%3Ccircle cx='50' cy='50' r='46'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Cg clip-path='url(%23c)' fill='%231d1d1f'%3E%3Cpath d='M0 0H100V44C92 31 76 26 50 26C24 26 8 31 0 44Z'/%3E%3Ccircle cx='37' cy='58' r='5.5'/%3E%3Ccircle cx='63' cy='58' r='5.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.35' cy='.3' r='.9'%3E%3Cstop offset='0' stop-color='%23ff5fa8'/%3E%3Cstop offset='.5' stop-color='%237b61ff'/%3E%3Cstop offset='1' stop-color='%231e9bff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Crect x='31' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='58' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
 <style>
-  /* Página de prueba: compara maneras de dibujar a una persona con las mismas tres pruebas. */
+  /* Página de prueba: la luz de lámpara de lava y tres maneras de ponerle cara, con las mismas tres pruebas. */
   body { margin: 0; }
   .cr {
-    --cr-glass-face: radial-gradient(circle at 36% 27%, #ffffff 0, #f3f4f9 52%, #dde0ed 100%);
     --cr-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%);
-    --cr-bead-shade: radial-gradient(circle at 50% 122%, rgba(70, 70, 120, 0.2) 0, rgba(70, 70, 120, 0) 56%);
-    --cr-gloss: radial-gradient(circle at 31% 22%, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0) 34%);
+    --cr-glass-face: radial-gradient(circle at 36% 27%, #ffffff 0, #f4f5fa 52%, #e1e4f0 100%);
   }
   .cr-intro { display: grid; gap: var(--rd-space-7); padding-top: 34px; }
   @media (min-width: 1100px) { .cr-intro { grid-template-columns: minmax(0, 1fr) 460px; align-items: start; } }
@@ -23,6 +21,8 @@
   .cr-flavors { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-7); }
   .cr-flavor { gap: var(--rd-space-4); }
   .cr-flavor__lead { margin: 0; max-width: 760px; }
+  .cr-hero { display: flex; flex-wrap: wrap; gap: var(--rd-space-7); padding: var(--rd-space-3) 0; }
+  .cr-hero > .cr-av { width: 184px; height: 184px; box-shadow: var(--rd-shadow-face); }
   .cr-tests { display: grid; gap: var(--rd-space-6); align-items: start; }
   @media (min-width: 1100px) { .cr-tests { grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; } }
   .cr-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
@@ -30,24 +30,17 @@
   .cr-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
   .cr-node__slot { height: 104px; display: grid; place-items: center; }
   .cr-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
-  .cr-av { position: relative; display: block; overflow: hidden; flex: 0 0 auto; color: var(--rd-ink); background-repeat: no-repeat; }
-  .cr-av svg { position: relative; display: block; width: 100%; height: 100%; }
-  .cr-av--glass { background: var(--cr-glass-face); }
-  .cr-av--glass::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--cr-bead-shade); pointer-events: none; }
-  .cr-av--luz > canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-  .cr-av--luz > i { position: absolute; inset: 0; border-radius: 50%; background: var(--cr-gloss); }
-  .cr-av--mono { display: grid; place-items: center; container-type: size; background: var(--cr-glass-face); color: var(--rd-muted); }
-  .cr-av--mono > b { font-family: var(--rd-font-num); font-weight: var(--rd-weight); font-size: 38cqw; letter-spacing: -0.02em; line-height: 1; }
+  .cr-av, .cv { position: relative; display: block; overflow: hidden; flex: 0 0 auto; border-radius: 50%; color: var(--rd-ink); }
+  .cr-av > canvas, .cv canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cr-av > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cv { background: var(--cr-glass-face); }
   .cr-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--cr-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
-  .cr-globe > .cr-av { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); }
-  .cr-globe > .cr-av--front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-globe > * { position: absolute; transform: translate(-50%, -50%); }
+  .cr-globe > .cr-front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
   .cr-verdict { display: grid; gap: var(--rd-space-2) var(--rd-space-7); padding-top: var(--rd-space-4); border-top: 1px solid var(--rd-hairline); }
   @media (min-width: 900px) { .cr-verdict { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .cr-verdict > div { display: flex; flex-direction: column; gap: 6px; }
   .cr-verdict p { margin: 0; font-size: var(--rd-text-small); line-height: 1.4; }
-  .cr-rest { display: grid; gap: var(--rd-space-4); padding-top: var(--rd-space-4); }
-  @media (min-width: 1100px) { .cr-rest { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .cr-rest p { margin: 0; font-size: var(--rd-text-small); line-height: 1.45; }
   .cr-real { display: grid; gap: var(--rd-space-4); }
   @media (min-width: 900px) { .cr-real { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .cr-real figure { display: flex; flex-direction: column; gap: var(--rd-space-2); margin: 0; min-width: 0; }
@@ -66,125 +59,71 @@
 
     <section class="cr-intro">
       <div class="cr-intro__text">
-        <h1 class="rd-title">Maneras de dibujar a una persona</h1>
-        <p>Cada sabor pasa las mismas tres pruebas: un nodo con nombre, una fila de lista y el globo con 64 personas. En el producto siguen las Vita Faces hasta que Mati apruebe el cambio.</p>
-        <p class="rd-note">Apple muestra a las personas con su foto, un Memoji o sus iniciales, y a su asistente como luz. Aura junta las dos cosas: una gota de luz que es tuya, con cara.</p>
+        <h1 class="rd-title">Aura: una lámpara de lava por persona</h1>
+        <p>Cada persona es una gota de vidrio con su propia luz adentro: masas de color que suben, se estiran, se funden y se separan. Abajo, tres maneras de ponerle cara, con las mismas pruebas.</p>
+        <p class="rd-note">En el producto siguen las Vita Faces hasta que Mati elija. La luz del globo ya es esta misma lava.</p>
       </div>
       <div class="rd-decision">
         <div class="rd-decision__body">
-          <span class="rd-decision__label rd-gradient-text">En curso</span>
-          <p class="rd-title">Aura: una gota de luz con cara.</p>
-          <p class="rd-note" style="margin: 0">Pedido de Mati el 21-nov después de ver los sabores: mezclar Aura y Tinta, con la luz en movimiento y más colores. Falta su visto bueno para pasarla al producto.</p>
+          <span class="rd-decision__label rd-gradient-text">Recomendación</span>
+          <p class="rd-title">Ojos: la luz es la persona.</p>
+          <p class="rd-note" style="margin: 0">Deja ver toda la lava, que es lo que más gusta, y le da vida con muy poco: forma de los ojos, anteojos, hacia dónde miran y un parpadeo. La otra opción con oficio es Vita de luz.</p>
         </div>
       </div>
     </section>
 
-    <section class="cr-flavors" aria-labelledby="real-title">
+    <section class="cr-flavors" aria-labelledby="luz-title">
       <div class="rd-card rd-glass cr-flavor">
-        <div class="rd-head"><h2 class="rd-title" id="real-title">En el globo real</h2><span class="rd-head__end"><span class="rd-chip rd-glass">Capturas de grafo/globo.html</span></span></div>
-        <p class="cr-flavor__lead">El mismo globo con tres juegos de caras. Solo cambian las siete imágenes de <code>faces/</code>; el código no se toca. La luz dentro de la esfera ya está en el globo.</p>
-        <div class="cr-real">
-          <figure><span class="rd-label">Vita Faces, hoy</span><img src="globo/hoy-5.webp" alt="Globo con 5 personas y las Vita Faces actuales" width="900" height="600"><img src="globo/hoy-50.webp" alt="Globo con 50 personas y las Vita Faces actuales" width="900" height="600"></figure>
-          <figure><span class="rd-label">Tinta</span><img src="globo/tinta-5.webp" alt="Globo con 5 personas y caras de Tinta" width="900" height="600"><img src="globo/tinta-50.webp" alt="Globo con 50 personas y caras de Tinta" width="900" height="600"></figure>
-          <figure><span class="rd-label">Aura</span><img src="globo/aura-5.webp" alt="Globo con 5 personas y caras de Aura" width="900" height="600"><img src="globo/aura-50.webp" alt="Globo con 50 personas y caras de Aura" width="900" height="600"></figure>
-        </div>
+        <div class="rd-head"><h2 class="rd-title" id="luz-title">La luz</h2><span class="rd-head__end"><span class="rd-chip rd-glass">WebGL2, sin librerías</span></span></div>
+        <p class="cr-flavor__lead">Cinco gotas a 184 px. Cada una mezcla cuatro tonos de una rueda de quince.</p>
+        <div class="cr-hero" id="hero"></div>
       </div>
     </section>
 
     <main class="cr-flavors" id="flavors"></main>
 
-    <section class="cr-flavors" aria-labelledby="rest-title">
-      <div class="rd-head"><h2 class="rd-title" id="rest-title">Lo que no dibujé</h2></div>
-      <div class="cr-rest">
-        <div class="rd-card rd-glass">
-          <span class="rd-label">Fotos reales</span>
-          <p>Es lo primero que hace Apple. Las cinco del equipo se sacan en diez minutos; faltan las otras 295 del globo.</p>
-          <p class="rd-note">Ronda promete que lo privado no sale de tu agente. Una cara dibujada cuida mejor esa promesa que una foto junto a tu sueño y tu carga.</p>
-        </div>
-        <div class="rd-card rd-glass">
-          <span class="rd-label">Hackers de Platanus</span>
-          <p>No hay una API pública de hackers. Lo público hoy son 16 mentores con foto en la página de Santiago y 48 repos de equipo en GitHub, con 77 personas y su avatar.</p>
-          <p class="rd-note">Mezcla fotos, dibujos e íconos, de personas que no dieron permiso, junto a datos inventados. Sirve a lo más para una escena del pitch («esta sala»), sin nombres ni estados y con el visto bueno de Platanus.</p>
-        </div>
-        <div class="rd-card rd-glass">
-          <span class="rd-label">Memoji o arcilla 3D</span>
-          <p>Es el otro avatar de Apple, y el más querido.</p>
-          <p class="rd-note">Ya está descartado en DESIGN.md: se parece a Montu.</p>
+    <section class="cr-flavors" aria-labelledby="real-title" id="real" hidden>
+      <div class="rd-card rd-glass cr-flavor">
+        <div class="rd-head"><h2 class="rd-title" id="real-title">Ojos en el globo real</h2><span class="rd-head__end"><span class="rd-chip rd-glass">Capturas de grafo/globo.html</span></span></div>
+        <p class="cr-flavor__lead">El globo con las siete imágenes de <code>faces/</code> cambiadas por Ojos. En estas capturas las caras están quietas; la luz de la esfera sí se mueve en el globo.</p>
+        <div class="cr-real">
+          <figure><span class="rd-label">5 personas</span><img src="globo/ojos-5.webp" alt="Globo con 5 personas y caras de Ojos" width="900" height="600"></figure>
+          <figure><span class="rd-label">50 personas</span><img src="globo/ojos-50.webp" alt="Globo con 50 personas y caras de Ojos" width="900" height="600"></figure>
+          <figure><span class="rd-label">300 personas</span><img src="globo/ojos-300.webp" alt="Globo con 300 personas y caras de Ojos" width="900" height="600"></figure>
         </div>
       </div>
     </section>
 
-    <p class="rd-note cr-foot">La luz de Aura y la del globo salen de <code>luz/luz.js</code>: un sombreador WebGL2 sin librerías, que queda quieto si pides menos movimiento. Las caras salen de <code>caras.js</code> a partir del nombre. El globo chico de cada tarjeta es una maqueta; las capturas de arriba son el globo real. <code>aplicar.py</code> deja un sabor en el formato de <code>faces/</code>.</p>
+    <p class="rd-note cr-foot">Descartadas después de verlas: Tinta y la cara dibujada sobre la gota (se veían sin terminar), el retrato de vidrio (se ve genérico), Vita Faces en vidrio (casi no cambia) y el monograma. La luz sale de <code>luz/luz.js</code>; con menos movimiento queda quieta, y sin WebGL2 queda una mezcla fija.</p>
   </div>
 </div>
 
 <script src="../luz/luz.js"></script>
-<script src="caras.js"></script>
+<script src="ojos.js"></script>
+<script src="vita-luz.js"></script>
 <script>
 (function () {
   'use strict';
-  var Caras = window.RondaCaras, Luz = window.RondaLuz;
+  var Luz = window.RondaLuz, Ojos = window.RondaOjos, Vita = window.RondaCarasLuz;
+  var query = new URLSearchParams(window.location.search);
+  var fixed = query.has('t') ? Number(query.get('t')) : null;
 
   var TEAM = [
-    { name: 'Tú', status: 'Pide cobertura', file: 'mati', initial: 'M', ring: true },
-    { name: 'Ian', status: 'Tiene la cifra', file: 'ian', initial: 'I', ring: true },
-    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', file: 'lian', initial: 'L', ring: true },
-    { name: 'Andrés', status: 'Plan B listo', file: 'andres', initial: 'A', small: true },
-    { name: 'Roberto', status: 'En reuniones', file: 'roberto', initial: 'R', small: true }
+    { name: 'Tú', status: 'Pide cobertura', key: 'mati', ring: true },
+    { name: 'Ian', status: 'Tiene la cifra', key: 'ian', ring: true },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', key: 'lian', ring: true },
+    { name: 'Andrés', status: 'Plan B listo', key: 'andres', small: true },
+    { name: 'Roberto', status: 'En reuniones', key: 'roberto', small: true }
   ];
-  var TEAM_STRIP = { mati: 0, ian: 1, lian: 2, roberto: 3, andres: 4 };
   var ROWS = [1, 2, 3];
-
   var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
-  var SURNAMES = 'RGSMLPCVFTHADBEN';
 
-  // Aura: una sola grilla de luz para toda la página; cada cara copia su celda en cada cuadro.
-  var LIGHT_COLS = 9, LIGHT_ROWS = 8, LIGHT_CELL = 128;
-  var lightPalettes = TEAM.map(function (person) { return Caras.TEAM_LIGHT[person.file]; }).concat(NAMES.map(function (name) { return Luz.paletteFor(name); }));
-  var lightFaces = [];
-
-  var FLAVORS = [
-    {
-      id: 'aura', title: 'Aura', chip: 'Luz con cara',
-      lead: 'Cada persona es una gota de luz que se mueve, con su propia mezcla de colores, y lleva la cara de Tinta redibujada: pelo más liviano, rasgos más tranquilos.',
-      pro: ['Se reconoce a cada persona de dos maneras: por su luz y por su cara.', 'La luz fluye sola y usa once tonos; cada persona toma cuatro que combinan.', 'De lejos queda un punto de color con pelo y ojos.'],
-      con: ['Vuelve el color por persona, que DESIGN.md hoy no permite. Lo decide Mati.', 'El degradado deja de ser el único color de la pantalla.'],
-      team: function (person, index) { return luz(index, Caras.rostro(person.name, { recipe: Caras.TEAM[person.file] })); },
-      crowd: function (index, size) { return luz(TEAM.length + index, Caras.rostro(NAMES[index], { small: size < 17 })); }
-    },
-    {
-      id: 'tinta', title: 'Tinta', chip: 'Propia de Ronda',
-      lead: 'La misma cara sobre un disco de vidrio blanco, dibujada con la tinta del texto. Sin color por persona.',
-      pro: ['Nace del sistema: vidrio y tinta. El degradado queda como único color.', 'Sale del nombre, para 5 o para 300.'],
-      con: ['Menos carisma que una Vita Face o que Aura.', 'En blanco y negro la cara se ve más seria.'],
-      team: function (person) { return glass(Caras.rostro(person.name, { recipe: Caras.TEAM[person.file] })); },
-      crowd: function (index, size) { return glass(Caras.rostro(NAMES[index], { small: size < 17 })); }
-    },
-    {
-      id: 'vidrio', title: 'Vita Faces en vidrio', chip: 'El cambio más corto',
-      lead: 'El personaje de Vita con tres ajustes: un solo fondo de vidrio, ropa de todos los días y nada de deporte.',
-      pro: ['Conserva el carisma y saca los pasteles y el deporte.', 'Entra reemplazando las siete imágenes de faces/, sin tocar el globo.'],
-      con: ['Sigue siendo la marca de Vita.', 'En el globo real casi no se distingue de lo que hay hoy.'],
-      team: function (person) { return sprite('vita-ronda-equipo.webp', 5, TEAM_STRIP[person.file], 0, 1); },
-      crowd: function (index) { return sprite('vita-ronda.webp', 8, index % 8, Math.floor(index / 8)); }
-    },
-    {
-      id: 'vita', title: 'Vita Faces', chip: 'En uso hoy',
-      lead: 'Las caras de Vita, tal como están: una por integrante y un atlas de 64 para el resto.',
-      pro: ['Ya están hechas y cada integrante tiene la suya.', 'Tienen carisma: se reconoce a una persona, no a un ícono.'],
-      con: ['Seis fondos pastel suman una segunda paleta que compite con el aura.', 'Traen gorras de natación, antiparras y medallas: son de un gimnasio, no de un equipo de trabajo.', 'Son la marca de Vita.'],
-      team: function (person) { return image('../faces/' + person.file + '.png'); },
-      crowd: function (index) { return sprite('../faces/atlas/faces.png', 8, index % 8, Math.floor(index / 8)); }
-    },
-    {
-      id: 'mono', title: 'Monograma', chip: 'Sin cara',
-      lead: 'Las iniciales sobre vidrio. Lo que muestra Contactos de Apple cuando no hay foto.',
-      pro: ['Sobrio y sin trabajo.'],
-      con: ['DESIGN.md lo prohíbe: «nunca una inicial».', 'De lejos no se lee, y dos personas con la misma letra son la misma.'],
-      team: function (person) { return mono(person.initial); },
-      crowd: function (index) { return mono(Caras.monograma(NAMES[index], SURNAMES.charAt(index % SURNAMES.length))); }
-    }
-  ];
+  // Dos grillas de luz para toda la página: el equipo en celdas grandes y las 64 personas en celdas chicas.
+  // Cada cara copia su celda en cada cuadro.
+  var TEAM_CELL = 192, CROWD_CELL = 64, CROWD_COLS = 8;
+  var teamPalettes = TEAM.map(function (person) { return Ojos.TEAM_LIGHT[person.key]; });
+  var crowdPalettes = NAMES.map(function (name) { return Luz.paletteFor(name); });
+  var orbs = [], vitas = [];
 
   function element(tag, className, text) {
     var node = document.createElement(tag);
@@ -192,36 +131,57 @@
     if (text != null) node.textContent = text;
     return node;
   }
-  function image(src) {
+  function source(index, crowd) {
+    return crowd ? { crowd: true, x: (index % CROWD_COLS) * CROWD_CELL, y: Math.floor(index / CROWD_COLS) * CROWD_CELL, cell: CROWD_CELL }
+                 : { crowd: false, x: index * TEAM_CELL, y: 0, cell: TEAM_CELL };
+  }
+  function orb(index, crowd, overlay) {
     var node = element('span', 'cr-av');
-    node.style.backgroundImage = 'url(' + src + ')';
-    node.style.backgroundSize = '100% 100%';
+    node.style.background = Luz.css(crowd ? crowdPalettes[index] : teamPalettes[index]);
+    node.innerHTML = '<canvas></canvas>' + (overlay || '');
+    orbs.push({ node: node, canvas: node.firstChild, from: source(index, crowd) });
     return node;
   }
-  function sprite(src, columns, column, row, rows) {
-    var node = element('span', 'cr-av');
-    var lines = rows || columns;
-    node.style.backgroundImage = 'url(' + src + ')';
-    node.style.backgroundSize = (columns * 100) + '% ' + (lines * 100) + '%';
-    node.style.backgroundPosition = (columns > 1 ? column * 100 / (columns - 1) : 0) + '% ' + (lines > 1 ? row * 100 / (lines - 1) : 0) + '%';
-    return node;
+  function vita(index, crowd, seed) {
+    var face = Vita.create(seed);
+    face.from = source(index, crowd);
+    vitas.push(face);
+    return face.el;
   }
-  function glass(svg) { var node = element('span', 'cr-av cr-av--glass'); node.innerHTML = svg; return node; }
-  function mono(letters) { var node = element('span', 'cr-av cr-av--mono'); node.appendChild(element('b', '', letters)); return node; }
-  function luz(cell, svg) {
-    var node = element('span', 'cr-av cr-av--luz');
-    node.style.background = Luz.css(lightPalettes[cell]);
-    node.innerHTML = '<canvas></canvas><i></i>' + svg;
-    lightFaces.push({ node: node, canvas: node.firstChild, cell: cell });
-    return node;
-  }
+
+  var FLAVORS = [
+    {
+      id: 'ojos', title: 'Ojos', chip: 'Recomendada',
+      lead: 'La gota es la persona y solo tiene ojos. Cambian la forma, el tamaño, los anteojos y una ceja; parpadean y miran hacia otro lado cada tanto.',
+      pro: ['Se ve toda la lava: nada la tapa.', 'Tiene vida con muy poco, y no depende de dibujar bien un peinado.', 'De lejos quedan dos puntos sobre un color, que se leen incluso a 12 px.'],
+      con: ['Entre 64 personas la diferencia la hace sobre todo el color; los ojos distinguen menos.', 'Puede leerse como personaje de juguete. Lo decide Mati al verla.'],
+      team: function (person, index, size) { return orb(index, false, Ojos.svg(person.key, { size: size })); },
+      crowd: function (index, size) { return orb(index, true, Ojos.svg(NAMES[index], { size: size })); }
+    },
+    {
+      id: 'vita', title: 'Vita de luz', chip: 'Con personaje',
+      lead: 'El personaje de Vita Faces, sin fondos pastel ni ropa de deporte, con la cabeza hecha de la luz de cada persona sobre un disco de vidrio.',
+      pro: ['El dibujo ya es profesional: pelo, anteojos y expresión terminados.', 'Cada integrante se reconoce por su peinado, no solo por su color.'],
+      con: ['La cabeza muestra poca lava: se ve un degradado, no las masas moviéndose.', 'Sigue siendo el personaje de Vita.', 'Bajo 20 px queda una cabeza con pelo y nada más.'],
+      team: function (person, index) { return vita(index, false, person.key); },
+      crowd: function (index) { return vita(index, true, NAMES[index]); }
+    },
+    {
+      id: 'sola', title: 'Luz sola', chip: 'Sin cara',
+      lead: 'Solo la gota, con el nombre al lado. Es la versión más limpia.',
+      pro: ['Es la que mejor muestra la lámpara de lava.', 'No hay nada que pueda verse mal dibujado.'],
+      con: ['Rompe el principio 7 de DESIGN.md: personas con cara.', 'Sin nombre al lado no se sabe quién es quién.'],
+      team: function (person, index) { return orb(index, false, ''); },
+      crowd: function (index) { return orb(index, true, ''); }
+    }
+  ];
 
   function nodes(flavor) {
     var row = element('div', 'cr-nodes');
     TEAM.forEach(function (person, index) {
       var cell = element('div', 'cr-node');
       var slot = element('div', 'cr-node__slot');
-      var face = flavor.team(person, index);
+      var face = flavor.team(person, index, person.small ? 72 : 92);
       face.classList.add('rd-face');
       if (person.small) face.classList.add('rd-face--small');
       if (person.ring) { var ring = element('span', 'cr-ring'); ring.appendChild(face); slot.appendChild(ring); } else slot.appendChild(face);
@@ -238,7 +198,7 @@
     ROWS.forEach(function (index) {
       var person = TEAM[index];
       var item = element('div', 'rd-item');
-      var face = flavor.team(person, index);
+      var face = flavor.team(person, index, 40);
       face.classList.add('rd-face', 'rd-face--tiny');
       var text = element('span', 'rd-item__text');
       text.appendChild(element('span', 'rd-item__title', person.name));
@@ -259,15 +219,15 @@
       var tiltedY = y * Math.cos(tilt) - z * Math.sin(tilt);
       var depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2;
       var eased = depth * depth * (3 - 2 * depth);
-      var size = 10 + 18 * eased;
+      var size = Math.round(10 + 18 * eased);
       var face = flavor.crowd(index, size);
-      face.style.width = face.style.height = size.toFixed(1) + 'px';
+      face.style.width = face.style.height = size + 'px';
       face.style.left = (50 + x * 41).toFixed(2) + '%';
       face.style.top = (50 + tiltedY * 41).toFixed(2) + '%';
       face.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
       face.style.zIndex = String(Math.round(depth * 100));
       if (eased < 0.55) face.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)';
-      else face.classList.add('cr-av--front');
+      else face.classList.add('cr-front');
       sphere.appendChild(face);
     }
     return sphere;
@@ -279,13 +239,15 @@
     block.appendChild(content);
     return block;
   }
-
   function verdict(title, lines) {
     var block = element('div');
     block.appendChild(element('span', 'rd-label', title));
     lines.forEach(function (line) { block.appendChild(element('p', '', line)); });
     return block;
   }
+
+  var hero = document.getElementById('hero');
+  TEAM.forEach(function (person, index) { hero.appendChild(orb(index, false, '')); });
 
   var host = document.getElementById('flavors');
   FLAVORS.forEach(function (flavor) {
@@ -310,33 +272,46 @@
     host.appendChild(card);
   });
 
-  // La luz: se pinta la grilla y cada cara copia su celda. Sin WebGL2 queda la mezcla quieta en CSS.
-  var grid = Luz.grid(document.createElement('canvas'), { cols: LIGHT_COLS, rows: LIGHT_ROWS, cell: LIGHT_CELL, palettes: lightPalettes });
-  if (!grid) return;
+  var probe = new Image();
+  probe.onload = function () { document.getElementById('real').hidden = false; };
+  probe.src = 'globo/ojos-5.webp';
+
+  // La luz: se pintan las dos grillas y cada cara copia su celda. Sin WebGL2 queda la mezcla quieta en CSS.
+  var teamGrid = Luz.grid(document.createElement('canvas'), { cols: TEAM.length, rows: 1, cell: TEAM_CELL, palettes: teamPalettes });
+  var crowdGrid = teamGrid && Luz.grid(document.createElement('canvas'), { cols: CROWD_COLS, rows: Math.ceil(NAMES.length / CROWD_COLS), cell: CROWD_CELL, palettes: crowdPalettes });
+  var page = document.querySelector('.rd-page');
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!crowdGrid) { Ojos.animate(page, fixed == null ? undefined : fixed); return; }
+
   var scale = Math.min(2, window.devicePixelRatio || 1);
-  lightFaces.forEach(function (face) {
+  orbs.forEach(function (face) {
     var side = Math.max(2, Math.round(face.node.clientWidth * scale));
     face.canvas.width = face.canvas.height = side;
     face.context = face.canvas.getContext('2d');
+    face.context.imageSmoothingQuality = 'high';
     face.node.style.background = 'none';
   });
-  function paint(time) {
-    grid.render(time);
-    lightFaces.forEach(function (face) {
-      var side = face.canvas.width;
+  function paint(seconds) {
+    teamGrid.render(seconds);
+    crowdGrid.render(seconds);
+    orbs.forEach(function (face) {
+      var side = face.canvas.width, from = face.from;
       face.context.clearRect(0, 0, side, side);
-      face.context.drawImage(grid.canvas, (face.cell % LIGHT_COLS) * LIGHT_CELL, Math.floor(face.cell / LIGHT_COLS) * LIGHT_CELL, LIGHT_CELL, LIGHT_CELL, 0, 0, side, side);
+      face.context.drawImage(from.crowd ? crowdGrid.canvas : teamGrid.canvas, from.x, from.y, from.cell, from.cell, 0, 0, side, side);
+    });
+    vitas.forEach(function (face) {
+      var from = face.from;
+      Vita.fit(face);
+      Vita.paint(face, from.crowd ? crowdGrid.canvas : teamGrid.canvas, from.x, from.y, from.cell);
     });
   }
-  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var card = document.getElementById('aura');
-  function loop(now) {
-    var box = card.getBoundingClientRect();
-    if (box.bottom > 0 && box.top < window.innerHeight) paint(8 + now / 1000 * 0.7);
-    requestAnimationFrame(loop);
-  }
-  paint(8);
-  if (!still) requestAnimationFrame(loop);
+  function loop(now) { paint(now / 1000); window.requestAnimationFrame(loop); }
+  Vita.whenReady(function () {
+    if (fixed != null) { paint(fixed); Ojos.animate(page, fixed); return; }
+    paint(0);
+    Ojos.animate(page);
+    if (!still) window.requestAnimationFrame(loop);
+  });
 })();
 </script>
 </body>

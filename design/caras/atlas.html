@@ -2,42 +2,36 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Ronda · lámina de caras</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f6f6fb' stroke='%231d1d1f' stroke-width='4'/%3E%3Ccircle cx='38' cy='56' r='6' fill='%231d1d1f'/%3E%3Ccircle cx='62' cy='56' r='6' fill='%231d1d1f'/%3E%3C/svg%3E">
+<title>Ronda · lámina de caras Ojos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%237b61ff'/%3E%3Crect x='32' y='40' width='11' height='23' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='57' y='40' width='11' height='23' rx='5.5' fill='%231d1d1f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../tokens.css">
 <style>
-  /* Lámina para fotografiar: aplicar.py la captura y la corta en las imágenes que usa el globo.
-     ?sabor=tinta | aura
-     ?capa=atlas   64 caras, 8 x 8 de 128 px (1024 x 1024)
+  /* Lámina para fotografiar, que aplicar.py captura y corta en las imágenes que usa el globo:
+     ?capa=atlas   64 caras, 8 x 8 de 128 px (1024 x 1024); chicas, para el globo: se dibujan con el detalle de 36 px
      ?capa=equipo  las cinco del equipo en el orden mati, ian, lian, roberto, andres, de 320 px (1600 x 320)
-     ?t=8          instante de la luz, en segundos (solo Aura) */
+     ?t=8          instante de la luz, en segundos
+     Las caras salen en reposo: ojos abiertos y mirada al frente. */
   html, body { margin: 0; background: var(--rd-bg); }
   #stage { position: relative; }
   #light { position: absolute; left: 0; top: 0; display: block; }
   #sheet { position: relative; display: grid; }
   .tile { position: relative; overflow: hidden; color: var(--rd-ink); }
-  .tile svg { display: block; width: 100%; height: 100%; }
-  .tinta .tile { background: radial-gradient(circle at 36% 27%, #ffffff 0, #f3f4f9 52%, #dde0ed 100%); }
-  .tinta .tile::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 122%, rgba(70, 70, 120, 0.2) 0, rgba(70, 70, 120, 0) 56%); }
-  .tile svg { position: relative; }
-  .aura .tile::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 31% 22%, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0) 34%); }
+  .tile svg { position: relative; display: block; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
 <div id="stage"><canvas id="light"></canvas><div id="sheet"></div></div>
 <script src="../luz/luz.js"></script>
-<script src="caras.js"></script>
+<script src="ojos.js"></script>
 <script>
 (function () {
   'use strict';
-  var Caras = window.RondaCaras, Luz = window.RondaLuz;
+  var Ojos = window.RondaOjos, Luz = window.RondaLuz;
   var query = new URLSearchParams(location.search);
-  var aura = query.get('sabor') === 'aura';
   var team = query.get('capa') === 'equipo';
   var order = ['mati', 'ian', 'lian', 'roberto', 'andres'];
   var size = team ? 320 : 128, cols = team ? order.length : 8, rows = team ? 1 : 8;
   var sheet = document.getElementById('sheet'), light = document.getElementById('light');
-  document.getElementById('stage').className = aura ? 'aura' : 'tinta';
   sheet.style.gridTemplateColumns = 'repeat(' + cols + ', ' + size + 'px)';
 
   var palettes = [];
@@ -45,12 +39,12 @@
     var tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.width = tile.style.height = size + 'px';
-    tile.innerHTML = team ? Caras.rostro('equipo', { recipe: Caras.TEAM[order[index]] }) : Caras.rostro('persona-' + index);
-    palettes.push(team ? Caras.TEAM_LIGHT[order[index]] : Luz.paletteFor('persona-' + index));
+    var seed = team ? order[index] : 'persona-' + index;
+    tile.innerHTML = Ojos.svg(seed, { size: team ? 184 : 36, rest: true });
+    palettes.push(team ? Ojos.TEAM_LIGHT[order[index]] : Luz.paletteFor(seed));
     sheet.appendChild(tile);
   }
 
-  if (!aura) { light.remove(); return; }
   var grid = Luz.grid(light, { cols: cols, rows: rows, cell: size, palettes: palettes, square: true });
   if (grid) {
     grid.render(Number(query.get('t') || 8));

@@ -1,13 +1,15 @@
 /*
- * Ronda · luz fluida. Un sombreador WebGL2, sin librerías, con dos usos:
- *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de luz, una por persona (caras «Aura»)
- *   RondaLuz.sphere(canvas, opciones)  la luz dentro del globo de vidrio
+ * Ronda · luz de lámpara de lava. Un sombreador WebGL2, sin librerías, con dos usos:
+ *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de vidrio con lava dentro, una por persona
+ *   RondaLuz.sphere(canvas, opciones)  la misma lava, más calmada, dentro del globo de vidrio
+ * Cada gota es una esfera de vidrio con cinco esferas de cera que suben, bajan, se estiran y se funden
+ * por cuellos viscosos (unión suave de distancias, marcha de rayos con refracción).
  * Si el navegador no tiene WebGL2, ambas devuelven null y quien llama deja su versión quieta.
  */
 (function (root) {
   'use strict';
 
-  // Rueda de once tonos. Los vecinos combinan; por eso cada mezcla toma tonos cercanos y un acento.
+  // Tonos 0 a 10: rueda original (los vecinos combinan). 11 a 14: tonos nuevos que se suman a cualquier mezcla.
   var PALETTE = [
     [0.12, 0.61, 1.00], // 0 azul
     [0.22, 0.78, 1.00], // 1 celeste
@@ -19,74 +21,176 @@
     [1.00, 0.39, 0.67], // 7 rosa
     [0.90, 0.27, 0.85], // 8 magenta
     [0.50, 0.39, 1.00], // 9 violeta
-    [0.33, 0.44, 0.98]  // 10 índigo
+    [0.33, 0.44, 0.98], // 10 índigo
+    [0.68, 0.90, 0.28], // 11 lima
+    [1.00, 0.44, 0.38], // 12 coral
+    [0.74, 0.60, 1.00], // 13 lavanda
+    [0.24, 0.92, 0.90]  // 14 agua
   ];
   var TONES = PALETTE.length;
+  var WHEEL = 11;
+  var EXTRA = [14, 14, 11, 11, 11, 12, 12, 12, 13, 13, 13];
 
   var VERTEX = '#version 300 es\nin vec2 aPos;\nvoid main() { gl_Position = vec4(aPos, 0.0, 1.0); }';
 
-  var FRAGMENT = [
-    '#version 300 es',
-    'precision highp float;',
-    'uniform vec2 uRes;',
-    'uniform float uTime;',
-    'uniform vec3 uPal[' + TONES + '];',
-    'uniform int uMode;',
-    'uniform vec2 uGrid;',
-    'uniform sampler2D uCells;',
-    'uniform float uSquare;',
-    'uniform vec3 uSphere;',
-    'uniform ivec4 uSpherePal;',
-    'uniform float uStrength;',
-    'out vec4 outColor;',
-    'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }',
-    'vec3 fluid(vec2 p, float t, float s, vec3 a, vec3 b, vec3 c, vec3 d) {',
-    '  vec2 q = p;',
-    '  for (int i = 1; i <= 4; i++) {',
-    '    float f = float(i);',
-    '    q.x += 0.5 / f * sin(f * 1.25 * q.y + t * (0.55 + 0.11 * f) + s * 6.2831 + f * 1.7);',
-    '    q.y += 0.5 / f * cos(f * 1.25 * q.x + t * (0.47 + 0.09 * f) + s * 4.1 + f * 2.3);',
-    '  }',
-    '  float n1 = 0.5 + 0.5 * sin(q.x * 0.95 + q.y * 0.55 + s * 3.0);',
-    '  float n2 = 0.5 + 0.5 * sin(q.y * 1.05 - q.x * 0.45 + 1.7 + s * 5.0);',
-    '  float n3 = 0.5 + 0.5 * sin((q.x + q.y) * 0.8 + 3.1 - s * 2.0);',
-    '  vec3 col = mix(a, b, smoothstep(0.0, 1.0, n1));',
-    '  col = mix(col, c, smoothstep(0.25, 1.0, n2) * 0.85);',
-    '  col = mix(col, d, smoothstep(0.45, 1.0, n3) * 0.6);',
-    '  return col;',
-    '}',
-    'void main() {',
-    '  vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);',
-    '  if (uMode == 0) {',
-    '    vec2 cell = uRes / uGrid;',
-    '    vec2 id = floor(frag / cell);',
-    '    vec2 uv = (fract(frag / cell) - 0.5) * 2.0;',
-    '    ivec4 tone = ivec4(texelFetch(uCells, ivec2(id), 0) * 255.0 + 0.5);',
-    '    float s = hash(id + 17.0);',
-    '    float r = length(uv);',
-    '    float z = sqrt(max(0.0, 1.0 - r * r));',
-    '    vec2 p = uv * (1.15 - 0.3 * z) * 0.95 + vec2(s * 9.0, s * 5.0);',
-    '    vec3 col = fluid(p, uTime, s, uPal[tone.x], uPal[tone.y], uPal[tone.z], uPal[tone.w]);',
-    '    col = mix(col, vec3(1.0), 0.07);',
-    '    col *= 0.9 + 0.14 * z;',
-    '    float rim = pow(1.0 - z, 2.6);',
-    '    col = mix(col, vec3(1.0), rim * 0.5);',
-    '    col -= 0.09 * smoothstep(0.15, 1.0, uv.y) * (1.0 - rim);',
-    '    float alpha = mix(smoothstep(1.0, 0.972, r), 1.0, uSquare);',
-    '    outColor = vec4(clamp(col, 0.0, 1.0) * alpha, alpha);',
-    '  } else {',
-    '    vec2 d = (frag - uSphere.xy) / uSphere.z;',
-    '    float r = length(d);',
-    '    float z = sqrt(max(0.0, 1.0 - r * r));',
-    '    vec2 p = d * (1.12 - 0.26 * z) * 1.85;',
-    '    vec3 col = fluid(p, uTime, 0.37, uPal[uSpherePal.x], uPal[uSpherePal.y], uPal[uSpherePal.z], uPal[uSpherePal.w]);',
-    '    col = mix(col, vec3(1.0), 0.05);',
-    '    float body = smoothstep(1.0, 0.9, r) * (0.34 + 0.66 * z);',
-    '    float alpha = clamp(body * uStrength, 0.0, 1.0);',
-    '    outColor = vec4(col * alpha, alpha);',
-    '  }',
-    '}'
-  ].join('\n');
+  var FRAGMENT = `#version 300 es
+precision highp float;
+uniform vec2 uRes;
+uniform float uTime;
+uniform vec3 uPal[${TONES}];
+uniform int uMode;
+uniform vec2 uGrid;
+uniform sampler2D uCells;
+uniform float uSquare;
+uniform vec3 uSphere;
+uniform ivec4 uSpherePal;
+uniform float uStrength;
+out vec4 outColor;
+
+float hash(float n) { return fract(sin(n * 127.1) * 43758.5453); }
+float dist(vec3 q) { return length(vec3(q.x, q.y * 0.82, q.z)); }
+
+const vec3 BASE[5] = vec3[5](vec3(0.0, -1.0, 0.0), vec3(-0.30, -0.1, 0.0), vec3(0.32, 0.15, 0.0), vec3(-0.05, 0.35, 0.0), vec3(0.18, 0.55, 0.0));
+const vec3 AMP[5] = vec3[5](vec3(0.20, 0.13, 0.12), vec3(0.34, 0.66, 0.30), vec3(0.36, 0.70, 0.30), vec3(0.40, 0.64, 0.30), vec3(0.42, 0.50, 0.26));
+const vec3 FRQ[5] = vec3[5](vec3(0.23, 0.31, 0.17), vec3(0.27, 0.34, 0.21), vec3(0.19, 0.29, 0.25), vec3(0.25, 0.39, 0.18), vec3(0.31, 0.44, 0.27));
+const float RAD[5] = float[5](0.58, 0.34, 0.28, 0.31, 0.20);
+
+vec4 blob(int k, float t, float seed) {
+  float f = float(k);
+  vec3 ph = vec3(hash(seed * 3.1 + f * 1.37), hash(seed * 5.3 + f * 2.11), hash(seed * 7.9 + f * 0.73)) * 6.2831;
+  vec3 p = BASE[k] + AMP[k] * sin(FRQ[k] * t + ph);
+  if (k > 0) p.y += 0.13 * sin(FRQ[k].y * 2.7 * t + ph.x * 2.0);
+  float r = RAD[k] * (1.0 + 0.09 * sin(t * 0.43 + ph.y));
+  if (k > 0) p.xy *= min(1.0, (0.96 - r * 0.8) / length(p.xy));
+  return vec4(p, r);
+}
+
+// Lava dentro de una esfera de vidrio de radio 1. uv: coordenadas del disco con y hacia arriba. Devuelve rgb y cobertura.
+vec3 lava(vec2 uv, float t, float seed, vec3 c0, vec3 c1, vec3 c2, vec3 c3, float calm, int nb, int steps, float aa, float sizeMul, out float cover) {
+  float r2 = dot(uv, uv);
+  float z = sqrt(max(1.0 - r2, 0.0));
+  vec3 sn = vec3(uv, z);
+  vec3 rd = refract(vec3(0.0, 0.0, -1.0), sn, mix(0.90, 0.93, calm));
+  vec3 ro = sn;
+  float tmax = -2.0 * dot(ro, rd);
+
+  vec4 bl[5];
+  vec3 cols[5] = vec3[5](c0, c1, c2, c3, c0);
+  for (int k = 0; k < 5; k++) {
+    if (k >= nb) break;
+    bl[k] = blob(k, t, seed);
+    bl[k].w *= sizeMul;
+  }
+
+  float K = mix(6.5, 4.4, calm);
+  float KC = K * 2.0;
+  float tt = 0.0, minD = 10.0, tmin = 0.0;
+  for (int i = 0; i < steps; i++) {
+    vec3 p = ro + rd * tt;
+    float S = 0.0;
+    for (int k = 0; k < 5; k++) {
+      if (k >= nb) break;
+      S += exp(-K * (dist(p - bl[k].xyz) - bl[k].w));
+    }
+    float d = -log(S) / K;
+    if (d < minD) { minD = d; tmin = tt; }
+    if (d < 0.006) break;
+    tt += max(d * 0.8, 0.02);
+    if (tt > tmax) break;
+  }
+
+  vec3 p = ro + rd * tmin;
+  float S = 0.0, SC = 0.0;
+  vec3 C = vec3(0.0), G = vec3(0.0);
+  for (int k = 0; k < 5; k++) {
+    if (k >= nb) break;
+    vec3 q = p - bl[k].xyz;
+    float l = dist(q);
+    float dk = l - bl[k].w;
+    S += exp(-K * dk);
+    float e = exp(-KC * dk);
+    SC += e;
+    C += e * cols[k];
+    G += e * vec3(q.x, q.y * 0.67, q.z) / l;
+  }
+  vec3 base = C / SC;
+  float lum = dot(base, vec3(0.299, 0.587, 0.114));
+  base = clamp(mix(vec3(lum), base, 1.22), 0.0, 1.0);
+  vec3 n = normalize(G + 1e-5);
+
+  vec3 pin = p + rd * 0.3;
+  float Si = 0.0;
+  for (int k = 0; k < 5; k++) {
+    if (k >= nb) break;
+    Si += exp(-K * (dist(pin - bl[k].xyz) - bl[k].w));
+  }
+  float thick = clamp(log(Si) / K / 0.22, 0.0, 1.0);
+
+  vec3 L = normalize(vec3(-0.45, 0.75, 0.55));
+  vec3 V = -rd;
+  float wrap = clamp((dot(n, L) + 0.55) / 1.55, 0.0, 1.0);
+  vec3 lit = mix(base, vec3(1.0), 0.22);
+  vec3 col = mix(base * base * 0.95, lit, smoothstep(0.0, 1.0, wrap));
+  col += base * 0.18 * thick;
+  float fres = pow(1.0 - clamp(dot(n, V), 0.0, 1.0), 2.5);
+  col = mix(col, mix(base, vec3(1.0), 0.5) * 1.05, fres * 0.55);
+  col = mix(col, mix(base, vec3(1.0), 0.5), (1.0 - thick) * 0.3);
+  float nh = max(dot(n, normalize(L + V)), 0.0);
+  col += vec3(1.0) * pow(nh, 60.0) * (0.55 - 0.5 * calm);
+  col += vec3(1.0) * pow(nh, 9.0) * (0.13 - 0.11 * calm);
+
+  cover = 1.0 - smoothstep(0.0, mix(aa * 1.6, 0.11, calm), minD - 0.006);
+
+  vec3 liq = mix(vec3(1.0), mix(c1, c2, smoothstep(-0.9, 0.9, uv.y)), 0.30 - 0.12 * calm);
+  liq = mix(liq, c0, smoothstep(0.1, -1.0, uv.y) * 0.30);
+  float halo = exp(-max(minD, 0.0) * 5.0);
+  liq = mix(liq, mix(base, vec3(1.0), 0.3), halo * 0.55);
+  col = mix(liq, col, cover * (1.0 - 0.12 * calm));
+
+  float rim = pow(1.0 - z, 4.0);
+  col = mix(col, vec3(1.0), rim * 0.4);
+  vec2 dir = normalize(uv + 1e-5);
+  float band = smoothstep(0.72, 0.9, sqrt(r2)) * smoothstep(1.0, 0.93, sqrt(r2));
+  col += vec3(1.0) * band * pow(max(dot(dir, normalize(vec2(-0.62, 0.78))), 0.0), 7.0) * (0.55 - 0.25 * calm);
+  col += vec3(1.0) * band * pow(max(dot(dir, normalize(vec2(0.62, -0.78))), 0.0), 5.0) * 0.16;
+  return clamp(col, 0.0, 1.0);
+}
+
+void main() {
+  vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+  float cover;
+  if (uMode == 0) {
+    vec2 cell = uRes / uGrid;
+    vec2 id = floor(frag / cell);
+    vec2 uv = (fract(frag / cell) - 0.5) * 2.0;
+    uv.y = -uv.y;
+    ivec4 tone = ivec4(texelFetch(uCells, ivec2(id), 0) * 255.0 + 0.5);
+    float s = hash(id.x * 7.0 + id.y * 131.0 + 17.0);
+    float px = cell.x;
+    float aa = 2.0 / px;
+    float r = length(uv);
+    float alpha = mix(smoothstep(1.0, 1.0 - aa, r), 1.0, uSquare);
+    if (r > 0.995) uv *= 0.995 / r;
+    int nb = px >= 96.0 ? 5 : (px >= 48.0 ? 4 : 3);
+    int steps = px >= 96.0 ? 22 : (px >= 48.0 ? 16 : 12);
+    float sizeMul = px >= 96.0 ? 1.0 : (px >= 48.0 ? 1.1 : 1.3);
+    float speed = mix(1.0, 1.8, 1.0 - clamp(px / 128.0, 0.0, 1.0));
+    float t = uTime * speed + s * 40.0;
+    vec3 col = lava(uv, t, s, uPal[tone.x], uPal[tone.y], uPal[tone.z], uPal[tone.w], 0.0, nb, steps, aa, sizeMul, cover);
+    outColor = vec4(col * alpha, alpha);
+  } else {
+    vec2 d = (frag - uSphere.xy) / uSphere.z;
+    d.y = -d.y;
+    float r = length(d);
+    if (r > 1.0) { outColor = vec4(0.0); return; }
+    float aa = 2.0 / uSphere.z;
+    float z = sqrt(max(1.0 - r * r, 0.0));
+    float t = uTime * 0.55 + 11.0;
+    vec3 col = lava(d, t, 0.37, uPal[uSpherePal.x], uPal[uSpherePal.y], uPal[uSpherePal.z], uPal[uSpherePal.w], 1.0, 5, 22, aa, 1.15, cover);
+    float alpha = clamp(smoothstep(1.0, 1.0 - aa, r) * (0.5 + 0.5 * z) * mix(0.55, 1.0, cover) * uStrength, 0.0, 1.0);
+    outColor = vec4(col * alpha, alpha);
+  }
+}`;
 
   function program(canvas) {
     var gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false });
@@ -146,19 +250,21 @@
     return function () { state ^= state << 13; state ^= state >>> 17; state ^= state << 5; return (state >>> 0) / 0x100000000; };
   }
 
-  // Cuatro tonos por persona, todos cercanos en la rueda: el suyo, sus dos vecinos y un acento a dos o tres pasos.
+  // Cuatro tonos por persona: el suyo, su vecino, uno a dos o tres pasos y un acento (el otro vecino o un tono nuevo).
   function paletteFor(seed) {
     var random = seeded('luz:' + seed);
-    var base = Math.floor(random() * TONES);
-    return [base, (base + 1) % TONES, (base + 2 + Math.floor(random() * 2)) % TONES, (base + TONES - 1) % TONES];
+    var base = Math.floor(random() * WHEEL);
+    var third = (base + 2 + Math.floor(random() * 2)) % WHEEL;
+    var accent = random() < 0.4 ? EXTRA[base] : (base + WHEEL - 1) % WHEEL;
+    return [base, (base + 1) % WHEEL, third, accent];
   }
 
   // Mezcla quieta en CSS para cuando no hay WebGL2 o la persona pidió menos movimiento.
   function css(palette) {
-    var spots = [[28, 30], [74, 34], [58, 78], [22, 74]];
+    var spots = [[28, 72], [74, 34], [58, 78], [22, 30]];
     var layers = palette.map(function (tone, index) {
       var rgb = PALETTE[tone].map(function (value) { return Math.round(value * 255); }).join(', ');
-      return 'radial-gradient(circle at ' + spots[index][0] + '% ' + spots[index][1] + '%, rgba(' + rgb + ', 0.95) 0, rgba(' + rgb + ', 0) 62%)';
+      return 'radial-gradient(circle at ' + spots[index][0] + '% ' + spots[index][1] + '%, rgba(' + rgb + ', 0.95) 0, rgba(' + rgb + ', 0) 52%)';
     });
     return layers.join(', ') + ', #f3f2fc';
   }
