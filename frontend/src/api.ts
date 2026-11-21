@@ -306,3 +306,21 @@ export const startRound = (token: string, teamId: string) => request<{ id: strin
 export const decideAsk = (token: string, topic: string, allow: boolean) => request<{ topic: string; allow: boolean }>(`${agentsPath(token)}/asks`, post({ topic, allow }));
 export const answerProposal = (token: string, proposalId: string, answer: PartyDecision) =>
   request<AgentProposal>(`${agentsPath(token)}/proposals/${encodeURIComponent(proposalId)}/answer`, post({ answer }));
+
+export interface WhatsAppStatus {
+  configured: boolean;
+  linked: boolean;
+  phoneEnding: string | null;
+}
+
+export interface WhatsAppLink {
+  code: string;
+  url: string | null;
+  expiresAt: string;
+}
+
+const whatsappPath = (token: string) => `${personPath(token)}/whatsapp`;
+
+export const fetchWhatsApp = (token: string) => request<WhatsAppStatus>(whatsappPath(token));
+export const startWhatsAppLink = (token: string) => request<WhatsAppLink>(`${whatsappPath(token)}/link`, post());
+export const disconnectWhatsApp = (token: string) => request<WhatsAppStatus>(whatsappPath(token), { method: 'DELETE' });

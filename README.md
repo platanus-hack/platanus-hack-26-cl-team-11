@@ -80,6 +80,8 @@ En producción: https://ronda-n8if.onrender.com
 
 Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. También responden las preguntas del tablero: quien pregunta recibe una sola respuesta armada con lo que comparten los demás (probado solo con un modelo falso). El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. Falta cargar esa llave en el servidor y probar la ronda con 50x. En un computador la ronda ya corrió de verdad con el Claude de la terminal (`AGENT_CLI=claude`); la simulación todavía no se ha probado con un modelo real. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+**WhatsApp.** Cada persona puede unir su teléfono y hablar con su agente por WhatsApp, vía Kapso: check-in, permiso para contar un bloqueo, propuestas con botones, presentación al acordar y preguntas al equipo. Construido y probado con un Kapso falso; falta la llave en el servidor. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md#whatsapp).
+
 ## Remotes
 
 - `origin` — working repo.

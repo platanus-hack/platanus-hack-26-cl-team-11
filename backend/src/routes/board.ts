@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { answerQuestion } from '../agents/ask.js';
+import { askTeam } from '../agents/ask.js';
 import { cardDepsFrom } from '../agents/deps.js';
 import {
   isPostKind,
@@ -31,7 +31,6 @@ const NOT_CONFIGURED = { error: 'Faltan las credenciales del modelo en el servid
 const ALREADY_ANSWERING = { error: 'Los agentes ya están respondiendo esta pregunta.' } as const;
 const TEAM_BUSY = { error: 'Los agentes del equipo están respondiendo otras preguntas. Prueba en un minuto.' } as const;
 
-const MAX_ANSWERS_RUNNING_PER_TEAM = 3;
 const ASKS_PER_MINUTE = 12;
 
 const trimmedText = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
@@ -44,17 +43,7 @@ export function boardRoutes(ctx: AppContext) {
   const askDeps = { ...cardDepsFrom(ctx), board };
   const limitedAsks = rateLimit(ASKS_PER_MINUTE);
 
-  const askAgents = (post: BoardPost): 'started' | 'no_model' | 'answering' | 'busy' => {
-    if (!ctx.model) return 'no_model';
-    const now = new Date();
-    if (board.answerOf(post.id, now)?.status === 'en_curso') return 'answering';
-    if (board.answersRunning(post.teamId, now) >= MAX_ANSWERS_RUNNING_PER_TEAM) return 'busy';
-    const startedAt = board.startAnswer(post.id, now);
-    if (!startedAt) return 'answering';
-    board.clearAgentReplies(post.id);
-    void answerQuestion({ ...askDeps, model: ctx.model }, post, startedAt);
-    return 'started';
-  };
+  const askAgents = (post: BoardPost) => askTeam({ ...askDeps, model: ctx.model }, post).state;
 
   const viewAnswer = (post: BoardPost) => {
     const answer = board.answerOf(post.id, new Date());

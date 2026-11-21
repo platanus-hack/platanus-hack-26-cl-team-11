@@ -44,7 +44,7 @@
 
 - [x] **Framework de agentes.** Ninguno: llamadas directas al modelo con salida estructurada, en `backend/src/agents/`. Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
 - [x] **Transporte entre agentes:** la base compartida. Cada conversación se guarda como un hilo con sus mensajes.
-- [ ] **Puente de WhatsApp:** qué proveedor y qué número. Hoy no está construido: el check-in, los permisos y la aprobación de propuestas se hacen en el panel web. Ian avisó en el hilo del equipo (21-nov, 06:00) que WhatsApp queda fuera por ahora. Falta decidir si la demo lo lleva, porque [DEMO.md](DEMO.md) todavía lo cuenta como real.
+- [ ] **Puente de WhatsApp:** el proveedor es Kapso y la demo lo lleva (decisión de Ian, 21-nov). Está construido y probado con un Kapso falso ([INTEGRATIONS.md](INTEGRATIONS.md#whatsapp)). Falta cargar la llave en Render, registrar el webhook y probarlo con un teléfono. Falta decidir el número: con el de prueba de Kapso solo puede escribir un teléfono; para el público hace falta uno propio.
 - [ ] **Dónde corre cada agente** y cómo se aísla su memoria privada. Hoy todos corren dentro del mismo servidor, y la memoria privada se separa por el token de cada persona en una sola base.
 - [ ] **Qué integraciones son reales** en la demo y cuáles sintéticas. Hoy: Apple Health está probada con un iPhone real; GitHub, Linear, Google Calendar, Gmail y Granola están construidas y sin probar contra el servicio.
 - [ ] **Probar la ronda de agentes contra el modelo real.** En local ya corrió con el Claude de la terminal. Faltan las credenciales del modelo en Render; `npm run agents:check` la prueba en local.

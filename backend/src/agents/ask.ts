@@ -9,6 +9,7 @@ import { systemFor } from './prompts.js';
 import { cardFor, inBatches, problemOf } from './round.js';
 
 export const MAX_RESPONDERS = 40;
+export const MAX_ANSWERS_RUNNING_PER_TEAM = 3;
 const RESPONDERS_IN_PARALLEL = 4;
 
 export const KNOWLEDGE_LEVELS = ['si', 'parcial', 'no'] as const;
@@ -124,4 +125,17 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
     if (!(failure instanceof AgentModelError)) console.error('Answering a question failed.', failure);
     finish('fallida', null, [], asked, problemOf(failure));
   }
+}
+
+export type AskOutcome = { state: 'started'; done: Promise<void> } | { state: 'no_model' | 'answering' | 'busy' };
+
+export function askTeam(deps: CardDeps & { board: BoardStore; model: AgentModel | null }, post: BoardPost, now: Date = new Date()): AskOutcome {
+  const { model } = deps;
+  if (!model) return { state: 'no_model' };
+  if (deps.board.answerOf(post.id, now)?.status === 'en_curso') return { state: 'answering' };
+  if (deps.board.answersRunning(post.teamId, now) >= MAX_ANSWERS_RUNNING_PER_TEAM) return { state: 'busy' };
+  const startedAt = deps.board.startAnswer(post.id, now);
+  if (!startedAt) return { state: 'answering' };
+  deps.board.clearAgentReplies(post.id);
+  return { state: 'started', done: answerQuestion({ ...deps, model }, post, startedAt) };
 }

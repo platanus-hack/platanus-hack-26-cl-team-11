@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
 import type { DatabaseSync } from 'node:sqlite';
+import { CHECKIN_SOURCE, CHECKIN_TYPE, isMood, MAX_CHECKIN_TEXT_LENGTH as MAX_TEXT_LENGTH, MOODS, recordCheckin, type Mood } from '../checkins.js';
 import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
 import { deriveSignals } from '../signals.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
-export const MOODS = ['bien', 'normal', 'cansada', 'mal'] as const;
-export type Mood = (typeof MOODS)[number];
+export { MOODS, type Mood } from '../checkins.js';
 
 export interface CheckinEntry {
   at: string;
@@ -15,9 +15,6 @@ export interface CheckinEntry {
   note: string | null;
 }
 
-const CHECKIN_SOURCE = 'checkin';
-const CHECKIN_TYPE = 'checkin';
-const MAX_TEXT_LENGTH = 280;
 const RECENT_CHECKINS = 14;
 const INVALID_MOOD = { error: `El ánimo debe ser uno de: ${MOODS.join(', ')}.` } as const;
 
@@ -28,8 +25,6 @@ interface CheckinRow {
   raw: string;
 }
 
-const isMood = (value: unknown): value is Mood => typeof value === 'string' && (MOODS as readonly string[]).includes(value);
-
 const readFreeText = (value: unknown, label: string): FreeText => {
   if (value === undefined || value === null) return { ok: true, value: null };
   if (typeof value !== 'string') return { ok: false, error: `${label} debe ser texto.` };
@@ -39,8 +34,6 @@ const readFreeText = (value: unknown, label: string): FreeText => {
 };
 
 const storedText = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value.trim() : null);
-
-const summaryOf = (mood: Mood, blocker: string | null) => `Check-in: ${mood}${blocker ? ' · con un bloqueo' : ''}`;
 
 function recentCheckins(db: DatabaseSync, personToken: string): CheckinEntry[] {
   const rows = db
@@ -55,7 +48,7 @@ function recentCheckins(db: DatabaseSync, personToken: string): CheckinEntry[] {
   return entries;
 }
 
-export function checkinRoutes({ db, store }: AppContext) {
+export function checkinRoutes({ db, store, whatsapp }: AppContext) {
   const routes = new Hono();
   const policies = openPolicyStore(db);
 
@@ -70,13 +63,8 @@ export function checkinRoutes({ db, store }: AppContext) {
     if (!note.ok) return c.json({ error: note.error }, 400);
 
     const now = new Date();
-    store.saveEvent(person.token, {
-      source: CHECKIN_SOURCE,
-      type: CHECKIN_TYPE,
-      occurredAt: now.toISOString(),
-      summary: summaryOf(body.mood, blocker.value),
-      raw: { mood: body.mood, blocker: blocker.value, note: note.value },
-    });
+    recordCheckin(store, person.token, { mood: body.mood, blocker: blocker.value, note: note.value }, now);
+    whatsapp.askPermissions(person.token);
     const signals = withChosenVisibility(deriveSignals(store.listSignalEvents(person.token, now), now), policies.chosen(person.token));
     return c.json({ ok: true, signals }, 201);
   });

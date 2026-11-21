@@ -100,6 +100,7 @@ export function agentRoutes(ctx: AppContext) {
     if (!isPartyDecision(body.answer)) return c.json(INVALID_DECISION, 400);
     if (proposal.status !== 'por_aprobar') return c.json(PROPOSAL_SETTLED, 409);
     const answered = agents.answerProposal(proposal.id, person.token, body.answer);
+    if (answered) ctx.whatsapp.proposalAnswered(answered, person.token);
     return c.json(viewProposal(answered ?? proposal, person.token));
   });
 

@@ -9,6 +9,7 @@ import { RowButton } from './RowButton';
 import { SectionHead } from './SectionHead';
 import { SIGNAL_GROUPS } from './signalGroups';
 import { usePolicy } from './usePolicy';
+import { WhatsAppSection } from './WhatsAppSection';
 
 export function SettingsTab({ token }: { token: string }) {
   const { policy, busy, problem, change } = usePolicy(token);
@@ -39,6 +40,8 @@ export function SettingsTab({ token }: { token: string }) {
           ))}
         </div>
       </div>
+
+      <WhatsAppSection token={token} />
 
       <div className="app-block">
         <SectionHead title="Pulso del equipo" />

@@ -23,6 +23,7 @@ backend/
     policy/             qué permite compartir cada persona
     agents/             agentes personales: ficha, conversación 1:1, propuestas y rutina diaria
     hub/                servidor de contexto: catálogo de fuentes, guardado y mapa (datos de prueba)
+    whatsapp/           puente de WhatsApp con Kapso: unir el teléfono, leer mensajes, botones y avisos
     rooms/              salas: un equipo abierto con código corto y su registro de lo que pasa
     assistants/         asistentes conectados: código de un uso, token propio y el documento de ingreso
     repo/               repo de cada persona: archivos con permiso e historial
@@ -197,6 +198,25 @@ Parte sola al publicar una pregunta. Quien preguntó puede pedirla de nuevo. Un 
 El modelo se llama detrás de una sola interfaz, `AgentModel` (`agents/model.ts`). Hay dos proveedores: 50x con DeepSeek (`agents/fiftyx.ts`), que se usa cuando está `FIFTYX_API_KEY`, y Anthropic con su SDK. El de 50x pide la respuesta con el esquema, la valida, la vuelve a pedir una vez si no lo cumple y nunca hace más de 4 llamadas a la vez. Las pruebas usan un modelo falso: nunca salen a la red. **La ronda no se ha probado contra el modelo real.** `npm run agents:check` corre una ronda de demo contra el modelo real y muestra el resultado.
 
 Cada llamada al modelo tiene un límite de 30 segundos en 50x y de 90 en Anthropic. Una ronda que pasa de 10 minutos se da por fallida y deja de bloquear al equipo.
+
+## WhatsApp
+
+El puente (`whatsapp/bridge.ts`) une un teléfono con una persona y lleva al chat lo que el panel ya hacía: el check-in, el permiso para contar un bloqueo, la respuesta a una propuesta y las preguntas al equipo. El detalle de cada momento está en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
+
+| Pieza | Qué hace | Dónde |
+|---|---|---|
+| Canal | Envía texto y botones por Kapso, de a un mensaje por teléfono, y comprueba la firma del webhook | `whatsapp/kapso.ts` |
+| Almacén | Teléfono de cada persona, códigos para unirlo, botones enviados y entregas ya vistas | `whatsapp/store.ts` |
+| Lectura | El modelo clasifica un mensaje de texto en check-in, pregunta u otro, con salida estructurada | `whatsapp/reading.ts` |
+| Puente | Decide qué hacer con cada mensaje y manda los avisos | `whatsapp/bridge.ts` |
+
+Reglas:
+
+- **Un botón es una acción con tipo.** Permitir, aceptar y rechazar llegan como el identificador del botón, no como texto que haya que interpretar. Solo vale si lo aprieta el teléfono al que se le envió, y una sola vez.
+- **El texto libre lo lee el modelo.** El código solo busca el código de unión, que es un identificador exacto.
+- **El mensaje de la persona sí llega al modelo**, porque es su propio agente quien lo lee. Lo que el modelo devuelve se guarda como check-in en la memoria privada y no entra a ningún mensaje entre agentes.
+- **Las señales no pasan por el modelo.** La frase «Por tus fuentes veo…» la arma el código.
+- **Un teléfono que nadie unió no gasta modelo**: recibe una sola vez por hora la instrucción para conectarse.
 
 ## Sala, asistentes y repo
 

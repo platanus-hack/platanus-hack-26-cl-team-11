@@ -23,7 +23,7 @@ import {
   type CollectedReply,
   type Teammate,
 } from './prompts.js';
-import type { AgentStore, Round } from './store.js';
+import type { AgentStore, Proposal, Round } from './store.js';
 
 export const MAX_NEEDS_PER_ROUND = 10;
 export const MIN_TEAM_SIZE = 2;
@@ -45,6 +45,7 @@ export interface RoundDeps {
   repo?: RepoStore;
   digests?: DigestStore;
   onEvent?: (teamId: string, type: RoomEventType, payload: JsonObject) => void;
+  onProposal?: (proposal: Proposal) => void;
   maxNeeds?: number;
 }
 
@@ -107,7 +108,8 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
   const text = draft.text.trim().slice(0, MAX_PROPOSAL_LENGTH);
   if (helperTokens.length === 0 || !text) return;
 
-  deps.agents.addProposal({ roundId: round.id, teamId: round.teamId, requesterToken: requester.token, helperTokens, topic: need.topic, text });
+  const proposal = deps.agents.addProposal({ roundId: round.id, teamId: round.teamId, requesterToken: requester.token, helperTokens, topic: need.topic, text });
+  deps.onProposal?.(proposal);
   deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic });
 }
 

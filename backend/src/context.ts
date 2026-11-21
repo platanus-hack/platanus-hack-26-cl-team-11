@@ -17,6 +17,9 @@ import { openRoomStore, type RoomStore } from './rooms/store.js';
 import { openSimStore, type SimStore } from './sim/personas.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
+import { createWhatsAppBridge, SILENT_BRIDGE, type WhatsAppBridge } from './whatsapp/bridge.js';
+import { createKapsoChannel, kapsoConfigFrom, type WhatsAppChannel } from './whatsapp/kapso.js';
+import { openWhatsAppStore } from './whatsapp/store.js';
 
 export interface HealthShortcut {
   url: string;
@@ -42,6 +45,7 @@ export interface AppContext {
   digests: DigestStore;
   sim: SimStore;
   model: AgentModel | null;
+  whatsapp: WhatsAppBridge;
   vault: Vault;
   fetch: Fetch;
   config: Config;
@@ -91,7 +95,12 @@ const modelFrom = (env: NodeJS.ProcessEnv, fetchImpl: Fetch): AgentModel | null 
   return config ? createClaudeModel(config) : null;
 };
 
-export function createContext(options: { location?: string; fetch?: Fetch; config?: Config; model?: AgentModel | null } = {}): AppContext {
+const channelFrom = (env: NodeJS.ProcessEnv, fetchImpl: Fetch): WhatsAppChannel | null => {
+  const config = kapsoConfigFrom(env);
+  return config ? createKapsoChannel(config, fetchImpl) : null;
+};
+
+export function createContext(options: { location?: string; fetch?: Fetch; config?: Config; model?: AgentModel | null; whatsapp?: WhatsAppChannel | null } = {}): AppContext {
   const location = options.location ?? (process.env.DATA_DIR || defaultDataDir());
   const inMemory = location === ':memory:';
   if (!inMemory) mkdirSync(location, { recursive: true });
@@ -99,7 +108,7 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
   const db = new DatabaseSync(inMemory ? ':memory:' : join(location, 'ronda.db'));
   const store = openStore(db, vault);
   const teams = openTeamStore(db);
-  return {
+  const ctx: AppContext = {
     db,
     vault,
     store,
@@ -114,5 +123,9 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     model: options.model === undefined ? modelFrom(process.env, options.fetch ?? fetch) : options.model,
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),
+    whatsapp: SILENT_BRIDGE,
   };
+  const channel = options.whatsapp === undefined ? channelFrom(process.env, options.fetch ?? fetch) : options.whatsapp;
+  if (channel) ctx.whatsapp = createWhatsAppBridge(ctx, channel, openWhatsAppStore(db));
+  return ctx;
 }

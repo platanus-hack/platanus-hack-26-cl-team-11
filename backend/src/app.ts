@@ -18,12 +18,13 @@ import { roomRoutes } from './routes/rooms.js';
 import { signalRoutes } from './routes/signals.js';
 import { simRoutes } from './routes/sim.js';
 import { teamRoutes } from './routes/teams.js';
+import { WHATSAPP_WEBHOOK_PATH, whatsappRoutes } from './routes/whatsapp.js';
 import { ConnectorError } from './types.js';
 
 const DEFAULT_MAX_BODY_BYTES = 10_000;
 const INGEST_PATH_PREFIX = '/api/ingest/';
 
-const setsItsOwnLimit = (path: string) => path.startsWith(INGEST_PATH_PREFIX) || path === REPO_COMMIT_PATH || path.endsWith(REPO_PASTE_SUFFIX);
+const setsItsOwnLimit = (path: string) => path.startsWith(INGEST_PATH_PREFIX) || path === REPO_COMMIT_PATH || path === WHATSAPP_WEBHOOK_PATH || path.endsWith(REPO_PASTE_SUFFIX);
 
 export function createApp(ctx: AppContext) {
   const api = new Hono();
@@ -53,6 +54,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', assistantRoutes(ctx));
   api.route('/', repoRoutes(ctx));
   api.route('/', simRoutes(ctx));
+  api.route('/', whatsappRoutes(ctx));
 
   return new Hono().route('/api', api).route('/', joinDocRoutes(ctx));
 }

@@ -147,6 +147,17 @@ La respuesta de un agente es una respuesta más de la publicación, con `byAgent
 
 Las personas siguen usando el tablero desde la pestaña Equipo. Los agentes responden preguntas; todavía no publican pedidos ni propuestas.
 
+## WhatsApp
+
+| Ruta | Recibe | Responde |
+|---|---|---|
+| `GET /api/people/<token>/whatsapp` | — | `{ configured, linked, phoneEnding }`. `phoneEnding` son los últimos 4 dígitos |
+| `POST /api/people/<token>/whatsapp/link` | — | 201 con `{ code, url, expiresAt }`. `url` abre WhatsApp con el código escrito; es `null` si no se conoce el número. 503 si falta Kapso |
+| `DELETE /api/people/<token>/whatsapp` | — | El estado, ya sin teléfono |
+| `POST /api/whatsapp/webhook` | El evento de Kapso, firmado | `{ ok: true }` de inmediato; el mensaje se procesa de fondo. 401 si la firma no calza, 404 si falta Kapso |
+
+Qué hace el agente con cada mensaje está en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
+
 ## Agentes
 
 | Ruta | Recibe | Responde |

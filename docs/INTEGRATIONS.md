@@ -212,6 +212,43 @@ Lo aprendido con el iPhone real, con el Atajo mínimo:
 
 Si algo llega en una unidad distinta, se ve en `GET /api/people/<token>/events`.
 
+## WhatsApp
+
+WhatsApp no es una fuente: es el canal entre cada persona y su agente. Pasa por Kapso (`backend/src/whatsapp/`).
+
+Qué hace hoy:
+
+| Momento | Qué pasa |
+|---|---|
+| Conectar | En Ajustes, «Conectar» crea un código de 6 caracteres que vale 15 minutos y abre WhatsApp con el mensaje escrito. Al llegar el código, el teléfono queda unido a la persona |
+| Check-in | La persona le cuenta a su agente cómo viene. El modelo lo lee y lo guarda como un check-in en su memoria privada. La respuesta agrega lo que el agente ve en sus fuentes (energía y carga), sin pasar por el modelo |
+| Permiso | Si el check-in trae un bloqueo en «preguntar», el agente manda dos botones: «Permitir» y «No contar». Con «Permitir» parte una ronda en sus equipos |
+| Propuesta | Cada propuesta de una ronda le llega a cada involucrado con los botones «Aceptar» y «Ahora no» |
+| Presentación | Cuando todos aceptan, cada uno recibe el mensaje que los presenta. Vale igual si alguien aceptó desde el panel |
+| Pregunta | Si la persona pregunta algo para su equipo, queda en el tablero, la responden los agentes y la respuesta armada vuelve por WhatsApp |
+
+Límites:
+
+- WhatsApp solo deja escribir libremente durante las 24 horas siguientes al último mensaje de la persona. Fuera de esa ventana el envío falla y queda en el registro del servidor; el panel sigue funcionando. Por eso el agente todavía no saluda en la mañana: la persona escribe primero.
+- Leer un mensaje de texto necesita el modelo. Conectar el teléfono y los botones funcionan sin él.
+- Con el número de prueba de Kapso (sandbox) solo se le puede escribir al teléfono registrado en esa sesión. Para que entre el público hace falta un número propio conectado en Kapso.
+
+Estado: construido y probado con un Kapso falso. Falta probarlo contra Kapso.
+
+### Cómo se activa
+
+1. Crear una llave en Kapso (Integrations → API keys) y tener un número conectado, o el de prueba.
+2. Cargar `KAPSO_API_KEY`, `KAPSO_PHONE_NUMBER_ID` y `KAPSO_WEBHOOK_SECRET` en Render ([DEPLOY.md](DEPLOY.md#para-activar-whatsapp)).
+3. Registrar el webhook en ese número, con el mismo secreto y solo el evento `whatsapp.message.received`:
+
+```bash
+curl -X POST "https://api.kapso.ai/platform/v1/whatsapp/phone_numbers/$KAPSO_PHONE_NUMBER_ID/webhooks" \
+  -H "X-API-Key: $KAPSO_API_KEY" -H "Content-Type: application/json" \
+  -d '{"whatsapp_webhook":{"kind":"kapso","url":"https://ronda-n8if.onrender.com/api/whatsapp/webhook","events":["whatsapp.message.received"],"secret_key":"'"$KAPSO_WEBHOOK_SECRET"'","active":true}}'
+```
+
+El webhook comprueba la firma (`X-Webhook-Signature`, HMAC-SHA256 del cuerpo en hexadecimal), ignora los demás eventos y no procesa dos veces una misma entrega (`X-Idempotency-Key`).
+
 ## ¿Apple Health reemplaza a Whoop?
 
 **Para sueño, sí. Para recuperación, no.** Whoop escribe en Apple Health el sueño, la frecuencia en reposo, la frecuencia respiratoria y los entrenamientos. No escribe la variabilidad cardíaca ni los puntajes de Recovery y Strain. Como la señal que usamos es sueño, Apple Health alcanza y Whoop queda fuera. Si después se quiere recuperación, Whoop tiene API propia con OAuth.

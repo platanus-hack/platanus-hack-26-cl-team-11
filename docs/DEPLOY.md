@@ -69,6 +69,17 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 | `AGENT_MODEL` | Opcional. Por defecto `claude-opus-5-5` | Qué modelo conversa |
 | `AGENT_ROUND_HOUR` | Opcional. Hora de Santiago, de 0 a 23; por defecto 9. Cualquier otro valor apaga la ronda diaria | Desde qué hora corre sola la ronda de cada día |
 
+### Para activar WhatsApp
+
+El puente de WhatsApp usa Kapso. Sin las tres primeras variables, la sección WhatsApp no aparece en Ajustes y el webhook responde 404. Los pasos están en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).
+
+| Variable | Valor | Para qué |
+|---|---|---|
+| `KAPSO_API_KEY` | La llave del proyecto de Kapso | Enviar mensajes |
+| `KAPSO_PHONE_NUMBER_ID` | El identificador del número en Kapso | Desde qué número se envía. Los mensajes que llegan a otro número se ignoran |
+| `KAPSO_WEBHOOK_SECRET` | Un secreto largo elegido por nosotros, el mismo que se registra en el webhook de Kapso | Comprobar la firma de cada mensaje que llega |
+| `KAPSO_WHATSAPP_NUMBER` | Opcional. El número con código de país, solo dígitos | Armar el link `wa.me`. Si falta, el servidor se lo pregunta a Kapso |
+
 Se cargan en el panel de Render: **ronda → Environment → Add Environment Variable**. Render vuelve a desplegar al guardar. Nunca van en el repo.
 
 Para probar el modelo antes de cargarlas, define la misma variable en tu terminal o en un archivo `.env` en la raíz del repo (git lo ignora) y corre `npm run agents:check`. Arma un equipo de demo en memoria, corre una ronda contra el modelo real y muestra las conversaciones y las propuestas. No toca la base ni producción.
