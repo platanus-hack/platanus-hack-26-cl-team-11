@@ -44,7 +44,7 @@ Todo lo demás (tarjetas, colores, tipografía, layout) ya está cerrado y no se
 
 ## Lo que ya está decidido (no lo cambies)
 
-- Las personas son nodos con su cara (Vita Faces, `design/faces/`). Nombre y estado junto a la cara.
+- Las personas son nodos con su cara (las caras de Ronda: gota de luz con ojos, `design/faces/`; ver «Caras» en `DESIGN.md`). Nombre y estado junto a la cara.
 - Las conexiones son curvas delgadas, nunca rectas.
 - Conexión en reposo: 1 px, gris translúcido. Conexión negociando: degradado, con halo y un punto
   de luz que la recorre.

@@ -370,6 +370,7 @@
     node.innerHTML = '<span class="rd-cara__halo"></span><span class="rd-cara__anillo"></span><span class="rd-cara__gota"><canvas></canvas></span><span class="rd-cara__onda"></span>';
     face.drop = node.querySelector('.rd-cara__gota');
     face.canvas = face.drop.firstChild;
+    node.lastChild.addEventListener('animationend', function () { node.classList.remove('is-onda'); });
     face.drop.insertAdjacentHTML('beforeend', eyesMarkup(face));
     face.svg = face.drop.lastElementChild;
     face.eyes = Array.prototype.map.call(face.svg.querySelectorAll('[data-eye]'), function (g) {
@@ -625,7 +626,7 @@
       drawDrop(face);
       if (frame % 2) return;
       var want = 0;
-      if (follow) { var dx = pointer.x - face.cx, dy = pointer.y - face.cy; want = Math.max(face.now.hover, 1 - smooth((Math.sqrt(dx * dx + dy * dy) - 90) / 420)); }
+      if (follow) { var dx = pointer.x - face.cx, dy = pointer.y - face.cy; want = Math.max(face.now.hover, 1 - smooth((Math.sqrt(dx * dx + dy * dy) - 120) / 700)); }
       face.near += (want - face.near) * (1 - Math.exp(-dt * 2 * 14));
       drawEyes(face, t, follow ? pointer : null);
     });

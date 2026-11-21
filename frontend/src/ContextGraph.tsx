@@ -1,9 +1,11 @@
 import { formatAgo } from './ago';
+import { Face } from './Face';
 import type { HubLink, HubSource } from './hubApi';
 import { SourceGlyph } from './SourceGlyph';
-import meFace from '../../design/faces/mati.png';
 
 export const ME = 'me';
+
+const ME_FACE = 'mati';
 
 const WIDTH = 1000;
 const HEIGHT = 720;
@@ -103,7 +105,7 @@ export function ContextGraph({ name, sources, links, selected, incoming, now, on
         })}
 
       <button type="button" className="rd-source app-me" style={percent(CENTER)} aria-pressed={selected === ME} onClick={() => onSelect(ME)}>
-        <img className="rd-face rd-face--small" src={meFace} alt="" />
+        <Face name={ME_FACE} size="node" />
         <span className="rd-source__name">{name}</span>
         <span className="rd-source__when">{latest ? formatAgo(latest, now) : 'Sin fuentes'}</span>
       </button>

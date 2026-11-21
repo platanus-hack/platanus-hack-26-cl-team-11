@@ -1,13 +1,47 @@
-const ATLAS_SIDE = 8;
-const ATLAS_FACES = ATLAS_SIDE * ATLAS_SIDE;
-const HASH_FACTOR = 31;
+import { useEffect, useRef } from 'react';
+import '../../design/luz/luz.js';
+import '../../design/faces/caras.js';
 
-const faceIndexOf = (name: string) => [...name].reduce((hash, letter) => (hash * HASH_FACTOR + (letter.codePointAt(0) ?? 0)) % ATLAS_FACES, 0);
+export type FaceState = 'reposo' | 'activa' | 'pensando' | 'lista' | 'ausente';
+export type FaceSize = 'row' | 'node';
 
-const percentOf = (cell: number) => `${(cell / (ATLAS_SIDE - 1)) * 100}%`;
+interface MountedFace {
+  set(state: FaceState): MountedFace;
+  destroy(): void;
+}
 
-export function Face({ name }: { name: string }) {
-  const index = faceIndexOf(name);
-  const backgroundPosition = `${percentOf(index % ATLAS_SIDE)} ${percentOf(Math.floor(index / ATLAS_SIDE))}`;
-  return <span className="rd-face rd-face--tiny app-face" style={{ backgroundPosition }} aria-hidden="true" />;
+declare global {
+  interface Window {
+    RondaCaras: { mount(node: HTMLElement, name: string, options: { trigger?: Element }): MountedFace };
+  }
+}
+
+const ROW_SELECTOR = 'a, button';
+
+interface FaceProps {
+  name: string;
+  state?: FaceState;
+  size?: FaceSize;
+}
+
+export function Face({ name, state = 'reposo', size = 'row' }: FaceProps) {
+  const host = useRef<HTMLSpanElement>(null);
+  const face = useRef<MountedFace | null>(null);
+
+  useEffect(() => {
+    const node = host.current;
+    if (!node) return;
+    const mounted = window.RondaCaras.mount(node, name, { trigger: node.closest(ROW_SELECTOR) ?? undefined });
+    face.current = mounted;
+    return () => {
+      face.current = null;
+      mounted.destroy();
+    };
+  }, [name, size]);
+
+  useEffect(() => {
+    face.current?.set(state);
+  }, [name, size, state]);
+
+  return <span ref={host} className={`app-face app-face--${size}`} aria-hidden="true" />;
 }

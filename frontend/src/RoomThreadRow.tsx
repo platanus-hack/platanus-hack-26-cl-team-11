@@ -19,7 +19,7 @@ export function RoomThreadRow({ thread, people, open, onToggle }: RoomThreadRowP
   return (
     <div>
       <Item
-        icon={<Face name={nameOf(thread.from)} />}
+        icon={<Face name={nameOf(thread.from)} state={thread.help ? 'reposo' : 'pensando'} />}
         title={`${nameOf(thread.from)} → ${nameOf(thread.to)}`}
         subtitle={`${thread.topic} · ${thread.help ? HELP_LABEL[thread.help] : 'Conversando'}`}
         expanded={readable ? open : undefined}
