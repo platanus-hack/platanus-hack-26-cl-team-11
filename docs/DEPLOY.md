@@ -2,6 +2,8 @@
 
 El producto corre en Render como un solo servicio web: el backend sirve la API y el frontend ya compilado. La configuración está en [`render.yaml`](../render.yaml).
 
+**En producción:** https://ronda-n8if.onrender.com (servicio `ronda-n8if`, en el espacio de trabajo de Ian en Render, creado el 21-nov-2026).
+
 ## Cómo funciona
 
 ```
@@ -14,23 +16,23 @@ push a main  →  Render instala y compila  →  publica
 
 Las pruebas se corren en local con `npm test` y `npm run type-check`. `.github/workflows/ci.yml` tiene esos mismos chequeos, pero solo se lanza a mano: las Actions de este repo no arrancan por un problema de pago de la cuenta dueña (probado el 21-nov-2026).
 
-## Crear el servicio (una sola vez)
+## Cómo se creó el servicio
 
-1. En Render: **New → Blueprint** y elige el repo `m5b6/platanus-hack-26`. Render necesita acceso al repo desde la cuenta de GitHub que lo contiene.
-2. Render lee `render.yaml` y propone un servicio `ronda` con un disco de 1 GB. Confirma.
-3. Al terminar el primer despliegue, la dirección queda como `https://<nombre>.onrender.com`.
+Ya está creado; esto queda como referencia.
 
-### Acceso al repositorio privado y créditos de la hack
+1. El dueño del repo instaló la app de Render en su cuenta de GitHub con acceso a `platanus-hack-26`.
+2. Quien despliega conectó su propia cuenta de GitHub en Render. Sin ese paso Render responde «the repository, branch, or Blueprint file could not be accessed», aunque el permiso del repo esté bien.
+3. Se creó el Blueprint desde la línea de comandos: `render ea blueprints create --repo <repo> --branch main` y luego `render ea blueprints approve <id>`. El equivalente en el panel es **New → Blueprint**.
 
-El repositorio pertenece a `m5b6`. Los créditos están en el workspace de Ian. Son dos comprobaciones distintas.
+El servicio usa el plan pagado más chico, porque el disco persistente no existe en el plan gratuito.
 
-1. En la [instalación de Render de m5b6](https://github.com/settings/installations/31963285), deja marcada **Only select repositories**. Busca `m5b6/platanus-hack-26`, agrégalo a la selección existente y guarda. Vuelve a abrir la instalación y comprueba que el repo figura en la lista.
-2. En el workspace con créditos, Ian abre **New → Blueprint** y busca el repo en la lista de GitHub. Si aparece, revisa `main`, `render.yaml`, el cargo estimado y el disco de 1 GB antes de aplicar. Si no aparece, comprueba qué credencial de GitHub está vinculada a ese workspace. El enlace «Public Git Repository» requiere un repo público.
-3. Tras el primer deploy, copia desde Render la URL del servicio y el SHA marcado como **Live**. Abre la portada y confirma que `GET /api/health` devuelve HTTP 200 con `{"ok":true}`. Registra en el hilo del equipo la URL, el SHA y el resultado.
+### Operarlo desde la terminal
 
-El 21 de noviembre se comprobó en local el commit `55c9077` con Node 22.23.1. Pasaron las 84 pruebas y el chequeo de tipos. Con los comandos del Blueprint, el proceso sirvió la portada «Ronda» y la respuesta de salud esperada. Ese mismo día se reabrió la instalación de GitHub y se verificó que incluía `m5b6/platanus-hack-26` entre seis repositorios seleccionados. Falta que Ian confirme la visibilidad del Blueprint en su workspace y comparta la primera URL y el SHA en estado **Live**.
-
-El servicio usa un plan pagado porque el disco persistente no existe en el plan gratuito.
+```bash
+render deploys list srv-dc0j2qrm8hqs73emf3ig     # estado de los despliegues
+render logs -r srv-dc0j2qrm8hqs73emf3ig          # registros
+render deploys create srv-dc0j2qrm8hqs73emf3ig   # volver a desplegar a mano
+```
 
 ## Variables
 
