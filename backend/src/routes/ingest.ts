@@ -9,6 +9,8 @@ import { asObject, NOT_FOUND } from './shared.js';
 const MAX_BODY_BYTES = 1_000_000;
 const NOTHING_READABLE = 'No pudimos leer ningún dato de salud en el envío.';
 const RECEIVED_ONE = 'Listo. Llegaron tus datos.';
+const MOST_DAYS_FROM_CURRENT_SHORTCUT = 10;
+const OLD_SHORTCUT_HINT = 'Tu Atajo es una versión antigua y lee un mes entero, por eso tarda. Bórralo en la app Atajos y agrégalo de nuevo desde tu página de Ronda.';
 const NOTHING_SENT = 'Tu teléfono no mandó datos de salud. Revisa que Salud tenga sueño o pasos registrados.';
 
 const shortDay = (day: string) => day.slice(5).split('-').reverse().join('-');
@@ -47,9 +49,10 @@ export function ingestRoutes({ db, store }: AppContext) {
     }
     const saved = batch.events.map((draft) => store.saveEvent(person.token, draft));
     const days = batch.events.map((draft) => draft.occurredAt);
-    noted(true, receivedMessage(days), days.length);
+    const message = days.length > MOST_DAYS_FROM_CURRENT_SHORTCUT ? `${receivedMessage(days)} ${OLD_SHORTCUT_HINT}` : receivedMessage(days);
+    noted(true, message, days.length);
     return c.json(
-      { ok: true, id: saved.at(-1)?.id ?? null, summary: batch.events.at(-1)?.summary ?? null, days: days.length, from: days[0], to: days.at(-1), ignored: batch.ignored, message: receivedMessage(days) },
+      { ok: true, id: saved.at(-1)?.id ?? null, summary: batch.events.at(-1)?.summary ?? null, days: days.length, from: days[0], to: days.at(-1), ignored: batch.ignored, message },
       201,
     );
   });

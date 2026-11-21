@@ -47,3 +47,13 @@ test('a delivery that brings nothing readable is kept as a failed delivery with 
   assert.deepEqual({ ok: failed.delivery?.ok, message: failed.delivery?.message }, { ok: false, message: 'No pudimos leer ningún dato de salud en el envío.' });
   assert.equal(failed.sync, null);
 });
+
+test('a delivery with a whole month of days says the shortcut is an old version', async () => {
+  const { send, health } = setup();
+  const month = Array.from({ length: 30 }, (_, index) => `2026-10-${String(index + 1).padStart(2, '0')}|${5000 + index}`).join('\n');
+  const response = await send({ steps_by_day: month });
+  assert.equal(response.status, 201);
+  const body = (await response.json()) as { message: string };
+  assert.match(body.message, /^Listo\. Llegaron 30 días de datos, del 01-10 al 30-10\. Tu Atajo es una versión antigua/);
+  assert.equal((await health()).delivery?.message, body.message);
+});

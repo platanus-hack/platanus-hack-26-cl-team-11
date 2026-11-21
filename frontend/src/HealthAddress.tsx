@@ -72,6 +72,7 @@ export function HealthAddress({ url, sync, delivery, shortcut, onCheck }: Health
       {shortcut && (
         <>
           <span className="rd-note">En tu iPhone, agrega el Atajo una sola vez. Después toca «Enviar datos» y llegan tu sueño, tus pasos y tu energía activa de los últimos días.</span>
+          <span className="rd-note">La primera vez, iOS pregunta si el Atajo puede leer Salud y enviar esos datos a Ronda. Elige «Permitir siempre». El número que muestra es cuántos registros van.</span>
           <div className="rd-actions">
             <a className="rd-button rd-button--quiet rd-button--small app-link" href={shortcut.url} target="_blank" rel="noreferrer">
               Agregar Atajo
