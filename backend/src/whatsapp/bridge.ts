@@ -4,10 +4,10 @@ import { AgentModelError } from '../agents/model.js';
 import { cardFor, runRound } from '../agents/round.js';
 import type { PartyDecision, Proposal } from '../agents/store.js';
 import { MAX_TEXT_LENGTH as MAX_POST_LENGTH, openBoardStore, type BoardPost } from '../board/store.js';
-import { isMood, MAX_CHECKIN_TEXT_LENGTH, recordCheckin } from '../checkins.js';
+import { CHECKIN_SOURCE, isMood, MAX_CHECKIN_TEXT_LENGTH, recordCheckin, type Mood } from '../checkins.js';
 import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
-import { deriveSignals, type LevelSignal } from '../signals.js';
+import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
 import type { JsonObject, Person } from '../types.js';
 import { digitsOf, type ReplyButton, type WhatsAppChannel } from './kapso.js';
 import { InboundReading, isIntent, readingPrompt, readingSystemFor } from './reading.js';
@@ -16,6 +16,8 @@ import { LINK_CODE_LENGTH, type PromptKind, type WhatsAppStore } from './store.j
 const UNKNOWN_SENDER_QUIET_MS = 60 * 60_000;
 const MAX_TRACKED_SENDERS = 5000;
 const VISIBLE_PHONE_DIGITS = 4;
+const RECENT_EVENTS = 50;
+const UNSTATED_MOOD: Mood = 'normal';
 const NOT_A_CODE_CHARACTER = /[^0-9A-Z]+/;
 
 const ALLOW = 'si';
@@ -114,6 +116,13 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     return todayLine([signals.energy, signals.load]);
   };
 
+  const moodToday = (person: Person, now: Date): Mood | null => {
+    const today = dayKeyOf(now);
+    const latest = ctx.store.listEvents(person.token, RECENT_EVENTS).find((event) => event.source === CHECKIN_SOURCE && dayKeyOf(new Date(event.occurredAt)) === today);
+    const mood = asRecord(latest?.raw).mood;
+    return isMood(mood) ? mood : null;
+  };
+
   const askPermissions = (personToken: string): void => {
     const person = ctx.store.findPerson(personToken);
     if (!person || !links.phoneOf(personToken)) return;
@@ -174,10 +183,11 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel, 
     if (intent === 'pregunta') return askQuestion(person, question);
 
     const now = new Date();
-    const mood = reading.mood.trim().toLowerCase();
+    const stated = reading.mood.trim().toLowerCase();
+    const earlier = moodToday(person, now);
     const within = (text: string) => [...text.trim()].slice(0, MAX_CHECKIN_TEXT_LENGTH).join('') || null;
-    recordCheckin(ctx.store, person.token, { mood: isMood(mood) ? mood : 'normal', blocker: within(reading.blocker), note: within(reading.note) }, now);
-    sendText(person.token, [reply || COPY.noted, todayOf(person, now)].filter(Boolean).join('\n'));
+    recordCheckin(ctx.store, person.token, { mood: isMood(stated) ? stated : (earlier ?? UNSTATED_MOOD), blocker: within(reading.blocker), note: within(reading.note) }, now);
+    sendText(person.token, [reply || COPY.noted, earlier === null ? todayOf(person, now) : null].filter(Boolean).join('\n'));
     askPermissions(person.token);
   };
 

@@ -189,6 +189,21 @@ test('a check-in by WhatsApp stays private, the agent asks before telling a bloc
   assert.equal(sent.at(-1)?.body, 'Eso ya lo respondiste.');
 });
 
+test('a later message that does not say how the person feels keeps the mood of the day and does not repeat what the sources show', async () => {
+  const readings: Reading[] = [
+    { intent: 'checkin', mood: 'cansada', reply: 'Anotado.' },
+    { intent: 'checkin', mood: '', note: 'Avanzó con el informe.', reply: 'Queda anotado.' },
+  ];
+  const { ctx, ana, sent, link, say } = setup(() => readings.shift() ?? { intent: 'otro' });
+  await link(ana.token, ANA_PHONE);
+  await say(ANA_PHONE, 'vengo cansada');
+  assert.match(sent.at(-1)?.body ?? '', /^Anotado\.\nPor tus fuentes veo: energía baja hoy/);
+  await say(ANA_PHONE, 'avancé con el informe');
+  assert.equal(sent.at(-1)?.body, 'Queda anotado.');
+  const moods = ctx.store.listEvents(ana.token).filter((event) => event.source === 'checkin').map((event) => (event.raw as { mood: string }).mood);
+  assert.deepEqual(moods, ['cansada', 'cansada']);
+});
+
 test('a no keeps the blocker private and a button from another phone does nothing', async () => {
   const { ctx, ana, tomas, sent, link, say, press, webhook, until, buttonOf } = setup(() => ({ intent: 'checkin', mood: 'mal', blocker: TOPIC, reply: 'Anotado.' }));
   await link(ana.token, ANA_PHONE);
