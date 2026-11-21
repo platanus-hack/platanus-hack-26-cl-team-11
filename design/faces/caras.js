@@ -19,6 +19,10 @@
  *   RondaCaras.still(t)     detiene la animación y deja todas las caras en el instante t (capturas)
  *   RondaCaras.STATES, RondaCaras.TEAM, RondaCaras.TEAM_LIGHT, RondaCaras.recipeFor(nombre), RondaCaras.keyFor(nombre),
  *   RondaCaras.lightFor(nombre)
+ *   RondaCaras.customize(nombre, { recipe, palette })   la cara que la persona eligió para sí; toda cara de ese nombre
+ *                 que se monte después la usa. Sin argumento vuelve a la que da el nombre. Avisa con el evento
+ *                 «rondacaras:cambio» en window (detail.key) para que quien ya la montó la vuelva a montar.
+ *   RondaCaras.CHOICES      lo que se puede elegir: forma de ojos, tamaño, anteojos, ceja, marca, pestañas y luz
  *
  * Hover y presionada no son estados que se fijan: salen solos del puntero, del foco y del teclado.
  * Necesita design/luz/luz.js cargado antes (la lava) y las clases rd-cara de design/ronda.css.
@@ -128,6 +132,38 @@
       seed: 0.05 + 0.9 * ((hashText('ojos2:' + seed) % 9973) / 9973),
       offset: (hashText('fase:' + seed) % 4000) / 100
     };
+  }
+
+  /* ---------- La cara que cada persona eligió para sí ---------- */
+
+  var CHOICES = {
+    kind: ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco'],
+    size: { chica: 4.2, media: 5.2, grande: 6.4 },
+    glasses: [null, 'redondo', 'suave', 'pantos', 'ceja'],
+    brow: [null, 'plana', 'arco', 'alzada'],
+    mark: [null, 'lunar', 'pecas'],
+    tones: 11
+  };
+  var CUSTOM = {};
+
+  function paletteFromTone(tone) {
+    var wheel = CHOICES.tones;
+    return [tone % wheel, (tone + 1) % wheel, (tone + 3) % wheel, (tone + wheel - 1) % wheel];
+  }
+
+  function customize(name, look) {
+    var key = keyFor(name);
+    if (look && (look.recipe || look.palette)) CUSTOM[key] = { recipe: look.recipe || null, palette: look.palette || null };
+    else delete CUSTOM[key];
+    if (root.dispatchEvent && root.CustomEvent) root.dispatchEvent(new root.CustomEvent('rondacaras:cambio', { detail: { key: key } }));
+  }
+
+  function chosenRecipe(seed) {
+    var base = TEAM[seed] || recipeFor(seed), custom = CUSTOM[seed], recipe = {}, key;
+    if (!custom || !custom.recipe) return base;
+    for (key in base) recipe[key] = base[key];
+    for (key in custom.recipe) recipe[key] = custom.recipe[key];
+    return tidy(recipe);
   }
 
   /* ---------- Forma del ojo, para el izquierdo: la comisura externa mira a -x ---------- */
@@ -342,7 +378,8 @@
     var seed = keyFor(name), light = lightFor(name);
     var size = settings.size || node.clientWidth || 92;
     var level = settings.level || levelFor(size);
-    var base = settings.recipe || TEAM[seed] || recipeFor(seed);
+    var base = settings.recipe || chosenRecipe(seed);
+    var chosenPalette = CUSTOM[seed] && CUSTOM[seed].palette;
     var live = {}, key;
     for (key in base) live[key] = base[key];
     if (level === 's') {
@@ -356,7 +393,7 @@
     var face = {
       node: node, seed: seed, seedInt: hashText('ojos2:' + seed), size: size, level: level, recipe: live, k: k, a: a, b: b,
       glasses: Boolean(live.glasses), reach: live.glasses ? [2.2, 1.6] : [3.6, 2.4], x: [50 - live.gap, 50 + live.gap], arcs: live.kind === 'arco',
-      light: light, palette: settings.palette || light.palette, rest: Boolean(settings.rest),
+      light: light, palette: settings.palette || chosenPalette || light.palette, rest: Boolean(settings.rest),
       group: settings.group || null, trigger: settings.trigger || null, index: 0, cx: 0, cy: 0, near: 0, visible: true,
       state: 'reposo', held: { hover: false, press: false }, pointer: { hover: false, press: false },
       goal: { hover: 0, press: 0, active: 0, think: 0, done: 0, away: 0 },
@@ -657,5 +694,5 @@
 
   function group() { groupCount += 1; return { seed: hashText('grupo' + groupCount), faces: [] }; }
 
-  root.RondaCaras = { mount: mount, group: group, still: still, recipeFor: recipeFor, keyFor: keyFor, lightFor: lightFor, levelFor: levelFor, STATES: STATES, TEAM: TEAM, TEAM_LIGHT: TEAM_LIGHT };
+  root.RondaCaras = { mount: mount, group: group, still: still, recipeFor: recipeFor, keyFor: keyFor, lightFor: lightFor, customize: customize, paletteFromTone: paletteFromTone, CHOICES: CHOICES, levelFor: levelFor, STATES: STATES, TEAM: TEAM, TEAM_LIGHT: TEAM_LIGHT };
 })(window);
