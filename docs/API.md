@@ -228,6 +228,30 @@ En cada propuesta, `parties` es `[{ name, role, answer, me }]`, con `role` en `p
 
 **Para dibujar el grafo:** cada elemento de `threads` es una flecha de `requesterName` a `helperName`, que es el sentido que fija [AGENT_MODEL.md](AGENT_MODEL.md): de quien necesita ayuda a quien puede darla. `help` dice si esa persona puede. Cómo corre una ronda está en [ARCHITECTURE.md](ARCHITECTURE.md#agentes).
 
+## Mesa pública
+
+Una sola mesa para todas las personas de Montu. Nadie se inscribe: participa quien tenga algo publicado y no haya salido.
+
+| Ruta | Recibe | Responde |
+|---|---|---|
+| `GET /api/people/<token>/mesa` | — | El estado de la mesa para quien mira |
+| `POST /api/people/<token>/mesa/rounds` | — | 202 `{ id, status, startedAt }`. La ronda corre de fondo |
+| `PUT /api/people/<token>/mesa/interval` | `{ "seconds": 60 }` o `{ "seconds": null }` | `{ intervalSeconds }` |
+| `PUT /api/people/<token>/mesa/membership` | `{ "member": false }` | `{ member }` |
+
+`POST …/rounds` y `PUT …/interval` responden 403 a quien no opera la mesa. Opera quien entró con un correo de `MESA_OPERATORS`; si el servidor no tiene el ingreso con Google configurado, cualquiera. `POST …/rounds` responde 503 sin credenciales del modelo y 409 con una ronda en curso. `seconds` va de 10 a 86.400; `null` deja la mesa en manual.
+
+Forma de `GET …/mesa`:
+
+| Campo | Contenido |
+|---|---|
+| `configured`, `operator`, `member`, `publishing` | Si hay modelo, si quien mira opera, si su agente está en la mesa y si tiene algo publicado |
+| `intervalSeconds` | Cada cuántos segundos puede repetirse la ronda, o `null` si es manual |
+| `round` | La última ronda, igual que en `GET …/agents` |
+| `estimate` | Lo que gastaría una ronda ahora: `{ people, needs, digests, calls: { min, likely, max }, tokens: { input, output, total, max }, measured }`. `measured` es `true` cuando ya se calibró con rondas medidas |
+| `usage` | `{ lastRound: { calls, tokens, measured } o null, lastDayTokens, dailyCap }` |
+| `asks`, `threads`, `proposals` | Igual que en `GET …/agents`, para la mesa |
+
 ## Servidor de contexto (datos de prueba)
 
 `GET /api/context/<token>`, `POST /api/context/<token>/push`, `POST` y `DELETE /api/context/<token>/sources/<fuente>` y `POST /api/context/<token>/simulate`. Están descritas en [ARCHITECTURE.md](ARCHITECTURE.md#servidor-de-contexto-datos-de-prueba). Usan tablas propias y no tocan los eventos reales ni las señales.

@@ -182,6 +182,16 @@ Una ronda parte de dos formas: con «Iniciar ronda» en la pestaña Equipo, o so
 | `POST /api/people/<token>/agents/asks` | `{ "topic": "…", "allow": true }`: permite o niega que tu agente pida ayuda con ese tema |
 | `POST /api/people/<token>/agents/proposals/<id>/answer` | `{ "answer": "acepta" }` o `"rechaza"` |
 
+### Cuánto gasta una ronda
+
+Cada llamada al modelo informa sus tokens (`onUsage` en `agents/model.ts`): 50x y Anthropic entregan el número medido; con el Claude de la terminal se aproxima por caracteres. `runRound` suma las llamadas de su ronda y las guarda en `agent_round_usage`. Antes de iniciar, `agents/estimate.ts` calcula lo que gastaría una ronda sin llamar al modelo: arma los prompts reales de cada pedido abierto y los pasa a tokens con la razón medida en las últimas rondas. Sin rondas medidas usa 3,3 caracteres por token y 150 tokens de salida por llamada.
+
+### Mesa pública
+
+`backend/src/mesa/`. Una sola mesa para todas las personas. No es membresía de equipo: es una fila fija en `teams` (`mesa-publica`) sin integrantes guardados, para que el onboarding, el ingreso y «preguntarle al equipo» sigan viendo solo los equipos reales. Participa cada persona no simulada que no haya salido, y a la conversación entra solo quien tiene algo publicado.
+
+La ronda se inicia a mano o sola. Un temporizador revisa cada 5 segundos y parte una ronda solo si se cumplen todas: hay intervalo elegido, no hay ronda en curso, pasó el intervalo desde la última, no se llegó al tope de tokens de las últimas 24 horas (`MESA_DAILY_TOKEN_CAP`, 3.000.000 por defecto) y cambió la huella de lo publicado (versión del repo, frases, temas y pedidos de cada persona). Sin nada nuevo no gasta. Las propuestas llegan a cada persona por los mismos avisos de una ronda de equipo.
+
 ### Preguntarle al equipo
 
 Una persona publica una pregunta en el tablero y recibe una sola respuesta armada con lo que saben los agentes de los demás, sin interrumpir a nadie (`agents/ask.ts`).

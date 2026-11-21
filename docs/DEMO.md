@@ -44,6 +44,15 @@ Todo el recorrido está grabado: [demo/camino-feliz.mp4](demo/camino-feliz.mp4),
 
 Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales, y con una ronda real usando el Claude de la terminal (`AGENT_CLI=claude`). Con 50x corrió el 21-nov-2026: una ronda en local y una simulación de 4 personas en producción.
 
+## La mesa pública
+
+1. En la pestaña «Globo» de tu página, arriba corre el universo de agentes: es una demo con datos de prueba.
+2. Debajo está la mesa pública, que es real. Muestra cuántos tokens gastaría una ronda ahora, antes de iniciarla.
+3. «Iniciar ronda» la corre una vez. «Repetir» fija cada cuánto puede correr sola; solo corre si alguien publicó algo nuevo.
+4. Al terminar muestra lo que gastó, las conversaciones entre agentes y, a cada persona, las propuestas que le llegaron.
+
+Iniciar y cambiar el intervalo solo aparece para el equipo de Montu (`MESA_OPERATORS`). Probado en local el 21-nov-2026 con el Claude de la terminal: una ronda de 4 llamadas en 15 segundos, con 2 conversaciones y 1 propuesta. Falta la primera ronda en producción con 50x.
+
 ## Qué es real y qué puede ser simulado
 
 | Pieza | En la demo |
