@@ -149,7 +149,7 @@ class Component extends DCLogic {
         if (self.drag.moved > 5) { cv.style.cursor = 'grabbing'; self.uy += dy; self.up = Math.max(-0.9, Math.min(0.9, self.up + dp)); self.vy = dy / dts; self.vp = dp / dts; self.idle = 0; self.turnTo = null; }
         self.drag.x = m.x; self.drag.y = m.y; self.drag.t = now;
       };
-      this.onUp = function (e) { var d = self.drag; self.drag = null; cv.style.cursor = 'grab'; if (d && d.moved <= 5) self.click(at(e)); };
+      this.onUp = function (e) { var d = self.drag; self.drag = null; cv.style.cursor = 'grab'; if (e.type === 'pointerup' && d && d.moved <= 5) self.click(at(e)); };
       this.onLeave = function () { self.mouse = null; };
       cv.addEventListener('pointerdown', this.onDown);
       cv.addEventListener('pointermove', this.onMove);
@@ -256,6 +256,8 @@ class Component extends DCLogic {
   }
 
   click(m) {
+    const miniature=this.motionSpots && pickMotionSpot(this.motionSpots,m);
+    if(miniature && this.openThread){this.openThread(miniature.a,miniature.b);return;}
     var h = this.hit(m);
     if (h >= 0) {
       for (var i = 0; i < this.groups.length; i++) {

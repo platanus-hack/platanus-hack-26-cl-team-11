@@ -243,11 +243,14 @@ function mountThreadInspector(graph,initialKind) {
   return open;
 }
 
+function pickMotionSpot(spots,point) {
+  // The last miniature painted is the upper surface if two hit areas overlap.
+  return spots.findLast(spot=>Math.abs(spot.x-point.x)<spot.width*.52 && Math.abs(spot.y-point.y)<spot.width*.38);
+}
+
 function pickProjectedThread(view,m,tolerance,activeOnly=false) {
-  for(const spot of view.spots){
-    if(Math.abs(spot.x-m.x)<spot.width*.52 && Math.abs(spot.y-m.y)<spot.width*.38)
-      return {a:spot.a,b:spot.b};
-  }
+  const spot=pickMotionSpot(view.spots,m);
+  if(spot) return spot;
   let best=tolerance, picked=null;
   function test(a,b,c,extent,topic) {
     const dist=threadHit(m,view.points[a],view.points[b],c,extent,best);
