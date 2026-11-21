@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
 import { ContextPage } from './ContextPage';
 import { HomePage } from './HomePage';
@@ -34,6 +35,7 @@ function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean
 
 export function App() {
   const [, section, token] = window.location.pathname.split('/');
+  if (section === 'duelos') return <Shell wide><DuelsPage /></Shell>;
   if (section === 'contexto' && token)
     return (
       <Shell wide>
