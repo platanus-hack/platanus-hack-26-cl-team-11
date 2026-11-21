@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { initialState, apply, replay, view, settle, expireOrders } from './exchange-engine.mjs';
 import { propose, evaluate, EVENT_END, KINDS } from './exchange-contracts.mjs';
+import { starterQuote } from './exchange-quotes.mjs';
 
 const minute = 60000;
 const strip = 60 * minute;
@@ -50,41 +51,60 @@ function deskSpecs(board, expiry) {
     return { ...spec, strike: basis, width };
   });
 }
-function openDesk(ledger, board, now, missingOnly) {
-  const expiry = missingOnly
+function postDeskQuotes(ledger, board, market, now, replace) {
+  const actor = house(market.kind);
+  const own = view(ledger.engine, actor, market.id, now).wallet;
+  const size = { buy: 3, sell: 3 };
+  if (replace) {
+    // Update only the still-open quantity from the original demonstration quotes.
+    size.buy = size.sell = 0;
+    for (const order of own.orders.filter((o) => o.marketId === market.id)) {
+      size[order.side] += order.remaining;
+      apply(ledger.engine, actor, { type: 'cancel', orderId: order.id, nonce: 'replace:' + order.id }, now);
+    }
+  }
+  const quote = starterQuote(market, board);
+  const { book, wallet } = view(ledger.engine, actor, market.id, now);
+  const bid = Math.min(quote.bid, (book.asks[0]?.price ?? 100) - 1);
+  const ask = Math.max(quote.ask, (book.bids[0]?.price ?? 0) + 1);
+  let available = wallet.available;
+  for (const [side, price, margin] of [
+    ['buy', bid, bid],
+    ['sell', ask, 100 - ask],
+  ]) {
+    if (price < 1 || price > 99) continue;
+    const qty = Math.min(size[side], Math.floor(available / margin));
+    if (!qty) continue;
+    apply(
+      ledger.engine,
+      actor,
+      { type: 'order', marketId: market.id, side, price, qty, nonce: (replace ? 'relist2:' : 'start2:') + market.id + side },
+      now,
+    );
+    available -= qty * margin;
+  }
+  ledger.deskQuotes[market.id] = { ...quote, at: board.at };
+}
+function openDesk(ledger, board, now, updating) {
+  const expiry = updating
     ? ledger.nextStrip
     : Math.min(EVENT_END, (Math.floor(now / strip) + 1) * strip + (now % strip > strip - 5 * minute ? strip : 0));
   if (expiry < now + 30000) return false;
-  const featured = missingOnly ? [...ledger.featured] : [];
-  const existingKinds = new Set(
-    missingOnly
-      ? view(ledger.engine, null, undefined, now)
-          .markets.filter((m) => featured.includes(m.id))
-          .map((m) => m.kind)
-      : [],
-  );
+  ledger.deskQuotes ??= {};
+  const featured = updating ? [...ledger.featured] : [];
+  const existing = view(ledger.engine, null, undefined, now).markets.filter((m) => featured.includes(m.id));
   for (const spec of deskSpecs(board, expiry)) {
-    if (existingKinds.has(spec.kind)) continue;
+    const previous = existing.find((m) => m.kind === spec.kind);
+    if (previous) {
+      if (!ledger.deskQuotes[previous.id]) postDeskQuotes(ledger, board, previous, now, true);
+      continue;
+    }
     const market = propose(spec, board, now);
     const actor = house(spec.kind);
     apply(ledger.engine, actor, { type: 'join' }, now);
     apply(ledger.engine, actor, { type: 'list', market }, now);
     featured.push(market.id);
-    // Reserve at most the cash left in this desk. All public players can hit these quotes.
-    const available = view(ledger.engine, actor, market.id, now).wallet.available;
-    const qty = Math.min(3, Math.floor(available / 80));
-    if (qty > 0)
-      for (const [side, price] of [
-        ['buy', 40],
-        ['sell', 60],
-      ]) {
-        apply(
-          ledger.engine,
-          actor,
-          { type: 'order', marketId: market.id, side, price, qty, nonce: market.id + side },
-          now,
-        );
-      }
+    postDeskQuotes(ledger, board, market, now, false);
   }
   ledger.nextStrip = expiry;
   ledger.featured = featured;
@@ -161,7 +181,9 @@ export async function operate(ledger, { actor, action, selected }, prices) {
   if (ledger.version !== 1) throw Error('Unsupported ledger version');
   let now = Date.now();
   let changed = await updateMaturities(ledger, selected, prices, now);
-  const missingOnly = now < ledger.nextStrip && ledger.featured.length < tradingKinds.length;
+  const missingOnly =
+    now < ledger.nextStrip &&
+    (ledger.featured.length < tradingKinds.length || ledger.featured.some((id) => !ledger.deskQuotes?.[id]));
   if ((now >= ledger.nextStrip || missingOnly) && now < EVENT_END) {
     let board;
     try {
@@ -205,6 +227,7 @@ export async function operate(ledger, { actor, action, selected }, prices) {
   const nowView = Date.now();
   const picked = (action?.type === 'list' ? result.marketId : null) || selected || ledger.featured[0];
   const state = view(ledger.engine, actor, picked, nowView);
+  for (const market of state.markets) market.starterQuote = ledger.deskQuotes?.[market.id] ?? null;
   state.featured = ledger.featured;
   state.serverTs = nowView;
   return { changed, result: action ? { result, view: state } : state };
