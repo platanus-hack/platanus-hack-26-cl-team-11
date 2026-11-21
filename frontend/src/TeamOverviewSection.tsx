@@ -90,7 +90,6 @@ export function TeamOverviewSection({ token, team, first }: { token: string; tea
               <PersonCard key={position} member={member} order={position} />
             ))}
           </div>
-          <p className="rd-note">De cada persona ves lo que eligió compartir en Ajustes. Los números del equipo necesitan al menos tres personas.</p>
         </>
       )}
     </div>
