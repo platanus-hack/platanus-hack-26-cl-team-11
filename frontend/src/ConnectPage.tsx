@@ -30,6 +30,11 @@ export function ConnectPage({ token }: { token: string }) {
         Hola, <span className="rd-gradient-text">{page.name}.</span>
       </h1>
       <p className="rd-note">Lo que conectes queda en tu memoria privada. Tú decides qué sale de ahí.</p>
+      <div className="rd-actions">
+        <a className="rd-button rd-button--quiet app-link" href={`/contexto/${encodeURIComponent(token)}`}>
+          Ver tu mapa de contexto
+        </a>
+      </div>
       {notice && <p className="rd-note">{notice}</p>}
       {error && (
         <p className="rd-note" role="alert">
