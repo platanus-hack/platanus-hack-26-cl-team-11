@@ -81,15 +81,15 @@ test('everyone is in the public table without joining a team, except simulated p
   assert.equal(mesaMembersOf(ctx).length, people.length + 1);
   const before = await view('Ana');
   assert.equal(before.member, true);
-  assert.equal(before.estimate.people, people.length);
+  assert.equal(before.estimate.people, people.length + 1, 'también quien no tiene nada conectado');
   assert.equal((await (await createApp(ctx).request(`/api/people/${silent.token}/mesa`)).json() as MesaView).publishing, false);
 
   assert.equal((await setMember('Tomás', 'no')).status, 400);
   assert.equal((await setMember('Tomás', false)).status, 200);
   assert.equal((await view('Tomás')).member, false);
-  assert.equal((await view('Ana')).estimate.people, people.length - 1);
-  assert.equal((await setMember('Tomás', true)).status, 200);
   assert.equal((await view('Ana')).estimate.people, people.length);
+  assert.equal((await setMember('Tomás', true)).status, 200);
+  assert.equal((await view('Ana')).estimate.people, people.length + 1);
 });
 
 test('a round in the public table is estimated first, then run by hand, and the spend is shown next to the estimate', async () => {
@@ -122,7 +122,7 @@ test('a round in the public table is estimated first, then run by hand, and the 
   const outsider = await view('Carla');
   assert.equal(outsider.threads.length, 1);
   assert.equal(outsider.threads[0]?.mine, false);
-  assert.equal(outsider.threads[0]?.messages, null);
+  assert.ok((outsider.threads[0]?.messages ?? []).length > 0, 'todos ven lo que conversan');
   assert.deepEqual(outsider.proposals, []);
 });
 
@@ -261,7 +261,7 @@ test('the live view streams each step of the round, with the words only for the 
 
   const outside = await live('Carla');
   assert.deepEqual(outside.events.map((event) => event.type), mine.events.map((event) => event.type));
-  assert.ok(outside.events.every((event) => event.text === null));
+  assert.deepEqual(outside.events.map((event) => event.text), mine.events.map((event) => event.text));
   assert.equal(outside.events.find((event) => event.type === 'hilo_abre')?.from, mine.me);
 
   assert.deepEqual((await live('Ana', mine.lastEventId)).events, []);
@@ -323,7 +323,7 @@ test('while the model writes, the live view carries the words to the two people 
   assert.equal(helper.streams[0]?.to, helper.me);
   assert.equal(helper.streams[0]?.text, 'Ana necesita');
   const outsider = await live('Carla');
-  assert.equal(outsider.streams[0]?.text, null);
+  assert.equal(outsider.streams[0]?.text, 'Ana necesita');
   assert.equal(outsider.streams[0]?.chars, 'Ana necesita'.length);
 
   release();

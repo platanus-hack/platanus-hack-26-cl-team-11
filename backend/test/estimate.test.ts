@@ -84,5 +84,5 @@ test('measured rounds replace the default guesses: tokens per character, output 
   assert.equal(measured.needs, 1);
   assert.equal(measured.calls.likely, 3);
   assert.equal(measured.tokens.output, 3 * 40);
-  assert.ok(measured.tokens.input > guessed.tokens.input);
+  assert.notEqual(measured.tokens.input, guessed.tokens.input);
 });

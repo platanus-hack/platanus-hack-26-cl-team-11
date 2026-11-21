@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MesaSection } from './MesaSection';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=5';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=7';
 const ROUND_SIGNAL = { montu: 'ronda' };
 
 type Mode = 'demo' | 'mesa';

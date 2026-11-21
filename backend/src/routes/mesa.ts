@@ -44,7 +44,7 @@ export function mesaRoutes(ctx: AppContext) {
     const members = mesaMembersOf(ctx);
     return {
       names: new Map(members.map((member) => [publicIdOf(member.token), member.name])),
-      publishing: members.filter((member) => hasPublished(cardFor(deps, member, now))).map((member) => publicIdOf(member.token)),
+      publishing: members.map((member) => publicIdOf(member.token)),
     };
   });
 
@@ -69,7 +69,7 @@ export function mesaRoutes(ctx: AppContext) {
         dailyCap: mesaDailyCapOf(ctx),
       },
       asks: card.pendingAsks,
-      threads: round ? agents.threadsOf(round.id).map((thread) => viewThread(thread, personToken)) : [],
+      threads: round ? agents.threadsOf(round.id).map((thread) => ({ ...viewThread(thread, thread.requesterToken), mine: personToken === thread.requesterToken || personToken === thread.helperToken })) : [],
       proposals: agents
         .proposalsOf(MESA_TEAM_ID)
         .filter((proposal) => isVisibleTo(proposal, personToken))
@@ -96,8 +96,8 @@ export function mesaRoutes(ctx: AppContext) {
     names.set(me, person.name);
     const seated = new Set([me, ...known.publishing]);
     const recorded = rooms.eventsAfter(MESA_TEAM_ID, since, MAX_LIVE_EVENTS);
-    const spokenToMe = recorded.some((event) => TEXT_EVENTS.includes(event.type) && (event.payload.from === me || event.payload.to === me));
-    const threads = new Map((round && spokenToMe ? agents.threadsOf(round.id) : []).map((thread) => [thread.id, thread]));
+    const spoken = recorded.some((event) => TEXT_EVENTS.includes(event.type));
+    const threads = new Map((round && spoken ? agents.threadsOf(round.id) : []).map((thread) => [thread.id, thread]));
     const streams = round?.status === 'en_curso' ? ctx.mesaLive.all() : [];
     for (const stream of streams) seated.add(stream.from).add(stream.to);
 
@@ -108,8 +108,7 @@ export function mesaRoutes(ctx: AppContext) {
       const mine = involved.includes(me);
       const spoken = typeof thread === 'string' ? threads.get(thread)?.messages : undefined;
       const text =
-        !mine ? null
-        : event.type === 'hilo_abre' ? spoken?.[ASK_MESSAGE]?.text ?? null
+        event.type === 'hilo_abre' ? spoken?.[ASK_MESSAGE]?.text ?? null
         : event.type === 'hilo_responde' ? spoken?.[REPLY_MESSAGE]?.text ?? null
         : event.type === 'propuesta_nace' && typeof proposal === 'string' ? agents.findProposal(proposal)?.text ?? null
         : null;
@@ -122,7 +121,7 @@ export function mesaRoutes(ctx: AppContext) {
       people: [...seated].flatMap((id) => (names.has(id) ? [{ id, name: names.get(id) as string }] : [])),
       round: round ? { id: round.id, status: round.status } : null,
       events,
-      streams: streams.map((stream) => ({ kind: stream.kind, from: stream.from, to: stream.to, topic: stream.topic, chars: stream.text.length, text: stream.from === me || stream.to === me ? stream.text : null })),
+      streams: streams.map((stream) => ({ kind: stream.kind, from: stream.from, to: stream.to, topic: stream.topic, chars: stream.text.length, text: stream.text })),
       lastEventId: events.at(-1)?.id ?? Math.max(since, rooms.lastEventId(MESA_TEAM_ID)),
     });
   });

@@ -67,26 +67,28 @@ interface OpenNeed {
   need: Need;
 }
 
-const RECENT_WORK_DAYS = 7;
-const MAX_RECENT_WORK = 6;
+const MAX_RECENT_WORK = 8;
+const RECENT_EVENTS_READ = 80;
+const PER_SOURCE = 3;
 const WORK_SOURCE_LABEL: Partial<Record<string, string>> = {
   google_calendar: 'En su calendario',
-  granola: 'Reunión',
+  granola: 'Reunión en Granola',
   linear: 'Tarea en Linear',
   github: 'En GitHub',
 };
 
-export function recentWorkOf(events: StoredEvent[], now: Date): string[] {
-  const since = now.getTime() - RECENT_WORK_DAYS * DAY_MS;
+export function recentWorkOf(events: StoredEvent[]): string[] {
+  const perSource = new Map<string, number>();
   const seen = new Set<string>();
   const lines: string[] = [];
   for (const event of events) {
     const label = WORK_SOURCE_LABEL[event.source];
-    const at = Date.parse(event.occurredAt);
-    if (!label || !event.summary || Number.isNaN(at) || at < since || at > now.getTime() + RECENT_WORK_DAYS * DAY_MS) continue;
+    if (!label || !event.summary) continue;
     const line = `${label}: ${event.summary}`;
-    if (seen.has(line)) continue;
+    const used = perSource.get(event.source) ?? 0;
+    if (seen.has(line) || used >= PER_SOURCE) continue;
     seen.add(line);
+    perSource.set(event.source, used + 1);
     lines.push(line);
     if (lines.length >= MAX_RECENT_WORK) break;
   }
@@ -97,7 +99,7 @@ export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents' | 
   const events = deps.store.listSignalEvents(member.token, now);
   const signals = withChosenVisibility(deriveSignals(events, now), deps.policies.chosen(member.token));
   const repo = deps.repo && deps.digests ? currentDigest({ repo: deps.repo, digests: deps.digests }, member.token) : undefined;
-  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo, recent: recentWorkOf(events, now) });
+  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo, recent: recentWorkOf(deps.store.listEvents(member.token, RECENT_EVENTS_READ)) });
 }
 
 export async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
@@ -202,17 +204,32 @@ const keepEveryCard = () => true;
 const CHATTER_TOPIC = 'en qué está';
 const MAX_CHATTER_TOPIC = 80;
 
+const LABEL_PREFIX = /^[^:]{1,40}:\s*/;
+
+const GITHUB_LINE = /^En GitHub:\s*(?:.* en )?[^/\s]+\/([^\s:]+)/;
+
+function topicOf(card: AgentCard): string | null {
+  const lines = [...card.statements.filter((line) => !line.startsWith('En GitHub')), ...card.statements.filter((line) => line.startsWith('En GitHub'))];
+  const line = lines[0];
+  if (!line) return card.expertise[0]?.slice(0, MAX_CHATTER_TOPIC) ?? null;
+  const repo = GITHUB_LINE.exec(line)?.[1];
+  const topic = repo ?? line.replace(LABEL_PREFIX, '').split(' · ')[0]?.replace(/^Trabaja en «(.*)»$/, '$1').trim();
+  return topic ? topic.slice(0, MAX_CHATTER_TOPIC) : null;
+}
+
 function chatterOf(cards: AgentCard[], limit: number): OpenNeed[] {
-  return cards
-    .filter((card) => card.statements.length > 0 || card.expertise.length > 0)
-    .slice(0, limit)
-    .map((requester) => ({
+  return cards.slice(0, limit).map((requester) => {
+    const known = requester.statements.length > 0 || requester.expertise.length > 0;
+    return {
       requester,
       need: {
-        topic: (requester.expertise[0] ?? CHATTER_TOPIC).slice(0, MAX_CHATTER_TOPIC),
-        statement: `${requester.name} está en esto: ${requester.statements[0] ?? requester.expertise.join(', ')}. Busca con quién cruzarse: alguien que sepa del tema, esté en algo parecido o le pueda servir.`,
+        topic: topicOf(requester) ?? (known ? CHATTER_TOPIC : 'presentarse'),
+        statement: known
+          ? `${requester.name} está en esto: ${requester.statements.slice(0, 3).join(' · ') || requester.expertise.join(', ')}. Busca con quién cruzarse: alguien que sepa del tema, esté en algo parecido o le pueda servir.`
+          : `${requester.name} recién entró a Montu y todavía no tiene actividad en sus fuentes. Quiere presentarse y saber en qué está cada uno.`,
       },
-    }));
+    };
+  });
 }
 
 export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter' | 'chatter'>, teamId: string, now: Date): { cards: AgentCard[]; openNeeds: OpenNeed[] } {

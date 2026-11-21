@@ -20,7 +20,12 @@
     sin_ayuda: ['Nadie puede ayudar por ahora', 'Lo vuelven a intentar la próxima vez'],
     falla: ['El modelo no respondió', 'Lo vuelven a intentar la próxima vez']
   };
-  var RESULT = { propuesta: 'quedó una propuesta', nadie: 'nadie con relación al tema', sin_ayuda: 'nadie pudo ayudar', falla: 'el modelo no respondió' };
+  // Cómo terminó cada conversación, en una frase que se entiende sola.
+  var ENDED = {
+    nadie: function (name) { return 'Nadie más estaba en algo parecido a lo de ' + name; },
+    sin_ayuda: function (name) { return 'Le escribieron a otros por lo de ' + name + ', pero nadie podía ahora'; },
+    falla: function (name) { return 'El agente de ' + name + ' no alcanzó a conversar'; }
+  };
 
   var slotOf = new Map(), needs = [], byKey = new Map();
   var arriving = [], since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
@@ -86,7 +91,13 @@
     var parts = [count(threads, 'conversación', 'conversaciones'), count(proposals, 'propuesta', 'propuestas')];
     if (finished && typeof finished.tokens === 'number') parts.push(finished.tokens.toLocaleString('es-CL') + ' tokens');
     idle(title, needs.length ? parts.join(' · ') : 'Nadie tenía un pedido abierto', needs.map(function (need) {
-      return { faces: need.g.members, title: need.g.topic, sub: askOf(need.from) + ' · ' + RESULT[need.outcome || 'falla'], check: need.outcome === 'propuesta' };
+      var name = need.from === 0 ? 'ti' : people[need.from].name;
+      var agreed = need.outcome === 'propuesta';
+      var helpers = (need.helpers || []).map(function (id) { var slot = slotOf.get(id); return slot === undefined ? null : slot === 0 ? 'Tú' : people[slot].name; }).filter(Boolean);
+      var who = helpers.length > 1 ? helpers.slice(0, -1).join(', ') + ' y ' + helpers[helpers.length - 1] : helpers[0];
+      var verb = helpers.length > 1 ? 'ayudan' : who === 'Tú' ? 'ayudas' : 'ayuda';
+      var title = agreed && who ? (name === 'ti' ? who + ' te ' + verb : who + ' ' + verb + ' a ' + name) : agreed ? 'Quedó una propuesta para ' + name : (ENDED[need.outcome] || ENDED.falla)(name);
+      return { faces: need.g.members, title: title, sub: need.g.topic, check: agreed };
     }));
   }
 
@@ -95,6 +106,7 @@
     need.queue.forEach(function (ev) {
       var helper = slotOf.get(ev.to);
       if (ev.type === 'hilo_abre') { need.threads += 1; if (helper !== undefined && need.g.members.indexOf(helper) < 0) need.g.members.push(helper); }
+      else if (ev.type === 'propuesta_nace') need.helpers = ev.helpers || [];
       else if (ev.type === 'pedido_cierra') need.outcome = ev.outcome;
     });
     need.queue = []; need.closed = true; need.done = true;
@@ -215,6 +227,7 @@
       need.answers[other] = ev.help || 'si'; heading(need);
       if (!settleLive(need, 'reply|' + ev.to, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]')) say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]');
     } else if (ev.type === 'propuesta_nace') {
+      need.helpers = ev.helpers || [];
       var helpers = (ev.helpers || []).map(function (id) { return slotOf.get(id); }).filter(function (slot) { return slot !== undefined; });
       var names = helpers.map(function (slot) { return people[slot].name; }).join(' y ');
       note(need, [need.from].concat(helpers), 'Propuesta', ev.text || names + (helpers.length === 1 ? ' ayuda a ' : ' ayudan a ') + people[need.from].name + '. Cada persona decide si acepta.', true);
