@@ -93,7 +93,8 @@ El frontend no usa un enrutador: `frontend/src/App.tsx` mira la dirección y eli
 
 | Dirección | Pantalla | Archivo |
 |---|---|---|
-| `/` | Portada: crea una persona y muestra su link | `HomePage.tsx` |
+| `/` | Solo el ingreso con Google (`LoginPage.tsx`). Si el servidor no tiene las credenciales de Google, como en un computador, muestra la portada anterior, que crea una persona y abre una sala (`HomePage.tsx`) | `App.tsx` |
+| `/sala` | Abre una sala nueva | `RoomStart.tsx` |
 | `/conectar/<token>` | Panel personal, con cuatro pestañas | `ConnectPage.tsx` |
 | `/contexto/<token>` | Mapa de contexto, con datos de prueba | `ContextPage.tsx` |
 

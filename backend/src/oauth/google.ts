@@ -59,15 +59,13 @@ export async function googleProfile(accessToken: string, fetchImpl: Fetch): Prom
 export const google: OAuthProvider = {
   id: 'google',
 
-  authorizeUrl({ credentials, redirectUri, scopes, state }) {
+  authorizeUrl({ credentials, redirectUri, scopes, state, login }) {
     const query = new URLSearchParams({
       client_id: credentials.clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: [...new Set([...IDENTITY_SCOPES, ...scopes])].join(' '),
-      access_type: 'offline',
-      prompt: 'consent',
-      include_granted_scopes: 'true',
+      ...(login ? { prompt: 'select_account' } : { access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true' }),
       state,
     });
     return `${AUTHORIZE_URL}?${query}`;

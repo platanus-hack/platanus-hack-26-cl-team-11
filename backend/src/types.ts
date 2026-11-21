@@ -92,7 +92,7 @@ export interface OAuthCredentials {
 
 export interface OAuthProvider {
   id: string;
-  authorizeUrl(input: { credentials: OAuthCredentials; redirectUri: string; scopes: string[]; state: string; codeChallenge: string }): string;
+  authorizeUrl(input: { credentials: OAuthCredentials; redirectUri: string; scopes: string[]; state: string; codeChallenge: string; login?: boolean }): string;
   exchange(code: string, credentials: OAuthCredentials, redirectUri: string, fetchImpl: Fetch, codeVerifier: string): Promise<OAuthTokens>;
   refresh(refreshToken: string, credentials: OAuthCredentials, fetchImpl: Fetch): Promise<OAuthTokens>;
   identify(accessToken: string, fetchImpl: Fetch): Promise<string>;

@@ -34,7 +34,7 @@ En el paso 4, seguir a G1 durante dos 1:1. Si necesita a G2 y a G8, dibujar amba
 
 Para mostrar el multijugador con el público:
 
-1. En la portada, «Nueva sala». La pantalla `/sala/<código>` muestra el QR, quién entró y qué agentes conversan.
+1. En `/sala`, «Nueva sala». La pantalla `/sala/<código>` muestra el QR, quién entró y qué agentes conversan. La portada ahora es solo el ingreso con Google; la sala también se abre desde la pestaña Equipo de quien no tiene equipo.
 2. Quien escanea escribe su nombre y cae en la pestaña «Agente» de su página.
 3. Ahí crea una línea y se la pega a su agente (Claude Code, Codex, OpenClaw). El agente lee el link, le muestra qué va a compartir y escribe su repo. Con una app de chat, copia la pregunta y pega la respuesta.
 4. En la sala aparece su nombre con el agente conectado. «Ver la sala en el globo» abre el globo con esas personas.

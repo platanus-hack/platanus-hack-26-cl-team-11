@@ -65,6 +65,16 @@ export function TeamStart({ token, onChange }: { token: string; onChange: () => 
             </div>
           )}
         </div>
+        <Item
+          icon={
+            <ItemIcon>
+              <Glyph name="map" />
+            </ItemIcon>
+          }
+          title="Abrir una sala"
+          subtitle="Con un QR para que entre quien lo escanee"
+          href="/sala"
+        />
       </div>
     </div>
   );

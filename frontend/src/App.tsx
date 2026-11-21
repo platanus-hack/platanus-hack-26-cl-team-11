@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import markUrl from '../../design/logo/montu-mark.svg';
 import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
@@ -6,8 +6,11 @@ import { ContextPage } from './ContextPage';
 import { HomePage } from './HomePage';
 import { InvitePage } from './InvitePage';
 import { JoinPage } from './JoinPage';
+import { LoginPage } from './LoginPage';
 import { MontuSplash, MontuStage } from './MontuLoader';
 import { RoomPage } from './RoomPage';
+import { RoomStart } from './RoomStart';
+import { fetchLoginOptions } from './api';
 
 function Backdrop({ children }: { children: ReactNode }) {
   return (
@@ -36,6 +39,30 @@ function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean
         <main className={wide ? 'app-wide' : 'app-main'}>{children}</main>
       </div>
     </Backdrop>
+  );
+}
+
+function Home() {
+  const [google, setGoogle] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetchLoginOptions().then(
+      (options) => setGoogle(options.google),
+      () => setGoogle(false),
+    );
+  }, []);
+
+  if (google === null) return <Backdrop>{null}</Backdrop>;
+  if (google)
+    return (
+      <Backdrop>
+        <LoginPage />
+      </Backdrop>
+    );
+  return (
+    <Shell>
+      <HomePage />
+    </Shell>
   );
 }
 
@@ -72,11 +99,13 @@ function Screen() {
         <RoomPage code={token} />
       </Shell>
     );
-  return (
-    <Shell>
-      <HomePage />
-    </Shell>
-  );
+  if (section === 'sala')
+    return (
+      <Shell>
+        <RoomStart />
+      </Shell>
+    );
+  return <Home />;
 }
 
 export function App() {

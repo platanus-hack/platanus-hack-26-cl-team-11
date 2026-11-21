@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { AgentTab } from './AgentTab';
 import { HEALTH_RETURN_PARAM } from './HealthAddress';
 import { fetchOnboarding, fetchPerson, fetchSignals, type OnboardingStep, type OnboardingStepId, type PersonPage, type Signals, type Summary } from './api';
@@ -10,6 +10,7 @@ import { TABS, type TabId } from './tabs';
 import { TeamSection } from './TeamSection';
 import { TopBar } from './TopBar';
 import { useHashTab } from './useHashTab';
+import { savePerson } from './savedPerson';
 import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
 
@@ -32,6 +33,11 @@ export function ConnectPage({ token }: { token: string }) {
     setFirstSteps((onboarding?.steps ?? []).filter((step) => step.id !== RETIRED_STEP));
   }, [token]);
   const { error, refresh } = usePolling(load);
+  const name = page?.name;
+
+  useEffect(() => {
+    if (name) savePerson({ token, name });
+  }, [token, name]);
 
   if (!page) {
     return (

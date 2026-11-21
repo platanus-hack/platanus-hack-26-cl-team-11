@@ -36,6 +36,8 @@ test('entering with Google creates your page the first time and brings you back 
   const authorize = new URL(started.headers.get('location') ?? '');
   assert.equal(`${authorize.origin}${authorize.pathname}`, 'https://accounts.google.com/o/oauth2/v2/auth');
   assert.equal(authorize.searchParams.get('scope'), 'openid email profile');
+  assert.equal(authorize.searchParams.get('prompt'), 'select_account');
+  assert.equal(authorize.searchParams.get('access_type'), null);
   assert.equal(authorize.searchParams.get('redirect_uri'), 'https://ronda.test/api/oauth/google/callback');
 
   const first = await through('/api/login/google/start');

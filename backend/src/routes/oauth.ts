@@ -114,6 +114,7 @@ export function oauthRoutes(ctx: AppContext) {
       scopes: LOGIN_SCOPES,
       state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true } satisfies OAuthState)),
       codeChallenge: challengeOf(nonce),
+      login: true,
     });
     setCookie(c, cookieNameOf(LOGIN_PROVIDER), nonce, { ...cookiePlaceOf(c.req.url, LOGIN_PROVIDER), httpOnly: true, sameSite: 'Lax', maxAge: STATE_TTL_MS / 1000 });
     return c.redirect(authorizeUrl, 302);

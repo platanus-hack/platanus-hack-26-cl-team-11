@@ -58,3 +58,9 @@ body { margin: 0; }
 .app-fit { flex: 0 0 auto; height: 36px; padding: 0 var(--rd-space-4); font-size: var(--rd-text-small); }
 @media (max-width: 700px) { .app-me { transform: translate(-50%, -22px); } .app-face--node { width: 44px; height: 44px; } .app-face--hub { width: 64px; height: 64px; } }
 .app-qr { display: block; width: 100%; aspect-ratio: 1; padding: var(--rd-space-2); border-radius: var(--rd-space-4); background: var(--rd-glass-solid); color: var(--rd-ink); }
+.app-login { min-height: 82vh; display: flex; align-items: center; justify-content: center; }
+.app-login__box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: var(--rd-space-4); }
+.app-login__box .rd-pagesub { margin: 0; }
+.app-login__actions { display: flex; flex-direction: column; gap: var(--rd-space-3); padding-top: var(--rd-space-4); }
+.app-login__actions .rd-button { flex: 0 0 auto; height: 54px; gap: var(--rd-space-3); }
+.app-login__logo { width: 20px; height: 20px; flex: 0 0 auto; }
