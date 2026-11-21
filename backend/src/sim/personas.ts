@@ -7,7 +7,7 @@ import type { FileDraft } from '../repo/store.js';
 export const MAX_SIM_PEOPLE = 60;
 export const MIN_SIM_PEOPLE = 2;
 export const SIM_AUTHOR = 'Simulación';
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 4;
 const MAX_ROLE_LENGTH = 60;
 const MAX_STATEMENT_LENGTH = 240;
 const MAX_TOPIC_LENGTH = 80;
@@ -88,7 +88,10 @@ const chunksOf = <Item>(items: Item[], size: number): Item[][] => Array.from({ l
 
 export async function inventPersonas(model: AgentModel, organization: string, names: string[]): Promise<SimPersona[]> {
   const listed = names.map((nombre, index) => ({ id: `s${index + 1}`, nombre }));
-  const batches = await Promise.all(chunksOf(listed, BATCH_SIZE).map((batch) => model.decide({ system: SYSTEM, prompt: promptFor(organization, batch), schema: SimTeam })));
+  const settled = await Promise.allSettled(chunksOf(listed, BATCH_SIZE).map((batch) => model.decide({ system: SYSTEM, prompt: promptFor(organization, batch), schema: SimTeam })));
+  const batches = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  const failed = settled.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+  if (batches.length === 0 && failed) throw failed.reason;
   const invented = new Map(batches.flatMap((batch) => batch.people).map((person) => [person.id, person]));
   return listed.flatMap(({ id, nombre }) => {
     const person = invented.get(id);

@@ -83,7 +83,7 @@ test('a simulation fills the room with invented people, each with a repo, and th
   );
   assert.match(ctx.repo.read(first?.token ?? '', 'ahora.md')?.content ?? '', /conciliación bancaria/);
 
-  assert.equal(asked.filter((schema) => schema === SimTeam).length, 2);
+  assert.equal(asked.filter((schema) => schema === SimTeam).length, 3);
   assert.equal(asked.filter((schema) => schema === RepoDigestAnswer).length, 0);
   assert.equal(state.threads.length, 2);
   for (const thread of state.threads) {
