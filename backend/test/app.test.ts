@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
-import { createContext } from '../src/context.js';
+import { createContext, loadConfig } from '../src/context.js';
 import { appleHealth } from '../src/connectors/appleHealth.js';
 
 const setup = () => {
@@ -72,4 +72,10 @@ test('an unknown token gets 404 and one person never sees another', async () => 
   assert.equal((await app.request('/api/people/nope')).status, 404);
   const events = (await (await app.request(`/api/people/${tomas.token}/events`)).json()) as { events: unknown[] };
   assert.equal(events.events.length, 0);
+});
+
+test('the public address falls back to the one Render provides', () => {
+  assert.equal(loadConfig({ RENDER_EXTERNAL_URL: 'https://ronda.onrender.com' }).publicBaseUrl, 'https://ronda.onrender.com');
+  assert.equal(loadConfig({ PUBLIC_BASE_URL: 'https://ronda.cl', RENDER_EXTERNAL_URL: 'https://ronda.onrender.com' }).publicBaseUrl, 'https://ronda.cl');
+  assert.equal(loadConfig({}).publicBaseUrl, null);
 });

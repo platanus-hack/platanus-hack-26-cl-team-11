@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ronda
+    runtime: node
+    region: virginia
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    disk:
+      name: ronda-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.1
+      - key: PORT
+        value: 10000
+      - key: DATA_DIR
+        value: /var/data
+      - key: SECRET_KEY
+        generateValue: true

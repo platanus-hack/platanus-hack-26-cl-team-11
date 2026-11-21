@@ -25,7 +25,7 @@ const defaultDataDir = () => join(dirname(fileURLToPath(import.meta.url)), '..',
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const google = env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } : undefined;
-  return { publicBaseUrl: env.PUBLIC_BASE_URL || null, oauth: { google } };
+  return { publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null, oauth: { google } };
 }
 
 export function createContext(options: { location?: string; fetch?: Fetch; config?: Config } = {}): AppContext {
