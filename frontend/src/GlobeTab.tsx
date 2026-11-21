@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchGlobeMode } from './api';
-import { MesaSection } from './MesaSection';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=8';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=9';
 
 type Mode = 'demo' | 'mesa';
 
@@ -25,11 +24,8 @@ export function GlobeTab({ token, active }: { token: string; active: boolean }) 
   if (!opened) return null;
 
   return (
-    <>
-      <div className="app-block">
-        <iframe key={mode} className="app-universe" title="Globo de agentes" src={mode === 'mesa' ? livePath : DEMO_PATH} />
-      </div>
-      <MesaSection token={token} />
-    </>
+    <div className="app-block">
+      <iframe key={mode} className="app-universe" title="Globo de agentes" src={mode === 'mesa' ? livePath : DEMO_PATH} />
+    </div>
   );
 }
