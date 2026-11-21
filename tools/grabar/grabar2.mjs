@@ -4,9 +4,11 @@
 //
 //   node tools/grabar/grabar2.mjs --base http://localhost:8797 --out docs/demo/diez-personas.mp4 --frames <carpeta fuera del repo> --capturas <carpeta fuera del repo>
 //
-// Otras opciones: --permiso pantalla|api · --sin-globo · --parcial-vale · --toma N · --max-segundos N.
+// Otras opciones: --permiso pantalla|api · --sin-globo · --sin-webgl · --parcial-vale · --toma N · --max-segundos N.
 // Deja el video, la captura final y un resumen en JSON junto al video. Los cuadros quedan en su carpeta, con la lista
 // que lee ffmpeg (lista.txt): este guion no borra nada.
+// --sin-webgl es para un computador sin GPU: ahí la lava de las caras y la luz del globo corren por software, cada paso
+// tarda diez veces más y la toma se alarga. Sin WebGL las caras muestran su mezcla quieta y el globo sus líneas.
 import { execFile } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
@@ -156,6 +158,7 @@ function leerOpciones() {
     capturas: opcion('capturas', null),
     permiso: opcion('permiso', 'pantalla'),
     sinGlobo: process.argv.includes('--sin-globo'),
+    sinWebgl: process.argv.includes('--sin-webgl'),
     parcialVale: process.argv.includes('--parcial-vale'),
     toma: Number(opcion('toma', '1')),
     maxSegundos: Number(opcion('max-segundos', '170')),
@@ -754,7 +757,7 @@ async function main() {
     commit: servidor.commit ?? null,
     modelo: servidor.modelo ?? null,
     toma: opciones.toma,
-    opciones: { permiso: opciones.permiso, sinGlobo: opciones.sinGlobo, parcialVale: opciones.parcialVale },
+    opciones: { permiso: opciones.permiso, sinGlobo: opciones.sinGlobo, sinWebgl: opciones.sinWebgl, parcialVale: opciones.parcialVale },
     variante: null,
     publicable: false,
     motivo: null,
@@ -783,7 +786,7 @@ async function main() {
     process.exitCode = 1;
   };
 
-  const navegador = await chromium.launch({ headless: true });
+  const navegador = await chromium.launch({ headless: true, args: opciones.sinWebgl ? ['--disable-webgl', '--disable-webgl2'] : [] });
   try {
     const contexto = await navegador.newContext({ viewport: { width: ANCHO, height: ALTO }, deviceScaleFactor: 1, locale: 'es-CL', timezoneId: 'America/Santiago' });
     await contexto.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: opciones.base });
