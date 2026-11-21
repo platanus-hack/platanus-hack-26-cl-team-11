@@ -31,6 +31,7 @@ Cada elemento de `sources`:
 | `provider` | `google`, `github` o `linear` si es OAuth; si no, `null` |
 | `configured` | `false` cuando es OAuth y faltan sus credenciales en el servidor |
 | `sync` | `{ last, total }`: último dato recibido y total de eventos; `null` sin eventos |
+| `delivery` | Solo en Apple Health: `{ at, ok, message }` del último envío, haya traído datos nuevos o no; `null` si nunca hubo uno |
 | `connection` | `{ account, lastSyncedAt, lastError }` o `null`. Nunca trae la credencial |
 
 `GET …/events` entrega la memoria privada completa. Es solo para la página de su dueño: ningún agente ni pantalla de equipo la usa.

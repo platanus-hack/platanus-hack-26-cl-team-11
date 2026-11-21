@@ -80,11 +80,12 @@ Límites del Atajo:
 2. Toca **Agregar Atajo**. Se abre el link de iCloud y lo agrega. Esto se hace una sola vez.
 3. Vuelve a la página y toca **Enviar datos**. La página abre el Atajo y le pasa la dirección personal de esa persona, así que nadie pega ni escribe nada.
 4. La primera vez acepta el permiso de Salud y el de conexión. El Atajo muestra la respuesta del servidor: «Listo. Llegaron 7 días de datos, del 15-11 al 21-11.»
-5. Para actualizar, toca **Enviar datos** otra vez.
+5. Al terminar, el Atajo vuelve solo a la página de Ronda. La fila de Apple Health muestra «Esperando tus datos…» y después la hora del envío con lo que llegó, o el motivo si falló. Si en dos minutos no llega nada, lo dice.
+6. Para actualizar, toca **Enviar datos** otra vez. La confirmación aparece aunque lleguen los mismos días.
 
 Los dos botones aparecen cuando el servidor tiene `HEALTH_SHORTCUT_URL` (ver [DEPLOY.md](DEPLOY.md)). Sin esa variable la fila muestra solo la dirección personal, como antes.
 
-El botón **Enviar datos** es un enlace `shortcuts://run-shortcut?name=<nombre>&input=text&text=<dirección>`, el esquema que [documenta Apple](https://support.apple.com/guide/shortcuts/run-a-shortcut-from-a-url-apd624386f42/ios). El nombre tiene que ser el mismo que el del Atajo en el teléfono: por defecto `Ronda Salud`, o el de `HEALTH_SHORTCUT_NAME`.
+El botón **Enviar datos** es un enlace `shortcuts://x-callback-url/run-shortcut?name=<nombre>&input=text&text=<dirección>&x-success=<página>` (con `x-cancel` y `x-error` iguales), para que el Atajo vuelva a la página. La vuelta automática no está probada en un iPhone. Es el esquema que [documenta Apple](https://support.apple.com/guide/shortcuts/run-a-shortcut-from-a-url-apd624386f42/ios). El nombre tiene que ser el mismo que el del Atajo en el teléfono: por defecto `Ronda Salud`, o el de `HEALTH_SHORTCUT_NAME`.
 
 ### Formato del envío
 
