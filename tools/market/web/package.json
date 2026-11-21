@@ -1,0 +1,7 @@
+{
+  "name": "platanus-market-web",
+  "private": true,
+  "dependencies": {
+    "@vercel/blob": "2.9.0"
+  }
+}
