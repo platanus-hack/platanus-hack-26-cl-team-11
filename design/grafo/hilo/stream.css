@@ -26,7 +26,8 @@
   display: inline-block;
   width: 2px;
   height: 1.05em;
-  margin-left: 2px;
+  margin-right: -2px;
+  transform: translateX(2px);
   vertical-align: -3px;
   border-radius: 1px;
   background: var(--rd-ink);

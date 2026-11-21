@@ -32,27 +32,29 @@
   .uv-tag[data-now] { transform: translateY(-2px); box-shadow: 0 0 0 1.5px var(--t), 0 8px 18px rgba(40,30,90,.12); }
 
   /* Panel del hilo */
-  .uv-panel { position: relative; display: flex; flex-direction: column; margin: 16px 16px 16px 0; border-radius: var(--rd-radius-card); overflow: hidden; }
+  .uv-panel { position: relative; display: flex; flex-direction: column; min-height: 0; height: calc(100vh - 32px); margin: 16px 16px 16px 0; border-radius: var(--rd-radius-card); overflow: hidden; }
   .uv-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 14px; border-bottom: 1px solid var(--rd-hairline); }
   .uv-faces { display: flex; flex: 0 0 auto; }
   .uv-faces span { width: 32px; height: 32px; margin-left: -9px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; transition: transform .5s cubic-bezier(.25,.8,.25,1); }
   .uv-faces span:first-child { margin-left: 0; }
   .uv-hcopy { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
-  .uv-hcopy .rd-title { font-size: 19px; }
+  .uv-hcopy .rd-title, .uv-hcopy .rd-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .uv-hcopy .rd-title { font-size: 19px; line-height: 1.25; }
+  .uv-head { height: 76px; box-sizing: border-box; }
   .uv-status { flex: 0 0 auto; }
   .uv-feed { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; padding: 16px 16px 18px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px); mask-image: linear-gradient(to bottom, transparent 0, #000 70px); }
-  .uv-item { display: flex; gap: 8px; align-items: flex-start; }
+  .uv-item { display: flex; gap: 8px; align-items: flex-start; will-change: transform; }
   .uv-item.mine { flex-direction: row-reverse; }
-  .uv-face { width: 26px; height: 26px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; flex: 0 0 auto; margin-top: 17px; }
+  .uv-face { width: 26px; height: 26px; border-radius: 50%; background-size: cover; box-shadow: 0 0 0 2px #fff; flex: 0 0 auto; margin-top: 2px; }
   .uv-col { display: flex; flex-direction: column; gap: 3px; min-width: 0; max-width: 86%; }
   .uv-item.mine .uv-col { align-items: flex-end; }
-  .uv-who { font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); }
-  .uv-bubble { padding: 9px 13px; border-radius: 6px 18px 18px 18px; background: var(--rd-glass-solid); box-shadow: 0 6px 18px rgba(40,30,90,.07); font-size: 14px; line-height: 1.42; }
+  .uv-who { display: block; margin-bottom: 3px; font-size: 12px; font-weight: var(--rd-weight); color: var(--rd-muted); line-height: 1.25; }
+  .uv-bubble { padding: 11px 13px; border-radius: 6px 18px 18px 18px; background: var(--rd-glass-solid); box-shadow: 0 6px 18px rgba(40,30,90,.07); font-size: 14px; line-height: 1.42; }
   .uv-item.mine .uv-bubble { border-radius: 18px 6px 18px 18px; background: var(--rd-fill-soft); box-shadow: none; }
   .uv-item.human .uv-bubble { background: #fff; border: 1.5px solid var(--rd-ink); }
-  .uv-tool { margin-left: 34px; }
+  .uv-tool { margin: 0; will-change: transform; }
   .uv-tool > .rd-label { display: block; margin: 0 0 4px 4px; }
-  .uv-ask { margin-left: 34px; padding: 1.5px; border-radius: 18px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
+  .uv-ask { margin: 0; padding: 1.5px; border-radius: 18px; background: var(--rd-gradient); box-shadow: var(--rd-shadow-glow); }
   .uv-ask > div { display: flex; flex-direction: column; gap: 9px; padding: 13px 14px 12px; border-radius: 16.5px; background: var(--rd-glass-solid); }
   .uv-ask .rd-actions .rd-button { height: 36px; font-size: 14px; }
   .uv-foot { display: flex; align-items: center; gap: 10px; padding: 12px 18px 16px; border-top: 1px solid var(--rd-hairline); }
@@ -92,7 +94,7 @@
       <button type="button" class="rd-button rd-button--quiet" id="next">Siguiente grupo</button>
     </div>
   </section>
-  <aside class="uv-panel rd-glass" aria-label="Hilo del grupo">
+  <aside class="uv-panel rd-glass ss-stage" aria-label="Hilo del grupo">
     <header class="uv-head">
       <div class="uv-faces" id="hfaces"></div>
       <div class="uv-hcopy"><span class="rd-label" id="hsub">Grupo</span><span class="rd-title" id="htopic">…</span></div>
@@ -147,8 +149,8 @@ function addItem(e) {
     node = el('div', 'uv-item' + (mine ? ' mine' : '') + (e.type === 'human' ? ' human' : ''));
     const f = el('span', 'uv-face'); Object.assign(f.style, faceCss(e.from));
     const col = el('div', 'uv-col');
-    col.append(el('span', 'uv-who', e.type === 'human' ? people[e.from].name + ', en persona' : 'Agente de ' + people[e.from].name + ' → ' + people[e.to].name));
-    const b = el('div', 'uv-bubble'); const s = RondaStream.create(e.text); b.append(s.el); col.append(b);
+    const b = el('div', 'uv-bubble'); const s = RondaStream.create(e.text);
+    b.append(el('span', 'uv-who', e.type === 'human' ? people[e.from].name + ', en persona' : 'Agente de ' + people[e.from].name + ' → ' + people[e.to].name), s.el); col.append(b);
     node.append(f, col);
     upd = t => s.update((t - e.at - 0.15) / Math.max(0.2, e.end - e.at - 0.15), t > e.end + 0.3);
   } else if (e.type === 'call') {
