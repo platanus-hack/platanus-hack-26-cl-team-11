@@ -94,12 +94,26 @@ function take(lots, qty) {
   return result;
 }
 
+function pairCredit(position, contributed, qty) {
+  // A pair pays FACE on settlement and its entry costs on void. Advance only
+  // their common floor, so a later tape failure never requires a clawback.
+  const advance = Math.min(FACE, contributed);
+  position.settlementCredit += (FACE - advance) * qty;
+  position.voidCredit += (contributed - advance) * qty;
+  return advance * qty;
+}
+
 function cancelOpen(state, order) {
   const wallet = state.wallets[key(order.owner)];
   wallet.available += (order.remaining - units(order.hedges)) * margin(order.side, order.price);
   if (order.hedges.length) {
-    const lots = holding(wallet, order.marketId)[opposite(order.side)];
-    for (const lot of order.hedges) addLot(lots, lot.unit, lot.qty);
+    const position = holding(wallet, order.marketId);
+    for (const lot of order.hedges) {
+      // Previously pledged inventory can now close positions opened since.
+      const matching = take(position[leg(order.side)], lot.qty);
+      for (const match of matching) wallet.available += pairCredit(position, lot.unit + match.unit, match.qty);
+      addLot(position[opposite(order.side)], lot.unit, lot.qty - units(matching));
+    }
   }
   delete state.orders[order.id];
 }
@@ -126,13 +140,7 @@ function fillLeg(state, order, price, qty) {
   const newUnits = cashUnits - units(extra);
   let released = 0;
   for (const lot of [...pledged, ...extra]) {
-    const contributed = lot.unit + unit;
-    // The pair pays FACE on settlement and its entry costs on void. Advance only
-    // their common floor, so a later tape failure never requires a clawback.
-    const advance = Math.min(FACE, contributed);
-    released += advance * lot.qty;
-    position.settlementCredit += (FACE - advance) * lot.qty;
-    position.voidCredit += (contributed - advance) * lot.qty;
+    released += pairCredit(position, lot.unit + unit, lot.qty);
   }
   addLot(position[leg(order.side)], unit, newUnits);
   wallet.available += cashUnits * margin(order.side, order.price) + released - qty * unit;
@@ -201,8 +209,7 @@ function cancel(state, actor, id) {
   return { ok: true, orderId: id, canceled: order.remaining };
 }
 
-export function apply(state, actor, action, now = Date.now()) {
-  const at = time(now);
+function identifyRequest(state, actor, action) {
   if (typeof actor !== 'string' || !actor.length || actor.length > 256) fail('invalid_actor', 'Billetera inválida.', 401);
   if (!action || typeof action !== 'object' || Array.isArray(action)) fail('invalid_action', 'Acción inválida.');
   const { type, nonce } = action;
@@ -216,9 +223,22 @@ export function apply(state, actor, action, now = Date.now()) {
     const prior = state.requests[actorKey]?.[key(nonce)];
     if (prior) {
       if (prior.digest !== digest) fail('nonce_conflict', 'Ese identificador corresponde a otra operación.', 409);
-      return structuredClone(prior.result);
+      return { actorKey, digest, result: structuredClone(prior.result) };
     }
   }
+  return { actorKey, digest, result: null };
+}
+
+// Receipt lookup stays available even when the upstream oracle is unavailable.
+export function replay(state, actor, action) {
+  return identifyRequest(state, actor, action).result;
+}
+
+export function apply(state, actor, action, now = Date.now()) {
+  const at = time(now);
+  const { actorKey, digest, result: prior } = identifyRequest(state, actor, action);
+  if (prior) return prior;
+  const { type, nonce } = action;
   expireOrders(state, at);
   let result;
   if (type === 'list') result = list(state, action.market);
@@ -277,7 +297,7 @@ function publicFill({ id, marketId, price, qty, at }) {
   return { id, marketId, price, qty, at };
 }
 
-function walletView(state, actor) {
+function walletView(state, actor, markets) {
   const wallet = state.wallets[key(actor)];
   if (!wallet) return null;
   const orders = values(state.orders).filter(o => o.owner === actor);
@@ -309,7 +329,22 @@ function walletView(state, actor) {
     locked += (o.remaining - units(o.hedges)) * margin(o.side, o.price);
     addPosition(o.marketId, opposite(o.side), o.hedges, true);
   }
-  const collateral = sum([...positions.values()], p => p.collateral) + voidCredit;
+  const quotes = new Map(markets.map(m => [m.id, m]));
+  const markedPositions = [...positions.values()].map(p => {
+    const market = quotes.get(p.marketId);
+    const longMark = market.bestBid !== null && market.bestAsk !== null
+      ? (market.bestBid + market.bestAsk) / 2
+      : market.lastPrice;
+    if (longMark === null) {
+      return { ...p, mark: p.collateral / p.qty, value: p.collateral, unrealizedPnl: 0 };
+    }
+    const mark = p.side === 'long' ? longMark : FACE - longMark;
+    const value = mark * p.qty;
+    return { ...p, mark, value, unrealizedPnl: value - p.collateral };
+  });
+  const collateral = sum(markedPositions, p => p.collateral) + voidCredit;
+  // The mark assumes successful settlement. Void-only refunds are mutually exclusive with settlement credits.
+  const markedEquity = wallet.available + locked + sum(markedPositions, p => p.value) + settlementCredit;
   const fills = [];
   for (let i = state.fills.length - 1; i >= 0 && fills.length < 100; i--) {
     const f = state.fills[i];
@@ -320,7 +355,7 @@ function walletView(state, actor) {
   return {
     available: wallet.available, locked, collateral, equityAtCost: wallet.available + locked + collateral,
     orders: orders.map(({ id, marketId, side, price, qty, remaining, at }) => ({ id, marketId, side, price, qty, remaining, at })),
-    positions: [...positions.values()], settlementCredit, voidCredit, credits, fills,
+    positions: markedPositions, markedEquity, markedPnl: markedEquity - GRANT, settlementCredit, voidCredit, credits, fills,
     settlements: wallet.settlements.slice(-100).reverse(),
   };
 }
@@ -344,7 +379,7 @@ export function view(state, actor = null, marketId = null, now = Date.now()) {
     return {
       ...structuredClone(m.terms), status: status(m, at),
       bestBid: depth(orders, 'buy')[0]?.price ?? null, bestAsk: depth(orders, 'sell')[0]?.price ?? null,
-      lastPrice: m.lastPrice, volume: m.volume, payout: m.resolution?.payout ?? null,
+      lastPrice: m.lastPrice ?? null, volume: m.volume, payout: m.resolution?.payout ?? null,
       evidence: m.resolution ? structuredClone(m.resolution.evidence) : null, settledAt: m.resolution?.at ?? null,
     };
   });
@@ -355,5 +390,5 @@ export function view(state, actor = null, marketId = null, now = Date.now()) {
     if (state.fills[i].marketId === market?.id) fills.push(publicFill(state.fills[i]));
   }
   return { markets, market, book: { bids: depth(orders, 'buy'), asks: depth(orders, 'sell') }, fills,
-    wallet: actor == null ? null : walletView(state, actor) };
+    wallet: actor == null ? null : walletView(state, actor, markets) };
 }

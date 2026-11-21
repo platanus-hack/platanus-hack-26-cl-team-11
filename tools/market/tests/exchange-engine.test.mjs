@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initialState, apply, view, settle, expireOrders } from '../web/lib/exchange-engine.mjs';
+import { initialState, apply, replay, view, settle, expireOrders } from '../web/lib/exchange-engine.mjs';
 
 const T = 1000;
 const END = 10000;
@@ -54,6 +54,23 @@ test('idempotency on join, list, order and cancel, keyed by actor and full actio
   assert.equal(view(s, null, null, T).markets.length, 1);
 });
 
+test('receipt-only replay is pure, distinguishes actors, and works after expiry without an oracle', () => {
+  const s = setup();
+  const action = { type: 'order', marketId: terms.id, side: 'buy', price: 33, qty: 2, nonce: 'retry' };
+  assert.equal(replay(s, 'a', action), null);
+  const receipt = apply(s, 'a', action, T);
+  const snapshot = structuredClone(s);
+  const replayed = replay(s, 'a', action);
+  assert.deepEqual(replayed, receipt);
+  replayed.remaining = 999;
+  assert.equal(replay(s, 'a', action).remaining, 2);
+  assert.equal(replay(s, 'b', action), null);
+  assert.throws(() => replay(s, 'a', { ...action, price: 45 }), fails('nonce_conflict'));
+  assert.deepEqual(s, snapshot);
+  expireOrders(s, END);
+  assert.deepEqual(replay(s, 'a', action), receipt);
+});
+
 test('crossing matches best price then FIFO, partial fills, price improvement, and private tape', () => {
   const s = setup(['a', 'b', 'c', 'd']);
   order(s, 'a', 'sell', 40, 2, '1');
@@ -68,7 +85,7 @@ test('crossing matches best price then FIFO, partial fills, price improvement, a
   assert.equal(snapshot.market.volume, 5);
   assert.equal(snapshot.market.lastPrice, 40);
   assert.equal(snapshot.wallet.available, 805);
-  assert.deepEqual(snapshot.wallet.positions, [{ marketId: terms.id, side: 'long', qty: 5, collateral: 195, pledged: 0 }]);
+  assert.deepEqual(snapshot.wallet.positions, [{ marketId: terms.id, side: 'long', qty: 5, collateral: 195, pledged: 0, mark: 40, value: 200, unrealizedPnl: 5 }]);
   assert.equal(wallet(s, 'a').orders.length, 0);
   assert.equal(wallet(s, 'b').locked, 180);
   assert.equal(wallet(s, 'b').fills[0].side, 'sell');
@@ -81,6 +98,34 @@ test('crossing matches best price then FIFO, partial fills, price improvement, a
   order(s, 'a', 'buy', 90, 2, '8');
   assert.equal(wallet(s, 'd').orders[0].id, resting.orderId);
   assert.equal(wallet(s, 'd').orders[0].remaining, 2);
+});
+
+test('mark uses two-sided midpoint, then last fill, then the average entry for each side', () => {
+  const s = setup(['a', 'b', 'c', 'd']);
+  order(s, 'a', 'buy', 40, 3, 'a40');
+  order(s, 'b', 'sell', 40, 3, 'b40');
+  order(s, 'a', 'buy', 50, 1, 'a50');
+  order(s, 'b', 'sell', 50, 1, 'b50');
+  const ask = order(s, 'a', 'sell', 75, 2, 'ask');
+  const bid = order(s, 'c', 'buy', 54, 1, 'bid');
+  const [long, short] = ['a', 'b'].map(actor => wallet(s, actor));
+  assert.deepEqual(long.positions[0], { marketId: terms.id, side: 'long', qty: 4, pledged: 2,
+    collateral: 170, mark: 64.5, value: 258, unrealizedPnl: 88 });
+  assert.deepEqual(short.positions[0], { marketId: terms.id, side: 'short', qty: 4, pledged: 0,
+    collateral: 230, mark: 35.5, value: 142, unrealizedPnl: -88 });
+  assert.equal(long.markedEquity, 1088);
+  assert.equal(short.markedPnl, -88);
+  assert.equal(wallet(s, 'c').markedPnl, 0); // Unfilled cash reserve is included exactly once.
+  cancel(s, 'c', bid.orderId, 'cancel-bid');
+  assert.equal(wallet(s, 'a').positions[0].mark, 50);
+  assert.equal(wallet(s, 'a').markedPnl, 30);
+  cancel(s, 'a', ask.orderId, 'cancel-ask');
+  delete Object.values(s.markets)[0].lastPrice; // Old snapshot missing a trade price.
+  assert.deepEqual(['a', 'b'].map(a => wallet(s, a).positions[0].mark), [42.5, 57.5]);
+  assert.deepEqual(['a', 'b'].map(a => wallet(s, a).markedPnl), [0, 0]);
+  settle(s, terms.id, 65, evidence, END);
+  assert.deepEqual(['a', 'b'].map(a => wallet(s, a, END).markedEquity), [1090, 910]);
+  assert.deepEqual(['a', 'b'].map(a => wallet(s, a, END).markedPnl), [90, -90]);
 });
 
 test('sell crossing a higher resting bid receives price improvement and escrow stays exact', () => {
@@ -181,6 +226,23 @@ test('entirely invested account closes with no new margin and cannot pledge inve
   assert.equal(wallet(s, 'c', END).available, 1020);
 });
 
+test('a canceled inventory-backed order releases capital against a newer opposite position', () => {
+  const s = setup();
+  order(s, 'b', 'sell', 35, 2, 'b-ask');
+  order(s, 'a', 'buy', 35, 2, 'a-bid');
+  const pledged = order(s, 'a', 'sell', 90, 2, 'a-ask');
+  order(s, 'c', 'buy', 60, 2, 'c-bid');
+  order(s, 'a', 'sell', 60, 2, 'a-sell');
+  assert.equal(wallet(s, 'a').positions.length, 2);
+  cancel(s, 'a', pledged.orderId, 'release');
+  assert.deepEqual(wallet(s, 'a').positions, []);
+  assert.equal(wallet(s, 'a').available, 1000);
+  assert.equal(wallet(s, 'a').settlementCredit, 50);
+  assert.equal(wallet(s, 'a').markedEquity, 1050);
+  settle(s, terms.id, 70, evidence, END);
+  assert.equal(wallet(s, 'a', END).available, 1050);
+});
+
 test('closing a loser retains the exact void refund and mixed orders escrow only excess units', () => {
   const s = setup();
   order(s, 'a', 'buy', 60, 4, '1');
@@ -194,7 +256,9 @@ test('closing a loser retains the exact void refund and mixed orders escrow only
   assert.equal(w.positions[0].qty, 3);
   assert.equal(w.voidCredit, 120);
   assert.equal(w.collateral, 330);
+  assert.equal(w.markedEquity, 880); // The 120 credit is paid only if the market is voided.
   settle(s, terms.id, null, evidence, END);
+  assert.equal(wallet(s, 'a', END).markedEquity, 1000);
   assert.ok(['a', 'b', 'c'].every(a => wallet(s, a, END).available === 1000));
 });
 

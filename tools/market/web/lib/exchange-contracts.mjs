@@ -2,9 +2,12 @@ import { createHash } from 'node:crypto';
 
 const EVENT = '26-cl';
 export const EVENT_END = Date.parse('2026-11-22T19:00:00Z');
-export const KINDS = Object.freeze(['binary', 'call', 'put', 'future', 'range', 'race', 'butterfly']);
-const widthKinds = new Set(['call', 'put', 'future', 'butterfly']);
-const names = { binary: 'Binaria', call: 'Call', put: 'Put', future: 'Futuro', range: 'Rango', race: 'Carrera', butterfly: 'Mariposa' };
+export const KINDS = Object.freeze(['binary', 'call', 'put', 'future', 'range', 'race', 'butterfly', 'linear', 'straddle']);
+const widthKinds = new Set(['call', 'put', 'future', 'butterfly', 'straddle']);
+const names = {
+  binary: 'Binaria', call: 'Call', put: 'Put', future: 'Futuro', range: 'Rango', race: 'Carrera',
+  butterfly: 'Mariposa', linear: 'Futuro lineal', straddle: 'Straddle',
+};
 const decimal = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 2 });
 const pct = (bps) => decimal.format(bps / 100) + '%';
 const pp = (bps) => decimal.format(bps / 100) + ' pp';
@@ -47,7 +50,9 @@ export function describe(market) {
     case 'call': return `Paga 0 hasta ${pct(strike)}. Por encima, el pago sube linealmente hasta 100 al ganar ${pp(width)} desde ese nivel.`;
     case 'put': return `Paga 0 desde ${pct(strike)} hacia arriba. Por debajo, el pago sube linealmente hasta 100 al perder ${pp(width)} desde ese nivel.`;
     case 'future': return `Paga 50 en ${pct(strike)}. El pago sube o baja linealmente, 50 por cada ${pp(width)}, con mínimo 0 y máximo 100.`;
+    case 'linear': return `El largo cobra un crédito por cada punto porcentual del precio de cierre de ${team}, redondeado al crédito más cercano. El corto cobra el resto hasta 100. Si compras a 12 y cierra en 17%, ganas 5 créditos por contrato.`;
     case 'butterfly': return `Paga 100 en ${pct(strike)}. El pago cae linealmente hasta 0 a una distancia de ${pp(width)} por encima o por debajo.`;
+    case 'straddle': return `Paga 0 en ${pct(strike)}. El pago sube linealmente cuanto más se aleja el cierre de ese nivel, en cualquier dirección. A una distancia de ${pp(width)} o más paga 100.`;
     case 'race': return `Gana el equipo con mayor variación porcentual desde su precio inicial. ${team} parte en ${pct(baseline)} y ${rival} en ${pct(rivalBaseline)}. Paga 100 si gana ${team}, 50 si empatan y 0 si gana ${rival}.`;
     default: fail('Tipo de contrato desconocido.');
   }
@@ -77,7 +82,7 @@ export function propose(spec, board, now = Date.now()) {
     terms.rivalBaseline = priceBps(rival.price);
     if (!terms.baseline || !terms.rivalBaseline) fail('La carrera requiere precios iniciales de al menos un punto base.');
     subject += ' vs. ' + rival.team;
-  } else {
+  } else if (kind !== 'linear') {
     terms.strike = bps(spec.strike, 'El nivel');
     if (widthKinds.has(kind)) terms.width = bps(spec.width, 'La amplitud', 1);
     if (kind === 'range') {
@@ -126,7 +131,9 @@ export function evaluate(market, seriesByTeam) {
     case 'call': longPayout = 100 * (close - strike) / width; break;
     case 'put': longPayout = 100 * (strike - close) / width; break;
     case 'future': longPayout = 50 + 50 * (close - strike) / width; break;
+    case 'linear': longPayout = close / 100; break;
     case 'butterfly': longPayout = 100 - 100 * Math.abs(close - strike) / width; break;
+    case 'straddle': longPayout = 100 * Math.abs(close - strike) / width; break;
     case 'race': {
       const rival = observation(seriesByTeam, market.rival, market.rivalId, expiry);
       if (!rival) return null;

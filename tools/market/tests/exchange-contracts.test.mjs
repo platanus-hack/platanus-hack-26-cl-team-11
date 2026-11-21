@@ -40,6 +40,7 @@ test('creation requires a fresh open board, official identities, supported integ
     { kind: 'unknown' }, { team: 'x' }, { strike: '1000' }, { strike: 0.1 }, { strike: -1 }, { strike: 10001 },
     { kind: 'range', upper: 999 }, { kind: 'range', upper: 1000 }, { kind: 'range', upper: 10001 },
     { kind: 'call' }, { kind: 'put', width: NaN }, { kind: 'future', width: 0 }, { kind: 'butterfly', width: 10001 },
+    { kind: 'straddle', width: 0 }, { kind: 'straddle', strike: 10001, width: 100 },
     { kind: 'race', rival: 'a' }, { kind: 'race', rival: 'x' }, { expiry: now }, { expiry: expiry + 1 },
     { expiry: now + 86460000 }, { expiry: new Date(expiry).toISOString() },
   ]) assert.throws(() => proposal(change), { status: 400 });
@@ -98,6 +99,7 @@ test('long payoffs use integer bps; bounded contracts include strikes, tails, ca
     put: [100, 50, 0, 0, 0, 0, 0],
     future: [0, 25, 50, 56, 75, 100, 100],
     butterfly: [0, 50, 100, 88, 50, 0, 0],
+    straddle: [100, 50, 0, 13, 50, 100, 100],
     range: [0, 0, 100, 100, 100, 100, 0],
   };
   const closes = [0.05, 0.08, 0.1, 0.105, 0.12, 0.14, 0.16];
@@ -105,6 +107,21 @@ test('long payoffs use integer bps; bounded contracts include strikes, tails, ca
     const market = proposal({ kind, width: 400, upper: 1400 });
     assert.deepEqual(closes.map((value) => settleAt(market, value)), expected, kind);
   }
+});
+
+test('linear futures settle one credit per percentage point over the full probability domain', () => {
+  const market = propose({ team: 'a', expiry, kind: 'linear' }, board, now);
+  assert.equal(market.strike, undefined);
+  assert.equal(market.width, undefined);
+  assert.deepEqual(proposal({ kind: 'linear', strike: 4000, width: 300 }), market);
+  for (const [fraction, expected] of [[0, 0], [0.0049, 0], [0.005, 1], [0.1249, 12], [0.125, 13], [0.55, 55], [0.99, 99], [1, 100]]) {
+    assert.equal(settleAt(market, fraction), expected);
+  }
+  const longPaid = 12;
+  const shortPaid = 100 - longPaid;
+  const longReceived = settleAt(market, 0.17);
+  assert.equal(longReceived - longPaid, 5);
+  assert.equal((100 - longReceived) - shortPaid, -5);
 });
 
 test('race compares proportional returns from locked prices, including exact ties and losses', () => {
