@@ -191,6 +191,7 @@ const DEMO_PROFILES: DemoProfile[] = [
 ];
 
 export const DEMO_NAMES = DEMO_PROFILES.map((profile) => profile.name);
+const DEMO_TEAM_NAME = 'Equipo demo';
 
 function seededRandom(seedText: string): () => number {
   let state = 2166136261;
@@ -422,7 +423,12 @@ export function seedDemo(ctx: AppContext, now: Date = new Date()): Array<{ name:
 function runAsScript(tokens: string[]): void {
   const ctx = createContext();
   if (tokens.length === 0) {
-    for (const person of seedDemo(ctx)) console.log(`${person.name}: /conectar/${person.token}`);
+    const team = ctx.teams.createTeam(DEMO_TEAM_NAME);
+    for (const person of seedDemo(ctx)) {
+      ctx.teams.addMember(team.id, person.token);
+      console.log(`${person.name}: /conectar/${person.token}`);
+    }
+    console.log(`Las cinco personas quedaron en el equipo «${team.name}».`);
     return;
   }
   for (const token of tokens) {
