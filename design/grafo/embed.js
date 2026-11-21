@@ -1,13 +1,12 @@
 /*
  * Ronda · el globo, incrustado en otra página. globo.html carga este archivo solo si la dirección trae ?embed:
  *
- *   <iframe src="../grafo/globo.html?embed&caras=ojos"></iframe>
+ *   <iframe src="../grafo/globo.html?embed"></iframe>
  *
- * No cambia cómo se dibuja el globo aprobado. Hace cuatro cosas alrededor:
+ * No cambia cómo se dibuja el globo aprobado. Hace tres cosas alrededor:
  *   1. Deja solo la esfera: sin barra, titular ni columna, con fondo transparente y encuadrada al marco.
  *   2. Un equipo de diez que conversa sin parar: tres grupos nacen, acuerdan y renacen con otras personas.
- *   3. ?caras=ojos: cada persona es su gota de luz con ojos (luz/luz.js y caras/ojos.js), viva dentro del globo.
- *   4. Le cuenta cada acuerdo a la página que lo incrusta (postMessage) y escucha su «aceptar».
+ *   3. Le cuenta cada acuerdo a la página que lo incrusta (postMessage) y escucha sus mensajes.
  *
  * Mensajes que salen:  { ronda: 'globo', type: 'listo' | 'acuerdo', tema, conversaciones, personas }
  * Mensajes que entran: { ronda: 'pagina', type: 'aceptar' }            tu grupo cierra el acuerdo y abre el tema siguiente
@@ -135,109 +134,7 @@
   if (!query.has('n')) g.setN(TEAM_SIZE, false);
   else { g.buildGroups(g.state.n); g.setState({ auto: false, groupCount: g.groups.length }); }
 
-  /* ---------- 3. Caras de luz ---------- */
-  var faces = null;
-  function fnv(text) {
-    var state = 0x811c9dc5;
-    for (var i = 0; i < text.length; i += 1) { state ^= text.charCodeAt(i); state = Math.imul(state, 0x01000193); }
-    return state >>> 0 || 0x9e3779b9;
-  }
-  // Sin WebGL2 la gota queda quieta: la misma mezcla de RondaLuz.css, pintada una vez en un lienzo.
-  function quietLight(palettes, cell) {
-    var canvas = document.createElement('canvas'), SPOTS = [[28, 72], [74, 34], [58, 78], [22, 30]];
-    canvas.width = palettes.length * cell; canvas.height = cell;
-    var context = canvas.getContext('2d');
-    palettes.forEach(function (palette, index) {
-      var tones = window.RondaLuz.css(palette).match(/rgba\(\d+, \d+, \d+, 0\.95\)/g) || [];
-      context.save();
-      context.translate(index * cell, 0);
-      context.beginPath(); context.arc(cell / 2, cell / 2, cell / 2, 0, Math.PI * 2); context.clip();
-      context.fillStyle = '#f3f2fc'; context.fillRect(0, 0, cell, cell);
-      for (var layer = tones.length - 1; layer >= 0; layer -= 1) {
-        var x = SPOTS[layer][0] / 100 * cell, y = SPOTS[layer][1] / 100 * cell;
-        var reach = Math.hypot(Math.max(x, cell - x), Math.max(y, cell - y)) * 0.52;
-        var wash = context.createRadialGradient(x, y, 0, x, y, reach);
-        wash.addColorStop(0, tones[layer]); wash.addColorStop(1, tones[layer].replace('0.95)', '0)'));
-        context.fillStyle = wash; context.fillRect(0, 0, cell, cell);
-      }
-      context.restore();
-    });
-    return { canvas: canvas, render: function () {} };
-  }
-  function withEyes() {
-    var Luz = window.RondaLuz, Ojos = window.RondaOjos;
-    var TEAM = ['mati', 'ian', 'lian', 'andres', 'roberto'], TILES = 8, CELL = 160, TEAM_SIDE = 192, TILE = 128, INSET = 4;
-    var ink = getComputedStyle(document.documentElement).getPropertyValue('--rd-ink').trim();
-    var seeds = TEAM.slice();
-    for (var tile = 0; tile < TILES; tile += 1) seeds.push((g.people[5 + tile] || {}).name || 'persona-' + tile);
-    var palettes = seeds.map(function (seed, index) { return index < TEAM.length ? Ojos.TEAM_LIGHT[seed] : Luz.paletteFor(seed); });
-    var light = Luz.grid(document.createElement('canvas'), { cols: seeds.length, rows: 1, cell: CELL, palettes: palettes }) || quietLight(palettes, CELL);
-
-    // Los ojos se dibujan una vez, abiertos y cerrados; el parpadeo elige cuál va en cada cuadro.
-    var picture = function (seed, size, t) {
-      var markup = Ojos.svg(seed, { size: size, t: t, rest: t == null })
-        .replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" style="color:' + ink + '" ')
-        .replace('width="100%" height="100%"', 'width="' + size * 2 + '" height="' + size * 2 + '"')
-        .replace(/ data-ojos-eyes>/g, '>'); // un atributo sin valor no es XML válido en una imagen suelta
-      var image = new Image();
-      image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup);
-      return image;
-    };
-    var shutAt = function (recipe, seedInt) {
-      var best = 0, when = 0;
-      for (var t = 0; t < 40; t += 0.02) { var shut = Ojos.pose(recipe, seedInt, t, false).shut; if (shut > best) { best = shut; when = t; } }
-      return when;
-    };
-    var people = seeds.map(function (seed, index) {
-      var team = index < TEAM.length, size = team ? 92 : 36;
-      var recipe = Ojos.TEAM[seed] || Ojos.recipeFor(seed), seedInt = fnv('ojos:' + seed);
-      return { team: team, recipe: recipe, seedInt: seedInt, open: picture(seed, size, null), shut: picture(seed, size, shutAt(recipe, seedInt)) };
-    });
-
-    var surface = function (width, height) {
-      var canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      canvas.complete = true; canvas.naturalWidth = width; // el globo pregunta esto antes de dibujar una imagen
-      return canvas;
-    };
-    var teamCanvas = TEAM.map(function () { return surface(TEAM_SIDE, TEAM_SIDE); });
-    var atlas = surface(TILES * TILE, TILE), atlasBlur = surface(TILES * TILE, TILE);
-    var atlasContext = atlas.getContext('2d'), blurContext = atlasBlur.getContext('2d');
-    g.team = teamCanvas; g.atlas = atlas; g.atlasBlur = atlasBlur;
-    for (var index = 5; index < g.MAX; index += 1) g.people[index].tile = (index - 5) % TILES;
-
-    return function (seconds) {
-      light.render(seconds);
-      atlasContext.clearRect(0, 0, atlas.width, atlas.height);
-      people.forEach(function (person, index) {
-        var context = person.team ? teamCanvas[index].getContext('2d') : atlasContext;
-        var x = person.team ? 0 : (index - TEAM.length) * TILE + INSET, y = person.team ? 0 : INSET, side = person.team ? TEAM_SIDE : TILE - INSET * 2;
-        if (person.team) context.clearRect(0, 0, side, side);
-        context.drawImage(light.canvas, index * CELL, 0, CELL, CELL, x, y, side, side);
-        var eyes = Ojos.pose(person.recipe, person.seedInt, seconds, false).shut > 0.5 ? person.shut : person.open;
-        if (eyes.complete && eyes.naturalWidth) context.drawImage(eyes, x, y, side, side);
-      });
-      blurContext.clearRect(0, 0, atlasBlur.width, atlasBlur.height);
-      blurContext.filter = 'blur(4px)';
-      blurContext.drawImage(atlas, 0, 0);
-      blurContext.filter = 'none';
-    };
-  }
-  var startFaces = function () {
-    var paint = withEyes();
-    var quiet = g.reduced || query.has('still');
-    faces = function (now) { paint(quiet ? 8 : now / 1000); };
-    faces(0);
-    if (quiet) setTimeout(function () { faces(0); }, 400); // los ojos son imágenes: se pintan de nuevo cuando ya cargaron
-  };
-  if (query.get('caras') === 'ojos' && window.RondaLuz) {
-    var eyesScript = document.createElement('script');
-    eyesScript.src = '../caras/ojos.js';
-    eyesScript.onload = startFaces;
-    document.head.appendChild(eyesScript);
-  }
-
-  /* ---------- 4. Lo que pasa adentro, hacia afuera ---------- */
+  /* ---------- 3. Lo que pasa adentro, hacia afuera ---------- */
   var told = {};
   var nameOf = function (index) { return g.people[index].name; };
   var watch = function () {
@@ -253,7 +150,6 @@
   };
   var still = g.reduced || query.has('still');
   var loop = function (now) {
-    if (faces && !still) faces(clock.demo);
     if (!still) watch();
     window.requestAnimationFrame(loop);
   };
