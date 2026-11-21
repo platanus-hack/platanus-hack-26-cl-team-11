@@ -121,6 +121,9 @@ izquierda; solo se centran los nombres bajo una cara.
 - Una persona nueva: se compone otra Vita Face con las partes de `vita-front`
   (`public/vita-faces`, escala 1,32 y origen Y 74 %) y se agrega a `faces/`.
 - Las caras actuales no buscan parecerse a cada integrante.
+- **En revisión (21-nov):** Mati volvió a abrir la pregunta de las caras. Las alternativas están en
+  `caras/sabores.html` (Vita Faces en vidrio, Tinta, Aura, Monograma). Hasta que Mati decida, rigen
+  las Vita Faces.
 
 ## Grafo de agentes: el globo
 
@@ -302,6 +305,7 @@ un punto, todavía no lo revisó Mati en grande).
 | `reference.html`, `reference.png` | La pantalla de referencia, hecha solo con primitivas, y su captura. |
 | `logo/ronda-mark.svg` | Isotipo. |
 | `faces/` | Caras del equipo. |
+| `caras/` | Página de prueba con alternativas de caras (`sabores.html`). Propuesta, no es producto. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · caras en cinco sabores</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231e9bff'/%3E%3Cstop offset='.5' stop-color='%23e840d8'/%3E%3Cstop offset='1' stop-color='%23ff8a1f'/%3E%3C/linearGradient%3E%3CclipPath id='c'%3E%3Ccircle cx='50' cy='50' r='40'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='40' fill='%23f6f6fb'/%3E%3Cg clip-path='url(%23c)' fill='%231d1d1f'%3E%3Cpath d='M0 0H100V42C92 30 76 26 50 26C24 26 8 30 0 42Z'/%3E%3Ccircle cx='38' cy='56' r='5'/%3E%3Ccircle cx='62' cy='56' r='5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<style>
+  /* Página de prueba: compara cinco maneras de dibujar a una persona con las mismas tres pruebas. */
+  body { margin: 0; }
+  .cr {
+    --cr-glass-face: radial-gradient(circle at 36% 27%, #ffffff 0, #f3f4f9 52%, #dde0ed 100%);
+    --cr-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%);
+    --cr-bead-shade: radial-gradient(circle at 50% 122%, rgba(70, 70, 120, 0.2) 0, rgba(70, 70, 120, 0) 56%);
+  }
+  .cr-intro { display: grid; gap: var(--rd-space-7); padding-top: 34px; }
+  @media (min-width: 1100px) { .cr-intro { grid-template-columns: minmax(0, 1fr) 460px; align-items: start; } }
+  .cr-intro__text { display: flex; flex-direction: column; gap: var(--rd-space-4); max-width: 720px; }
+  .cr-intro__text p { margin: 0; }
+  .cr-flavors { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-7); }
+  .cr-flavor { gap: var(--rd-space-4); }
+  .cr-flavor__lead { margin: 0; max-width: 760px; }
+  .cr-tests { display: grid; gap: var(--rd-space-6); align-items: start; }
+  @media (min-width: 1100px) { .cr-tests { grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; } }
+  .cr-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
+  .cr-nodes { display: flex; align-items: flex-start; gap: var(--rd-space-2); padding: var(--rd-space-3) 0 var(--rd-space-1); }
+  .cr-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
+  .cr-node__slot { height: 104px; display: grid; place-items: center; }
+  .cr-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
+  .cr-av { position: relative; display: block; overflow: hidden; flex: 0 0 auto; color: var(--rd-ink); background-repeat: no-repeat; }
+  .cr-av svg { display: block; width: 100%; height: 100%; }
+  .cr-av--glass { background: var(--cr-glass-face); }
+  .cr-av--glass::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--cr-bead-shade); pointer-events: none; }
+  .cr-av--mono { display: grid; place-items: center; container-type: size; background: var(--cr-glass-face); color: var(--rd-muted); }
+  .cr-av--mono > b { font-family: var(--rd-font-num); font-weight: var(--rd-weight); font-size: 38cqw; letter-spacing: -0.02em; line-height: 1; }
+  .cr-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--cr-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .cr-globe > .cr-av { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); }
+  .cr-globe > .cr-av--front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-verdict { display: grid; gap: var(--rd-space-2) var(--rd-space-7); padding-top: var(--rd-space-4); border-top: 1px solid var(--rd-hairline); }
+  @media (min-width: 900px) { .cr-verdict { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .cr-verdict > div { display: flex; flex-direction: column; gap: 6px; }
+  .cr-verdict p { margin: 0; font-size: var(--rd-text-small); line-height: 1.4; }
+  .cr-rest { display: grid; gap: var(--rd-space-4); padding-top: var(--rd-space-4); }
+  @media (min-width: 1100px) { .cr-rest { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .cr-rest p { margin: 0; font-size: var(--rd-text-small); line-height: 1.45; }
+  .cr-foot { padding-top: var(--rd-space-7); max-width: 760px; }
+</style>
+</head>
+<body>
+<div class="rd-page cr">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar">
+      <span class="rd-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda · caras</span>
+      <span class="rd-chip rd-chip--status rd-glass">Propuesta del 21-nov, sin decidir</span>
+    </header>
+
+    <section class="cr-intro">
+      <div class="cr-intro__text">
+        <h1 class="rd-title">Cinco maneras de dibujar a una persona</h1>
+        <p>Cada sabor pasa las mismas tres pruebas: un nodo con nombre, una fila de lista y el globo con 64 personas. Hoy rige Vita Faces; nada de esta página está en el producto.</p>
+        <p class="rd-note">Apple muestra a las personas con su foto, un Memoji o sus iniciales, y a su asistente como luz, nunca con cara. Ronda ya separa lo mismo: la persona es la cara y su agente es el aro de luz que la rodea.</p>
+      </div>
+      <div class="rd-decision">
+        <div class="rd-decision__body">
+          <span class="rd-decision__label rd-gradient-text">Recomendación</span>
+          <p class="rd-title" id="pick"></p>
+          <p class="rd-note" id="pick-why" style="margin: 0"></p>
+        </div>
+      </div>
+    </section>
+
+    <main class="cr-flavors" id="flavors"></main>
+
+    <section class="cr-flavors" aria-labelledby="rest-title">
+      <div class="rd-head"><h2 class="rd-title" id="rest-title">Lo que no dibujé</h2></div>
+      <div class="cr-rest">
+        <div class="rd-card rd-glass">
+          <span class="rd-label">Fotos reales</span>
+          <p>Es lo primero que hace Apple. Las cinco del equipo se sacan en diez minutos; faltan las otras 295 del globo.</p>
+          <p class="rd-note">Ronda promete que lo privado no sale de tu agente. Una cara dibujada cuida mejor esa promesa que una foto junto a tu sueño y tu carga.</p>
+        </div>
+        <div class="rd-card rd-glass">
+          <span class="rd-label">Hackers de Platanus</span>
+          <p>No hay una API pública de hackers. Lo público hoy son 16 mentores con foto en la página de Santiago y 48 repos de equipo en GitHub, con 77 personas y su avatar.</p>
+          <p class="rd-note">Mezcla fotos, dibujos e íconos, de personas que no dieron permiso, junto a datos inventados. Sirve a lo más para una escena del pitch («esta sala»), sin nombres ni estados y con el visto bueno de Platanus.</p>
+        </div>
+        <div class="rd-card rd-glass">
+          <span class="rd-label">Memoji o arcilla 3D</span>
+          <p>Es el otro avatar de Apple, y el más querido.</p>
+          <p class="rd-note">Ya está descartado en DESIGN.md: se parece a Montu.</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="rd-note cr-foot">Vita Faces en vidrio sale de <code>componer.py</code> con las piezas de vita-front. Tinta, Aura y Monograma salen de <code>caras.js</code> a partir del nombre. El globo de esta página es una maqueta: 64 caras sobre una esfera, con el fondo desenfocado igual que en el globo real.</p>
+  </div>
+</div>
+
+<script src="caras.js"></script>
+<script>
+(function () {
+  'use strict';
+  var Caras = window.RondaCaras;
+
+  var TEAM = [
+    { name: 'Tú', status: 'Pide cobertura', file: 'mati', initial: 'M', ring: true, tinta: { hair: 'corto', tone: 'tinta', eyes: 'punto', brows: 'pillo', mouth: 'lado' } },
+    { name: 'Ian', status: 'Tiene la cifra', file: 'ian', initial: 'I', ring: true, tinta: { hair: 'copete', tone: 'grafito', eyes: 'feliz', mouth: 'sonrisa' } },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', file: 'lian', initial: 'L', ring: true, tinta: { hair: 'flequillo', tone: 'tinta', eyes: 'punto', mouth: 'chica', glasses: 'redondo' } },
+    { name: 'Andrés', status: 'Plan B listo', file: 'andres', initial: 'A', small: true, tinta: { hair: 'lado', tone: 'grafito', eyes: 'ovalo', brows: 'firme', mouth: 'sonrisa' } },
+    { name: 'Roberto', status: 'En reuniones', file: 'roberto', initial: 'R', small: true, tinta: { hair: 'corto', tone: 'tinta', flip: true, eyes: 'ovalo', brows: 'arco', mouth: 'abierta' } }
+  ];
+  var TEAM_STRIP = { mati: 0, ian: 1, lian: 2, roberto: 3, andres: 4 };
+  var ROWS = [1, 2, 3];
+
+  var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
+  var SURNAMES = 'RGSMLPCVFTHADBEN';
+
+  var FLAVORS = [
+    {
+      id: 'vita', title: 'Vita Faces', chip: 'En uso hoy',
+      lead: 'Las caras de Vita, tal como están: una por integrante y un atlas de 64 para el resto.',
+      pro: ['Ya están hechas y cada integrante tiene la suya.', 'Tienen carisma: se reconoce a una persona, no a un ícono.'],
+      con: ['Seis fondos pastel suman una segunda paleta que compite con el aura.', 'Traen gorras de natación, antiparras y medallas: son de un gimnasio, no de un equipo de trabajo.', 'Son la marca de Vita.'],
+      team: function (person) { return image('../faces/' + person.file + '.png'); },
+      crowd: function (index) { return sprite('../faces/atlas/faces.png', 8, index % 8, Math.floor(index / 8)); }
+    },
+    {
+      id: 'vidrio', title: 'Vita Faces en vidrio', chip: 'El cambio más corto',
+      lead: 'El mismo personaje con tres ajustes: un solo fondo de vidrio, ropa de todos los días y nada de deporte.',
+      pro: ['Conserva el carisma y deja el color al degradado.', 'Misma grilla de 8 por 8 que el atlas actual: entra regenerando las imágenes, sin tocar el globo.'],
+      con: ['Sigue siendo la marca de Vita.', 'Una cabeza blanca sobre vidrio claro pierde algo de borde al fondo del globo.'],
+      team: function (person) { return sprite('vita-ronda-equipo.webp', 5, TEAM_STRIP[person.file], 0, 1); },
+      crowd: function (index) { return sprite('vita-ronda.webp', 8, index % 8, Math.floor(index / 8)); }
+    },
+    {
+      id: 'tinta', title: 'Tinta', chip: 'Propia de Ronda',
+      lead: 'La cara es el disco de vidrio, dibujada con la misma tinta del texto. Sin color por persona.',
+      pro: ['Nace del sistema: vidrio y tinta, nada más.', 'Sale del nombre, sin imágenes, para 5 o para 300.', 'De lejos quedan el pelo y los ojos, que es lo que se alcanza a leer.'],
+      con: ['Menos carisma que una Vita Face.', 'Es un primer trazo: necesita una pasada de dibujo antes de mostrarse.'],
+      team: function (person) { return glass(Caras.tinta(person.name, { recipe: person.tinta })); },
+      crowd: function (index, size) { return glass(Caras.tinta(NAMES[index], { small: size < 17 })); }
+    },
+    {
+      id: 'aura', title: 'Aura', chip: 'Sin cara',
+      lead: 'Cada persona es una gota de luz con su propia mezcla del aura. Así dibuja Apple a su asistente.',
+      pro: ['Con 300 personas el globo se ve como un cielo.', 'Cero dibujo y cero imágenes.'],
+      con: ['Rompe el principio 7: personas con cara.', 'Saca el degradado de sus cuatro lugares; si todo brilla, nada brilla.', 'No se sabe quién es quién.'],
+      team: function (person) { return painted(Caras.aura(person.name)); },
+      crowd: function (index) { return painted(Caras.aura(NAMES[index])); }
+    },
+    {
+      id: 'mono', title: 'Monograma', chip: 'Sin cara',
+      lead: 'Las iniciales sobre vidrio. Lo que muestra Contactos de Apple cuando no hay foto.',
+      pro: ['Sobrio y sin trabajo.'],
+      con: ['DESIGN.md lo prohíbe: «nunca una inicial».', 'De lejos no se lee, y dos personas con la misma letra son la misma.'],
+      team: function (person) { return mono(person.initial); },
+      crowd: function (index) { return mono(Caras.monograma(NAMES[index], SURNAMES.charAt(index % SURNAMES.length))); }
+    }
+  ];
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function image(src) {
+    var node = element('span', 'cr-av');
+    node.style.backgroundImage = 'url(' + src + ')';
+    node.style.backgroundSize = '100% 100%';
+    return node;
+  }
+  function sprite(src, columns, column, row, rows) {
+    var node = element('span', 'cr-av');
+    var lines = rows || columns;
+    node.style.backgroundImage = 'url(' + src + ')';
+    node.style.backgroundSize = (columns * 100) + '% ' + (lines * 100) + '%';
+    node.style.backgroundPosition = (columns > 1 ? column * 100 / (columns - 1) : 0) + '% ' + (lines > 1 ? row * 100 / (lines - 1) : 0) + '%';
+    return node;
+  }
+  function glass(svg) { var node = element('span', 'cr-av cr-av--glass'); node.innerHTML = svg; return node; }
+  function painted(background) { var node = element('span', 'cr-av'); node.style.background = background; return node; }
+  function mono(letters) { var node = element('span', 'cr-av cr-av--mono'); node.appendChild(element('b', '', letters)); return node; }
+
+  function nodes(flavor) {
+    var row = element('div', 'cr-nodes');
+    TEAM.forEach(function (person) {
+      var cell = element('div', 'cr-node');
+      var slot = element('div', 'cr-node__slot');
+      var face = flavor.team(person);
+      face.classList.add('rd-face');
+      if (person.small) face.classList.add('rd-face--small');
+      if (person.ring) { var ring = element('span', 'cr-ring'); ring.appendChild(face); slot.appendChild(ring); } else slot.appendChild(face);
+      var label = element('span', 'rd-person');
+      label.appendChild(element('span', 'rd-person__name', person.name));
+      label.appendChild(element('span', 'rd-person__status', person.status));
+      cell.appendChild(slot); cell.appendChild(label); row.appendChild(cell);
+    });
+    return row;
+  }
+
+  function rows(flavor) {
+    var list = element('div', 'rd-list');
+    ROWS.forEach(function (index) {
+      var person = TEAM[index];
+      var item = element('div', 'rd-item');
+      var face = flavor.team(person);
+      face.classList.add('rd-face', 'rd-face--tiny');
+      var text = element('span', 'rd-item__text');
+      text.appendChild(element('span', 'rd-item__title', person.name));
+      text.appendChild(element('span', 'rd-item__sub', person.status));
+      item.appendChild(face); item.appendChild(text); list.appendChild(item);
+    });
+    return list;
+  }
+
+  function globe(flavor) {
+    var sphere = element('div', 'cr-globe');
+    var count = NAMES.length, golden = Math.PI * (3 - Math.sqrt(5)), tilt = 0.42, spin = 0.6;
+    for (var index = 0; index < count; index += 1) {
+      var y = 1 - 2 * (index + 0.5) / count;
+      var radius = Math.sqrt(1 - y * y);
+      var theta = index * golden + spin;
+      var x = radius * Math.cos(theta), z = radius * Math.sin(theta);
+      var tiltedY = y * Math.cos(tilt) - z * Math.sin(tilt);
+      var depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2;
+      var eased = depth * depth * (3 - 2 * depth);
+      var size = 10 + 18 * eased;
+      var face = flavor.crowd(index, size);
+      face.style.width = face.style.height = size.toFixed(1) + 'px';
+      face.style.left = (50 + x * 41).toFixed(2) + '%';
+      face.style.top = (50 + tiltedY * 41).toFixed(2) + '%';
+      face.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
+      face.style.zIndex = String(Math.round(depth * 100));
+      if (eased < 0.55) face.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)';
+      else face.classList.add('cr-av--front');
+      sphere.appendChild(face);
+    }
+    return sphere;
+  }
+
+  function test(label, content) {
+    var block = element('div', 'cr-test');
+    block.appendChild(element('span', 'rd-label', label));
+    block.appendChild(content);
+    return block;
+  }
+
+  function verdict(title, lines) {
+    var block = element('div');
+    block.appendChild(element('span', 'rd-label', title));
+    lines.forEach(function (line) { block.appendChild(element('p', '', line)); });
+    return block;
+  }
+
+  var host = document.getElementById('flavors');
+  FLAVORS.forEach(function (flavor) {
+    var card = element('section', 'rd-card rd-glass cr-flavor');
+    card.id = flavor.id;
+    var head = element('div', 'rd-head');
+    head.appendChild(element('h2', 'rd-title', flavor.title));
+    var end = element('span', 'rd-head__end');
+    end.appendChild(element('span', 'rd-chip rd-glass', flavor.chip));
+    head.appendChild(end);
+    card.appendChild(head);
+    card.appendChild(element('p', 'cr-flavor__lead', flavor.lead));
+    var tests = element('div', 'cr-tests');
+    tests.appendChild(test('Nodo con nombre, 92 y 72 px', nodes(flavor)));
+    tests.appendChild(test('Fila de lista, 40 px', rows(flavor)));
+    tests.appendChild(test('Globo, 64 personas', globe(flavor)));
+    card.appendChild(tests);
+    var bottom = element('div', 'cr-verdict');
+    bottom.appendChild(verdict('A favor', flavor.pro));
+    bottom.appendChild(verdict('En contra', flavor.con));
+    card.appendChild(bottom);
+    host.appendChild(card);
+  });
+
+  document.getElementById('pick').textContent = 'Seguir con caras. Para la demo, Vita Faces en vidrio.';
+  document.getElementById('pick-why').textContent = 'Saca lo que hoy desentona, los pasteles y el deporte, sin perder el carisma ni rehacer las escenas que ya usan estas caras. Tinta es la opción si quieres que Ronda tenga caras propias y no las de Vita.';
+})();
+</script>
+</body>
+</html>
