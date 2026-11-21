@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ronda · herramientas de los agentes</title>
-<link rel="icon" href="../../logo/ronda-mark.svg">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
 <link rel="stylesheet" href="../../tokens.css">
 <link rel="stylesheet" href="../../ronda.css">
 <link rel="stylesheet" href="./tools.css">
@@ -12,7 +12,7 @@
 <style>
   /* Galería de trabajo de las tarjetas de herramienta. ?t=<segundos> fija el reloj. */
   body { margin: 0; }
-  .gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; margin-top: 24px; }
+  .gal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
   .demo { max-width: 420px; margin-top: 24px; padding: 18px 20px; border-radius: var(--rd-radius-card); font-size: 15px; line-height: 1.45; }
 </style>
 </head>
@@ -23,6 +23,7 @@
     <header class="rd-bar"><span class="rd-brand"><img class="rd-mark" src="../../logo/ronda-mark.svg" alt="">Ronda</span></header>
     <h1 class="rd-hero">Herramientas,<br><span class="rd-gradient-text">cada una con su forma.</span></h1>
     <p class="demo rd-glass" id="demo"></p>
+    <div class="rd-actions" style="max-width: 200px"><button type="button" class="rd-button rd-button--quiet" id="replay">Repetir</button></div>
     <section class="gal" id="gal" aria-label="Tarjetas de herramienta"></section>
   </div>
 </div>
@@ -42,21 +43,23 @@ const calls = [
   { name: 'github.pr', label: 'Revisar el cambio de Lian', input: { pr: 128 }, output: { estado: 'aprobado' }, receipt: 'Aprobado' },
   { name: 'granola.resumen', label: 'Leer la reunión de ayer', input: { reunion: 'Demo' }, output: { puntos: 3 }, receipt: '3 puntos' },
   { name: 'whatsapp.enviar', label: 'Avisar a Ian por WhatsApp', input: { para: 'Ian' }, output: { leido: true }, receipt: 'Leído' },
+  { name: 'whatsapp.leer', label: 'Leer la respuesta de Lian', input: { de: 'Lian' }, output: { recibido: true }, receipt: 'Recibido' },
+  { name: 'granola.buscar', label: 'Buscar quién prometió el deck', input: { tema: 'deck' }, output: { quien: 'Ian' }, receipt: 'Lo tiene Ian' },
   { name: 'salud.descanso', label: 'Leer tu descanso', input: { senal: 'sueño' }, output: { compartir: false }, receipt: 'Solo para ti', privateResult: true }
 ];
 const q = new URLSearchParams(location.search), fixed = q.has('t') ? +q.get('t') : null;
-const cycle = 7;
-const cards = calls.map((c, i) => { c.at = 0.6 + i * 0.12; c.end = c.at + 2.8; const r = RondaTools.create(c); document.getElementById('gal').append(r.el); return r; });
+let t0 = performance.now(), playing = true;
+const cards = calls.map((c, i) => { c.at = 0.6 + i * 0.12; c.end = c.at + 2.8; const r = RondaTools.create(c); r.el.classList.add('ss-stage'); document.getElementById('gal').append(r.el); return r; });
 const stream = RondaStream.create('A las 10:00 tengo [[x]] ¿Te sirve a las 10:30? Así revisamos la demo con calma.');
 document.getElementById('demo').append(stream.el);
-const t0 = performance.now();
 function frame() {
-  const t = fixed !== null ? fixed : ((performance.now() - t0) / 1000) % cycle;
+  const t = fixed !== null ? fixed : (performance.now() - t0) / 1000;
   cards.forEach(c => c.update(t));
   stream.update(Math.min(1, Math.max(0, (t - 0.3) / 3)), t > 3.6);
-  if (fixed === null) requestAnimationFrame(frame);
+  if (fixed === null && t < 6) requestAnimationFrame(frame);
 }
 frame();
+document.getElementById('replay').addEventListener('click', () => location.reload());
 </script>
 </body>
 </html>

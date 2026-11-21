@@ -239,12 +239,12 @@ window.RondaTools = (() => {
     copy.append(h('b', 'rt-label', call.label), meta);
     const status = h('span', 'rt-status');
     const run = h('span', 'rt-run');
-    run.innerHTML = '<svg class="rt-spin" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 1.5a5.5 5.5 0 0 1 5.5 5.5"/></svg>';
+    run.innerHTML = '<i class="rt-ico"><svg class="rt-spin" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 1.5a5.5 5.5 0 0 1 5.5 5.5"/></svg></i>';
     run.append(h('span', '', 'Consultando'));
     const done = h('span', 'rt-done');
     done.innerHTML = call.privateResult
-      ? '<svg width="12" height="14" viewBox="0 0 12 14"><rect x="1.5" y="6" width="9" height="6.5" rx="2"/><path d="M3.8 6V4.3a2.2 2.2 0 0 1 4.4 0V6"/></svg>'
-      : '<svg width="14" height="14" viewBox="0 0 14 14"><path class="rt-checkpath" d="M3 7.4l2.6 2.6L11 4.3"/></svg>';
+      ? '<i class="rt-ico"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="2.5" y="6" width="9" height="6.5" rx="2"/><path d="M4.8 6V4.3a2.2 2.2 0 0 1 4.4 0V6"/></svg></i>'
+      : '<i class="rt-ico"><svg width="14" height="14" viewBox="0 0 14 14"><path class="rt-checkpath" d="M3 7.4l2.6 2.6L11 4.3"/></svg></i>';
     done.append(h('span', '', call.receipt || 'Listo'));
     status.append(run, done);
     head.append(tile, copy, status);
