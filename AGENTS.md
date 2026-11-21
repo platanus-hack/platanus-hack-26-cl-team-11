@@ -35,7 +35,10 @@ Lo que no queda en un correo se pierde entre WhatsApp, Slack y lo que se habla e
   - Para: `mati@vita.lat`, `ian@vita.lat`, `lian@vita.lat`, `robert@getvita.ai`, `andres@getvita.ai`
     (sin repetir a quien lo manda).
   - CC: `team@mail.vita.lat`.
-- Asunto con el prefijo `[Hack26]`. Las respuestas van con «Responder a todos», sin sacar a nadie.
+- **Siempre en el mismo hilo**: el hilo de correo «[Hack26] Hilo del equipo». Nunca se abre un
+  correo nuevo; se responde con «Responder a todos» en ese hilo, sin sacar a nadie, para que todas
+  las personas y todos los agentes lean la misma conversación. Para encontrarlo, busca en tu correo
+  `subject:"[Hack26] Hilo del equipo"` y responde al último mensaje.
 - Lo manda quien comunica, desde su cuenta. Un agente redacta el correo y lo envía solo con la
   aprobación de su persona.
 - Si el mensaje salió primero por otro canal, el correo dice por dónde (por ejemplo «mandado también
