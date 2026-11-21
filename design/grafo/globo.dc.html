@@ -237,6 +237,10 @@ class Component extends DCLogic {
         if (g.members && g.members.indexOf(h) >= 0 && (this.lastPhase[g.id] || 0) > 0.5) { this.focusGroup(g); return; }
       }
     }
+    if (h < 0 && this.pickThread) {
+      const edge=this.pickThread(m);
+      if (edge) { this.openThread(edge.a,edge.b,edge.topic); return; }
+    }
     this.turnTo = null;
     if (this.state.focus) this.setState({ focus: null });
   }
@@ -439,6 +443,8 @@ class Component extends DCLogic {
     }
 
     var chips = [], pulses = [];
+    const activeThreads = this.openThread ? [] : null;
+    let calendarBox = null;
     for (var g2 = 0; g2 < this.groups.length; g2++) {
       var Gr = this.groups[g2], ph2 = phases[Gr.id];
       if (ph2.alpha * ph2.draw < 0.01) continue;
@@ -468,8 +474,9 @@ class Component extends DCLogic {
           }
         }
         ctx.globalAlpha = 1;
+        if (activeThreads && gAlpha > .12 && u > .05) activeThreads.push({a:A,b:B,c:c2,extent:u,topic:Gr.topic});
         if (this.drawCalendar && Gr.mine && A === 1 && B === 2) {
-          this.drawCalendar(ctx, pa, pb, c2, P, this.calendarZoom, t, this.reduced);
+          calendarBox=this.drawCalendar(ctx, pa, pb, c2, P, this.calendarZoom, DemoThreads.time("1-2",this.reduced));
         } else if (Gr.edges[ei][2] && u > 0.95) chips.push([Gr.edges[ei][2], 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y, gAlpha]);
       }
       if (ph2.agree > 0 || (isFocus && !Gr.mine)) {
@@ -483,6 +490,13 @@ class Component extends DCLogic {
       }
     }
 
+    if (activeThreads) {
+      const view={points:P, ctrl, active:activeThreads, calendarBox, reserved:liveKey, count:n, vis:this.vis};
+      this.pickThread=(point)=>pickProjectedThread(view,point,14/this.calendarZoom);
+      if (this.mouse && !this.drag && this.hover<0 && pickProjectedThread(view,this.mouse,10/this.calendarZoom,true)) cv.style.cursor="pointer";
+      const selection=this.threadSelection || {id:"1-2",a:1,b:2,events:this.calendarEvents};
+      if (!this.reduced && P[selection.a] && P[selection.b]) drawThreadToken(ctx,view,selection,this.calendarZoom);
+    }
     pulses.forEach(function (pl) {
       var u2 = pl[2], rr2 = 10 + u2 * 70;
       ctx.globalAlpha = (1 - u2) * 0.8; ctx.strokeStyle = self.grad(ctx, pl[0] - rr2, pl[1], pl[0] + rr2, pl[1]); ctx.lineWidth = 2 * (1 - u2) + 0.5;

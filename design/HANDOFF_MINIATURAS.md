@@ -37,3 +37,7 @@ design/lint.sh
 ```
 
 Para revisar la propuesta, prueba el giro con cinco agentes, los cinco enlaces de detalle y el regreso al grafo. A 10, 50 y 300 agentes, la demo actual conserva dos intercambios destacados. Comprueba pausa, movimiento reducido y legibilidad a 390 px. Usa los ensayos de Stageshow de la regla 4 y registra por separado el resultado técnico y el feedback visual de Mati. [Ensayo anterior](motion/REHEARSAL.md) · [Reglas del repo](../AGENTS.md)
+
+## Dirección aprobada después de la primera prueba
+
+Mati aprobó el [calendario a escala del arco](grafo/globo.html?n=5&solo=calendars). Para las siguientes piezas, revisar una por vez en el servidor en vivo. Tomar como referencia los controles de AI Teammates en Vita Front y el tamaño del calendario (64 × 43 px en escritorio, 52 × 35 px en teléfono). La miniatura tiene varios estados reconocibles. Cada arco representa un hilo entre agentes. Tanto la pieza como la línea abren su conversación, con tokens en tránsito y llamadas a herramientas que permiten inspeccionar entradas y resultados. Los datos de este prototipo son simulados.

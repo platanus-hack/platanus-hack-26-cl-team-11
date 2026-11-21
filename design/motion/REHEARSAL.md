@@ -104,3 +104,15 @@ Se inspeccionó el canvas real en Chrome a 1280 y 390 px. Se comprobó el anclaj
 durante el arrastre, el cambio en vivo a movimiento reducido, el favicon y el
 selector de 5, 10, 50 y 300 personas. Stageshow ensaya la versión grande. El
 globo usa su propio canvas y la verificación visual de esta pieza se hizo allí.
+
+### Hilos de prueba sobre los arcos
+
+Al tocar el calendario, la vista abre la conversación de Ian y Lian en el instante
+que muestra la miniatura. Se ven la pregunta, la consulta de cada agenda, el
+descarte de las 10:00, el cruce y la propuesta de las 10:30. El texto del hilo
+y los fragmentos que viajan sobre el arco salen de los mismos eventos locales.
+Cada llamada permite abrir la entrada y leer el resultado cuando termina.
+
+Se probaron el calendario, otra conexión activa y una conexión de fondo en Chrome
+a 1280 y 390 px. Se comprobaron la apertura por teclado del calendario, el cierre
+con Escape, la repetición del hilo y la lectura del resultado con movimiento reducido.

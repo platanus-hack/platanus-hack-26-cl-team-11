@@ -7,6 +7,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNDAgNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iUm9uZGEiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGQjAyRSIvPjxzdG9wIG9mZnNldD0iMC40IiBzdG9wLWNvbG9yPSIjRkY0RDZEIi8+PHN0b3Agb2Zmc2V0PSIwLjciIHN0b3AtY29sb3I9IiNCNzY2RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNEI2RkYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjExIiBmaWxsPSJ1cmwoI2cpIi8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuNyI+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiLz4KICAgIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjIwIiByeD0iMTMuNSIgcnk9IjYuMiIgdHJhbnNmb3JtPSJyb3RhdGUoNjAgMjAgMjApIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjEzLjUiIHJ5PSI2LjIiIHRyYW5zZm9ybT0icm90YXRlKDEyMCAyMCAyMCkiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMi42IiBmaWxsPSIjRkZGRkZGIi8+Cjwvc3ZnPgo=">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
+<link rel="stylesheet" href="./mini/threads.css">
 <style>
   /* Página de trabajo del globo aprobado (21-nov). Fuente: globo.dc.html. */
   body { margin: 0; }
@@ -61,6 +62,7 @@
       <button type="button" class="rd-button" data-n="300">300</button>
     </div>
     <div class="legend rd-note"><span class="ring"><i></i></span><span><span class="rd-label" id="groups">2 grupos negociando</span> · toca un aro para ver el grupo</span></div>
+    <button type="button" class="rd-button rd-button--quiet" id="open-calendar-thread" hidden>Ver hilo de calendario</button>
     <div class="rd-card rd-glass" id="focus" hidden>
       <span class="rd-label rd-gradient-text">Grupo negociando</span>
       <span class="rd-title" id="ftopic"></span>
@@ -70,6 +72,15 @@
     </div>
   </aside>
 </div></div>
+<dialog id="thread-view" aria-labelledby="thread-title">
+  <div class="thread-panel">
+    <header class="thread-head"><div><p>Hilo de agentes · Simulación</p><h2 id="thread-title"></h2></div>
+      <button autofocus class="thread-close rd-button rd-button--quiet" aria-label="Cerrar hilo">×</button></header>
+    <div class="thread-feed" role="region" aria-label="Mensajes y llamadas a herramientas" tabindex="0"></div>
+    <footer class="thread-foot"><span class="thread-status" role="status"></span><button class="thread-replay rd-button rd-button--quiet">Repetir</button></footer>
+  </div>
+</dialog>
+<script src="./mini/threads.js"></script>
 <script src="./mini/calendar-edge.js"></script>
 <script>
 class DCLogic { constructor(p) { this.props = p || {}; } setState(o) { Object.assign(this.state, o); sync(); } }
@@ -224,6 +235,10 @@ class Component extends DCLogic {
         var g = this.groups[i];
         if (g.members && g.members.indexOf(h) >= 0 && (this.lastPhase[g.id] || 0) > 0.5) { this.focusGroup(g); return; }
       }
+    }
+    if (h < 0 && this.pickThread) {
+      const edge=this.pickThread(m);
+      if (edge) { this.openThread(edge.a,edge.b,edge.topic); return; }
     }
     this.turnTo = null;
     if (this.state.focus) this.setState({ focus: null });
@@ -427,6 +442,8 @@ class Component extends DCLogic {
     }
 
     var chips = [], pulses = [];
+    const activeThreads = this.openThread ? [] : null;
+    let calendarBox = null;
     for (var g2 = 0; g2 < this.groups.length; g2++) {
       var Gr = this.groups[g2], ph2 = phases[Gr.id];
       if (ph2.alpha * ph2.draw < 0.01) continue;
@@ -456,8 +473,9 @@ class Component extends DCLogic {
           }
         }
         ctx.globalAlpha = 1;
+        if (activeThreads && gAlpha > .12 && u > .05) activeThreads.push({a:A,b:B,c:c2,extent:u,topic:Gr.topic});
         if (this.drawCalendar && Gr.mine && A === 1 && B === 2) {
-          this.drawCalendar(ctx, pa, pb, c2, P, this.calendarZoom, t, this.reduced);
+          calendarBox=this.drawCalendar(ctx, pa, pb, c2, P, this.calendarZoom, DemoThreads.time("1-2",this.reduced));
         } else if (Gr.edges[ei][2] && u > 0.95) chips.push([Gr.edges[ei][2], 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y, gAlpha]);
       }
       if (ph2.agree > 0 || (isFocus && !Gr.mine)) {
@@ -471,6 +489,13 @@ class Component extends DCLogic {
       }
     }
 
+    if (activeThreads) {
+      const view={points:P, ctrl, active:activeThreads, calendarBox, reserved:liveKey, count:n, vis:this.vis};
+      this.pickThread=(point)=>pickProjectedThread(view,point,14/this.calendarZoom);
+      if (this.mouse && !this.drag && this.hover<0 && pickProjectedThread(view,this.mouse,10/this.calendarZoom,true)) cv.style.cursor="pointer";
+      const selection=this.threadSelection || {id:"1-2",a:1,b:2,events:this.calendarEvents};
+      if (!this.reduced && P[selection.a] && P[selection.b]) drawThreadToken(ctx,view,selection,this.calendarZoom);
+    }
     pulses.forEach(function (pl) {
       var u2 = pl[2], rr2 = 10 + u2 * 70;
       ctx.globalAlpha = (1 - u2) * 0.8; ctx.strokeStyle = self.grad(ctx, pl[0] - rr2, pl[1], pl[0] + rr2, pl[1]); ctx.lineWidth = 2 * (1 - u2) + 0.5;
@@ -578,9 +603,12 @@ const calendarPreview = q.get("solo") === "calendars";
 const g = new Component({ autoplay: !q.has('n') && !calendarPreview });
 if (calendarPreview) {
   g.drawCalendar = drawCalendarEdge;
+  g.openThread = mountThreadInspector(g);
+  g.calendarEvents = DemoThreads.fixture(1,2,g.people);
+  document.querySelector(".legend .rd-label").after(document.createTextNode(" · toca un arco para ver su hilo"));
   document.body.classList.add("calendar-preview");
   document.title = "Calendario en el globo · Ronda";
-  document.getElementById("c").setAttribute("aria-label","Globo de agentes. Las agendas de Ian y Lian coinciden a las 10:30. Arrastra para girar.");
+  document.getElementById("c").setAttribute("aria-label","Globo de agentes. Toca un arco para abrir su hilo simulado. Arrastra para girar.");
   g.people[2].status = "Libre desde las 10:30";
   function resizeCalendarPreview() {
     const width = document.documentElement.clientWidth;
@@ -625,7 +653,7 @@ if (q.has('n')) g.setN(+q.get('n'), false);
 g.componentDidMount();
 if (calendarPreview) {
   const motion=matchMedia("(prefers-reduced-motion: reduce)");
-  const syncMotion=()=>{g.reduced=q.has("still") || motion.matches;};
+  const syncMotion=()=>{g.reduced=q.has("still") || motion.matches; g.refreshThread();};
   motion.addEventListener("change",syncMotion);
   syncMotion();
 }

@@ -1,5 +1,5 @@
 // A small schedule control, drawn in the same projection as the active edge.
-function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds, still) {
+function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds) {
   const width = (innerWidth < 750 ? 52 : 64) / zoom;
   const scale = width / 64;
   let anchor, best = -Infinity;
@@ -13,14 +13,14 @@ function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds, still) {
   }
   // At a tight viewing angle the faces take precedence over the miniature.
   if (best < width*.42) return;
-  const phase = still ? .66 : (seconds % 4.6) / 4.6;
+  const phase = seconds;
   function rise(a,b) {
     const t = Math.max(0,Math.min(1,(phase-a)/(b-a)));
     return t*t*(3-2*t);
   }
-  const first = rise(.08,.32)-rise(.86,.98);
-  const second = rise(.22,.47)-rise(.82,.95);
-  const match = rise(.45,.57)-rise(.78,.88);
+  const first = rise(1.7,3.4);
+  const second = rise(3.5,5.3);
+  const match = rise(7.5,8.4);
   function box(x,y,w,h,r,fill) {
     ctx.fillStyle=fill; ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill();
   }
@@ -54,7 +54,9 @@ function drawCalendarEdge(ctx, from, to, control, faces, zoom, seconds, still) {
   // Roll the time inside a fixed aperture once both keys meet.
   ctx.save();ctx.beginPath();ctx.rect(4,2,56,16);ctx.clip();
   ctx.font='600 13px -apple-system, system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillStyle='#415963';ctx.fillText('10:00',32,11-17*match);
-  ctx.fillStyle='#014e60';ctx.fillText('10:30',32,28-17*match);
+  const state = phase<1.7 ? '¿30 min?' : phase<3.5 ? 'Ian' : phase<5.4 ? 'Lian' : '10:00';
+  ctx.fillStyle='#415963';ctx.fillText(state,32,11-17*match);
+  ctx.fillStyle='#014e60';ctx.fillText(phase>=11.4?'✓ 10:30':'10:30',32,28-17*match);
   ctx.restore();ctx.restore();
+  return {x:anchor.x,y:anchor.y,halfWidth:32*scale,halfHeight:22*scale};
 }
