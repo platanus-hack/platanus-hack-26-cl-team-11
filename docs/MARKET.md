@@ -74,3 +74,26 @@ El archivo también admite pronosticar empate con `{"team":"tie"}`. Dos equipos 
 ### Verificación pública · 14:36 UTC
 
 El pronóstico de prueba se fijó a las 14:31:35 UTC. Al vencer a las 14:36:35, team-11 registró −7,10% y el favorito team-9 +33,53%. La API devolvió `settled` y `winner=rival`. La última observación de ambas series anterior al cierre fue de las 14:34:33.500 UTC. Una lectura independiente de esas dos series reprodujo ambos rendimientos. Se verificaron también el comprobante compartido entre dos navegadores, la selección y seguimiento de equipos, la resolución de una ronda histórica y el archivo jugable con la fuente en pausa. La prueba usó pronósticos sin gasto de bananas.
+
+## Inventario en equipos baratos · 14:45 UTC
+
+El historial público trae un punto por operación. La variación de precio de cada punto identifica el equipo y la cantidad, así que la cinta completa se puede reconstruir: 627 operaciones hasta las 14:38 UTC. La cinta muestra por qué perdió el piloto de impulso. Otros participantes mantienen lotes chicos en los equipos baratos y los venden uno o dos segundos después de cada compra fuerte. La compra del piloto en team-42 a las 14:13:44 fue seguida un segundo después por la venta de 6.839 acciones que alguien había comprado a las 12:05.
+
+`tools/market/inventory.py` opera desde ese lado. Compra un lote de 20 bananas en cada uno de los equipos más baratos, hasta 300 bananas en total, y vende el lote completo cuando la venta neta supera su costo en 50% y en al menos 4 bananas. No compra team-11 ni vende esa posición. Lee los precios por el socket público del sitio (`tools/market/feed.py`), que entrega cada operación en unos 100 ms, y concilia con la cartola cada dos minutos.
+
+Reproducción sobre la cinta con ese tope de 300 bananas, comisiones y redondeo incluidos, con un segundo de demora antes de cada venta:
+
+| Inicio UTC | Ventas | Ganancia realizada | Inventario al final, costo → venta neta |
+|---|---:|---:|---|
+| 11:00 | 25 | +958 | 285 → 304 |
+| 12:00 | 33 | +888 | 285 → 340 |
+| 13:00 | 7 | +110 | 285 → 342 |
+| 13:30 | 7 | +88 | 285 → 340 |
+| 14:00 | 0 | 0 | 285 → 276 |
+| 14:15 | 0 | 0 | 285 → 285 |
+
+Con tres segundos de demora, el inicio de las 13:00 baja a +34. Ninguna venta simulada cerró bajo su costo. La ganancia depende de que alguien compre fuerte un equipo barato: entre las 14:00 y las 14:38 no hubo ninguna compra así en los 15 equipos más baratos. El inventario sin vender baja de valor si el grupo barato baja, cuesta cerca de 1,5 bananas por lote liquidarlo y vale cero al cierre salvo que ese equipo gane. La reproducción supone que los demás participantes repiten sus órdenes. Son resultados hipotéticos.
+
+`python3 tools/market/inventory.py --paper` simula las órdenes contra los precios en vivo, sin sesión, y escribe en `paper-orders.jsonl`. Sin `--paper` pide la sesión por entrada oculta, opera y escribe los recibos en `inventory-orders.jsonl`. Los límites se leen de `inventory.json` en el mismo directorio local mientras el proceso corre: `{"buying": false}` detiene las compras y `{"liquidate": true}` vende todo el inventario salvo team-11. Crear `inventory.stop` detiene el proceso y deja las posiciones como están.
+
+El [reglamento del juego](https://hack.platan.us/26-cl/market/bases) dice que las bananas no son transferibles entre participantes y prohíbe la colusión, las cuentas múltiples, la manipulación de la plataforma y el intercambio de bananas por dinero o favores, con descalificación inmediata. Este proceso usa una sola cuenta y las mismas órdenes que la página.
