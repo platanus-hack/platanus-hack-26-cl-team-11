@@ -42,7 +42,7 @@ export interface CreatedPerson {
   name: string;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
@@ -52,16 +52,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-const send = (method: string, body?: unknown): RequestInit => ({
+export const send = (method: string, body?: unknown): RequestInit => ({
   method,
   headers: { 'content-type': 'application/json' },
   body: body === undefined ? undefined : JSON.stringify(body),
 });
 
-const post = (body?: unknown) => send('POST', body);
+export const post = (body?: unknown) => send('POST', body);
 const put = (body: unknown) => send('PUT', body);
 
-const personPath = (token: string) => `/api/people/${encodeURIComponent(token)}`;
+export const personPath = (token: string) => `/api/people/${encodeURIComponent(token)}`;
 
 export const fetchPerson = (token: string) => request<PersonPage>(personPath(token));
 export const createPerson = (name: string) => request<CreatedPerson>('/api/people', post({ name }));

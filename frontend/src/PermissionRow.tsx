@@ -1,9 +1,10 @@
-import { VISIBILITIES, type Visibility } from './api';
+import type { Visibility } from './api';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
 import { ItemIcon } from './ItemIcon';
 import { RowButton } from './RowButton';
 import { VISIBILITY_LABEL, type SignalGroup } from './signalGroups';
+import { VisibilityChoice } from './VisibilityChoice';
 
 interface PermissionRowProps {
   group: SignalGroup;
@@ -29,20 +30,7 @@ export function PermissionRow({ group, visibility, disabled, open, onToggle, onC
       />
       {open && visibility && (
         <div className="rd-item__detail">
-          <div className="rd-actions" role="group" aria-label={`Permiso de ${group.title}`}>
-            {VISIBILITIES.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`rd-button rd-button--quiet rd-button--small${option === visibility ? '' : ' app-off'}`}
-                aria-pressed={option === visibility}
-                disabled={disabled}
-                onClick={() => onChange(option)}
-              >
-                {VISIBILITY_LABEL[option]}
-              </button>
-            ))}
-          </div>
+          <VisibilityChoice label={`Permiso de ${group.title}`} value={visibility} disabled={disabled} onChange={onChange} />
         </div>
       )}
     </div>

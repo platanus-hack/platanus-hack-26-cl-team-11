@@ -39,3 +39,4 @@ body { margin: 0; }
 .rd-row > .app-pick { padding: 0; width: auto; flex: 1 1 auto; }
 .app-fit { flex: 0 0 auto; height: 36px; padding: 0 var(--rd-space-4); font-size: var(--rd-text-small); }
 @media (max-width: 700px) { .app-me { transform: translate(-50%, -22px); } .app-me .rd-face--small { width: 44px; height: 44px; } }
+.app-qr { display: block; width: 100%; aspect-ratio: 1; padding: var(--rd-space-2); border-radius: var(--rd-space-4); background: var(--rd-glass-solid); color: var(--rd-ink); }

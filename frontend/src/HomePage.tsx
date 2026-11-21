@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { createPerson, type CreatedPerson } from './api';
+import { RoomStart } from './RoomStart';
 
 export function HomePage() {
   const [name, setName] = useState('');
@@ -60,6 +61,7 @@ export function HomePage() {
           </a>
         </section>
       )}
+      <RoomStart />
     </>
   );
 }

@@ -3,6 +3,7 @@ import type { GlyphName } from './Glyph';
 export const TABS = [
   { id: 'fuentes', name: 'Fuentes', glyph: 'sources' },
   { id: 'tu', name: 'Tú', glyph: 'person' },
+  { id: 'agente', name: 'Agente', glyph: 'agent' },
   { id: 'equipo', name: 'Equipo', glyph: 'team' },
   { id: 'ajustes', name: 'Ajustes', glyph: 'settings' },
 ] as const satisfies ReadonlyArray<{ id: string; name: string; glyph: GlyphName }>;

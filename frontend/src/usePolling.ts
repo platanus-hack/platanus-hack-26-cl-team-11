@@ -3,7 +3,7 @@ import { messageOf } from './format';
 
 const REFRESH_MS = 5000;
 
-export function usePolling(load: () => Promise<void>) {
+export function usePolling(load: () => Promise<void>, everyMs: number = REFRESH_MS) {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(
@@ -16,9 +16,9 @@ export function usePolling(load: () => Promise<void>) {
 
   useEffect(() => {
     void refresh();
-    const timer = window.setInterval(() => void refresh(), REFRESH_MS);
+    const timer = window.setInterval(() => void refresh(), everyMs);
     return () => window.clearInterval(timer);
-  }, [refresh]);
+  }, [refresh, everyMs]);
 
   return { error, refresh };
 }

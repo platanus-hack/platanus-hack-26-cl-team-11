@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from 'react';
+import { AgentTab } from './AgentTab';
 import { fetchPerson, fetchSignals, type PersonPage, type Signals } from './api';
 import { SettingsTab } from './SettingsTab';
 import { SourcesTab } from './SourcesTab';
@@ -37,6 +38,7 @@ export function ConnectPage({ token }: { token: string }) {
   const content: Record<TabId, ReactNode> = {
     fuentes: <SourcesTab token={token} page={page} notice={notice} onChange={reload} />,
     tu: <YouTab token={token} name={page.name} signals={signals} sources={page.sources} onSaved={reload} />,
+    agente: <AgentTab token={token} />,
     equipo: <TeamSection token={token} />,
     ajustes: <SettingsTab token={token} />,
   };
