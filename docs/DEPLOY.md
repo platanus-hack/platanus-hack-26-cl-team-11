@@ -25,7 +25,7 @@ Ya está creado; esto queda como referencia.
 2. Quien despliega conectó su propia cuenta de GitHub en Render. Sin ese paso Render responde «the repository, branch, or Blueprint file could not be accessed», aunque el permiso del repo esté bien.
 3. Se creó el Blueprint desde la línea de comandos: `render ea blueprints create --repo <repo> --branch main` y luego `render ea blueprints approve <id>`. El equivalente en el panel es **New → Blueprint**.
 
-El servicio usa el plan pagado más chico. Partió así porque el disco persistente no existe en el plan gratuito; desde que la base está en Postgres ya no usa disco.
+El servicio usa el plan pagado más chico. Partió así porque el disco persistente no existe en el plan gratuito; desde que la base está en Postgres el disco ya no se usa.
 
 ### Operarlo desde la terminal
 
@@ -102,7 +102,7 @@ Producción guarda todo en Postgres desde el 21-nov-2026: la base `montu-db` de 
 
 ## Límites
 
-- **Sin disco, los despliegues no cortan el servicio.** Render prende el servidor nuevo, espera que `/api/health` responda y recién ahí le pasa el tráfico. Durante ese cambio hay dos servidores a la vez por unos segundos; los dos escriben en la misma base.
+- **Falta quitar el disco para que los despliegues no corten.** El servicio todavía tiene conectado el disco `ronda-data`, que ya no usa, y por eso cada despliegue sigue dejando unos 25 segundos sin respuesta. `render.yaml` ya no lo declara, pero Render no lo quita solo: se borra en el panel, en **Disks → Delete disk**. Sin disco, Render prende el servidor nuevo, espera que `/api/health` responda y recién ahí le pasa el tráfico; durante ese cambio hay dos servidores a la vez por unos segundos y los dos escriben en la misma base.
 - **Si igual hay un corte**, la página abre desde una copia guardada en el navegador (`frontend/public/sw.js`) y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`).
 - **Cada consulta bloquea el servidor mientras Postgres responde**, uno o dos milisegundos dentro de Render. Alcanza para la hack; con mucho tráfico habría que pasar las tiendas a consultas asíncronas.
 - **Si Postgres corta la conexión**, el servidor se reconecta y repite la consulta, salvo en medio de una transacción.
