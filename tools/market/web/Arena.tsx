@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { clock, move, pct, read, save, saved, teamLabel } from './market';
 type Choice = { team: string; before: number; after: number; price: number };
-type Round = { at: number; impulse: string; favorite: string; choices: Choice[] };
+type Round = { at: number; winner: string; impulse: string; favorite: string; choices: Choice[] };
 export function Arena() {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [failure, setFailure] = useState(false);
@@ -26,11 +26,12 @@ export function Arena() {
     );
   const chosen = picks[round.at];
   const played = rounds.filter((r) => picks[r.at]);
-  const counts = (pick: (r: Round) => string) =>
-    played.filter((r) => {
-      const best = Math.max(...r.choices.map((c) => c.after));
-      return r.choices.some((c) => c.team === pick(r) && c.after === best);
-    }).length;
+  const counts = (pick: (r: Round) => string) => played.filter((r) => r.winner === pick(r)).length;
+  function choose(team: string) {
+    const nextPicks = { ...picks, [round!.at]: team };
+    setPicks(nextPicks);
+    save('archive-picks', nextPicks);
+  }
   const wins = counts((r) => picks[r.at]!);
   function next() {
     const n = (index + 1) % rounds.length;
@@ -61,11 +62,7 @@ export function Arena() {
             key={c.team}
             className="rd-button rd-button--quiet archive-pick"
             disabled={!!chosen}
-            onClick={() => {
-              const nextPicks = { ...picks, [round.at]: c.team };
-              setPicks(nextPicks);
-              save('archive-picks', nextPicks);
-            }}
+            onClick={() => choose(c.team)}
           >
             {teamLabel(c.team)}
             <span className="rd-note">
@@ -74,12 +71,21 @@ export function Arena() {
           </button>
         ))}
       </div>
+      {!chosen && (
+        <button className="rd-button rd-button--quiet rd-button--small" onClick={() => choose('tie')}>
+          Pronosticar empate
+        </button>
+      )}
       {chosen && (
         <div role="status">
           <p>
-            {round.choices.find((c) => c.team === chosen)?.after === Math.max(...round.choices.map((c) => c.after))
+            {round.winner === 'tie'
+              ? chosen === 'tie'
+                ? 'Acertaste el empate.'
+                : 'Empate entre los equipos.'
+              : chosen === round.winner
               ? 'Acertaste.'
-              : 'Ganó el otro equipo.'}{' '}
+              : 'Ganó ' + teamLabel(round.winner) + '.'}{' '}
             {round.choices.map((c) => teamLabel(c.team) + ' ' + move(c.after)).join(' · ')}
           </p>
           <button className="rd-button rd-button--quiet rd-button--small" onClick={next}>

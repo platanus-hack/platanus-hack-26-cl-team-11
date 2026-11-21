@@ -33,4 +33,4 @@ Lee los dos equipos y elige uno usando solo price y before (cambio en los cinco 
     curl -fsS 'https://duelos-platanus-26.vercel.app/api/replay?round=1' \
       -H 'Content-Type: application/json' -d '{"team":"TEAM"}'
 
-La respuesta incluye correct y outcome. Las rondas son públicas y repetibles, con puntuación de práctica. Abre /terminal?round=1#arena para compartir el mismo desafío. Los pronósticos y el archivo usan precios publicados, sin órdenes en la cuenta del participante.
+Usa {"team":"tie"} para pronosticar empate. La respuesta incluye winner, correct y outcome. Las rondas son públicas y repetibles, con puntuación de práctica. Abre /terminal?round=1#arena para compartir el mismo desafío. Los pronósticos y el archivo usan precios publicados, sin órdenes en la cuenta del participante.

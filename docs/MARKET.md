@@ -68,3 +68,5 @@ El archivo tiene 21 rondas reconstruidas con las series públicas del 21 de novi
 Para regenerarlo, descarga los datos con `python3 tools/market/replay.py --refresh` y ejecuta `python3 tools/market/build_rounds.py`. Para publicar, usa Node 22 y `tools/market/build_web.sh <directorio-de-staging>` desde el repo. En ese directorio enlaza el proyecto Vercel `duelos-platanus-26` y ejecuta `vercel deploy --prod`. La variable sensible de producción `CALL_SECRET` conserva la validez de los comprobantes entre despliegues.
 
 La ruta anterior de duelos usa el libro SQLite de Render. La prueba local de cinco minutos dejó 110 y 90 fichas en los dos monederos. Los monederos se guardan por origen web. La terminal, el archivo y los pronósticos firmados funcionan en Vercel con lecturas públicas de Platanus.
+
+El archivo también admite pronosticar empate con `{"team":"tie"}`. Dos equipos que conservan la misma proporción de precios pueden moverse juntos cuando se negocia un tercero. La misma tolerancia absoluta de 1e-9 en la diferencia de rendimientos se usa para pronósticos en vivo e históricos. El marcador solo acredita la elección que coincide con el resultado.

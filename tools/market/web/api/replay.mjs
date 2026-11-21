@@ -14,12 +14,14 @@ export default function replay(req, res) {
     choices: round.choices.map(({ team, price, before }) => ({ team, price, before })),
   };
   if (req.method === 'GET') return res.json(view);
-  const pick = round.choices.find((c) => c.team === req.body?.team);
-  if (!pick) return res.status(400).json({ error: 'Elige uno de los dos equipos de la ronda' });
+  const pick = req.body?.team;
+  if (pick !== 'tie' && !round.choices.some((c) => c.team === pick))
+    return res.status(400).json({ error: 'Elige un equipo de la ronda o tie' });
   return res.json({
     ...view,
-    pick: pick.team,
-    correct: pick.after === Math.max(...round.choices.map((c) => c.after)),
+    pick,
+    winner: round.winner,
+    correct: pick === round.winner,
     outcome: round.choices.map(({ team, after }) => ({ team, change: after })),
   });
 }

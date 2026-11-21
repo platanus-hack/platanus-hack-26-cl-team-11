@@ -27,7 +27,9 @@ for t in range(start, end, 900):
     for team in sorted([fast, favorite]):
         choices.append(dict(team=team, price=price(team, t), before=change[team],
                             after=price(team, t+300)/price(team, t)-1))
-    rounds.append(dict(at=t*1000, impulse=fast, favorite=favorite, choices=choices))
+    gap = choices[0]["after"] - choices[1]["after"]
+    winner = "tie" if abs(gap) < 1e-9 else max(choices, key=lambda c: c["after"])["team"]
+    rounds.append(dict(at=t*1000, impulse=fast, favorite=favorite, choices=choices, winner=winner))
 out = Path(__file__).parent / "web/public/rounds.json"
 out.write_text(json.dumps(rounds, separators=(",", ":"))+"\n")
 print(f"{len(rounds)} rounds")
