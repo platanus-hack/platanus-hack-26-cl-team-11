@@ -455,6 +455,37 @@ export interface AgentsView {
   proposals: AgentProposal[];
 }
 
+export interface RoundEstimate {
+  people: number;
+  needs: number;
+  digests: number;
+  calls: { min: number; likely: number; max: number };
+  tokens: { input: number; output: number; total: number; max: number };
+  measured: boolean;
+}
+
+export interface MesaView {
+  name: string;
+  configured: boolean;
+  operator: boolean;
+  member: boolean;
+  publishing: boolean;
+  intervalSeconds: number | null;
+  round: AgentRound | null;
+  estimate: RoundEstimate;
+  usage: { lastRound: { calls: number; tokens: number; measured: boolean } | null; lastDayTokens: number; dailyCap: number };
+  asks: AgentAsk[];
+  threads: AgentThread[];
+  proposals: AgentProposal[];
+}
+
+const mesaPath = (token: string) => `${personPath(token)}/mesa`;
+
+export const fetchMesa = (token: string) => request<MesaView>(mesaPath(token));
+export const startMesaRound = (token: string) => request<{ id: string }>(`${mesaPath(token)}/rounds`, post());
+export const setMesaInterval = (token: string, seconds: number | null) => request<{ intervalSeconds: number | null }>(`${mesaPath(token)}/interval`, put({ seconds }));
+export const setMesaMembership = (token: string, member: boolean) => request<{ member: boolean }>(`${mesaPath(token)}/membership`, put({ member }));
+
 const agentsPath = (token: string) => `${personPath(token)}/agents`;
 
 export const fetchAgents = (token: string, teamId: string) => request<AgentsView>(`${teamPath(token, teamId)}/agents`);

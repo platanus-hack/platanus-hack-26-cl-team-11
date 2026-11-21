@@ -73,7 +73,7 @@ export function ConnectPage({ token }: { token: string }) {
     fuentes: <SourcesTab token={token} page={page} notice={notice} focusId={focusedSource} onChange={reload} />,
     tu: <YouTab name={page.name} signals={signals} summary={summary} />,
     equipo: <TeamSection token={token} />,
-    globo: <GlobeTab active={tab === 'globo'} />,
+    globo: <GlobeTab token={token} active={tab === 'globo'} />,
     ajustes: <SettingsTab token={token} name={page.name} login={page.login ?? null} firstSteps={firstSteps} onOpenStep={openStep} />,
   };
 

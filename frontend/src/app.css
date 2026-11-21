@@ -47,6 +47,9 @@ body { margin: 0; }
 .app-thread { padding: var(--rd-space-2) 0 var(--rd-space-4); }
 .app-world { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: var(--rd-radius-card); }
 .app-universe { display: block; width: 100%; height: min(78vh, 760px); border: 0; border-radius: var(--rd-radius-card); }
+.app-mesa > .rd-actions { margin-top: var(--rd-space-2); }
+.app-mesa > .rd-actions + .rd-label { margin-top: var(--rd-space-3); }
+.app-mesa > .rd-note { margin: 0; }
 @media (min-width: 960px) { .app-universe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
 .app-chat { min-height: 180px; padding: var(--rd-space-3) 0; }
 .app-chat > .rd-note { margin: 0; }

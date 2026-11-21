@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { createLimiter, jsonSchemaOf } from './fiftyx.js';
-import { approximateTokens, AgentModelError, MODEL_FAILURE, type AgentModel } from './model.js';
+import { AgentModelError, MODEL_FAILURE, type AgentModel } from './model.js';
 
 export const CLAUDE_CLI_MODEL = 'claude-sonnet-5-5';
 export const CLAUDE_CLI_MAX_PARALLEL = 3;
@@ -65,7 +65,6 @@ export function createClaudeCliModel(config: ClaudeCliConfig, run: CliRunner = r
         console.error('Claude CLI call failed.', failure instanceof Error ? failure.message : failure);
         throw new AgentModelError(MODEL_FAILURE.silent);
       }
-      request.onUsage?.({ inputTokens: approximateTokens(request.system + request.prompt), outputTokens: approximateTokens(output), measured: false });
       const parsed = request.schema.safeParse(answerOf(output));
       if (!parsed.success) throw new AgentModelError(MODEL_FAILURE.incomplete);
       return parsed.data;
