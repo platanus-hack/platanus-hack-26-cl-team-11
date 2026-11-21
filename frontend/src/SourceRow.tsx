@@ -3,11 +3,10 @@ import { connectSource, disconnectSource, oauthStartUrl, syncSource, type Source
 import { messageOf } from './format';
 import { HealthAddress } from './HealthAddress';
 import { Item } from './Item';
-import { ItemIcon } from './ItemIcon';
 import { KeyForm } from './KeyForm';
 import { RowButton } from './RowButton';
 import { SourceDetail } from './SourceDetail';
-import { SourceGlyph } from './SourceGlyph';
+import { SourceLogo } from './SourceLogo';
 import { isConfigured, isConnected, stateOf } from './sourceState';
 
 interface SourceRowProps {
@@ -76,11 +75,7 @@ export function SourceRow({ token, source, ingestUrl, open, onToggle, onChange }
   return (
     <div>
       <Item
-        icon={
-          <ItemIcon>
-            <SourceGlyph id={source.id} />
-          </ItemIcon>
-        }
+        icon={<SourceLogo id={source.id} />}
         title={
           <>
             {source.label}
