@@ -1,11 +1,13 @@
 """Replay momentum vs. reversal using archived public histories, one lot at a time."""
+import argparse
 import bisect
 import json
 import math
+import time
 from datetime import datetime
 from statistics import median
 
-from monitor import DATA, quote
+from monitor import DATA, quote, read_json
 
 STEP = 10
 LOOKBACK = 120
@@ -23,6 +25,7 @@ def candidates(now, prior):
 def backtest(series, start, end, mode):
     trades = []
     lot = None
+    next_entry = start
     for tick in range(start+LOOKBACK,end,STEP):
         prices = series[tick]
         if lot:
@@ -35,19 +38,37 @@ def backtest(series, start, end, mode):
             if net-debit >= 2 or net-debit <= -4 or tick-at>=360 or tick+STEP>=end:
                 trades.append(net-debit)
                 lot = None
+                next_entry = tick + LOOKBACK
+            continue
+        if tick < next_entry:
             continue
         prior = tick-STEP
         ordered = candidates(series[prior],series[prior-LOOKBACK])
+        ordered = [row for row in ordered if row[1] != "team-11"]
         move,team = ordered[-1] if mode=="momentum" else ordered[0]
         if abs(move)<math.log(1.12) or tick+2*STEP>=end:
             continue
         fill = quote(prices[team],B,BPS,"buy",BUDGET)
         lot = team,fill["shares"],-fill["cashDelta"],tick
-    return dict(pnl=sum(trades), wins=sum(x>0 for x in trades), trades=len(trades))
+    return dict(pnl=sum(trades), best=max(trades, default=0), worst=min(trades, default=0), wins=sum(x>0 for x in trades), trades=len(trades))
 
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--refresh", action="store_true", help="download a new set of 48 public histories")
+    args = parser.parse_args()
+    if args.refresh:
+        directory = DATA / "history"
+        directory.mkdir(parents=True, exist_ok=True)
+        for project in read_json("state")["projects"]:
+            target = directory / (project["teamSlug"] + ".json")
+            tmp = target.with_suffix(".tmp")
+            tmp.write_text(json.dumps(read_json("history/"+project["id"])["points"]))
+            tmp.replace(target)
+            time.sleep(0.4)
     files = sorted((DATA/"history").glob("team-*.json"))
+    if len(files) != 48:
+        parser.error("use --refresh to fetch all event histories")
     tracks = {}
     for f in files:
         points=json.loads(f.read_text())
