@@ -78,15 +78,20 @@
 <dialog id="thread-view" aria-labelledby="thread-title">
   <div class="thread-panel">
     <header class="thread-head">
-      <canvas class="thread-mark" width="160" height="112" aria-hidden="true"></canvas>
-      <div class="thread-heading"><p>Hilo simulado</p><h2 id="thread-title"></h2><span class="thread-pair"></span></div>
+      <div class="thread-faces" aria-hidden="true"></div>
+      <div class="thread-heading"><span class="thread-pair"></span><h2 id="thread-title"></h2></div>
+      <span class="thread-state" role="status"></span>
       <button autofocus class="thread-close rd-button rd-button--quiet" aria-label="Cerrar hilo">×</button>
     </header>
     <div class="thread-feed" role="region" aria-label="Mensajes y llamadas a herramientas" tabindex="0"></div>
     <footer class="thread-foot">
-      <div class="thread-meter"><span class="thread-status" role="status"></span><time class="thread-time"></time></div>
-      <input class="thread-position" type="range" min="0" max="12" step=".05" aria-label="Posición en el hilo">
-      <div class="thread-transport"><button class="thread-toggle rd-button">Pausar</button><button class="thread-replay rd-button rd-button--quiet">Repetir</button></div>
+      <div class="thread-meter"><span class="thread-status"></span><span class="rd-note">Simulación local</span></div>
+      <div class="thread-transport">
+        <button class="thread-toggle rd-button rd-button--quiet" aria-label="Pausar">Ⅱ</button>
+        <input class="thread-position" type="range" min="0" max="12" step=".05" aria-label="Posición en el hilo">
+        <time class="thread-time"></time>
+        <button class="thread-replay rd-button rd-button--quiet">Repetir</button>
+      </div>
     </footer>
   </div>
 </dialog>

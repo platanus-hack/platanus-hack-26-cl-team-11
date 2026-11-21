@@ -18,7 +18,9 @@ const DemoThreads = (() => {
     return !runs.has(id) ? ambient : .8*time(id,reduced)/duration;
   }
   function tokenCount(event,t) {
-    return Math.max(0,Math.min(event.tokens.length,1+Math.floor((t-event.at)/(event.end-event.at)*event.tokens.length)));
+    const start=event.at+(event.type==='human' ? .15 : .7);
+    if(t<start) return 0;
+    return Math.min(event.tokens.length,1+Math.floor((t-start)/(event.end-start)*event.tokens.length));
   }
   return {key,time,set,start,fraction,duration,tokenCount,paused:id=>runs.get(id)?.paused};
 })();
@@ -42,131 +44,201 @@ function threadHit(point, from,to,control,extent,tolerance) {
 function mountThreadInspector(graph,initialKind) {
   const dialog=document.querySelector('#thread-view');
   const find=selector=>dialog.querySelector(selector);
-  const feed=find('.thread-feed'), heading=find('h2'), status=find('.thread-status');
+  const feed=find('.thread-feed'), heading=find('h2'), state=find('.thread-state');
   const timeline=find('.thread-position'), clock=find('.thread-time'), toggle=find('.thread-toggle');
-  const mark=find('.thread-mark').getContext('2d');
-  const picker=document.querySelector('#thread-picker');
+  const replay=find('.thread-replay'), status=find('.thread-status');
+  const picker=document.querySelector('#thread-picker'), select=picker.querySelector('select');
   const launch=document.querySelector('#open-calendar-thread');
   picker.hidden=false;
-  const select=picker.querySelector('select');
   for(const motion of globeMotions) select.add(new Option(threadStories[motion.kind].label,motion.kind));
   select.value=initialKind && threadStories[initialKind] ? initialKind : 'calendars';
-  let selected,events=[],rows=[],frame=0,previous=-1;
   const transcripts=new Map();
+  let thread, rows=[], frame=0, previous=-1;
   function node(tag,cls,value) {
-    const el=document.createElement(tag);if(cls) el.className=cls;
-    if(value!==undefined) el.textContent=value;return el;
+    const el=document.createElement(tag);
+    if(cls) el.className=cls;
+    if(value!==undefined) el.textContent=value;
+    return el;
   }
   function face(author) {
     const el=node('span','thread-face');
-    Object.assign(el.style,graph.faceStyle(author));
-    el.style.width='24px';el.style.height='24px';el.setAttribute('aria-hidden','true');
+    const {backgroundImage,backgroundSize,backgroundPosition}=graph.faceStyle(author);
+    Object.assign(el.style,{backgroundImage,backgroundSize,backgroundPosition:backgroundPosition||'center'});
+    el.setAttribute('aria-hidden','true');
     return el;
   }
-  function row(event) {
-    const el=node('article','thread-event');
-    const label=node('header'),name=node('strong','',graph.people[event.author].name);
-    const stamp=node('time','','+'+event.at.toFixed(1)+' s');
-    label.append(face(event.author),name,stamp);el.append(label);
-    let content,receipt,payload;
-    if(event.type==='call') {
-      content=node('details','thread-tool');
-      const summary=node('summary'),glyph=node('span','tool-glyph','{ }');
-      const description=node('span','tool-copy'),title=node('b','',event.label);
-      receipt=node('small');description.append(title,receipt);
-      const caret=node('span','tool-caret','⌄');caret.setAttribute('aria-hidden','true');
-      summary.append(glyph,description,caret);content.append(summary);
-      content.append(node('code','tool-name',event.name));
-      for(const [tag,value] of [['Entrada',event.input],['Resultado',event.output]]) {
-        payload=node('details','thread-payload');
-        payload.append(node('summary','',tag),node('pre','',JSON.stringify(value,null,2)));content.append(payload);
+  function agent(author) {
+    return author===0?'Tu agente':'Agente de '+graph.people[author].name;
+  }
+  feed.onscroll=()=>feed.classList.toggle('scrolled',feed.scrollTop>12);
+  function reset() {
+    feed.replaceChildren();rows=[];previous=-1;
+  }
+  function decide(phrase) {
+    thread.choice=phrase;
+    thread.events=threadScript(thread.kind,thread.a,thread.b,graph.people,phrase);
+    DemoThreads.set(thread.id,thread.ask.end);
+    render();
+    toggle.focus({preventScroll:true});
+  }
+  function decision(event,el) {
+    const card=node('div','thread-decision rd-decision'), body=node('div','rd-decision__body');
+    body.append(node('small','rd-decision__label rd-gradient-text','Tu decisión'),node('strong','',event.question));
+    const phrase=node('p','thread-phrase','«'+(thread.choice || event.options[0])+'»');
+    const hint=node('small','','Solo tú ves esta solicitud.'), actions=node('div','thread-actions');
+    const accept=node('button','rd-button','Aceptar'), adjust=node('button','rd-button rd-button--quiet','Ajustar');
+    const choices=node('select','thread-choice');
+    choices.setAttribute('aria-label','Frase que podrá compartir tu agente');
+    for(const option of event.options) choices.add(new Option(option,option));
+    choices.hidden=true;
+    choices.onchange=()=>{phrase.textContent='«'+choices.value+'»';};
+    adjust.onclick=()=>{choices.hidden=false;adjust.hidden=true;choices.focus();};
+    accept.onclick=()=>decide(choices.value);
+    actions.append(accept,adjust);
+    const receipt=node('small','ask-receipt');
+    body.append(phrase,hint,choices,actions,receipt);card.append(body);el.append(card);
+    return {update(t){
+      const done=t>=event.end;
+      hint.hidden=done;actions.hidden=done;receipt.hidden=!done;
+      if(done){choices.hidden=true;receipt.textContent=thread.choice?'✓ Aceptado por ti':'✓ Permiso de ejemplo';}
+    }};
+  }
+  function tool(event,el) {
+    const card=node('details','thread-tool'), head=node('summary');
+    const glyph=node('span','tool-glyph');glyph.setAttribute('aria-hidden','true');
+    const copy=node('span','tool-copy');
+    const method=node('code');
+    const dot=event.name.indexOf('.')+1;
+    method.append(event.name.slice(0,dot),node('wbr'),event.name.slice(dot));
+    copy.append(node('b','',event.label),method);
+    const receipt=node('small','tool-receipt');
+    const caret=node('span','tool-caret','›');caret.setAttribute('aria-hidden','true');
+    head.append(glyph,copy,receipt,caret);card.append(head);
+    let result;
+    for(const [label,value] of [['Entrada',event.input],['Salida',event.output]]) {
+      const payload=node('details','thread-payload');
+      payload.append(node('summary','',label),node('pre','',JSON.stringify(value,null,2)));
+      card.append(payload);result=payload;
+    }
+    el.append(card);
+    let lastDone;
+    return {update(t){
+      const done=t>=event.end;
+      if(done===lastDone) return false;
+      lastDone=done;result.hidden=!done;
+      card.dataset.state=done?(event.privateResult?'private':'done'):'running';
+      receipt.textContent=done?event.receipt:'Consultando';
+      return true;
+    }};
+  }
+  function message(event,el) {
+    const mine=event.author===0;
+    el.classList.toggle('mine',mine);el.classList.toggle('human',event.type==='human');
+    const column=node('div','thread-message'), header=node('header');
+    header.append(node('strong','',event.type==='human'?'Tú, en persona':agent(event.author)));
+    const bubble=node('p','thread-bubble'), dots=node('span','thread-dots');
+    dots.setAttribute('aria-label','Escribiendo');dots.append(node('i'),node('i'),node('i'));
+    bubble.append(dots);column.append(header,bubble);el.append(face(event.author),column);
+    let count=0,word;
+    return {update(t,animate){
+      const end=DemoThreads.tokenCount(event,t);
+      dots.hidden=end>0;
+      bubble.classList.toggle('streaming',end>0 && t<event.end+.35 && animate);
+      const changed=count<end;
+      while(count<end) {
+        const token=event.tokens[count++], value=token.trimEnd();
+        if(!word){word=node('span','thread-word');bubble.append(word);}
+        const fragment=node('span','thread-token',value==='[[x]]'?'dato privado':value);
+        if(value==='[[x]]') fragment.classList.add('thread-redaction');
+        if(animate && t<event.end && end-count<2) fragment.classList.add('arriving');
+        word.append(fragment);
+        if(/\s$/u.test(token)){bubble.append(' ');word=null;}
       }
-    } else {
-      content=node('p','thread-bubble');
-      if(event.author===graph.threadSelection.b) el.classList.add('reply');
-    }
-    el.append(content);
-    if(event.withheld) {
-      const seal=node('div','thread-redaction');
-      const stripes=node('i');stripes.setAttribute('aria-hidden','true');
-      seal.append(stripes,node('small','','Dato privado'));el.append(seal);
-    }
-    feed.append(el);return {content,receipt,payload,count:0,word:null};
+      return changed;
+    }};
   }
-  function appendTokens(row,event,count,animate) {
-    while(row.count<count){
-      const token=event.tokens[row.count++];
-      if(!row.word){row.word=node('span','thread-word');row.content.append(row.word);}
-      const fragment=node('span',animate?'thread-token arriving':'thread-token',token.trimEnd());
-      row.word.append(fragment);
-      if(/\s$/u.test(token)){row.content.append(' ');row.word=null;}
-    }
+  function row(event,animate) {
+    const el=node('article','thread-event');
+    if(animate) el.classList.add('entering');
+    const item=event.type==='ask'?decision(event,el):event.type==='call'?tool(event,el):message(event,el);
+    feed.append(el);
+    return item;
   }
-  function reset() {feed.replaceChildren();rows=[];}
-  function render(){
+  function render() {
     cancelAnimationFrame(frame);
     if(!dialog.open) return;
-    const selection=graph.threadSelection;
-    const t=DemoThreads.time(selected,graph.reduced);
-    if(t<previous-.01) reset();
+    const ask=thread.ask;
+    let t=DemoThreads.time(thread.id,graph.reduced);
+    // Stop at the owner's turn even when opening an edge halfway through its ambient loop.
+    const waiting=ask && !graph.reduced && !thread.choice && t>=ask.at;
+    if(waiting){t=ask.at;DemoThreads.set(thread.id,t,true);}
+    if(t<previous) reset();
+    const playing=!graph.reduced && !DemoThreads.paused(thread.id) && t<DemoThreads.duration;
+    const animate=playing && previous>=0 && t-previous<.2;
+    const follow=!feed.querySelector('details[open]') && feed.scrollHeight-feed.clientHeight-feed.scrollTop<36;
     previous=t;
-    const follow=!feed.querySelector('details[open]') && feed.scrollHeight-feed.clientHeight-feed.scrollTop<32;
     let current='En curso',changed=false;
-    events.forEach((event,i)=>{
+    thread.events.forEach((event,i)=>{
       if(t<event.at) return;
-      if(!rows[i]) {rows[i]=row(event);changed=true;}
-      const {content,receipt,payload}=rows[i];
-      if(event.type==='message'){
-        const count=DemoThreads.tokenCount(event,t);
-        if(rows[i].count<count){
-          appendTokens(rows[i],event,count,!graph.reduced && !DemoThreads.paused(selected) && t<event.end && count-rows[i].count<=2);
-          changed=true;
-        }
-        content.classList.toggle('streaming',t<event.end && !DemoThreads.paused(selected));
-        current=t<event.end?'Transmitiendo':'En curso';
-      } else {
-        const done=t>=event.end;
-        const value=done?event.receipt:(event.pending || 'Ejecutando…');
-        if(receipt.textContent!==value){receipt.textContent=value;changed=true;}
-        content.dataset.done=String(done);payload.hidden=!done;
-        current=done?'En curso':event.pending || 'Usando herramienta';
-      }
+      if(!rows[i]){rows[i]=row(event,animate);changed=true;}
+      if(rows[i].update(t,animate)) changed=true;
+      if(t<event.end) current=event.type==='call'?'Usando herramienta':event.type==='ask'?'Esperando tu permiso':'Transmitiendo';
     });
-    const end=t>=DemoThreads.duration,paused=DemoThreads.paused(selected);
-    if(end) current='Finalizado';else if(paused) current='En pausa';
-    dialog.dataset.playing=String(!end&&!paused&&!graph.reduced);
+    const ended=t>=DemoThreads.duration;
+    if(waiting) current='Esperando tu permiso';
+    else if(ended) current='Finalizado';
+    else if(!playing) current='En pausa';
+    const phase=ended?'done':waiting?'wait':playing?'live':'paused';
+    if(state.dataset.phase!==phase){
+      state.dataset.phase=phase;
+      state.textContent=ended?(thread.kind==='guideline'?'Propuesta':thread.kind==='health'?'Privado':'Acuerdo'):waiting?'Te espera':playing?'Negociando':'En pausa';
+    }
     if(status.textContent!==current) status.textContent=current;
-    timeline.value=String(t);timeline.disabled=graph.reduced;timeline.setAttribute('aria-valuetext',t.toFixed(1)+' de 12 segundos');
-    timeline.style.setProperty('--progress',(100*t/DemoThreads.duration)+'%');
+    dialog.dataset.playing=String(playing);
+    timeline.value=String(t);timeline.disabled=graph.reduced;
+    timeline.setAttribute('aria-valuetext',t.toFixed(1)+' de 12 segundos');
     clock.textContent=t.toFixed(1)+' / 12 s';
-    toggle.hidden=graph.reduced;toggle.disabled=end;toggle.textContent=paused?'Continuar':'Pausar';
-    find('.thread-replay').hidden=graph.reduced;
-    mark.setTransform(1,0,0,1,0,0);mark.clearRect(0,0,160,112);mark.setTransform(2.2,0,0,2.2,10,7);
-    window.RondaMotion.paint(mark,selection.kind==='exchange'?'chat':selection.kind,t/12*.8,[graph.team[selection.a],graph.team[selection.b]]);
+    toggle.hidden=graph.reduced;toggle.disabled=ended || Boolean(waiting);
+    toggle.textContent=playing?'Ⅱ':'▶';toggle.setAttribute('aria-label',playing?'Pausar':'Continuar');
+    replay.hidden=graph.reduced;
     if(follow && changed) feed.scrollTop=feed.scrollHeight;
-    if(!end && !paused) frame=requestAnimationFrame(render);
+    if(playing) frame=requestAnimationFrame(render);
   }
   function open(a,b,topic) {
-    selected=DemoThreads.key(a,b);
-    const motion=globeMotions.find(m=>DemoThreads.key(m.a,m.b)===selected);
+    const id=DemoThreads.key(a,b);
+    const motion=globeMotions.find(m=>DemoThreads.key(m.a,m.b)===id);
     if(motion){a=motion.a;b=motion.b;select.value=motion.kind;}
     const kind=motion?.kind || 'exchange';
-    if(!transcripts.has(selected)) transcripts.set(selected,{id:selected,a,b,kind,events:threadScript(kind,a,b,graph.people)});
-    graph.threadSelection=transcripts.get(selected);events=graph.threadSelection.events;
+    if(!transcripts.has(id)){
+      const events=threadScript(kind,a,b,graph.people);
+      transcripts.set(id,{id,a,b,kind,events,ask:events.find(e=>e.type==='ask')});
+    }
+    thread=transcripts.get(id);graph.threadSelection=thread;
     const spot=graph.motionSpots?.find(m=>m.kind===kind);
-    DemoThreads.start(selected,spot?.fraction || 0);
-    dialog.style.setProperty('--thread-accent',threadStories[kind].tint);
+    DemoThreads.start(id,spot?.fraction || 0);
+    if(thread.resume){DemoThreads.set(id,DemoThreads.time(id));thread.resume=false;}
     heading.textContent=kind==='exchange' && topic ? topic : threadStories[kind].title;
-    find('.thread-pair').textContent=graph.people[a].name+' ↔ '+graph.people[b].name;
-    reset();previous=-1;if(!dialog.open) dialog.showModal();render();
+    find('.thread-faces').replaceChildren(face(a),face(b));
+    find('.thread-pair').textContent=a===0 || b===0?'Tu agente y el de '+graph.people[a===0?b:a].name:'Agentes de '+graph.people[a].name+' y '+graph.people[b].name;
+    delete state.dataset.phase;reset();if(!dialog.open) dialog.showModal();render();
   }
   launch.onclick=()=>{const m=globeMotions.find(m=>m.kind===select.value);open(m.a,m.b);};
-  toggle.onclick=()=>{DemoThreads.set(selected,DemoThreads.time(selected),!DemoThreads.paused(selected));render();};
-  timeline.oninput=()=>{DemoThreads.set(selected,Number(timeline.value),true);render();};
+  toggle.onclick=()=>{DemoThreads.set(thread.id,DemoThreads.time(thread.id),!DemoThreads.paused(thread.id));render();};
+  timeline.oninput=()=>{DemoThreads.set(thread.id,Number(timeline.value),true);render();};
   find('.thread-close').onclick=()=>dialog.close();
-  find('.thread-replay').onclick=()=>{DemoThreads.set(selected,0);reset();render();};
-  dialog.addEventListener('close',()=>{cancelAnimationFrame(frame);graph.threadSelection=null;launch.focus({preventScroll:true});});
-  dialog.addEventListener('click',e=>{if(e.target===dialog && !dialog.querySelector('.thread-panel').contains(e.target))dialog.close();});
+  replay.onclick=()=>{
+    thread.choice=null;
+    thread.events=threadScript(thread.kind,thread.a,thread.b,graph.people);
+    DemoThreads.set(thread.id,0);reset();render();
+  };
+  dialog.addEventListener('close',()=>{
+    cancelAnimationFrame(frame);
+    thread.resume=!DemoThreads.paused(thread.id);
+    DemoThreads.set(thread.id,DemoThreads.time(thread.id),true);
+    graph.threadSelection=null;
+    launch.focus({preventScroll:true});
+  });
+  dialog.addEventListener('click',e=>{if(e.target===dialog) dialog.close();});
   graph.refreshThread=()=>{if(dialog.open){reset();render();}};
   return open;
 }
@@ -193,6 +265,14 @@ function pickProjectedThread(view,m,tolerance,activeOnly=false) {
   return picked;
 }
 
+const threadTheme=getComputedStyle(document.documentElement);
+const tokenPaint={
+  paper:threadTheme.getPropertyValue('--rd-glass-solid').trim(),
+  border:threadTheme.getPropertyValue('--rd-hairline').trim(),
+  ink:threadTheme.getPropertyValue('--rd-ink').trim(),
+  font:threadTheme.getPropertyValue('--rd-font').trim()
+};
+
 function drawThreadToken(ctx,view,selection,zoom) {
   const time=DemoThreads.time(selection.id);
   const msg=selection.events.find(e=>e.type==='message' && time>=e.at && time<e.end);
@@ -205,11 +285,12 @@ function drawThreadToken(ctx,view,selection,zoom) {
   const x=v*v*from.x+2*v*u*c.x+u*u*to.x, y=v*v*from.y+2*v*u*c.y+u*u*to.y;
   const dx=(v*(c.x-from.x)+u*(to.x-c.x)),dy=(v*(c.y-from.y)+u*(to.y-c.y));
   const length=Math.hypot(dx,dy)||1;
-  const token=msg.tokens[DemoThreads.tokenCount(msg,time)-1].trim();
+  const token=msg.tokens[DemoThreads.tokenCount(msg,time)-1]?.trim();
+  if(!token || token==='[[x]]') return;
   ctx.save();ctx.translate(x-dy/length*35/zoom,y+dx/length*35/zoom);ctx.scale(1/zoom,1/zoom);
-  ctx.font='600 11px -apple-system,system-ui,sans-serif';
+  ctx.font='600 11px '+tokenPaint.font;
   const width=ctx.measureText(token).width+12;
   ctx.globalAlpha=Math.min(1,progress*10,(1-progress)*10);ctx.beginPath();ctx.roundRect(-width/2,-9,width,18,7);
-  ctx.fillStyle='#e4f4f2';ctx.fill();ctx.strokeStyle='#8dbcbf';ctx.lineWidth=.8;ctx.stroke();
-  ctx.fillStyle='#115865';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(token,0,0);ctx.restore();
+  ctx.fillStyle=tokenPaint.paper;ctx.fill();ctx.strokeStyle=tokenPaint.border;ctx.lineWidth=.8;ctx.stroke();
+  ctx.fillStyle=tokenPaint.ink;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(token,0,0);ctx.restore();
 }

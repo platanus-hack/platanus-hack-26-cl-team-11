@@ -1,19 +1,23 @@
 // Demo events are the visible messages exchanged by the agents and their public tool receipts.
 const threadStories = {
-  chat: {title:'Coordinar una conversación',label:'Chat',tint:'var(--rd-mini-denim)'},
-  calendars: {title:'Encontrar media hora',label:'Calendario',tint:'var(--rd-mini-teal)'},
-  health: {title:'Responder con privacidad',label:'Salud privada',tint:'var(--rd-mini-rust)'},
-  permission: {title:'Dar permiso una vez',label:'Permiso',tint:'var(--rd-mini-ochre)'},
-  help: {title:'Hacer una presentación',label:'Ayuda',tint:'var(--rd-mini-denim)'},
-  checkin: {title:'Compartir disponibilidad',label:'Check-in',tint:'var(--rd-mini-ochre)'},
-  pulse: {title:'Leer el pulso del equipo',label:'Pulso de equipo',tint:'var(--rd-mini-teal)'},
-  guideline: {title:'Proponer una regla',label:'Propuesta',tint:'var(--rd-mini-denim)'},
-  exchange: {title:'Coordinar el próximo paso',label:'Coordinación',tint:'var(--rd-muted)'}
+  chat: {title:'Coordinar una conversación',label:'Chat'},
+  calendars: {title:'Encontrar media hora',label:'Calendario'},
+  health: {title:'Responder con privacidad',label:'Salud privada'},
+  permission: {title:'Dar permiso una vez',label:'Permiso'},
+  help: {title:'Hacer una presentación',label:'Ayuda'},
+  checkin: {title:'Compartir disponibilidad',label:'Check-in'},
+  pulse: {title:'Leer el pulso del equipo',label:'Pulso de equipo'},
+  guideline: {title:'Proponer una regla',label:'Propuesta'},
+  exchange: {title:'Coordinar el próximo paso',label:'Coordinación'}
 };
 
-function threadScript(kind,a,b,people) {
+function threadTokens(text) {
+  return text.match(/\[\[x\]\]\s*|\S{1,6}\s*/gu) || [];
+}
+
+function threadScript(kind,a,b,people,phrase='Puedo cubrir a las 11.') {
   const A=people[a].name, B=people[b].name;
-  const msg=(at,end,author,text)=>({type:'message',at,end,author,tokens:text.match(/\S{1,6}\s*/gu)});
+  const msg=(at,end,author,text)=>({type:'message',at,end,author,tokens:threadTokens(text)});
   const tool=(at,end,author,name,label,input,output,receipt)=>({type:'call',at,end,author,name,label,input,output,receipt});
   switch(kind) {
     case 'chat': return [
@@ -32,14 +36,15 @@ function threadScript(kind,a,b,people) {
     ];
     case 'health': return [
       msg(0,2,a,'¿Puedes compartir el registro de descanso?'),
-      tool(2.4,5.1,b,'politica.consultar','Comprobar permiso',{senal:'descanso',destinatario:A},{compartir:false},'La lectura es privada'),
+      {...tool(2.4,5.1,b,'politica.consultar','Comprobar permiso',{senal:'descanso',destinatario:A},{compartir:false},'Privado'),privateResult:true},
       tool(5.4,7.8,b,'respuesta.limitar','Preparar la respuesta permitida',{campo:'descanso'},{mensaje:'Ese dato es privado.'},'Sin datos personales'),
-      {...msg(8.1,11.2,b,'Ese dato es privado. Puedo ayudarte a buscar otra hora.'),withheld:true}
+      msg(8.1,11.2,b,'Mi registro de descanso es [[x]] Puedo ayudarte a buscar otra hora.')
     ];
     case 'permission': return [
       msg(0,2,a,'¿Puedo pasarle tu oferta de cobertura a mi dueño?'),
-      {...tool(2.2,5.6,b,'permiso.solicitar','Pedir permiso a la persona',{frase:'Puedo cubrir a las 11.',destinatario:A},{autorizado:true,usos:1},'Un envío autorizado'),pending:'Esperando al dueño'},
-      tool(5.8,8.6,b,'permiso.usar','Entregar la frase aprobada',{destinatario:A,usos:1},{mensaje:'Puedo cubrir a las 11.',usos_restantes:0},'Pase utilizado'),
+      {type:'ask',at:2.2,end:4.4,author:b,question:'¿Qué frase puede compartir tu agente con '+A+'?',options:['Puedo cubrir a las 11.','Puedo ayudar hoy.']},
+      {...msg(4.5,5.7,b,phrase),type:'human'},
+      tool(5.8,8.6,b,'permiso.usar','Entregar la frase aprobada',{destinatario:A,usos:1},{mensaje:phrase,usos_restantes:0},'Pase utilizado'),
       msg(9,11.4,a,'Recibido. Solo pasaré esa frase.')
     ];
     case 'help': return [
