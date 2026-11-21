@@ -43,8 +43,12 @@ render deploys create srv-dc0j2qrm8hqs73emf3ig   # volver a desplegar a mano
 | `PORT` | `render.yaml` | Puerto en que escucha |
 | `DATA_DIR` | `render.yaml` | Apunta al disco persistente, `/var/data` |
 | `SECRET_KEY` | La genera Render | Cifra las credenciales guardadas. Si cambia, las conexiones existentes dejan de poder leerse |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | A mano, en el panel de Render | Activan la conexión con Google |
-| `PUBLIC_BASE_URL` | Opcional | Solo con dominio propio. Sin ella se usa la dirección que entrega Render |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | A mano, en el panel de Render | Activan Google Calendar y Gmail |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | A mano, en el panel de Render | Activan GitHub |
+| `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET` | A mano, en el panel de Render | Activan Linear |
+| `PUBLIC_BASE_URL` | Opcional | Solo con dominio propio. Sin ella se usa `RENDER_EXTERNAL_URL`, que Render define solo |
+
+Dónde se crea cada aplicación OAuth y qué dirección de retorno lleva está en [INTEGRATIONS.md](INTEGRATIONS.md#aplicaciones-oauth-por-crear). Una fuente sin sus dos variables aparece en el panel como «Falta configurarla en el servidor».
 
 Las llaves nunca van en el repo ni en `render.yaml`.
 
@@ -56,6 +60,7 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Una llave de la API de Anthropic | Acceso directo al modelo |
 | `ANTHROPIC_BASE_URL` | La dirección del proxy de la hack, si se usa en vez de una llave | Con solo esta variable, el servidor llama al proxy sin llave |
+| `ANTHROPIC_AUTH_TOKEN` | Un token, si el proxy lo pide en vez de una llave | Se manda como token de autorización. Basta una de las tres variables para que el modelo quede configurado |
 | `AGENT_MODEL` | Opcional. Por defecto `claude-opus-5-5` | Qué modelo conversa |
 | `AGENT_ROUND_HOUR` | Opcional. Hora de Santiago, de 0 a 23; por defecto 9. Cualquier otro valor apaga la ronda diaria | Desde qué hora corre sola la ronda de cada día |
 
