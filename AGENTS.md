@@ -64,8 +64,10 @@ Hay una sola dirección visual, aprobada por Mati. Ningún agente inventa estilo
   se propone y se pregunta a Mati.
 - `design/archive/` son direcciones descartadas. No se usan como referencia.
 - Antes de terminar: `design/lint.sh` tiene que pasar, y una captura de tu pantalla tiene que
-  parecer la misma app que `design/reference.png`. En Claude Code lo verifica el hook
-  `.claude/hooks/design-lint.sh`.
+  parecer la misma app que `design/reference.png`. Lo verifican dos cosas: en Claude Code, el hook
+  `.claude/hooks/design-lint.sh`; para todos (Codex y personas incluidos), el `pre-commit` de
+  `.githooks/`, que se activa con `npm install`. Si tu clon no lo tiene activo, corre
+  `git config core.hooksPath .githooks`.
 - Un cambio a la dirección misma (colores, tipografía, principios) solo lo aprueba Mati y se
   registra en la tabla «Decisiones» de `design/DESIGN.md`.
 

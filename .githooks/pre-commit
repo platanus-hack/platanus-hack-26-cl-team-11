@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# AGENTS.md regla 3: ningún commit entra con UI fuera del sistema de diseño.
+# Se activa con `npm install` (script prepare) o con: git config core.hooksPath .githooks
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+[ -x design/lint.sh ] || exit 0
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+# shellcheck disable=SC2086
+out=$(design/lint.sh $staged 2>&1) && exit 0
+echo "$out" >&2
+echo >&2
+echo "Commit detenido. Arregla lo de arriba; no uses --no-verify (AGENTS.md regla 1)." >&2
+exit 1

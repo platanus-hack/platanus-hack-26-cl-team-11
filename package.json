@@ -1,8 +1,13 @@
 {
   "name": "ronda",
   "private": true,
-  "workspaces": ["backend", "frontend"],
-  "engines": { "node": ">=22.5" },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.5"
+  },
   "scripts": {
     "dev": "concurrently -n back,front -c blue,magenta \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "dev:back": "npm run dev -w backend",
@@ -11,7 +16,9 @@
     "start": "npm run start -w backend",
     "test": "npm test -w backend",
     "type-check": "npm run type-check -w backend && npm run type-check -w frontend",
-    "add-person": "npm run add-person -w backend --"
+    "add-person": "npm run add-person -w backend --",
+    "lint:design": "design/lint.sh",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
