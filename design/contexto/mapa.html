@@ -33,7 +33,6 @@
         <canvas id="dots-back" aria-hidden="true"></canvas>
         <canvas id="dots-front" class="cx-globe__front" aria-hidden="true"></canvas>
         <div class="cx-globe__floor" aria-hidden="true"></div>
-        <button type="button" class="cx-me" id="me" aria-label="Ver todo el contexto"><img id="me-face" src="../faces/mati.png" alt=""></button>
       </div>
       <aside class="cx-slab cx-panel" id="panel" aria-live="polite"></aside>
     </div>
@@ -45,10 +44,8 @@
 (function () {
   const { find, ago, tile, esc } = window.RONDA;
   const $ = (id) => document.getElementById(id);
-  const RAD = Math.PI / 180;
-  const TILT = 0.15;
-  const SPIN = 0.07;
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+  const params = new URLSearchParams(location.search);
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || params.has('still');
 
   const FEED = {
     health: ['Dormiste 5 h 40 min, una hora menos que tu promedio', 'Pulso en reposo 61 lpm, 4 sobre tu promedio', '8.412 pasos hasta las 18:00', 'Variabilidad cardíaca baja desde el jueves'],
@@ -71,7 +68,8 @@
   ];
 
   const t0 = Date.now();
-  const state = { person: 'me', selected: null, off: { whatsapp: true, codex: true }, items: {}, pushed: {}, tick: 0 };
+  const wantedPerson = PEOPLE.find((p) => p.id === params.get('persona'));
+  const state = { person: wantedPerson ? wantedPerson.id : 'me', selected: null, off: { whatsapp: true, codex: true }, items: {}, pushed: {}, tick: 0 };
   IDS.forEach((id) => {
     state.items[id] = FEED[id].slice(0, 3).map((text, index) => ({ text, at: t0 - AGO[id][index] * 60000 }));
   });
@@ -89,66 +87,72 @@
     return has ? { on: true, items: [], lastAt: t0 - has[0] * 60000, shared: has[1] } : { on: false, items: [], lastAt: null, shared: '' };
   }
 
-  /* ---------- Esfera ---------- */
+  /* ---------- Esfera: puntos fijos; apps y personas derivan solas ---------- */
   const globe = $('globe');
   const layers = [$('dots-back'), $('dots-front')];
   const back = layers[0].getContext('2d');
   const front = layers[1].getContext('2d');
-  const spots = IDS.map((id, index) => {
-    const lat = (index % 2 ? -1 : 1) * 38 * RAD;
-    const lon = index * 45 * RAD;
-    return { id, app: find(id), lon, v: [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.cos(lat) * Math.cos(lon)], up: index % 2 === 0 };
-  });
   const hex = (color) => [1, 3, 5].map((start) => parseInt(color.slice(start, start + 2), 16));
+  const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const unit = (v) => { const n = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / n, v[1] / n, v[2] / n]; };
+  let seed = 7;
+  const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
   const COUNT = 1500;
   const dots = [];
   for (let i = 0; i < COUNT; i += 1) {
     const y = 1 - (2 * (i + 0.5)) / COUNT;
     const ring = Math.sqrt(1 - y * y);
     const turn = i * Math.PI * (3 - Math.sqrt(5));
-    dots.push({ v: [Math.cos(turn) * ring, y, Math.sin(turn) * ring], spot: -1, w: 0 });
+    dots.push([Math.cos(turn) * ring, y, Math.sin(turn) * ring]);
   }
 
-  function paintPatches() {
-    dots.forEach((dot) => {
-      dot.spot = -1;
-      dot.w = 0;
-      spots.forEach((spot, index) => {
-        if (!sourceOf(spot.id).on) return;
-        const near = dot.v[0] * spot.v[0] + dot.v[1] * spot.v[1] + dot.v[2] * spot.v[2];
-        const weight = Math.min(1, Math.max(0, (near - 0.9) / 0.085));
-        if (weight > dot.w) {
-          dot.w = weight;
-          dot.spot = index;
-        }
-      });
-    });
+  const things = [];
+  const total = IDS.length + PEOPLE.length;
+  const order = Array.from({ length: total }, (_, index) => index).sort(() => random() - 0.5);
+  function place(slot) {
+    const y = 0.78 - (1.56 * (slot + 0.5)) / total;
+    const ring = Math.sqrt(1 - y * y);
+    const turn = slot * Math.PI * (3 - Math.sqrt(5)) + (random() - 0.5) * 0.9;
+    return unit([Math.cos(turn) * ring, y + (random() - 0.5) * 0.18, Math.sin(turn) * ring]);
   }
-
-  const nodes = {};
-  spots.forEach((spot) => {
+  function add(kind, id, html) {
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = 'cx-node';
-    el.innerHTML = tile(spot.app) + '<span class="cx-node__label"><span class="cx-node__name">' + esc(spot.app.name) + '</span><span class="cx-node__when"></span></span>';
-    if (spot.up) {
-      el.querySelector('.cx-node__label').style.top = 'auto';
-      el.querySelector('.cx-node__label').style.bottom = 'calc(100% + 12px)';
-    }
-    el.addEventListener('click', () => {
-      if (!moved) select(spot.id);
-    });
+    el.className = 'cx-node' + (kind === 'person' ? ' cx-node--person' : '');
+    el.innerHTML = html;
     globe.appendChild(el);
-    nodes[spot.id] = { el, when: el.querySelector('.cx-node__when'), tile: el.querySelector('.cx-tile'), tint: hex(spot.app.tint) };
+    const thing = { kind, id, el, v: place(order[things.length]), axis: unit([random() - 0.5, random() - 0.5, random() - 0.5]), speed: (0.018 + random() * 0.026) * (random() < 0.5 ? -1 : 1) };
+    el.addEventListener('click', () => {
+      if (moved) return;
+      if (kind === 'app') select(id);
+      else choose(id);
+    });
+    things.push(thing);
+    return thing;
+  }
+  IDS.forEach((id) => {
+    const app = find(id);
+    const thing = add('app', id, tile(app) + '<span class="cx-node__label"><span class="cx-node__name">' + esc(app.name) + '</span><span class="cx-node__when"></span></span>');
+    thing.tint = hex(app.tint);
+    thing.when = thing.el.querySelector('.cx-node__when');
+    thing.tile = thing.el.querySelector('.cx-tile');
   });
+  PEOPLE.forEach((p) => {
+    add('person', p.id, '<img src="../faces/' + p.face + '.png" alt=""><span class="cx-node__label"><span class="cx-node__name">' + esc(p.name) + '</span></span>');
+  });
+  const thingOf = (kind, id) => things.find((thing) => thing.kind === kind && thing.id === id);
 
-  let yaw = -0.5;
+  let yaw = -0.4;
+  let tilt = 0.18;
   let size = { w: 0, h: 0, r: 0 };
   let pulse = null;
   let dragging = false;
   let moved = false;
-  let lastX = 0;
+  let last = { x: 0, y: 0 };
   let glide = 0;
+  let clock = 0;
 
   function fit() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -167,10 +171,34 @@
     const sin = Math.sin(yaw);
     const x = v[0] * cos + v[2] * sin;
     const z1 = -v[0] * sin + v[2] * cos;
-    const y = v[1] * Math.cos(TILT) - z1 * Math.sin(TILT);
-    const z = v[1] * Math.sin(TILT) + z1 * Math.cos(TILT);
+    const y = v[1] * Math.cos(tilt) - z1 * Math.sin(tilt);
+    const z = v[1] * Math.sin(tilt) + z1 * Math.cos(tilt);
     const k = 1 / (1 - z * 0.16 * radius);
     return { x: size.w / 2 + x * size.r * radius * k, y: size.h / 2 - y * size.r * radius * k, z: z * radius, k };
+  }
+
+  function drift(dt) {
+    things.forEach((thing) => {
+      const angle = thing.speed * dt;
+      const k = thing.axis;
+      const c = Math.cos(angle);
+      const s = Math.sin(angle);
+      const kxv = cross(k, thing.v);
+      const kv = dot3(k, thing.v) * (1 - c);
+      thing.v = unit([thing.v[0] * c + kxv[0] * s + k[0] * kv, thing.v[1] * c + kxv[1] * s + k[1] * kv, thing.v[2] * c + kxv[2] * s + k[2] * kv]);
+    });
+    for (let i = 0; i < things.length; i += 1) {
+      for (let j = i + 1; j < things.length; j += 1) {
+        const a = things[i];
+        const b = things[j];
+        const near = dot3(a.v, b.v);
+        if (near < 0.8) continue;
+        const push = (near - 0.8) * 1.4 * dt;
+        const away = [a.v[0] - b.v[0], a.v[1] - b.v[1], a.v[2] - b.v[2]];
+        a.v = unit([a.v[0] + away[0] * push, a.v[1] + away[1] * push, a.v[2] + away[2] * push]);
+        b.v = unit([b.v[0] - away[0] * push, b.v[1] - away[1] * push, b.v[2] - away[2] * push]);
+      }
+    }
   }
 
   function disc(ctx, x, y, radius, color) {
@@ -190,11 +218,6 @@
     inner.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
     inner.addColorStop(1, 'rgba(255, 255, 255, 0.16)');
     disc(back, cx, cy, r, inner);
-    const veil = front.createRadialGradient(cx - r * 0.25, cy - r * 0.3, r * 0.05, cx, cy, r);
-    veil.addColorStop(0, 'rgba(255, 255, 255, 0.46)');
-    veil.addColorStop(0.6, 'rgba(255, 255, 255, 0.2)');
-    veil.addColorStop(1, 'rgba(255, 255, 255, 0.06)');
-    disc(front, cx, cy, r, veil);
     back.lineWidth = 1.5;
     back.strokeStyle = 'rgba(255, 255, 255, 0.95)';
     back.beginPath();
@@ -205,72 +228,103 @@
     back.beginPath();
     back.arc(cx, cy, r + 1.5, 0, Math.PI * 2);
     back.stroke();
+    const veil = front.createRadialGradient(cx - r * 0.25, cy - r * 0.3, r * 0.05, cx, cy, r);
+    veil.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+    veil.addColorStop(0.6, 'rgba(255, 255, 255, 0.26)');
+    veil.addColorStop(1, 'rgba(255, 255, 255, 0.08)');
+    disc(front, cx, cy, r, veil);
   }
 
   function draw(now) {
     glass();
-    const beat = pulse ? Math.min(1, (now - pulse.start) / 1500) : 0;
+    const apps = things.filter((thing) => thing.kind === 'app' && sourceOf(thing.id).on);
+    const beat = pulse ? Math.min(1, (now - pulse.start) / 1700) : 0;
     for (let i = 0; i < COUNT; i += 1) {
-      const dot = dots[i];
-      const p = project(dot.v, 1);
+      const v = dots[i];
+      const p = project(v, 1);
       const depth = (p.z + 1) / 2;
       let radius = (0.7 + 1.7 * depth) * p.k;
       let alpha = 0.1 + 0.55 * depth * depth;
       let color = '96, 90, 140';
-      if (dot.spot >= 0) {
-        const node = nodes[spots[dot.spot].id];
-        const glow = pulse && pulse.id === spots[dot.spot].id ? Math.sin(beat * Math.PI) : 0;
-        const picked = state.selected === spots[dot.spot].id ? 0.35 : 0;
-        const w = dot.w;
-        color = Math.round(96 + (node.tint[0] - 96) * w) + ', ' + Math.round(90 + (node.tint[1] - 90) * w) + ', ' + Math.round(140 + (node.tint[2] - 140) * w);
+      let best = 0;
+      let owner = null;
+      for (let a = 0; a < apps.length; a += 1) {
+        const weight = (dot3(v, apps[a].v) - 0.9) / 0.085;
+        if (weight > best) {
+          best = weight;
+          owner = apps[a];
+        }
+      }
+      if (owner) {
+        const w = Math.min(1, best);
+        const glow = pulse && pulse.id === owner.id ? Math.sin(beat * Math.PI) : 0;
+        const picked = state.selected === owner.id ? 0.35 : 0;
+        color = Math.round(96 + (owner.tint[0] - 96) * w) + ', ' + Math.round(90 + (owner.tint[1] - 90) * w) + ', ' + Math.round(140 + (owner.tint[2] - 140) * w);
         radius *= 1 + w * (0.9 + glow * 0.9 + picked);
         alpha = Math.min(1, alpha + w * (0.2 + 0.5 * depth + glow * 0.3));
       }
       disc(p.z < 0 ? back : front, p.x, p.y, radius, 'rgba(' + color + ', ' + alpha.toFixed(3) + ')');
     }
 
-    spots.forEach((spot) => {
-      const node = nodes[spot.id];
-      const on = sourceOf(spot.id).on;
-      const p = project(spot.v, 1.04);
-      const depth = (p.z + 1.04) / 2.08;
-      const scale = (0.58 + 0.54 * depth) * Math.min(1, size.r / 250);
-      node.el.style.transform = 'translate(' + (p.x - 36).toFixed(1) + 'px, ' + (p.y - 36).toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
-      node.el.style.zIndex = String(p.z > 0 ? 600 + Math.round(p.z * 100) : 100 + Math.round((p.z + 1.04) * 90));
-      node.el.style.filter = depth < 0.5 ? 'blur(' + ((0.5 - depth) * 4.5).toFixed(1) + 'px)' : 'none';
-      node.el.classList.toggle('cx-node--far', depth < 0.6);
-      if (!on) return;
-      const live = pulse && pulse.id === spot.id;
-      for (let step = 0; step < 9; step += 1) {
-        const q = project(spot.v, 0.9 - step * 0.068);
-        const near = (q.z + 1) / 2;
-        const fade = (1 - step / 9) * (0.2 + 0.5 * near);
-        disc(q.z < 0 ? back : front, q.x, q.y, (1.5 + 1.3 * near) * (1 - step * 0.05), 'rgba(' + node.tint.join(', ') + ', ' + fade.toFixed(3) + ')');
-      }
-      if (live && beat < 1) {
-        const q = project(spot.v, 0.94 - beat * 0.62);
+    if (pulse && beat < 1) {
+      const source = thingOf('app', pulse.id);
+      const from = source.v;
+      const to = thingOf('person', state.person).v;
+      const angle = Math.acos(Math.max(-1, Math.min(1, dot3(from, to))));
+      const tint = source.tint.join(', ');
+      for (let step = 0; step < 7; step += 1) {
+        const t = Math.max(0, beat - step * 0.035);
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const a = Math.sin((1 - eased) * angle) / (Math.sin(angle) || 1);
+        const b = Math.sin(eased * angle) / (Math.sin(angle) || 1);
+        const q = project(unit([from[0] * a + to[0] * b, from[1] * a + to[1] * b, from[2] * a + to[2] * b]), 1.02);
         const ctx = q.z < 0 ? back : front;
-        ctx.strokeStyle = 'rgb(' + node.tint.join(', ') + ')';
-        ctx.lineWidth = 3;
-        disc(ctx, q.x, q.y, 6, '#ffffff');
-        ctx.stroke();
+        if (step === 0) {
+          ctx.strokeStyle = 'rgb(' + tint + ')';
+          ctx.lineWidth = 3;
+          disc(ctx, q.x, q.y, 6.5, '#ffffff');
+          ctx.stroke();
+        } else {
+          disc(ctx, q.x, q.y, 4.2 - step * 0.45, 'rgba(' + tint + ', ' + (0.5 - step * 0.06).toFixed(2) + ')');
+        }
       }
-    });
+    }
     if (pulse && beat >= 1) pulse = null;
+
+    things.forEach((thing) => {
+      const p = project(thing.v, 1.04);
+      const depth = (p.z + 1.04) / 2.08;
+      const base = thing.kind === 'person' && thing.id !== state.person ? 0.72 : 1;
+      const scale = (0.5 + 0.6 * depth) * base * Math.min(1, size.r / 250);
+      thing.el.style.transform = 'translate(' + (p.x - 32).toFixed(1) + 'px, ' + (p.y - 32).toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+      thing.el.style.zIndex = String(p.z > 0 ? 600 + Math.round(p.z * 100) : 100 + Math.round((p.z + 1.04) * 90));
+      thing.el.style.filter = depth < 0.62 ? 'blur(' + ((0.62 - depth) * 13).toFixed(1) + 'px)' : 'none';
+      thing.el.style.opacity = depth < 0.62 ? (0.45 + depth * 0.85).toFixed(2) : '1';
+      thing.el.classList.toggle('cx-node--far', depth < 0.66);
+      thing.el.classList.toggle('cx-node--up', p.y < size.h / 2 - size.r * 0.35);
+    });
   }
 
   let before = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - before) / 1000);
     before = now;
-    if (state.selected) {
-      const spot = spots.find((item) => item.id === state.selected);
-      let gap = (-spot.lon - yaw) % (Math.PI * 2);
+    clock += dt;
+    const target = state.selected ? thingOf('app', state.selected) : null;
+    if (target) {
+      let gap = (-Math.atan2(target.v[0], target.v[2]) - yaw) % (Math.PI * 2);
       if (gap > Math.PI) gap -= Math.PI * 2;
       if (gap < -Math.PI) gap += Math.PI * 2;
-      yaw += gap * (1 - Math.exp(-dt * 5));
+      const ease = 1 - Math.exp(-dt * 5);
+      yaw += gap * ease;
+      tilt += (Math.max(-0.7, Math.min(0.7, Math.asin(target.v[1]) * 0.8)) - tilt) * ease;
     } else if (!dragging) {
-      yaw += (still ? 0 : SPIN * dt) + glide * dt;
+      if (!still) {
+        drift(dt);
+        yaw += 0.085 * dt;
+        tilt += (0.18 + Math.sin(clock * 0.21) * 0.24 - tilt) * (1 - Math.exp(-dt * 1.2));
+      }
+      yaw += glide * dt;
       glide *= Math.exp(-dt * 3);
     }
     draw(now);
@@ -280,17 +334,19 @@
   globe.addEventListener('pointerdown', (event) => {
     dragging = true;
     moved = false;
-    lastX = event.clientX;
+    last = { x: event.clientX, y: event.clientY };
   });
   window.addEventListener('pointermove', (event) => {
     if (!dragging) return;
-    const dx = event.clientX - lastX;
-    if (Math.abs(dx) > 3) moved = true;
+    const dx = event.clientX - last.x;
+    const dy = event.clientY - last.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
     if (!moved) return;
     if (state.selected) select(null);
     yaw += dx * 0.006;
+    tilt = Math.max(-0.8, Math.min(0.8, tilt + dy * 0.004));
     glide = dx * 0.25;
-    lastX = event.clientX;
+    last = { x: event.clientX, y: event.clientY };
   });
   window.addEventListener('pointerup', () => {
     dragging = false;
@@ -305,12 +361,16 @@
   }
 
   function renderNodes() {
-    spots.forEach((spot) => {
-      const source = sourceOf(spot.id);
-      const node = nodes[spot.id];
-      node.tile.classList.toggle('cx-tile--off', !source.on);
-      node.el.setAttribute('aria-pressed', String(state.selected === spot.id));
-      node.when.textContent = source.on ? (source.lastAt ? since(source.lastAt) : 'Sin datos') : 'Sin conectar';
+    things.forEach((thing) => {
+      if (thing.kind === 'person') {
+        thing.el.setAttribute('aria-pressed', String(thing.id === state.person && !state.selected));
+        thing.el.classList.toggle('cx-node--main', thing.id === state.person);
+        return;
+      }
+      const source = sourceOf(thing.id);
+      thing.tile.classList.toggle('cx-tile--off', !source.on);
+      thing.el.setAttribute('aria-pressed', String(state.selected === thing.id));
+      thing.when.textContent = source.on ? (source.lastAt ? since(source.lastAt) : 'Sin datos') : 'Sin conectar';
     });
   }
 
@@ -321,9 +381,9 @@
     if (!state.selected) {
       const all = IDS.map((id) => ({ app: find(id), source: sourceOf(id) }));
       const on = all.filter((entry) => entry.source.on);
-      const last = on.map((entry) => entry.source.lastAt).sort((a, b) => b - a)[0];
+      const lastAt = on.map((entry) => entry.source.lastAt).sort((a, b) => b - a)[0];
       $('panel').innerHTML = '<div class="cx-panel__head"><img class="cx-panel__face" src="../faces/' + who.face + '.png" alt=""><div><h2>' + esc(title) + '</h2>' +
-        '<p>' + on.length + ' de ' + IDS.length + ' conexiones' + (last ? ' · último dato ' + since(last).toLowerCase() : '') + '</p></div></div>' +
+        '<p>' + on.length + ' de ' + IDS.length + ' conexiones' + (lastAt ? ' · último dato ' + since(lastAt).toLowerCase() : '') + '</p></div></div>' +
         all.map(({ app, source }) => {
           let line = 'Sin conectar';
           if (source.on) line = mine ? source.items[0].text : source.shared || 'Privado';
@@ -355,7 +415,6 @@
     renderPeople();
     renderNodes();
     renderPanel();
-    $('me-face').src = '../faces/' + person().face + '.png';
   }
 
   function select(id) {
@@ -364,30 +423,27 @@
     renderPanel();
   }
 
+  function choose(id) {
+    state.person = id;
+    state.selected = null;
+    renderAll();
+  }
+
   document.addEventListener('click', (event) => {
     const who = event.target.closest('[data-person]');
-    if (who) {
-      state.person = who.dataset.person;
-      state.selected = null;
-      paintPatches();
-      return renderAll();
-    }
+    if (who) return choose(who.dataset.person);
     const pick = event.target.closest('[data-select]');
     if (pick) return select(pick.dataset.select);
     const off = event.target.closest('[data-off]');
     if (off) {
       state.off[off.dataset.off] = true;
-      paintPatches();
       renderNodes();
       renderPanel();
     }
   });
-  $('me').addEventListener('click', () => {
-    if (!moved) select(null);
-  });
 
   function arrive() {
-    if (state.person !== 'me') return;
+    if (state.person !== 'me' || document.hidden) return;
     const on = IDS.filter((id) => !state.off[id]);
     if (!on.length) return;
     const id = on[(state.tick * 3) % on.length];
@@ -401,13 +457,12 @@
   }
 
   fit();
-  paintPatches();
   renderAll();
-  const wanted = new URLSearchParams(location.search).get('fuente');
+  const wanted = params.get('fuente');
   if (wanted && find(wanted)) select(wanted);
   requestAnimationFrame(frame);
   if (!still) setInterval(arrive, 6000);
-  setInterval(() => { renderNodes(); }, 30000);
+  setInterval(renderNodes, 30000);
 })();
 </script>
 </body>

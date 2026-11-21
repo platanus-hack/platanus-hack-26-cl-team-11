@@ -26,55 +26,67 @@
     <div class="cx-head">
       <div>
         <h1 class="cx-title">Resumen</h1>
-        <p class="cx-sub">Semana del 16 al 22 de noviembre</p>
+        <p class="cx-sub">Equipo de 5 · semana del 16 al 22 de noviembre</p>
       </div>
-      <a class="cx-btn" href="conexiones.html">Agregar una conexión</a>
     </div>
 
-    <section class="cx-stats" id="stats" aria-label="Tu semana en cifras"></section>
-
     <div class="cx-bento">
-      <section class="cx-slab cx-card cx-card--7" style="--tint: #5b5cf0">
-        <div class="cx-card__head"><h2>Código</h2><span id="code-tiles" style="display: inline-flex"></span></div>
-        <div class="cx-row">
-          <div class="cx-fig"><span class="cx-stat__label">Commits</span><span class="cx-num">23</span></div>
-          <div class="cx-fig"><span class="cx-stat__label">Líneas agregadas</span><span class="cx-num cx-num--mid">+1.840</span></div>
-          <div class="cx-fig"><span class="cx-stat__label">Líneas borradas</span><span class="cx-num cx-num--mid">−612</span></div>
-          <div class="cx-fig"><span class="cx-stat__label">Pull requests</span><span class="cx-num cx-num--mid">3</span></div>
+      <section class="cx-slab cx-t cx-t--7 ss-stage" id="net-tile">
+        <div class="cx-t__head"><h2 class="cx-t__title">Conversaciones entre agentes</h2></div>
+        <div class="cx-net">
+          <div class="cx-net__figure">
+            <span class="cx-big" id="talks">46</span>
+            <span class="cx-net__label">esta semana. <b id="reached">4</b> llegaron a ti.</span>
+            <span class="cx-net__who" id="who" aria-live="polite"></span>
+          </div>
+          <div class="cx-net__graph" id="graph">
+            <svg viewBox="0 0 470 330" aria-hidden="true">
+              <defs>
+                <linearGradient id="cx-live" gradientUnits="userSpaceOnUse" x1="60" y1="50" x2="410" y2="290">
+                  <stop offset="0" stop-color="#1e9bff"/><stop offset="0.3" stop-color="#7b61ff"/><stop offset="0.55" stop-color="#e840d8"/><stop offset="0.76" stop-color="#ff3b6b"/><stop offset="1" stop-color="#ff8a1f"/>
+                </linearGradient>
+              </defs>
+              <g id="edges"></g>
+              <circle class="cx-spark" id="spark" r="5"></circle>
+            </svg>
+          </div>
         </div>
-        <div class="cx-bars" id="bars" role="img" aria-label="Commits por día: lunes 3, martes 5, miércoles 2, jueves 6, viernes 4, sábado 2, domingo 1"></div>
-        <div class="cx-foot" id="code-foot"></div>
       </section>
 
-      <section class="cx-slab cx-card cx-card--5" style="--tint: #ff3b6b">
-        <div class="cx-card__head"><h2>Salud</h2><span id="health-tiles" style="display: inline-flex"></span></div>
-        <div class="cx-row">
-          <div class="cx-fig"><span class="cx-stat__label">Pulso en reposo</span><span class="cx-num">58<small>lpm</small></span></div>
-          <div class="cx-fig"><span class="cx-stat__label">Sueño por noche</span><span class="cx-num cx-num--mid">6<small>h</small> 12<small>min</small></span></div>
-        </div>
-        <div>
-          <svg class="cx-spark" id="spark" role="img" aria-label="Pulso en reposo de lunes a domingo: 61, 60, 59, 60, 58, 57 y 58"></svg>
-          <div class="cx-spark__days" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-        </div>
-        <div class="cx-foot"><span><b>4</b> entrenamientos</span><span><b>8.412</b> pasos por día</span></div>
+      <section class="cx-slab cx-t cx-t--5">
+        <div class="cx-t__head"><h2 class="cx-t__title">Llegó a ti</h2></div>
+        <div class="cx-count"><span class="cx-big" id="got">4</span><span>de <span id="of">46</span> conversaciones</span></div>
+        <div class="cx-inbox" id="inbox"></div>
       </section>
 
-      <section class="cx-slab cx-card cx-card--7">
-        <div class="cx-card__head"><h2>Tú y tu equipo</h2></div>
-        <div class="cx-vs" id="versus"></div>
-        <div class="cx-foot"><span id="team-note"></span></div>
+      <section class="cx-slab cx-t cx-t--7">
+        <div class="cx-t__head">
+          <h2 class="cx-t__title">Tú y tu equipo</h2>
+          <div class="cx-seg" id="groups" role="group" aria-label="Señales"></div>
+        </div>
+        <div class="cx-cmp" id="cmp"></div>
+        <div class="cx-key"><span><i class="me"></i>Tú</span><span><i class="team"></i>Mediana de tu equipo</span><span>Nadie ve el dato de otra persona.</span></div>
       </section>
 
-      <section class="cx-slab cx-card cx-card--5" style="--tint: #3f7fe8">
-        <div class="cx-card__head"><h2>Reuniones</h2><span id="meet-tiles" style="display: inline-flex"></span></div>
-        <div class="cx-row">
-          <div class="cx-fig"><span class="cx-stat__label">Tiempo en reuniones</span><span class="cx-num">9<small>h</small> 30<small>min</small></span></div>
-          <div class="cx-fig"><span class="cx-stat__label">Día más cargado</span><span class="cx-num cx-num--mid">Miércoles</span></div>
-        </div>
-        <div class="cx-week" id="week" role="img" aria-label="Reuniones por día: lunes 2, martes 3, miércoles 5, jueves 3, viernes 1"></div>
-        <div class="cx-legend"><span><i class="rec"></i>Transcrita por Granola</span><span><i></i>Sin transcribir</span></div>
-        <div class="cx-foot" style="margin-top: auto"><span><b>11</b> de 14 transcritas</span><span><b>40</b> min por reunión</span></div>
-      </section>
+      <div class="cx-col">
+        <section class="cx-slab cx-t">
+          <div class="cx-t__head">
+            <h2 class="cx-t__title">Pulso del equipo</h2>
+            <div class="cx-seg" id="signals" role="group" aria-label="Señal"></div>
+          </div>
+          <div class="cx-count"><span class="cx-big cx-big--word" id="pulse-word">Media</span><span id="pulse-note"></span></div>
+          <div class="cx-pulse" id="pulse">
+            <svg id="pulse-svg" role="img" aria-label="Nivel del equipo y el tuyo, de lunes a domingo"></svg>
+            <div class="cx-pulse__days" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          </div>
+          <div class="cx-key"><span><i class="me"></i>Equipo</span><span><i class="mine"></i>Tú</span><span>Aportan 5 de 5 personas.</span></div>
+        </section>
+
+        <section class="cx-slab cx-t" style="gap: 8px; padding-bottom: 14px">
+          <div class="cx-t__head"><h2 class="cx-t__title">Tu equipo</h2></div>
+          <div id="mates"></div>
+        </section>
+      </div>
     </div>
   </div>
 </div>
@@ -82,76 +94,310 @@
 <script src="apps.js"></script>
 <script>
 (function () {
-  const { find, tile, esc, ICON } = window.RONDA;
+  const { find, tile, esc } = window.RONDA;
   const $ = (id) => document.getElementById(id);
-  const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-  const TODAY = 5;
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+  const TRAVEL = 'cubic-bezier(0.45, 0, 0.1, 1)';
 
-  const stats = [
-    ['gcal', 'Reuniones', '14', '', '9 h 30 min esta semana'],
-    ['granola', 'Reuniones transcritas', '11', 'de 14', '3 quedaron sin transcribir'],
-    ['whatsapp', 'WhatsApps respondidos', '86', '', 'Tardas 12 min en responder'],
-    ['gmail', 'Correos respondidos', '17', 'de 42', '6 esperan tu respuesta'],
-    ['health', 'Pulso en reposo', '58', 'lpm', '2 menos que la semana pasada'],
-    ['github', 'Commits', '23', '', '+1.840 y −612 líneas'],
+  /* ---------- La red: cinco agentes, diez pares, 46 conversaciones ---------- */
+  const PEOPLE = [
+    { id: 'me', name: 'Tú', face: 'mati', x: 235, y: 56, up: true },
+    { id: 'ian', name: 'Ian', face: 'ian', x: 410, y: 140 },
+    { id: 'lian', name: 'Lian', face: 'lian', x: 342, y: 268 },
+    { id: 'andres', name: 'Andrés', face: 'andres', x: 128, y: 268 },
+    { id: 'roberto', name: 'Roberto', face: 'roberto', x: 60, y: 140 },
   ];
-  $('stats').innerHTML = stats.map(([id, label, value, unit, note]) => {
-    const app = find(id);
-    return '<div class="cx-stat" style="--tint:' + app.tint + '"><div class="cx-stat__head">' + tile(app) + '<span class="cx-stat__label">' + esc(label) + '</span></div>' +
-      '<span class="cx-num">' + value + (unit ? '<small>' + unit + '</small>' : '') + '</span><span class="cx-stat__note">' + esc(note) + '</span></div>';
-  }).join('');
-
-  $('code-tiles').innerHTML = ['github', 'codex', 'claude'].map((id) => tile(find(id))).join('');
-  $('health-tiles').innerHTML = tile(find('health'));
-  $('meet-tiles').innerHTML = ['gcal', 'granola'].map((id) => tile(find(id))).join('');
-
-  const commits = [3, 5, 2, 6, 4, 2, 1];
-  const top = Math.max.apply(null, commits);
-  $('bars').innerHTML = commits.map((count, day) =>
-    '<div class="cx-bars__col' + (day === TODAY ? ' cx-bars__col--now' : '') + '"><span class="cx-bars__n">' + count + '</span>' +
-    '<span class="cx-bars__bar" style="height:' + Math.round((count / top) * 78) + 'px"></span><span class="cx-bars__d">' + DAYS[day] + '</span></div>').join('');
-  $('code-foot').innerHTML = '<span>' + tile(find('claude')) + '<span>Claude terminó <b>12</b> tareas</span></span><span>' + tile(find('codex')) + '<span>Codex terminó <b>9</b></span></span>';
-
-  const versus = [
-    ['health', 'Duermes 10 % menos que tu equipo', '6 h 12 min por noche. Tu equipo, 6 h 54 min.', 90, 100],
-    ['strava', 'Entrenas el doble que tu equipo', '4 entrenamientos. Tu equipo, 2.', 100, 50],
-    ['gcal', 'Tienes 27 % más reuniones que tu equipo', '14 reuniones. Tu equipo, 11.', 100, 79],
-    ['whatsapp', 'Respondes WhatsApp el doble de rápido', '12 min. Tu equipo, 25 min.', 48, 100],
+  const PAIRS = [['me', 'ian', 9], ['me', 'lian', 7], ['me', 'andres', 4], ['me', 'roberto', 3], ['ian', 'lian', 6], ['ian', 'andres', 5], ['ian', 'roberto', 2], ['lian', 'andres', 4], ['lian', 'roberto', 3], ['andres', 'roberto', 3]];
+  const TOTAL = PAIRS.reduce((sum, pair) => sum + pair[2], 0);
+  const INBOX = [
+    { from: 'lian', text: 'Lian te cubre la demo del jueves', state: 'Aceptado' },
+    { from: 'ian', text: 'Ian revisa tu cambio antes de las 10:30', state: 'Aceptado' },
+    { from: 'andres', text: 'Andrés necesita el guion hoy', action: 'Responder', done: 'Respondido' },
+    { from: 'roberto', text: 'Roberto propone no tener reuniones antes de las 10:00', action: 'Votar', done: 'A favor' },
   ];
-  $('versus').innerHTML = versus.map(([id, title, detail, mine, team]) => {
-    const app = find(id);
-    return '<div class="cx-vs__row" style="--tint:' + app.tint + '"><div class="cx-vs__say">' + tile(app) +
-      '<div class="cx-vs__text"><b>' + esc(title) + '</b><span>' + esc(detail) + '</span></div></div>' +
-      '<div class="cx-vs__bars"><span>Tú</span><span class="cx-vs__track"><span class="cx-vs__fill cx-vs__fill--me" style="width:' + mine + '%"></span></span>' +
-      '<span>Equipo</span><span class="cx-vs__track"><span class="cx-vs__fill" style="width:' + team + '%"></span></span></div></div>';
-  }).join('');
-  $('team-note').innerHTML = ICON.lock.replace('<svg', '<svg style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"') +
-    '<span>Tu equipo es el promedio de 5 personas. Nadie ve el dato de otra.</span>';
+  const person = (id) => PEOPLE.find((p) => p.id === id);
+  const graph = $('graph');
+  const edges = PAIRS.map(([a, b, count]) => {
+    const from = person(a);
+    const to = person(b);
+    const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+    const pull = { x: mid.x + (235 - mid.x) * 0.28, y: mid.y + (172 - mid.y) * 0.28 };
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    el.setAttribute('class', 'cx-edge');
+    el.setAttribute('d', 'M' + from.x + ' ' + from.y + 'Q' + pull.x.toFixed(1) + ' ' + pull.y.toFixed(1) + ' ' + to.x + ' ' + to.y);
+    $('edges').appendChild(el);
+    return { a, b, count, el };
+  });
+  const faces = {};
+  PEOPLE.forEach((p) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'cx-net__face' + (p.up ? ' cx-net__face--up' : '');
+    el.style.left = (p.x / 4.7).toFixed(2) + '%';
+    el.style.top = (p.y / 3.3).toFixed(2) + '%';
+    el.setAttribute('aria-label', (p.id === 'me' ? 'Tu mapa' : 'Mapa de ' + p.name));
+    el.innerHTML = '<img src="../faces/' + p.face + '.png" alt=""><span>' + esc(p.name) + '</span>';
+    el.addEventListener('mouseenter', () => pick(p.id));
+    el.addEventListener('focus', () => pick(p.id));
+    el.addEventListener('mouseleave', () => pick(null));
+    el.addEventListener('blur', () => pick(null));
+    el.addEventListener('click', () => { location.href = 'mapa.html?persona=' + p.id; });
+    graph.appendChild(el);
+    faces[p.id] = el;
+  });
 
-  const meetings = [[2, 2], [3, 3], [5, 4], [3, 2], [1, 0]];
-  $('week').innerHTML = meetings.map(([total, recorded], day) => {
-    let blocks = '';
-    for (let i = 0; i < total; i += 1) blocks += '<span class="cx-week__block' + (i < recorded ? ' cx-week__block--rec' : '') + '"></span>';
-    return '<div class="cx-week__day"><div class="cx-week__stack">' + blocks + '</div><span class="cx-week__d">' + DAYS[day] + '</span></div>';
-  }).join('');
-
-  const pulse = [61, 60, 59, 60, 58, 57, 58];
-  function drawSpark() {
-    const svg = $('spark');
-    const width = svg.clientWidth || 300;
-    const height = 92;
-    const low = 55;
-    const high = 63;
-    const step = width / pulse.length;
-    const points = pulse.map((value, day) => [step * (day + 0.5), 10 + ((high - value) / (high - low)) * (height - 24)]);
-    const line = points.map((point, index) => (index ? 'L' : 'M') + point[0].toFixed(1) + ' ' + point[1].toFixed(1)).join(' ');
-    const area = line + ' L' + points[points.length - 1][0].toFixed(1) + ' ' + height + ' L' + points[0][0].toFixed(1) + ' ' + height + ' Z';
-    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-    svg.innerHTML = '<path class="cx-spark__area" d="' + area + '"/><path class="cx-spark__line" d="' + line + '"/>' +
-      points.map((point, day) => '<circle class="cx-spark__dot" cx="' + point[0].toFixed(1) + '" cy="' + point[1].toFixed(1) + '" r="' + (day === TODAY ? 6.5 : 4.5) + '"/>').join('');
+  function pick(id) {
+    edges.forEach((edge) => {
+      const mine = id && (edge.a === id || edge.b === id);
+      edge.el.classList.toggle('cx-edge--pick', Boolean(mine));
+      edge.el.classList.toggle('cx-edge--dim', Boolean(id) && !mine);
+    });
+    PEOPLE.forEach((p) => faces[p.id].classList.toggle('cx-net__face--pick', p.id === id));
+    if (!id) {
+      $('who').textContent = '';
+      return;
+    }
+    const all = edges.filter((edge) => edge.a === id || edge.b === id).reduce((sum, edge) => sum + edge.count, 0);
+    const withMe = edges.find((edge) => (edge.a === 'me' && edge.b === id) || (edge.b === 'me' && edge.a === id));
+    $('who').textContent = id === 'me'
+      ? 'Tu agente: ' + all + ' conversaciones con los otros cuatro.'
+      : 'Agente de ' + person(id).name + ': ' + all + ' conversaciones, ' + withMe.count + ' con el tuyo.';
   }
-  drawSpark();
-  window.addEventListener('resize', drawSpark);
+
+  /* ---------- Lo que llegó a ti ---------- */
+  $('inbox').innerHTML = INBOX.map((item, index) => {
+    const end = item.action
+      ? '<button type="button" class="cx-btn cx-btn--small" data-act="' + index + '">' + item.action + '</button>'
+      : '<span class="cx-inbox__state">' + item.state + '</span>';
+    return '<div class="cx-inbox__row"' + (still ? '' : ' data-wait') + '><div class="cx-inbox__in"><div class="cx-inbox__line"><img src="../faces/' + person(item.from).face + '.png" alt="">' +
+      '<span class="cx-inbox__text">' + esc(item.text) + '</span>' + end + '</div></div></div>';
+  }).join('');
+  $('inbox').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-act]');
+    if (!button) return;
+    const item = INBOX[Number(button.dataset.act)];
+    const done = button.textContent === item.done;
+    button.textContent = done ? item.action : item.done;
+    button.classList.toggle('cx-btn--on', !done);
+    button.style.setProperty('--tint', '#30a85a');
+  });
+
+  /* ---------- La escena: se reproduce una vez al cargar ---------- */
+  const rows = Array.from($('inbox').children);
+  const spark = $('spark');
+
+  function flash(edge, ms) {
+    return new Promise((resolve) => {
+      const length = edge.el.getTotalLength();
+      const start = performance.now();
+      edge.el.classList.add('cx-edge--on');
+      edge.el.style.stroke = 'url(#cx-live)';
+      spark.style.opacity = '1';
+      (function step(now) {
+        const t = Math.min(1, (now - start) / ms);
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const point = edge.el.getPointAtLength(length * eased);
+        spark.setAttribute('cx', point.x.toFixed(1));
+        spark.setAttribute('cy', point.y.toFixed(1));
+        if (t < 1) return requestAnimationFrame(step);
+        edge.el.classList.remove('cx-edge--on');
+        edge.el.style.stroke = '';
+        spark.style.opacity = '0';
+        resolve();
+      })(start);
+    });
+  }
+
+  function deliver(edge, index) {
+    const box = graph.getBoundingClientRect();
+    const point = edge.el.getPointAtLength(edge.el.getTotalLength() / 2);
+    const from = { x: box.left + (point.x / 470) * box.width, y: box.top + (point.y / 330) * box.height };
+    const list = $('inbox').getBoundingClientRect();
+    const to = { x: list.left + 4, y: list.bottom + 8 };
+    const chip = document.createElement('span');
+    chip.className = 'cx-fly';
+    chip.textContent = 'Para ti';
+    document.body.appendChild(chip);
+    const move = chip.animate([
+      { transform: 'translate(' + (from.x - 30) + 'px, ' + (from.y - 14) + 'px) scale(0.6)', opacity: 0 },
+      { transform: 'translate(' + (from.x - 30) + 'px, ' + (from.y - 14) + 'px) scale(1)', opacity: 1, offset: 0.18 },
+      { transform: 'translate(' + to.x + 'px, ' + to.y + 'px) scale(1)', opacity: 1, offset: 0.86 },
+      { transform: 'translate(' + to.x + 'px, ' + to.y + 'px) scale(0.9)', opacity: 0 },
+    ], { duration: 950, easing: TRAVEL });
+    move.onfinish = () => {
+      chip.remove();
+      rows[index].removeAttribute('data-wait');
+      $('got').textContent = String(index + 1);
+      $('reached').textContent = String(index + 1);
+    };
+  }
+
+  function roll(el, to, ms) {
+    const start = performance.now();
+    (function step(now) {
+      const t = Math.min(1, (now - start) / ms);
+      el.textContent = String(Math.round(to * (1 - Math.pow(1 - t, 2))));
+      if (t < 1) requestAnimationFrame(step);
+    })(start);
+  }
+
+  async function play() {
+    const order = [4, 0, 7, 1, 5, 9, 2, 8, 6, 3, 0, 4, 1];
+    const gives = { 1: 1, 3: 0, 6: 2, 9: 3 };
+    let delivered = 0;
+    $('got').textContent = '0';
+    $('reached').textContent = '0';
+    roll($('talks'), TOTAL, order.length * 400 + 300);
+    for (let i = 0; i < order.length; i += 1) {
+      const edge = edges[order[i]];
+      await flash(edge, 360);
+      if (gives[i] !== undefined) {
+        deliver(edge, delivered);
+        delivered += 1;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+  }
+  let talks = TOTAL;
+  async function murmur() {
+    if (document.hidden) return;
+    await flash(edges[4 + Math.floor(Math.random() * 6)], 420);
+    talks += 1;
+    $('talks').textContent = String(talks);
+    $('of').textContent = String(talks);
+  }
+  if (!still) {
+    setTimeout(async () => {
+      await play();
+      setInterval(murmur, 5200);
+    }, 500);
+  }
+
+  /* ---------- Tú y tu equipo ---------- */
+  const SIGNALS = [
+    ['salud', 'health', 'Sueño por noche', 372, 414, '10 % menos', '6 h 12 min · equipo 6 h 54 min'],
+    ['salud', 'health', 'Pulso en reposo', 58, 62, '4 lpm menos', '58 lpm · equipo 62 lpm'],
+    ['salud', 'strava', 'Entrenamientos', 4, 2, 'El doble', '4 · equipo 2'],
+    ['trabajo', 'gcal', 'Reuniones', 14, 11, '27 % más', '14 · equipo 11'],
+    ['trabajo', 'granola', 'Reuniones transcritas', 79, 52, '27 puntos más', '79 % · equipo 52 %'],
+    ['trabajo', 'github', 'Commits', 23, 17, '35 % más', '23 · equipo 17'],
+    ['mensajes', 'whatsapp', 'Tiempo de respuesta', 12, 25, 'El doble de rápido', '12 min · equipo 25 min'],
+    ['mensajes', 'whatsapp', 'WhatsApps respondidos', 86, 64, '34 % más', '86 · equipo 64'],
+    ['mensajes', 'gmail', 'Correos respondidos', 40, 61, '21 puntos menos', '40 % · equipo 61 %'],
+  ];
+  const GROUPS = [['todo', 'Todo'], ['salud', 'Salud'], ['trabajo', 'Trabajo'], ['mensajes', 'Mensajes']];
+  let group = 'todo';
+  $('cmp').innerHTML = SIGNALS.map(([kind, app, label, mine, team, delta, detail]) => {
+    const scale = Math.max(mine, team) * 1.12;
+    const me = (mine / scale) * 100;
+    const us = (team / scale) * 100;
+    const startAt = still ? null : 50;
+    const at = (value) => (startAt === null ? value : startAt).toFixed(1);
+    return '<div class="cx-cmp__row" data-kind="' + kind + '" data-me="' + me.toFixed(1) + '" data-us="' + us.toFixed(1) + '">' + tile(find(app)) +
+      '<span class="cx-cmp__label">' + esc(label) + '</span>' +
+      '<span class="cx-cmp__track"><i class="cx-cmp__gap" style="left:' + at(Math.min(me, us)) + '%;width:' + (startAt === null ? Math.abs(me - us).toFixed(1) : 0) + '%"></i>' +
+      '<i class="cx-cmp__dot cx-cmp__dot--team" style="left:' + at(us) + '%"></i><i class="cx-cmp__dot cx-cmp__dot--me" style="left:' + at(me) + '%"></i></span>' +
+      '<span class="cx-cmp__say"><b>' + esc(delta) + '</b><span>' + esc(detail) + '</span></span></div>';
+  }).join('');
+  function settle() {
+    Array.from($('cmp').children).forEach((row, index) => {
+      setTimeout(() => {
+        const me = Number(row.dataset.me);
+        const us = Number(row.dataset.us);
+        row.querySelector('.cx-cmp__dot--me').style.left = me + '%';
+        row.querySelector('.cx-cmp__dot--team').style.left = us + '%';
+        const gap = row.querySelector('.cx-cmp__gap');
+        gap.style.left = Math.min(me, us) + '%';
+        gap.style.width = Math.abs(me - us) + '%';
+      }, 600 + index * 70);
+    });
+  }
+  if (!still) settle();
+  function renderGroups() {
+    $('groups').innerHTML = GROUPS.map(([id, name]) => '<button type="button" aria-pressed="' + (id === group) + '" data-group="' + id + '">' + name + '</button>').join('');
+    Array.from($('cmp').children).forEach((row) => { row.hidden = group !== 'todo' && row.dataset.kind !== group; });
+  }
+  $('groups').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-group]');
+    if (!button) return;
+    group = button.dataset.group;
+    renderGroups();
+  });
+  renderGroups();
+
+  /* ---------- Pulso del equipo ---------- */
+  const LEVEL = { 1: 'Baja', 2: 'Media', 3: 'Alta' };
+  const DAY = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const PULSE = {
+    energia: { name: 'Energía', team: [2, 2, 3, 2, 2, 1, 2], me: [2, 1, 2, 1, 1, 1, 2] },
+    carga: { name: 'Carga', team: [2, 3, 3, 2, 2, 1, 1], me: [3, 3, 3, 3, 2, 2, 1] },
+  };
+  let signal = 'energia';
+  const median = (values) => values.slice().sort((a, b) => a - b)[Math.floor(values.length / 2)];
+  const versus = (mine, team) => (mine === team ? 'igual que el equipo' : Math.abs(mine - team) + (Math.abs(mine - team) === 1 ? ' nivel ' : ' niveles ') + (mine < team ? 'bajo' : 'sobre') + ' el equipo');
+
+  function pulseSummary() {
+    const data = PULSE[signal];
+    const team = median(data.team);
+    const mine = median(data.me);
+    $('pulse-word').textContent = LEVEL[team];
+    $('pulse-note').textContent = 'Tú: ' + LEVEL[mine].toLowerCase() + ', ' + versus(mine, team) + '.';
+  }
+
+  function drawPulse() {
+    const svg = $('pulse-svg');
+    const data = PULSE[signal];
+    const width = svg.clientWidth || 360;
+    const height = 150;
+    const left = 44;
+    const step = (width - left) / 7;
+    const x = (day) => left + step * (day + 0.5);
+    const y = (level) => 126 - (level - 1) * 51;
+    const line = (values, shift) => values.map((level, day) => (day ? 'L' : 'M') + x(day).toFixed(1) + ' ' + (y(level) + shift).toFixed(1)).join(' ');
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svg.innerHTML = [3, 2, 1].map((level) => '<line class="cx-pulse__band" x1="' + left + '" x2="' + width + '" y1="' + y(level) + '" y2="' + y(level) + '"/><text class="cx-pulse__level" x="0" y="' + (y(level) + 4) + '">' + LEVEL[level] + '</text>').join('') +
+      '<path class="cx-pulse__me" d="' + line(data.me, 3) + '"/><path class="cx-pulse__team" d="' + line(data.team, -3) + '"/>' +
+      '<line class="cx-pulse__hair" id="hair" y1="8" y2="142"/><circle class="cx-pulse__pt" id="pt-me" r="6" fill="#7b61ff"/><circle class="cx-pulse__pt" id="pt-team" r="6" fill="#1d1d1f"/>';
+    svg.onpointermove = (event) => {
+      const box = svg.getBoundingClientRect();
+      const day = Math.max(0, Math.min(6, Math.floor((event.clientX - box.left - left) / step)));
+      $('pulse').dataset.scrub = '1';
+      $('hair').setAttribute('x1', x(day));
+      $('hair').setAttribute('x2', x(day));
+      $('pt-me').setAttribute('cx', x(day));
+      $('pt-me').setAttribute('cy', y(data.me[day]) + 3);
+      $('pt-team').setAttribute('cx', x(day));
+      $('pt-team').setAttribute('cy', y(data.team[day]) - 3);
+      $('pulse-word').textContent = LEVEL[data.team[day]];
+      $('pulse-note').textContent = DAY[day] + '. Tú: ' + LEVEL[data.me[day]].toLowerCase() + ', ' + versus(data.me[day], data.team[day]) + '.';
+    };
+    svg.onpointerleave = () => {
+      delete $('pulse').dataset.scrub;
+      pulseSummary();
+    };
+    pulseSummary();
+  }
+  function renderSignals() {
+    $('signals').innerHTML = Object.keys(PULSE).map((id) => '<button type="button" aria-pressed="' + (id === signal) + '" data-signal="' + id + '">' + PULSE[id].name + '</button>').join('');
+  }
+  $('signals').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-signal]');
+    if (!button) return;
+    signal = button.dataset.signal;
+    renderSignals();
+    drawPulse();
+  });
+  renderSignals();
+  drawPulse();
+  window.addEventListener('resize', drawPulse);
+
+  /* ---------- Tu equipo ---------- */
+  const SHARED = { ian: 'Libre de 15:00 a 18:00', lian: 'Ocupada hasta las 12:00', andres: 'Ensayo del pitch a las 10:30', roberto: 'En reuniones hasta las 13:00' };
+  $('mates').innerHTML = PEOPLE.filter((p) => p.id !== 'me').map((p) => {
+    const talks = edges.find((edge) => edge.a === 'me' && edge.b === p.id).count;
+    return '<a class="cx-mate" href="mapa.html?persona=' + p.id + '"><img src="../faces/' + p.face + '.png" alt=""><span class="cx-mate__text"><b>' + esc(p.name) + '</b><span>' + esc(SHARED[p.id]) + '</span></span>' +
+      '<span class="cx-mate__n">' + talks + ' con tu agente</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>';
+  }).join('');
 })();
 </script>
 </body>
