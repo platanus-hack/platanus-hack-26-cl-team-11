@@ -392,3 +392,22 @@ button.rd-item, a.rd-item { cursor: pointer; }
 .rd-thread .rd-bubble { max-width: 100%; border-radius: 6px 18px 18px 18px; animation: none; }
 .rd-thread__line--mine .rd-bubble { border-radius: 18px 6px 18px 18px; background: var(--rd-fill-soft); box-shadow: none; }
 @media (prefers-reduced-motion: reduce) { .rd-persona, .rd-thread__line { animation: none; } }
+
+/* ---- Chat con tu agente: tarjeta de vidrio con su cara, burbujas del hilo y una barra para escribir ---- */
+.rd-thread--chat .rd-thread__lines { min-height: 120px; max-height: 420px; overflow-y: auto; padding: var(--rd-space-1) 2px; scrollbar-width: none; }
+.rd-thread--chat .rd-thread__lines::-webkit-scrollbar { display: none; }
+.rd-thread--chat .rd-thread__line--mine .rd-bubble { background: var(--rd-ink); color: var(--rd-on-ink); }
+.rd-thread__hint { margin: 0; color: var(--rd-muted); font-size: var(--rd-text-small); }
+.rd-thread__ideas { display: flex; flex-wrap: wrap; gap: var(--rd-space-2); }
+.rd-thread__idea { height: 34px; padding: 0 14px; border: 0; border-radius: var(--rd-radius-pill); background: var(--rd-fill-soft); color: var(--rd-ink); font: inherit; font-size: var(--rd-text-small); font-weight: var(--rd-weight); cursor: pointer; transition: transform .15s ease, background-color .15s ease; }
+.rd-thread__idea:active { transform: scale(.97); }
+.rd-thread__idea:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: 2px; }
+.rd-composer { display: flex; align-items: center; gap: var(--rd-space-2); padding: 6px 6px 6px var(--rd-space-4); border-radius: var(--rd-radius-pill); background: var(--rd-glass-solid); box-shadow: 0 0 0 1px var(--rd-hairline), var(--rd-shadow-card); transition: box-shadow .2s ease; }
+.rd-composer:focus-within { box-shadow: 0 0 0 1.5px var(--rd-ink), var(--rd-shadow-card); }
+.rd-composer__input { flex: 1 1 auto; min-width: 0; height: 36px; padding: 0; border: 0; outline: 0; background: none; color: var(--rd-ink); font: inherit; }
+.rd-composer__input::placeholder { color: var(--rd-muted); }
+.rd-composer__send { flex: 0 0 auto; width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--rd-ink); color: var(--rd-on-ink); cursor: pointer; transition: transform .15s ease, opacity .15s ease; }
+.rd-composer__send:disabled { opacity: .3; cursor: default; }
+.rd-composer__send:not(:disabled):active { transform: scale(.92); }
+.rd-composer__send svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .rd-thread__idea, .rd-composer, .rd-composer__send { transition: none; } }
