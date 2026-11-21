@@ -82,7 +82,7 @@
   .uv-member b { font-size: 15px; font-weight: var(--rd-weight); letter-spacing: -0.01em; }
   .uv-member span { font-size: 13px; color: var(--rd-muted); }
 
-  .uv-feed { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 18px 0 22px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 72px); mask-image: linear-gradient(to bottom, transparent 0, #000 72px); }
+  .uv-feed { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 18px 0 22px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px); mask-image: linear-gradient(to bottom, transparent 0, #000 22px); }
   .uv[data-scene="ronda"] .uv-feed, .uv[data-scene="semana"] .uv-feed { gap: 0; }
   .uv[data-scene="semana"] .uv-feed { justify-content: flex-start; -webkit-mask-image: none; mask-image: none; padding-top: 6px; }
   .uv-feed > * { will-change: transform; }
@@ -120,6 +120,20 @@
   /* Filas de lista, como las del Resumen: cara, título en 600, una línea gris y el check al final. */
   .uv-li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 2px; box-sizing: border-box; }
   .uv-li + .uv-li { border-top: 1px solid var(--rd-hairline); }
+  .uv-li-text > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  /* Tarjeta de la persona tocada en el globo: cara, nombre y su estado rápido. */
+  .uv-who-card { position: absolute; left: 24px; bottom: 24px; z-index: 4; width: min(300px, calc(100% - 48px)); box-sizing: border-box; padding: 16px; gap: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .3s var(--ease), transform .4s var(--ease); }
+  .uv-who-card[data-on] { opacity: 1; transform: none; pointer-events: auto; }
+  .uv-who-card header { display: flex; align-items: center; gap: 12px; }
+  .uv-who-card header .uv-face { width: 44px; height: 44px; }
+  .uv-who-card header b { display: block; font-size: 17px; }
+  .uv-who-card header span { color: var(--rd-muted); font-size: 13px; }
+  .uv-who-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .uv-who-grid div { padding: 9px 11px; border-radius: 12px; background: var(--rd-fill-soft); }
+  .uv-who-grid small { display: block; color: var(--rd-muted); font-size: 12px; }
+  .uv-who-grid b { font-size: 15px; font-family: var(--rd-font-num); }
+  .uv-who-card p { margin: 0; font-size: 13.5px; color: var(--rd-muted); line-height: 1.4; }
+  .uv-who-card p b { color: var(--rd-ink); font-weight: var(--rd-weight); }
   .uv-li .uv-faces { display: flex; flex: 0 0 auto; width: 78px; }
   .uv-li .uv-face { width: 34px; height: 34px; }
   .uv-li .uv-face + .uv-face { margin-left: -12px; }
@@ -146,6 +160,14 @@
     .uv-num { font-size: 32px; }
     .uv-stats .rd-note { white-space: normal; }
     .uv-cal { display: none; }
+    .uv-who-card { left: 10px; right: 10px; bottom: 10px; width: auto; padding: 10px 12px; gap: 8px; }
+    .uv-who-card header .uv-face { width: 30px; height: 30px; }
+    .uv-who-card header b { display: inline; font-size: 15px; }
+    .uv-who-card header span { display: none; }
+    .uv-who-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .uv-who-grid div { padding: 6px 8px; }
+    .uv-who-grid b { font-size: 13px; }
+    .uv-who-card p { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   }
   @media (prefers-reduced-motion: reduce) {
     .uv-stage canvas, .uv-week, .uv-ask-foot > *, .uv-top .rd-nav > *, .uv-top .rd-nav b { transition: none; }
@@ -173,6 +195,7 @@
       <div class="uv-stats" id="wstats"></div>
       <div class="uv-cal" id="wcal"></div>
     </section>
+    <section class="uv-who-card rd-card rd-glass" id="who" aria-live="polite"></section>
     <div class="uv-admin">
       <div class="uv-cat" aria-label="Catálogo visto en esta vuelta">
         <div class="uv-row" id="cat-tools"></div>
@@ -197,7 +220,7 @@
 <script src="../luz/luz.js"></script>
 <script src="./mini/calendar-edge.js"></script>
 <script src="./mini/motion-paint.js"></script>
-<script src="./hilo/stream.js"></script>
+<script src="./hilo/stream.js?v=10"></script>
 <script src="./hilo/tools.js"></script>
 <script src="./hilo/edge.js"></script>
 <script src="./universo.js"></script>
@@ -299,7 +322,7 @@ function addItem(e) {
     // En vivo, e.live.text crece con lo que el modelo va escribiendo: la burbuja se rehace con el texto nuevo y la cabeza avanza hasta alcanzarlo.
     if (e.live) { let stream = s, made = e.text, seen = 0;
       upd = () => { const text = e.live.text || '';
-        if (text !== made) { const next = RondaStream.create(text); stream.el.replaceWith(next.el); stream = next; made = text; }
+        if (text !== made) { const next = RondaStream.create(text, true); stream.el.replaceWith(next.el); stream = next; made = text; }
         seen = Math.min(text.length, seen + Math.max(0.7, (text.length - seen) * 0.14));
         b.toggleAttribute('data-typing', !text && !e.live.done); stream.update(text.length ? seen / text.length : 0, e.live.done && seen >= text.length - 0.5); }; }
     else upd = t => { const p = (t - e.at - lead) / Math.max(0.3, e.end - e.at - lead); b.toggleAttribute('data-typing', p <= 0 && t < e.end); s.update(p, p >= 1.15); };
@@ -509,6 +532,28 @@ function draw(T) {
 const stage = document.querySelector('.uv-stage');
 function faceAt(e) { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
   for (let k = HITS.length - 1; k >= 0; k--) { const h = HITS[k]; if (Math.hypot(h.x - x, h.y - y) <= h.r + 4) return h.i; } return -1; }
+// Al tocar una cara: quién es y, si lo comparte, su energía, carga, sueño, pasos y en qué está.
+const whoCard = document.getElementById('who');
+const LEVEL = { baja: 'Baja', media: 'Media', alta: 'Alta' };
+function showWho(i) {
+  if (i < 0) { whoCard.removeAttribute('data-on'); return; }
+  const st = people[i].stats, head = el('header'), id = el('div');
+  id.append(el('b', '', i === 0 ? 'Tú' : people[i].name), el('span', '', i === 0 ? 'Tu agente' : 'Su agente'));
+  head.append(face(i), id);
+  const parts = [head];
+  if (st && st.shares) {
+    const grid = el('div', 'uv-who-grid');
+    const cell = (label, value) => { if (value === null || value === undefined || value === 'sin_datos') return; const d = el('div'); d.append(el('small', '', label), el('b', '', value)); grid.append(d); };
+    cell('Energía', LEVEL[st.energy]); cell('Carga', LEVEL[st.load]);
+    cell('Sueño', st.sleepHours == null ? null : (Math.round(st.sleepHours * 10) / 10).toLocaleString('es-CL') + ' h');
+    cell('Pasos', st.steps == null ? null : st.steps.toLocaleString('es-CL'));
+    if (grid.children.length) parts.push(grid);
+    if (st.working) { const p = el('p'); p.append('En qué está: ', el('b', '', st.working)); parts.push(p); }
+    else if (st.topics && st.topics.length) { const p = el('p'); p.append('Sabe de: ', el('b', '', st.topics.join(', '))); parts.push(p); }
+    if (parts.length === 1) parts.push(el('p', '', 'Todavía no hay datos de hoy.'));
+  } else if (LIVE) parts.push(el('p', '', 'No comparte su estado.'));
+  whoCard.replaceChildren(...parts); whoCard.setAttribute('data-on', '');
+}
 cv.addEventListener('pointerdown', e => { POINT.drag = { x: e.clientX, y: e.clientY, yaw, pitch }; POINT.moved = 0; });
 addEventListener('pointermove', e => {
   if (POINT.drag) {
@@ -521,7 +566,7 @@ addEventListener('pointermove', e => {
 });
 addEventListener('pointerup', e => {
   if (!POINT.drag) return;
-  if (POINT.moved <= 4 && e.target === cv) { const hit = faceAt(e); POINT.picked = hit === POINT.picked ? -1 : hit; }
+  if (POINT.moved <= 4 && e.target === cv) { const hit = faceAt(e); POINT.picked = hit === POINT.picked ? -1 : hit; showWho(POINT.picked); }
   else { tYaw = yaw - Math.sin(T * 0.12) * (scene.kind === 'group' ? 0.08 : 0.35); tPitch = pitch + 0.1; }
   POINT.drag = null; stage.removeAttribute('data-drag');
 });
@@ -567,7 +612,7 @@ if ((q.get('vivo') || '').startsWith('/api/people/')) {
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=8'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=10'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }

@@ -54,7 +54,7 @@
     if (slot < 0) return;
     slotOf.set(person.id, slot);
     LIVE.on[slot] = true;
-    people[slot] = { name: person.name, face: 'tile:' + tileOf(person.id) };
+    people[slot] = { name: person.name, face: 'tile:' + tileOf(person.id), stats: person.stats || null };
   }
 
   function needOf(ev) {
@@ -98,7 +98,7 @@
       var who = helpers.length > 1 ? helpers.slice(0, -1).join(', ') + ' y ' + helpers[helpers.length - 1] : helpers[0];
       var verb = helpers.length > 1 ? 'ayudan' : who === 'Tú' ? 'ayudas' : 'ayuda';
       var title = agreed && who ? (name === 'ti' ? who + ' te ' + verb : who + ' ' + verb + ' a ' + name) : agreed ? 'Quedó una propuesta para ' + name : (ENDED[need.outcome] || ENDED.falla)(name);
-      return { faces: need.g.members, title: title, sub: need.g.topic, check: agreed };
+      return { faces: need.g.members, title: title, sub: agreed && need.proposal ? need.g.topic + ' · ' + need.proposal : need.g.topic, check: agreed };
     }));
   }
 
@@ -107,7 +107,7 @@
     need.queue.forEach(function (ev) {
       var helper = slotOf.get(ev.to);
       if (ev.type === 'hilo_abre') { need.threads += 1; if (helper !== undefined && need.g.members.indexOf(helper) < 0) need.g.members.push(helper); }
-      else if (ev.type === 'propuesta_nace') need.helpers = ev.helpers || [];
+      else if (ev.type === 'propuesta_nace') { need.helpers = ev.helpers || []; need.proposal = ev.text || null; }
       else if (ev.type === 'pedido_cierra') need.outcome = ev.outcome;
     });
     need.queue = []; need.closed = true; need.done = true;
@@ -228,7 +228,7 @@
       need.answers[other] = ev.help || 'si'; heading(need);
       if (!settleLive(need, 'reply|' + ev.to, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]')) say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]');
     } else if (ev.type === 'propuesta_nace') {
-      need.helpers = ev.helpers || [];
+      need.helpers = ev.helpers || []; need.proposal = ev.text || null;
       var helpers = (ev.helpers || []).map(function (id) { return slotOf.get(id); }).filter(function (slot) { return slot !== undefined; });
       var names = helpers.map(function (slot) { return people[slot].name; }).join(' y ');
       note(need, [need.from].concat(helpers), 'Propuesta', ev.text || names + (helpers.length === 1 ? ' ayuda a ' : ' ayudan a ') + people[need.from].name + '. Cada persona decide si acepta.', true);

@@ -7,7 +7,8 @@ window.RondaStream = (() => {
   const PRIVATE = '[[x]]';
   const TAIL = 7; // letras en la cola de encendido
 
-  function create(text) {
+  // grow: lo que todavía no aparece no ocupa lugar (mensajes que el modelo sigue escribiendo en vivo).
+  function create(text, grow) {
     const el = document.createElement('span');
     el.className = 'rs-stream';
     const glyphs = [];   // { node, w } en orden de aparición
@@ -56,9 +57,10 @@ window.RondaStream = (() => {
         if (v === vis[i]) continue;
         vis[i] = v;
         glyphs[i].node.style.opacity = v >= 1 ? '' : v.toFixed(3);
+        if (grow) glyphs[i].node.style.display = v > 0 ? '' : 'none';
       }
     }
-    glyphs.forEach(g => { g.node.style.opacity = '0'; });
+    glyphs.forEach(g => { g.node.style.opacity = '0'; if (grow) g.node.style.display = 'none'; });
 
     return {
       el,

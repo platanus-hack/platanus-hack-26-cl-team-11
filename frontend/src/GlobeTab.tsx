@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchGlobeMode } from './api';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=9';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=10';
 
 type Mode = 'demo' | 'mesa';
 

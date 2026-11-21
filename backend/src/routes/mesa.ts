@@ -7,6 +7,10 @@ import { hasPublished, isMesaOperator, mesaCardDeps, mesaMembersOf } from '../me
 import { isInterval, MAX_INTERVAL_SECONDS, MESA_NAME, MESA_TEAM_ID, MIN_INTERVAL_SECONDS } from '../mesa/store.js';
 import { mesaDailyCapOf, mesaTokensLastDay, startMesaRound } from '../mesa/ticker.js';
 import { isVisibleTo, viewProposal, viewThread } from './agents.js';
+import { openPolicyStore } from '../policy/store.js';
+import { deriveSignals } from '../signals.js';
+import { deriveSummary } from '../summary.js';
+import { teamOverview, type OverviewMember } from '../teamOverview.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_AN_OPERATOR = { error: 'Solo el equipo de Montu inicia rondas y cambia el intervalo de la mesa.' } as const;
@@ -36,6 +40,25 @@ export function mesaRoutes(ctx: AppContext) {
   const { store, agents, mesa, rooms } = ctx;
   const routes = new Hono();
   const memoMs = ctx.config.mesaMemoMs ?? 0;
+
+  const policies = openPolicyStore(ctx.db);
+
+  const statsNow = remembered(memoMs || 30_000, () => {
+    const now = new Date();
+    const members = mesaMembersOf(ctx);
+    const inputs = members.map((member) => {
+      const events = store.listSignalEvents(member.token, now);
+      const signals = deriveSignals(events, now);
+      return { name: member.name, me: false, signals, summary: deriveSummary(events, signals, now), policy: policies.get(member.token) };
+    });
+    const shown = teamOverview(inputs).members;
+    return new Map(members.map((member, index) => [publicIdOf(member.token), shown[index] as OverviewMember]));
+  });
+
+  const statsOf = (member?: OverviewMember) =>
+    member
+      ? { shares: member.shares, energy: member.energy, load: member.load, sleepHours: member.sleepHours, steps: member.steps, working: member.working, topics: member.topics }
+      : null;
 
   const estimateNow = remembered(memoMs, () => estimateRound(mesaCardDeps(ctx), MESA_TEAM_ID, new Date()));
   const seatedNow = remembered(memoMs, () => {
@@ -92,6 +115,13 @@ export function mesaRoutes(ctx: AppContext) {
     const since = Number.isInteger(asked) && asked > 0 ? asked : Math.max(0, rooms.lastEventOfType(MESA_TEAM_ID, 'ronda_empieza') - 1);
     const round = agents.latestRound(MESA_TEAM_ID);
     const known = seatedNow();
+    const stats = asked > 0 ? new Map<string, OverviewMember>() : new Map(statsNow());
+    if (asked <= 0) {
+      const events = store.listSignalEvents(person.token, now);
+      const signals = deriveSignals(events, now);
+      const own = teamOverview([{ name: person.name, me: true, signals, summary: deriveSummary(events, signals, now), policy: policies.get(person.token) }]).members[0];
+      if (own) stats.set(me, own);
+    }
     const names = new Map(known.names);
     names.set(me, person.name);
     const seated = new Set([me, ...known.publishing]);
@@ -118,7 +148,7 @@ export function mesaRoutes(ctx: AppContext) {
     return c.json({
       me,
       now: now.toISOString(),
-      people: [...seated].flatMap((id) => (names.has(id) ? [{ id, name: names.get(id) as string }] : [])),
+      people: [...seated].flatMap((id) => (names.has(id) ? [{ id, name: names.get(id) as string, stats: asked > 0 ? undefined : statsOf(stats.get(id)) }] : [])),
       round: round ? { id: round.id, status: round.status } : null,
       events,
       streams: streams.map((stream) => ({ kind: stream.kind, from: stream.from, to: stream.to, topic: stream.topic, chars: stream.text.length, text: stream.text })),
