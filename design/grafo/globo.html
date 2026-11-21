@@ -19,6 +19,7 @@
   .globo .seg { display: flex; gap: 6px; align-self: flex-start; padding: 5px; border-radius: var(--rd-radius-pill); }
   .globo .seg .rd-button { flex: 0 0 auto; min-width: 64px; height: 40px; padding: 0 18px; background: transparent; color: var(--rd-ink); }
   .globo .seg .rd-button[aria-pressed="true"] { background: var(--rd-ink); color: var(--rd-on-ink); }
+  .globo .motion-pause { align-self:flex-end; flex:none; height:36px; padding:0 16px; font-size:14px; }
   .globo .legend { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
   .globo .ring { width: 14px; height: 14px; border-radius: 50%; padding: 2px; background: var(--rd-faint); box-sizing: border-box; }
   .globo .ring i { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--rd-bg); }
@@ -66,6 +67,7 @@
       <label for="thread-kind">Hilos del grafo</label>
       <div><select id="thread-kind"></select><button type="button" class="rd-button" id="open-calendar-thread">Abrir hilo</button></div>
     </div>
+    <button id="motion-pause" class="motion-pause rd-button rd-button--quiet" type="button" hidden>Pausar miniaturas</button>
     <div class="rd-card rd-glass" id="focus" hidden>
       <span class="rd-label rd-gradient-text">Grupo negociando</span>
       <span class="rd-title" id="ftopic"></span>
@@ -698,9 +700,7 @@ if (calendarPreview) {
 }
 if (motionPreview) {
   g.people[2].status="Libre desde las 10:30";
-  const pause=document.createElement("button");
-  pause.type="button";pause.className="rd-button rd-button--quiet";pause.textContent="Pausar miniaturas";
-  pause.style.alignSelf="flex-start";document.querySelector(".globo aside").append(pause);
+  const pause=document.getElementById("motion-pause");
   let frozenAt=null,offset=0;
   pause.onclick=()=>{
     if (frozenAt===null) {frozenAt=g.nowT || 0;pause.textContent="Reanudar miniaturas";}
