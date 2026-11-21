@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · luz de seda</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.35' cy='.3' r='.9'%3E%3Cstop offset='0' stop-color='%23ffd0e8'/%3E%3Cstop offset='.5' stop-color='%23b9a8ff'/%3E%3Cstop offset='1' stop-color='%237fc8ff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Crect x='31' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='58' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../tokens.css">
+<link rel="stylesheet" href="../../../ronda.css">
+<style>
+  body { margin: 0; }
+  .cr { --cr-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%); }
+  .cr-intro { display: flex; flex-direction: column; gap: var(--rd-space-3); padding-top: 34px; max-width: 760px; }
+  .cr-intro p { margin: 0; }
+  .cr-section { padding-top: var(--rd-space-6); }
+  .cr-card { display: flex; flex-direction: column; gap: var(--rd-space-4); }
+  .cr-hero { display: flex; flex-wrap: wrap; gap: var(--rd-space-7); padding: var(--rd-space-3) 0; }
+  .cr-hero > .cr-av { width: 184px; height: 184px; box-shadow: var(--rd-shadow-face); }
+  .cr-tests { display: grid; gap: var(--rd-space-6); align-items: start; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; }
+  .cr-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
+  .cr-nodes { display: flex; align-items: flex-start; gap: var(--rd-space-2); padding: var(--rd-space-3) 0 var(--rd-space-1); }
+  .cr-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
+  .cr-node__slot { height: 104px; display: grid; place-items: center; }
+  .cr-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
+  .cr-av { position: relative; display: block; overflow: hidden; flex: 0 0 auto; border-radius: 50%; color: var(--rd-ink); }
+  .cr-av > canvas, .cr-av > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cr-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--cr-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .cr-globe > * { position: absolute; transform: translate(-50%, -50%); }
+  .cr-globe > .cr-front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-specimens { display: grid; grid-template-columns: repeat(8, 96px); gap: var(--rd-space-5) var(--rd-space-4); justify-content: space-between; }
+  .cr-specimens .cr-av { width: 96px; height: 96px; box-shadow: var(--rd-shadow-face); }
+  .cr-bg { position: relative; width: 540px; height: 540px; margin: 0 auto; }
+  .cr-bg canvas, .cr-bg > i { position: absolute; display: block; }
+  .cr-bg canvas { inset: 0; width: 100%; height: 100%; }
+  .cr-bg > i { width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 8px rgba(40, 30, 90, 0.18); transform: translate(-50%, -50%); }
+</style>
+</head>
+<body>
+<div class="rd-page cr">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <section class="cr-intro">
+      <h1 class="rd-title">Seda: la lava hecha de luz</h1>
+      <p class="rd-note">Mismas masas y mismo movimiento; el material cambia de cera brillante a luz translúcida con brillo suave por dentro, resplandor donde se tocan y vidrio lechoso.</p>
+    </section>
+
+    <section class="cr-section"><div class="rd-card rd-glass cr-card">
+      <div class="rd-head"><h2 class="rd-title">El equipo a 184 px</h2></div>
+      <div class="cr-hero" id="hero"></div>
+    </div></section>
+
+    <section class="cr-section"><div class="rd-card rd-glass cr-card">
+      <div class="rd-head"><h2 class="rd-title">Las tres pruebas</h2></div>
+      <div class="cr-tests">
+        <div class="cr-test"><span class="rd-label">Nodo con nombre, 92 y 72 px</span><div id="nodes"></div></div>
+        <div class="cr-test"><span class="rd-label">Fila de lista, 40 px</span><div id="rows"></div></div>
+        <div class="cr-test"><span class="rd-label">Globo, 64 personas</span><div id="globe"></div></div>
+      </div>
+    </div></section>
+
+    <section class="cr-section"><div class="rd-card rd-glass cr-card">
+      <div class="rd-head"><h2 class="rd-title">32 personas generadas, 96 px</h2></div>
+      <div class="cr-specimens" id="specimens"></div>
+    </div></section>
+
+    <section class="cr-section"><div class="rd-card rd-glass cr-card">
+      <div class="rd-head"><h2 class="rd-title">La luz como fondo del globo</h2></div>
+      <div class="cr-bg" id="bg"></div>
+    </div></section>
+  </div>
+</div>
+
+<script src="luz.js"></script>
+<script src="../../ojos.js"></script>
+<script>
+(function () {
+  'use strict';
+  var Luz = window.RondaLuz, Ojos = window.RondaOjos;
+  var query = new URLSearchParams(window.location.search);
+  var fixed = query.has('t') ? Number(query.get('t')) : null;
+  var TEAM = [
+    { name: 'Tú', status: 'Pide cobertura', key: 'mati', ring: true },
+    { name: 'Ian', status: 'Tiene la cifra', key: 'ian', ring: true },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', key: 'lian', ring: true },
+    { name: 'Andrés', status: 'Plan B listo', key: 'andres', small: true },
+    { name: 'Roberto', status: 'En reuniones', key: 'roberto', small: true }
+  ];
+  var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
+  var SPECIMENS = 32, TEAM_CELL = 192, CROWD_CELL = 64, CROWD_COLS = 8;
+  var teamPalettes = TEAM.map(function (person) { return Ojos.TEAM_LIGHT[person.key]; });
+  var crowdPalettes = NAMES.map(function (name) { return Luz.paletteFor(name); });
+  var orbs = [];
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function orb(index, crowd, overlay) {
+    var node = element('span', 'cr-av');
+    node.style.background = Luz.css(crowd ? crowdPalettes[index] : teamPalettes[index]);
+    node.innerHTML = '<canvas></canvas>' + (overlay || '');
+    orbs.push({ node: node, canvas: node.firstChild, from: crowd ? { crowd: true, x: (index % CROWD_COLS) * CROWD_CELL, y: Math.floor(index / CROWD_COLS) * CROWD_CELL, cell: CROWD_CELL } : { crowd: false, x: index * TEAM_CELL, y: 0, cell: TEAM_CELL } });
+    return node;
+  }
+  function team(person, index, size) { return orb(index, false, Ojos.svg(person.key, { size: size })); }
+  function crowd(index, size) { return orb(index, true, Ojos.svg(NAMES[index], { size: size })); }
+
+  var hero = document.getElementById('hero');
+  TEAM.forEach(function (person, index) { hero.appendChild(team(person, index, 184)); });
+
+  var nodes = element('div', 'cr-nodes');
+  TEAM.forEach(function (person, index) {
+    var cell = element('div', 'cr-node'), slot = element('div', 'cr-node__slot');
+    var face = team(person, index, person.small ? 72 : 92);
+    face.classList.add('rd-face');
+    if (person.small) face.classList.add('rd-face--small');
+    if (person.ring) { var ring = element('span', 'cr-ring'); ring.appendChild(face); slot.appendChild(ring); } else slot.appendChild(face);
+    var label = element('span', 'rd-person');
+    label.appendChild(element('span', 'rd-person__name', person.name));
+    label.appendChild(element('span', 'rd-person__status', person.status));
+    cell.appendChild(slot); cell.appendChild(label); nodes.appendChild(cell);
+  });
+  document.getElementById('nodes').appendChild(nodes);
+
+  var list = element('div', 'rd-list');
+  [1, 2, 3].forEach(function (index) {
+    var person = TEAM[index], item = element('div', 'rd-item');
+    var face = team(person, index, 40);
+    face.classList.add('rd-face', 'rd-face--tiny');
+    var text = element('span', 'rd-item__text');
+    text.appendChild(element('span', 'rd-item__title', person.name));
+    text.appendChild(element('span', 'rd-item__sub', person.status));
+    item.appendChild(face); item.appendChild(text); list.appendChild(item);
+  });
+  document.getElementById('rows').appendChild(list);
+
+  var globe = element('div', 'cr-globe');
+  var golden = Math.PI * (3 - Math.sqrt(5)), tilt = 0.42, spin = 0.6;
+  NAMES.forEach(function (name, index) {
+    var y = 1 - 2 * (index + 0.5) / NAMES.length, radius = Math.sqrt(1 - y * y), theta = index * golden + spin;
+    var x = radius * Math.cos(theta), z = radius * Math.sin(theta);
+    var tiltedY = y * Math.cos(tilt) - z * Math.sin(tilt);
+    var depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2, eased = depth * depth * (3 - 2 * depth);
+    var size = Math.round(10 + 18 * eased), face = crowd(index, size);
+    face.style.width = face.style.height = size + 'px';
+    face.style.left = (50 + x * 41).toFixed(2) + '%';
+    face.style.top = (50 + tiltedY * 41).toFixed(2) + '%';
+    face.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
+    face.style.zIndex = String(Math.round(depth * 100));
+    if (eased < 0.55) face.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)';
+    else face.classList.add('cr-front');
+    globe.appendChild(face);
+  });
+  document.getElementById('globe').appendChild(globe);
+
+  var specimens = document.getElementById('specimens');
+  for (var s = 0; s < SPECIMENS; s += 1) specimens.appendChild(crowd(s, 96));
+
+  var bg = document.getElementById('bg'), bgCanvas = element('canvas');
+  bg.appendChild(bgCanvas);
+  var random = Ojos.randomFrom('discos');
+  for (var d = 0; d < 20; d += 1) {
+    var angle = random() * Math.PI * 2, reach = Math.sqrt(random()) * 0.82, dot = element('i');
+    dot.style.left = (50 + Math.cos(angle) * reach * 50).toFixed(1) + '%';
+    dot.style.top = (50 + Math.sin(angle) * reach * 50).toFixed(1) + '%';
+    bg.appendChild(dot);
+  }
+
+  var teamGrid = Luz.grid(document.createElement('canvas'), { cols: TEAM.length, rows: 1, cell: TEAM_CELL, palettes: teamPalettes });
+  var crowdGrid = teamGrid && Luz.grid(document.createElement('canvas'), { cols: CROWD_COLS, rows: Math.ceil(NAMES.length / CROWD_COLS), cell: CROWD_CELL, palettes: crowdPalettes });
+  var sphere = teamGrid && Luz.sphere(bgCanvas, { palette: [0, 9, 7, 5] });
+  var page = document.querySelector('.rd-page');
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!crowdGrid || !sphere) { Ojos.animate(page, fixed == null ? undefined : fixed); return; }
+
+  var scale = Math.min(2, window.devicePixelRatio || 1);
+  orbs.forEach(function (face) {
+    var side = Math.max(2, Math.round(face.node.clientWidth * scale));
+    face.canvas.width = face.canvas.height = side;
+    face.context = face.canvas.getContext('2d');
+    face.context.imageSmoothingQuality = 'high';
+    face.node.style.background = 'none';
+  });
+  var bgSide = Math.round(540 * scale);
+  bgCanvas.width = bgCanvas.height = bgSide;
+  function paint(seconds) {
+    teamGrid.render(seconds);
+    crowdGrid.render(seconds);
+    orbs.forEach(function (face) {
+      var side = face.canvas.width, from = face.from;
+      face.context.clearRect(0, 0, side, side);
+      face.context.drawImage(from.crowd ? crowdGrid.canvas : teamGrid.canvas, from.x, from.y, from.cell, from.cell, 0, 0, side, side);
+    });
+    sphere.render(seconds, bgSide / 2, bgSide / 2, bgSide / 2 - 2, 0.9);
+  }
+  function loop(now) { paint(now / 1000); window.requestAnimationFrame(loop); }
+  if (fixed != null) { paint(fixed); Ojos.animate(page, fixed); return; }
+  paint(0);
+  Ojos.animate(page);
+  if (!still) window.requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

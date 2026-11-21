@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · Vita de lava</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.35' cy='.3' r='.9'%3E%3Cstop offset='0' stop-color='%23ff5fa8'/%3E%3Cstop offset='.5' stop-color='%237b61ff'/%3E%3Cstop offset='1' stop-color='%231e9bff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Cpath d='M30 33Q50 18 70 33' fill='none' stroke='%231d1d1f' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='54' r='5' fill='%231d1d1f'/%3E%3Ccircle cx='62' cy='54' r='5' fill='%231d1d1f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../tokens.css">
+<link rel="stylesheet" href="../../../ronda.css">
+<style>
+  body { margin: 0; }
+  .vl { --vl-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%); --vl-glass-face: radial-gradient(circle at 36% 27%, #ffffff 0, #f4f5fa 52%, #e1e4f0 100%); }
+  .vl-intro { display: flex; flex-direction: column; gap: var(--rd-space-3); padding-top: 34px; max-width: 760px; }
+  .vl-intro p { margin: 0; }
+  .vl-section { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-7); }
+  .vl-hero { display: flex; flex-wrap: wrap; gap: var(--rd-space-7); }
+  .vl-hero > figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .vl-tests { display: grid; gap: var(--rd-space-6); align-items: start; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; }
+  .vl-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
+  .vl-nodes { display: flex; align-items: flex-start; gap: var(--rd-space-2); padding: var(--rd-space-3) 0 var(--rd-space-1); }
+  .vl-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
+  .vl-node__slot { height: 104px; display: grid; place-items: center; }
+  .vl-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
+  .cv { position: relative; display: block; overflow: hidden; flex: 0 0 auto; border-radius: 50%; color: var(--rd-ink); background: var(--vl-glass-face); }
+  .cv canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .vl-hero .cv { box-shadow: var(--rd-shadow-face); }
+  .vl-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--vl-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .vl-globe > * { position: absolute; transform: translate(-50%, -50%); }
+  .vl-globe > .vl-front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .vl-specimens { display: grid; grid-template-columns: repeat(8, 96px); gap: var(--rd-space-6) var(--rd-space-7); justify-content: space-between; }
+  .vl-specimens .cv { box-shadow: var(--rd-shadow-face); }
+  .vl-stage { position: relative; width: 540px; height: 540px; border-radius: 50%; background: var(--vl-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .vl-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; }
+  .vl-stage i { position: absolute; border-radius: 50%; background: #fff; transform: translate(-50%, -50%); box-shadow: 0 2px 8px rgba(40, 30, 90, 0.2); }
+</style>
+</head>
+<body>
+<div class="rd-page vl">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar">
+      <span class="rd-brand"><img class="rd-mark" src="../../../logo/ronda-mark.svg" alt="">Ronda · Vita de lava</span>
+    </header>
+
+    <section class="vl-intro">
+      <h1 class="rd-title">Vita de lava</h1>
+      <p class="rd-note">La gota entera es lava y el dibujo de Vita Faces va encima: pelo, cejas, ojos, boca y anteojos, en tinta.</p>
+    </section>
+
+    <section class="vl-section"><span class="rd-label">El equipo, 184 px</span><div class="vl-hero" id="hero"></div></section>
+
+    <section class="vl-section">
+      <div class="vl-tests">
+        <div class="vl-test"><span class="rd-label">Nodo con nombre, 92 y 72 px</span><div class="vl-nodes" id="nodes"></div></div>
+        <div class="vl-test"><span class="rd-label">Fila de lista, 40 px</span><div class="rd-list" id="rows"></div></div>
+        <div class="vl-test"><span class="rd-label">Globo, 64 personas</span><div id="globe"></div></div>
+      </div>
+    </section>
+
+    <section class="vl-section"><span class="rd-label">Treinta y dos personas, 96 px</span><div class="vl-specimens" id="specimens"></div></section>
+
+    <section class="vl-section"><span class="rd-label">La luz como fondo del globo</span><div class="vl-stage" id="stage"><canvas></canvas></div></section>
+  </div>
+</div>
+
+<script src="../../../luz/luz.js"></script>
+<script src="caras-lava.js"></script>
+<script>
+(function () {
+  'use strict';
+  var Luz = window.RondaLuz, Lava = window.RondaCarasLava;
+  var query = new URLSearchParams(window.location.search);
+  var fixed = query.has('t') ? Number(query.get('t')) : null;
+
+  var TEAM = [
+    { name: 'Tú', status: 'Pide cobertura', key: 'mati', ring: true },
+    { name: 'Ian', status: 'Tiene la cifra', key: 'ian', ring: true },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', key: 'lian', ring: true },
+    { name: 'Andrés', status: 'Plan B listo', key: 'andres', small: true },
+    { name: 'Roberto', status: 'En reuniones', key: 'roberto', small: true }
+  ];
+  var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
+
+  var TEAM_CELL = 192, CROWD_CELL = 64, CROWD_COLS = 8;
+  var teamPalettes = TEAM.map(function (person) { return Lava.TEAM_LIGHT[person.key]; });
+  var crowdPalettes = NAMES.map(function (name) { return Luz.paletteFor(name); });
+  var faces = [];
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function face(seed, size, from) {
+    var item = Lava.create(seed);
+    item.from = from;
+    item.el.style.width = item.el.style.height = size + 'px';
+    item.el.style.background = Luz.css(from.palette);
+    faces.push(item);
+    return item.el;
+  }
+  function team(index, size) { return face(TEAM[index].key, size, { crowd: false, x: index * TEAM_CELL, y: 0, cell: TEAM_CELL, palette: teamPalettes[index] }); }
+  function crowd(index, size) { return face(NAMES[index], size, { crowd: true, x: (index % CROWD_COLS) * CROWD_CELL, y: Math.floor(index / CROWD_COLS) * CROWD_CELL, cell: CROWD_CELL, palette: crowdPalettes[index] }); }
+
+  TEAM.forEach(function (person, index) {
+    var figure = element('figure');
+    figure.appendChild(team(index, 184));
+    figure.appendChild(element('span', 'rd-person__name', person.name));
+    document.getElementById('hero').appendChild(figure);
+  });
+
+  var nodes = document.getElementById('nodes');
+  TEAM.forEach(function (person, index) {
+    var cell = element('div', 'vl-node'), slot = element('div', 'vl-node__slot');
+    var node = team(index, person.small ? 72 : 92);
+    if (person.ring) { var ring = element('span', 'vl-ring'); ring.appendChild(node); slot.appendChild(ring); } else slot.appendChild(node);
+    var label = element('span', 'rd-person');
+    label.appendChild(element('span', 'rd-person__name', person.name));
+    label.appendChild(element('span', 'rd-person__status', person.status));
+    cell.appendChild(slot); cell.appendChild(label); nodes.appendChild(cell);
+  });
+
+  var rows = document.getElementById('rows');
+  [1, 2, 3].forEach(function (index) {
+    var item = element('div', 'rd-item'), text = element('span', 'rd-item__text');
+    item.appendChild(team(index, 40));
+    text.appendChild(element('span', 'rd-item__title', TEAM[index].name));
+    text.appendChild(element('span', 'rd-item__sub', TEAM[index].status));
+    item.appendChild(text); rows.appendChild(item);
+  });
+
+  var sphere = element('div', 'vl-globe');
+  var golden = Math.PI * (3 - Math.sqrt(5)), tilt = 0.42;
+  NAMES.forEach(function (name, index) {
+    var y = 1 - 2 * (index + 0.5) / NAMES.length, radius = Math.sqrt(1 - y * y), theta = index * golden + 0.6;
+    var x = radius * Math.cos(theta), z = radius * Math.sin(theta);
+    var depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2, eased = depth * depth * (3 - 2 * depth);
+    var size = Math.round(10 + 18 * eased);
+    var node = crowd(index, size);
+    node.style.left = (50 + x * 41).toFixed(2) + '%';
+    node.style.top = (50 + (y * Math.cos(tilt) - z * Math.sin(tilt)) * 41).toFixed(2) + '%';
+    node.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
+    node.style.zIndex = String(Math.round(depth * 100));
+    if (eased < 0.55) node.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)'; else node.classList.add('vl-front');
+    sphere.appendChild(node);
+  });
+  document.getElementById('globe').appendChild(sphere);
+
+  var specimens = document.getElementById('specimens');
+  for (var s = 0; s < 32; s += 1) specimens.appendChild(crowd(s, 96));
+
+  var stage = document.getElementById('stage');
+  for (var d = 0; d < 20; d += 1) {
+    var sy = 1 - 2 * (d + 0.5) / 20, sr = Math.sqrt(1 - sy * sy), st = d * golden + 1.1;
+    var disc = element('i');
+    disc.style.left = (50 + sr * Math.cos(st) * 40).toFixed(2) + '%';
+    disc.style.top = (50 + sy * 40).toFixed(2) + '%';
+    disc.style.width = disc.style.height = (10 + 8 * ((Math.sin(st) + 1) / 2)).toFixed(1) + 'px';
+    disc.style.opacity = '0.92';
+    stage.appendChild(disc);
+  }
+
+  var teamGrid = Luz.grid(document.createElement('canvas'), { cols: TEAM.length, rows: 1, cell: TEAM_CELL, palettes: teamPalettes });
+  var crowdGrid = teamGrid && Luz.grid(document.createElement('canvas'), { cols: CROWD_COLS, rows: Math.ceil(NAMES.length / CROWD_COLS), cell: CROWD_CELL, palettes: crowdPalettes });
+  var stageCanvas = stage.firstChild, stageLight = Luz.sphere(stageCanvas, { palette: [0, 9, 7, 5] });
+  if (stageLight) { var side = Math.round(540 * Math.min(2, window.devicePixelRatio || 1)); stageCanvas.width = stageCanvas.height = side; }
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!crowdGrid) return;
+
+  function paint(seconds, moving) {
+    teamGrid.render(seconds);
+    crowdGrid.render(seconds);
+    if (stageLight) { var half = stageCanvas.width / 2; stageLight.render(seconds, half, half, half, 0.9); }
+    faces.forEach(function (item) {
+      var from = item.from;
+      Lava.fit(item);
+      Lava.paint(item, from.crowd ? crowdGrid.canvas : teamGrid.canvas, from.x, from.y, from.cell, moving ? seconds : undefined);
+    });
+  }
+  Lava.whenReady(function () {
+    if (fixed != null) { paint(fixed, true); return; }
+    paint(0, false);
+    if (still) return;
+    (function loop(now) { paint(now / 1000, true); window.requestAnimationFrame(loop); })(0);
+  });
+})();
+</script>
+</body>
+</html>

@@ -127,7 +127,8 @@ izquierda; solo se centran los nombres bajo una cara.
   hay tres opciones sobre esa luz: **Ojos** (la gota solo tiene ojos; es la recomendada), **Vita de
   luz** (el personaje de Vita con la cabeza hecha de luz) y la luz sola. Falta que Mati elija; hasta
   entonces en el producto rigen las Vita Faces. Lo que se elija cambia la regla «no hay color por
-  persona» de la sección Color.
+  persona» de la sección Color. Mati aprobó esa versión («i love it») y pidió más intentos con la misma
+  idea: están en `caras/intentos.html`, uno por pestaña, al lado de la actual.
 
 ## Grafo de agentes: el globo
 

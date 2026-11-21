@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · Ojos, segunda vuelta</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.35' cy='.3' r='.9'%3E%3Cstop offset='0' stop-color='%23ff5fa8'/%3E%3Cstop offset='.5' stop-color='%237b61ff'/%3E%3Cstop offset='1' stop-color='%231e9bff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Crect x='31' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='58' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3Ccircle cx='34' cy='44' r='2' fill='%23fff'/%3E%3Ccircle cx='61' cy='44' r='2' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../tokens.css">
+<link rel="stylesheet" href="../../../ronda.css">
+<style>
+  body { margin: 0; }
+  .cr {
+    --cr-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%);
+  }
+  .cr-section { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-7); }
+  .cr-intro { display: flex; flex-direction: column; gap: var(--rd-space-3); padding-top: 34px; max-width: 760px; }
+  .cr-intro p { margin: 0; }
+  .cr-hero { display: flex; flex-wrap: wrap; gap: var(--rd-space-7); padding: var(--rd-space-3) 0; }
+  .cr-hero > .cr-av { width: 184px; height: 184px; box-shadow: var(--rd-shadow-face); }
+  .cr-tests { display: grid; gap: var(--rd-space-6); align-items: start; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; }
+  .cr-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
+  .cr-nodes { display: flex; align-items: flex-start; gap: var(--rd-space-2); padding: var(--rd-space-3) 0 var(--rd-space-1); }
+  .cr-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
+  .cr-node__slot { height: 104px; display: grid; place-items: center; }
+  .cr-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
+  .cr-av { position: relative; display: block; overflow: hidden; flex: 0 0 auto; border-radius: 50%; color: var(--rd-ink); }
+  .cr-av > canvas, .cr-av > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cr-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--cr-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .cr-globe > * { position: absolute; transform: translate(-50%, -50%); }
+  .cr-globe > .cr-front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-specimens { display: grid; grid-template-columns: repeat(8, 96px); gap: 22px 0; justify-content: space-between; padding: var(--rd-space-3) 0; }
+  .cr-specimens > .cr-av { box-shadow: var(--rd-shadow-face); }
+</style>
+</head>
+<body>
+<div class="rd-page cr">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar">
+      <span class="rd-brand"><img class="rd-mark" src="../../../logo/ronda-mark.svg" alt="">Ronda · caras</span>
+      <span class="rd-chip rd-chip--status rd-glass">Ojos 2</span>
+    </header>
+
+    <section class="cr-intro">
+      <h1 class="rd-title">Ojos, segunda vuelta</h1>
+      <p class="rd-note">Los ojos ahora viven dentro del vidrio: sombra sobre la lava, borde de luz, párpados de verdad, y miran al puntero y a su vecina.</p>
+    </section>
+
+    <section class="cr-section">
+      <div class="rd-card rd-glass cr-section">
+        <div class="rd-head"><h2 class="rd-title">El equipo</h2></div>
+        <div class="cr-hero" id="hero"></div>
+      </div>
+    </section>
+
+    <section class="cr-section">
+      <div class="rd-card rd-glass cr-section">
+        <div class="rd-head"><h2 class="rd-title">Las tres pruebas</h2></div>
+        <div class="cr-tests" id="tests"></div>
+      </div>
+    </section>
+
+    <section class="cr-section">
+      <div class="rd-card rd-glass cr-section">
+        <div class="rd-head"><h2 class="rd-title">Treinta y dos personas</h2></div>
+        <div class="cr-specimens" id="specimens"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="../../../luz/luz.js"></script>
+<script src="ojos2.js"></script>
+<script>
+(function () {
+  'use strict';
+  var Luz = window.RondaLuz, Ojos = window.RondaOjos2;
+  var query = new URLSearchParams(window.location.search);
+  var fixed = query.has('t') ? Number(query.get('t')) : null;
+
+  var TEAM = [
+    { name: 'Tú', status: 'Pide cobertura', key: 'mati', ring: true },
+    { name: 'Ian', status: 'Tiene la cifra', key: 'ian', ring: true },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', key: 'lian', ring: true },
+    { name: 'Andrés', status: 'Plan B listo', key: 'andres', small: true },
+    { name: 'Roberto', status: 'En reuniones', key: 'roberto', small: true }
+  ];
+  var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
+  var SPECIMENS = NAMES.slice(0, 32).map(function (name, index) { return NAMES[(index * 7 + 3) % NAMES.length]; });
+
+  var TEAM_CELL = 192, CROWD_CELL = 64, CROWD_COLS = 8;
+  var teamPalettes = TEAM.map(function (person) { return Ojos.TEAM_LIGHT[person.key]; });
+  var crowdPalettes = NAMES.map(function (name) { return Luz.paletteFor(name); });
+  var orbs = [];
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function source(index, crowd) {
+    return crowd ? { crowd: true, x: (index % CROWD_COLS) * CROWD_CELL, y: Math.floor(index / CROWD_COLS) * CROWD_CELL, cell: CROWD_CELL }
+                 : { crowd: false, x: index * TEAM_CELL, y: 0, cell: TEAM_CELL };
+  }
+  function orb(index, crowd, seed, size, group) {
+    var node = element('span', 'cr-av');
+    node.style.background = Luz.css(crowd ? crowdPalettes[index] : teamPalettes[index]);
+    node.innerHTML = '<canvas></canvas>';
+    node.style.width = node.style.height = size + 'px';
+    orbs.push({ node: node, canvas: node.firstChild, from: source(index, crowd) });
+    node.__pending = { seed: seed, size: size, group: group };
+    return node;
+  }
+  function eyes(node) {
+    var pending = node.__pending;
+    Ojos.mount(node, pending.seed, { size: pending.size, group: pending.group });
+  }
+
+  var hero = document.getElementById('hero');
+  var heroGroup = Ojos.group();
+  TEAM.forEach(function (person, index) { hero.appendChild(orb(index, false, person.key, 184, heroGroup)); });
+
+  function nodes() {
+    var row = element('div', 'cr-nodes'), grp = Ojos.group();
+    TEAM.forEach(function (person, index) {
+      var cell = element('div', 'cr-node'), slot = element('div', 'cr-node__slot');
+      var size = person.small ? 72 : 92;
+      var face = orb(index, false, person.key, size, grp);
+      if (person.ring) { var ring = element('span', 'cr-ring'); ring.appendChild(face); slot.appendChild(ring); } else slot.appendChild(face);
+      var label = element('span', 'rd-person');
+      label.appendChild(element('span', 'rd-person__name', person.name));
+      label.appendChild(element('span', 'rd-person__status', person.status));
+      cell.appendChild(slot); cell.appendChild(label); row.appendChild(cell);
+    });
+    return row;
+  }
+  function rows() {
+    var list = element('div', 'rd-list'), grp = Ojos.group();
+    [1, 2, 3].forEach(function (index) {
+      var person = TEAM[index], item = element('div', 'rd-item');
+      var text = element('span', 'rd-item__text');
+      text.appendChild(element('span', 'rd-item__title', person.name));
+      text.appendChild(element('span', 'rd-item__sub', person.status));
+      item.appendChild(orb(index, false, person.key, 40, grp)); item.appendChild(text); list.appendChild(item);
+    });
+    return list;
+  }
+  function globe() {
+    var sphere = element('div', 'cr-globe');
+    var count = NAMES.length, golden = Math.PI * (3 - Math.sqrt(5)), tilt = 0.42, spin = 0.6;
+    for (var index = 0; index < count; index += 1) {
+      var y = 1 - 2 * (index + 0.5) / count, radius = Math.sqrt(1 - y * y), theta = index * golden + spin;
+      var x = radius * Math.cos(theta), z = radius * Math.sin(theta);
+      var tiltedY = y * Math.cos(tilt) - z * Math.sin(tilt);
+      var depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2, eased = depth * depth * (3 - 2 * depth);
+      var size = Math.round(10 + 18 * eased);
+      var face = orb(index, true, NAMES[index], size, null);
+      face.style.left = (50 + x * 41).toFixed(2) + '%';
+      face.style.top = (50 + tiltedY * 41).toFixed(2) + '%';
+      face.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
+      face.style.zIndex = String(Math.round(depth * 100));
+      if (eased < 0.55) face.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)';
+      else face.classList.add('cr-front');
+      sphere.appendChild(face);
+    }
+    return sphere;
+  }
+  function test(label, content) {
+    var block = element('div', 'cr-test');
+    block.appendChild(element('span', 'rd-label', label));
+    block.appendChild(content);
+    return block;
+  }
+  var tests = document.getElementById('tests');
+  tests.appendChild(test('Nodo con nombre, 92 y 72 px', nodes()));
+  tests.appendChild(test('Fila de lista, 40 px', rows()));
+  tests.appendChild(test('Globo, 64 personas', globe()));
+
+  var specimens = document.getElementById('specimens');
+  var rowGroup = null;
+  SPECIMENS.forEach(function (name, index) {
+    if (index % 8 === 0) rowGroup = Ojos.group();
+    var crowdIndex = NAMES.indexOf(name);
+    var node = orb(crowdIndex, true, name, 96, rowGroup);
+    specimens.appendChild(node);
+  });
+
+  document.querySelectorAll('.cr-av').forEach(eyes);
+
+  var teamGrid = Luz.grid(document.createElement('canvas'), { cols: TEAM.length, rows: 1, cell: TEAM_CELL, palettes: teamPalettes });
+  var crowdGrid = teamGrid && Luz.grid(document.createElement('canvas'), { cols: CROWD_COLS, rows: Math.ceil(NAMES.length / CROWD_COLS), cell: CROWD_CELL, palettes: crowdPalettes });
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!crowdGrid) { Ojos.start(fixed == null ? undefined : fixed); return; }
+
+  var scale = Math.min(2, window.devicePixelRatio || 1);
+  orbs.forEach(function (face) {
+    var side = Math.max(2, Math.round(face.node.clientWidth * scale));
+    face.canvas.width = face.canvas.height = side;
+    face.context = face.canvas.getContext('2d');
+    face.context.imageSmoothingQuality = 'high';
+    face.node.style.background = 'none';
+  });
+  function paint(seconds) {
+    teamGrid.render(seconds);
+    crowdGrid.render(seconds);
+    orbs.forEach(function (face) {
+      var side = face.canvas.width, from = face.from;
+      face.context.clearRect(0, 0, side, side);
+      face.context.drawImage(from.crowd ? crowdGrid.canvas : teamGrid.canvas, from.x, from.y, from.cell, from.cell, 0, 0, side, side);
+    });
+  }
+  function loop(now) { paint(now / 1000); window.requestAnimationFrame(loop); }
+  if (fixed != null) { paint(fixed); Ojos.start(fixed); return; }
+  paint(0);
+  Ojos.start();
+  if (!still) window.requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · luz con three.js</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.34' cy='.28' r='.85'%3E%3Cstop offset='0' stop-color='%23ffd1ea'/%3E%3Cstop offset='.45' stop-color='%23a58bff'/%3E%3Cstop offset='1' stop-color='%231e9bff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Cellipse cx='36' cy='28' rx='12' ry='7' fill='%23fff' opacity='.8' transform='rotate(-28 36 28)'/%3E%3Ccircle cx='56' cy='62' r='13' fill='%23ff6f9c' opacity='.9'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../tokens.css">
+<link rel="stylesheet" href="../../../ronda.css">
+<script type="importmap">{ "imports": { "three": "./three.module.min.js" } }</script>
+<style>
+  body { margin: 0; }
+  .cr {
+    --cr-globe: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.42) 52%, rgba(196, 202, 236, 0.34) 100%);
+    --cr-glass-face: radial-gradient(circle at 36% 27%, #ffffff 0, #f4f5fa 52%, #e1e4f0 100%);
+  }
+  .cr-section { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-6); }
+  .cr-head { display: flex; flex-direction: column; gap: var(--rd-space-2); padding-top: 34px; max-width: 760px; }
+  .cr-head p { margin: 0; }
+  .cr-card { gap: var(--rd-space-4); }
+  .cr-hero { display: flex; flex-wrap: wrap; gap: var(--rd-space-7); padding: var(--rd-space-3) 0; }
+  .cr-hero > .cr-av { width: 184px; height: 184px; box-shadow: var(--rd-shadow-face); }
+  .cr-tests { display: grid; gap: var(--rd-space-6); align-items: start; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr) 248px; }
+  .cr-test { display: flex; flex-direction: column; gap: var(--rd-space-3); min-width: 0; }
+  .cr-nodes { display: flex; align-items: flex-start; gap: var(--rd-space-2); padding: var(--rd-space-3) 0 var(--rd-space-1); }
+  .cr-node { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; text-align: center; }
+  .cr-node__slot { height: 104px; display: grid; place-items: center; }
+  .cr-ring { display: grid; padding: 6px; border-radius: 50%; background: var(--rd-gradient); }
+  .cr-av { position: relative; display: block; overflow: hidden; flex: 0 0 auto; border-radius: 50%; color: var(--rd-ink); }
+  .cr-av > canvas, .cr-av > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cr-globe { position: relative; width: 248px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--cr-globe); box-shadow: inset 0 0 0 1px var(--rd-glass-border), var(--rd-shadow-card); }
+  .cr-globe > * { position: absolute; transform: translate(-50%, -50%); }
+  .cr-globe > .cr-front { box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-crowd { display: grid; grid-template-columns: repeat(8, 96px); gap: 22px 36px; justify-content: space-between; padding-top: var(--rd-space-2); }
+  .cr-crowd .cr-av { width: 96px; height: 96px; box-shadow: var(--rd-shadow-face); }
+  .cr-big { display: flex; gap: var(--rd-space-7); align-items: center; flex-wrap: wrap; }
+  .cr-big .cr-globe { width: 540px; }
+  .cr-big .cr-globe > canvas { inset: 0; width: 100%; height: 100%; transform: none; border-radius: 50%; }
+  .cr-big .cr-globe > .cr-disc { width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 36% 27%, #fff 0, #f4f5fa 60%, #e1e4f0 100%); box-shadow: 0 0 0 1.5px var(--rd-glass-border), 0 4px 10px rgba(40, 30, 90, 0.16); }
+  .cr-budget { display: flex; flex-direction: column; gap: var(--rd-space-2); max-width: 520px; }
+  .cr-budget p { margin: 0; font-size: var(--rd-text-small); line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="rd-page cr">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="cr-head">
+      <h1 class="rd-title">Luz tres: vidrio y cera de verdad</h1>
+      <p class="rd-note">La cera es geometría real que la luz del cuarto recorre y el vidrio es un material físico que la dobla; lo chico usa una cera de sombreador bajo el mismo vidrio.</p>
+    </header>
+
+    <section class="cr-section" aria-labelledby="b-title">
+      <div class="rd-card rd-glass cr-card">
+        <div class="rd-head"><h2 class="rd-title" id="b-title">El equipo, a 184 px</h2></div>
+        <div class="cr-hero" id="hero"></div>
+      </div>
+    </section>
+
+    <section class="cr-section" aria-labelledby="c-title">
+      <div class="rd-card rd-glass cr-card">
+        <div class="rd-head"><h2 class="rd-title" id="c-title">Las tres pruebas</h2></div>
+        <div class="cr-tests">
+          <div class="cr-test"><span class="rd-label">Nodo con nombre, 92 y 72 px</span><div class="cr-nodes" id="nodes"></div></div>
+          <div class="cr-test"><span class="rd-label">Fila de lista, 40 px</span><div class="rd-list" id="rows"></div></div>
+          <div class="cr-test"><span class="rd-label">Globo, 64 personas</span><div class="cr-globe" id="globe"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cr-section" aria-labelledby="d-title">
+      <div class="rd-card rd-glass cr-card">
+        <div class="rd-head"><h2 class="rd-title" id="d-title">Treinta y dos personas, a 96 px</h2></div>
+        <div class="cr-crowd" id="crowd"></div>
+      </div>
+    </section>
+
+    <section class="cr-section" aria-labelledby="e-title">
+      <div class="rd-card rd-glass cr-card">
+        <div class="rd-head"><h2 class="rd-title" id="e-title">La esfera del globo, a 540 px</h2></div>
+        <div class="cr-big">
+          <div class="cr-globe" id="sphere"></div>
+          <div class="cr-budget">
+            <span class="rd-label">Presupuesto de este cuadro</span>
+            <p id="budget">Midiendo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module" src="./luz.js"></script>
+<script type="module">
+import '../../ojos.js';
+(function () {
+  'use strict';
+  const Luz = window.RondaLuz, Ojos = window.RondaOjos;
+  const query = new URLSearchParams(window.location.search);
+  const fixed = query.has('t') ? Number(query.get('t')) : null;
+
+  const TEAM = [
+    { name: 'Tú', status: 'Pide cobertura', key: 'mati', ring: true },
+    { name: 'Ian', status: 'Tiene la cifra', key: 'ian', ring: true },
+    { name: 'Lian', status: 'Hueco de 9:30 a 10:15', key: 'lian', ring: true },
+    { name: 'Andrés', status: 'Plan B listo', key: 'andres', small: true },
+    { name: 'Roberto', status: 'En reuniones', key: 'roberto', small: true }
+  ];
+  const ROWS = [1, 2, 3];
+  const NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno', 'Renata', 'Pedro', 'Rocío', 'Alonso', 'Macarena', 'Franco', 'Elisa', 'Julián', 'Carolina', 'Emilio', 'Bárbara', 'Santiago', 'Magdalena', 'Gonzalo', 'Francisca', 'León', 'Victoria', 'Ramiro', 'Pilar', 'Tobías', 'Laura', 'Mateo', 'Olivia', 'Cristián', 'Julieta', 'Raúl', 'Amparo', 'Octavio'];
+  const SPECIMENS = NAMES.slice(0, 32).map((name, index) => 'espécimen-' + index + name);
+
+  const TEAM_CELL = 192, CROWD_CELL = 64, CROWD_COLS = 8, SPEC_CELL = 96, SPEC_COLS = 8;
+  const teamPalettes = TEAM.map((person) => Ojos.TEAM_LIGHT[person.key]);
+  const crowdPalettes = NAMES.map((name) => Luz.paletteFor(name));
+  const specPalettes = SPECIMENS.map((name) => Luz.paletteFor(name));
+  const orbs = [];
+
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function source(kind, index) {
+    if (kind === 'crowd') return { kind, x: (index % CROWD_COLS) * CROWD_CELL, y: Math.floor(index / CROWD_COLS) * CROWD_CELL, cell: CROWD_CELL };
+    if (kind === 'spec') return { kind, x: (index % SPEC_COLS) * SPEC_CELL, y: Math.floor(index / SPEC_COLS) * SPEC_CELL, cell: SPEC_CELL };
+    return { kind, x: index * TEAM_CELL, y: 0, cell: TEAM_CELL };
+  }
+  function orb(kind, index, seed, size, palettes) {
+    const node = element('span', 'cr-av');
+    node.style.background = Luz.css(palettes[index]);
+    node.innerHTML = '<canvas></canvas>' + Ojos.svg(seed, { size });
+    orbs.push({ node, canvas: node.firstChild, from: source(kind, index) });
+    return node;
+  }
+
+  const hero = document.getElementById('hero');
+  TEAM.forEach((person, index) => hero.appendChild(orb('team', index, person.key, 184, teamPalettes)));
+
+  const nodes = document.getElementById('nodes');
+  TEAM.forEach((person, index) => {
+    const cell = element('div', 'cr-node');
+    const slot = element('div', 'cr-node__slot');
+    const face = orb('team', index, person.key, person.small ? 72 : 92, teamPalettes);
+    face.classList.add('rd-face');
+    if (person.small) face.classList.add('rd-face--small');
+    if (person.ring) { const ring = element('span', 'cr-ring'); ring.appendChild(face); slot.appendChild(ring); } else slot.appendChild(face);
+    const label = element('span', 'rd-person');
+    label.appendChild(element('span', 'rd-person__name', person.name));
+    label.appendChild(element('span', 'rd-person__status', person.status));
+    cell.appendChild(slot); cell.appendChild(label); nodes.appendChild(cell);
+  });
+
+  const rows = document.getElementById('rows');
+  ROWS.forEach((index) => {
+    const person = TEAM[index];
+    const item = element('div', 'rd-item');
+    const face = orb('team', index, person.key, 40, teamPalettes);
+    face.classList.add('rd-face', 'rd-face--tiny');
+    const text = element('span', 'rd-item__text');
+    text.appendChild(element('span', 'rd-item__title', person.name));
+    text.appendChild(element('span', 'rd-item__sub', person.status));
+    item.appendChild(face); item.appendChild(text); rows.appendChild(item);
+  });
+
+  const globe = document.getElementById('globe');
+  const golden = Math.PI * (3 - Math.sqrt(5)), tilt = 0.42, spin = 0.6;
+  NAMES.forEach((name, index) => {
+    const y = 1 - 2 * (index + 0.5) / NAMES.length;
+    const radius = Math.sqrt(1 - y * y);
+    const theta = index * golden + spin;
+    const x = radius * Math.cos(theta), z = radius * Math.sin(theta);
+    const tiltedY = y * Math.cos(tilt) - z * Math.sin(tilt);
+    const depth = (y * Math.sin(tilt) + z * Math.cos(tilt) + 1) / 2;
+    const eased = depth * depth * (3 - 2 * depth);
+    const size = Math.round(10 + 18 * eased);
+    const face = orb('crowd', index, name, size, crowdPalettes);
+    face.style.width = face.style.height = size + 'px';
+    face.style.left = (50 + x * 41).toFixed(2) + '%';
+    face.style.top = (50 + tiltedY * 41).toFixed(2) + '%';
+    face.style.opacity = (0.3 + 0.7 * eased).toFixed(2);
+    face.style.zIndex = String(Math.round(depth * 100));
+    if (eased < 0.55) face.style.filter = 'blur(' + ((0.55 - eased) * 3.2).toFixed(2) + 'px)';
+    else face.classList.add('cr-front');
+    globe.appendChild(face);
+  });
+
+  const crowd = document.getElementById('crowd');
+  SPECIMENS.forEach((name, index) => crowd.appendChild(orb('spec', index, name, 96, specPalettes)));
+
+  const sphereHost = document.getElementById('sphere');
+  const sphereCanvas = element('canvas');
+  sphereHost.appendChild(sphereCanvas);
+  for (let index = 0; index < 20; index += 1) {
+    const y = 1 - 2 * (index + 0.5) / 20;
+    const radius = Math.sqrt(1 - y * y), theta = index * golden + 1.1;
+    const disc = element('span', 'cr-disc');
+    disc.style.left = (50 + radius * Math.cos(theta) * 40).toFixed(2) + '%';
+    disc.style.top = (50 + y * 40).toFixed(2) + '%';
+    sphereHost.appendChild(disc);
+  }
+
+  const teamGrid = Luz.grid(document.createElement('canvas'), { cols: TEAM.length, rows: 1, cell: TEAM_CELL, palettes: teamPalettes });
+  const crowdGrid = teamGrid && Luz.grid(document.createElement('canvas'), { cols: CROWD_COLS, rows: Math.ceil(NAMES.length / CROWD_COLS), cell: CROWD_CELL, palettes: crowdPalettes });
+  const specGrid = crowdGrid && Luz.grid(document.createElement('canvas'), { cols: SPEC_COLS, rows: Math.ceil(SPECIMENS.length / SPEC_COLS), cell: SPEC_CELL, palettes: specPalettes });
+  const page = document.querySelector('.rd-page');
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!specGrid) { Ojos.animate(page, fixed == null ? undefined : fixed); return; }
+
+  const sphereScale = Math.min(2, window.devicePixelRatio || 1);
+  sphereCanvas.width = sphereCanvas.height = Math.round(540 * sphereScale);
+  const sphere = Luz.sphere(sphereCanvas, { palette: [0, 9, 7, 5] });
+  const grids = { team: teamGrid, crowd: crowdGrid, spec: specGrid };
+
+  const scale = Math.min(2, window.devicePixelRatio || 1);
+  orbs.forEach((face) => {
+    const side = Math.max(2, Math.round(face.node.clientWidth * scale));
+    face.canvas.width = face.canvas.height = side;
+    face.context = face.canvas.getContext('2d');
+    face.context.imageSmoothingQuality = 'high';
+    face.node.style.background = 'none';
+  });
+
+  const budget = document.getElementById('budget');
+  let frames = 0, spent = 0;
+  function paint(seconds) {
+    const started = performance.now();
+    teamGrid.render(seconds);
+    crowdGrid.render(seconds);
+    specGrid.render(seconds);
+    sphere.render(seconds, sphereCanvas.width / 2, sphereCanvas.height / 2, sphereCanvas.width / 2 / 1.0, 0.9);
+    orbs.forEach((face) => {
+      const side = face.canvas.width, from = face.from;
+      face.context.clearRect(0, 0, side, side);
+      face.context.drawImage(grids[from.kind].canvas, from.x, from.y, from.cell, from.cell, 0, 0, side, side);
+    });
+    spent += performance.now() - started; frames += 1;
+    if (frames % 30 === 0) { budget.textContent = (spent / frames).toFixed(1) + ' ms por cuadro, medidos en esta máquina (' + frames + ' cuadros).'; }
+  }
+  function loop(now) { paint(now / 1000); window.requestAnimationFrame(loop); }
+  if (fixed != null) { paint(fixed); budget.textContent = 'Cuadro fijo a ' + fixed + ' s.'; Ojos.animate(page, fixed); return; }
+  paint(0);
+  Ojos.animate(page);
+  if (!still) window.requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

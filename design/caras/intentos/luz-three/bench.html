@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Ronda · medida de luz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23a58bff'/%3E%3C/svg%3E">
+<script type="importmap">{ "imports": { "three": "./three.module.min.js" } }</script></head>
+<body style="font:16px system-ui;padding:24px"><pre id="out">Midiendo.</pre>
+<script type="module" src="./luz.js"></script>
+<script type="module">
+const L = window.RondaLuz;
+const mk = (c, r, cell) => L.grid(document.createElement('canvas'), { cols: c, rows: r, cell, palettes: Array.from({ length: c * r }, (_, i) => L.paletteFor('p' + i)) });
+const parts = { 'equipo 5 x 192': mk(5, 1, 192), 'multitud 8 x 8 x 64': mk(8, 8, 64), 'especimenes 8 x 4 x 96': mk(8, 4, 96) };
+const sc = document.createElement('canvas'); sc.width = sc.height = 540; const sphere = L.sphere(sc);
+const sync = (canvas) => canvas.getContext('2d').getImageData(0, 0, 1, 1);
+const lines = [];
+const time = (name, fn, n = 20) => { fn(0); const t = performance.now(); for (let i = 1; i <= n; i += 1) fn(i * 0.1); lines.push(name + ': ' + ((performance.now() - t) / n).toFixed(1) + ' ms'); };
+for (const [name, g] of Object.entries(parts)) time(name, (s) => { g.render(s); sync(g.canvas); });
+time('esfera 540', (s) => { sphere.render(s, 270, 270, 270, 0.9); sync(sc); });
+time('todo junto', (s) => { Object.values(parts).forEach((g) => g.render(s)); sphere.render(s, 270, 270, 270, 0.9); sync(sc); });
+document.getElementById('out').textContent = lines.join('\n');
+</script></body></html>
