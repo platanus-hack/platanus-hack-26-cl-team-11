@@ -63,3 +63,5 @@ Platanus Hack son públicos.
 ## Contexto del proyecto
 
 Qué construimos, alcance de la demo y decisiones abiertas: `README.md` y `docs/`.
+
+Para implementar o mostrar cómo nacen los grupos, lee [Del 1:1 al grupo de ayuda](docs/AGENT_MODEL.md#del-11-al-grupo-de-ayuda). Una flecha va de quien necesita ayuda a quien puede dársela. En el turno 2 se combinan las salidas del mismo solicitante.

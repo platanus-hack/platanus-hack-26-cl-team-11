@@ -29,6 +29,24 @@ Lo que hacía el coordinador lo cubren dos piezas que **no son agentes**: no int
 
 Cualquier agente puede hablarle a cualquier otro. Que puedan hablar todos con todos no significa que lo hagan todos los días: en 300 personas serían 44.850 intercambios por vuelta. Un agente abre una conversación cuando tiene un motivo: su dueño necesita algo, tiene algo que ofrecer o hay una pregunta abierta en el tablero.
 
+### Del 1:1 al grupo de ayuda
+
+**Turno 1.** Cada par que conversa puede descubrir una necesidad en cualquiera de los dos sentidos. Se guarda `G1 → G2` únicamente si del diálogo se desprende que G1 necesita ayuda de G2. La punta señala a quien puede ayudar, incluso si G2 inició el diálogo. Si la necesidad es mutua, se guardan dos flechas. Si nadie necesita ayuda del otro, el par aporta cero flechas. El resultado depende de lo que ocurra en la conversación. En una simulación exhaustiva de 100 agentes se pueden recorrer los 4.950 pares.
+
+**Turno 2.** Para cada solicitante, toma los destinatarios distintos de sus flechas salientes en esa ronda. Con un mínimo de dos ayudantes, cada combinación de dos destinatarios forma un trío con el solicitante. Los ayudantes pueden participar aunque entre ellos no haya surgido una dependencia. En la variante con umbral configurable, se eligen exactamente `k` ayudantes por candidato. Con `d` destinatarios hay `C(d, k)` candidatos y cada grupo tiene `k + 1` agentes. Si `d < k`, ese solicitante sigue con sus 1:1. Una vez fijados el grafo y el umbral, la lista de grupos es reproducible.
+
+| Dependencias descubiertas | Mínimo de ayudantes | Grupos del turno 2 |
+|---|---:|---|
+| G1 → G2, G1 → G8 | 2 | {G1, G2, G8}. G1 lleva el pedido. |
+| G1 → G2, G8 → G1 | 2 | Ninguno. G1 y G8 tienen una salida cada uno. |
+| G1 → G2, G8 y G9, y G4 → G5 y G6 | 2 | Tres tríos por G1 y un cuarto por G4. |
+| Las mismas flechas de la fila anterior | 3 | Solo {G1, G2, G8, G9}. |
+| G1 y G2 se necesitan mutuamente y ambos necesitan a G8 | 2 | Un solo {G1, G2, G8}, con las agendas de G1 y G2. |
+
+Para deduplicar, identifica el grupo por su conjunto de miembros dentro de la ronda y conserva los pedidos de cada solicitante. Cada pedido mantiene la referencia al 1:1 que lo originó. Antes de llevar contenido del 1:1 al grupo, cada agente aplica los permisos para esa audiencia. La presentación entre personas sigue requiriendo su aceptación. El umbral de ayudantes regula la convocatoria y el mínimo de privacidad de un agregado regula la publicación del pulso.
+
+[Ver la simulación con seis escenas](../design/grafo-dirigido.mp4).
+
 ### Pedido y oferta de ayuda
 
 1. **Pedido.** Un agente publica una necesidad en el tablero («busco a alguien con experiencia en X»), sin datos privados de su dueño.

@@ -9,7 +9,7 @@
 | Privacidad | La persona decide qué sale de su agente; los líderes ven agregados. |
 | Fuentes | Wearables, check-in conversacional, trabajo (GitHub, Linear, calendario) y reuniones (Granola). |
 | Relación con Montu | Proyecto nuevo con código desde cero; se toma lo aprendido, no el código. |
-| Conversación entre agentes | Uno a uno entre agentes, sin agente coordinador. Tablero compartido y función de agregado en su lugar; detalle en [AGENT_MODEL.md](AGENT_MODEL.md). |
+| Conversación entre agentes | Primero 1:1. Las necesidades descubiertas forman un grafo dirigido. En el turno 2, las salidas de un mismo solicitante pueden originar grupos. Red sin coordinador, con tablero y función de agregado; detalle en [AGENT_MODEL.md](AGENT_MODEL.md). |
 | Orden de construcción | Base, luego diferenciadores, luego extras; detalle en [ROADMAP.md](ROADMAP.md). |
 
 ## Abierto

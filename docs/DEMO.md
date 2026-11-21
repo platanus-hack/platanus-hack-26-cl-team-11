@@ -24,6 +24,8 @@ El hilo de la presentación es la tesis de [VISION.md](VISION.md): la complejida
 6. **Resultado** (30 s): la vista de equipo con pulso, ayuda emparejada y una guideline propuesta.
 7. **Cierre** (20 s): de vuelta al grafo de 300. De 44.850 conversaciones posibles, cada persona recibe solo las que necesita tener.
 
+En el paso 4, seguir a G1 durante dos 1:1. Si necesita a G2 y a G8, dibujar ambas flechas saliendo de G1 y abrir el trío. Invertir una flecha en una segunda corrida para mostrar por qué desaparece el grupo. El [video de las seis escenas](../design/grafo-dirigido.mp4) usa conversaciones sintéticas como apoyo al tramo en vivo.
+
 ## Qué es real y qué puede ser simulado
 
 | Pieza | En la demo |
