@@ -67,7 +67,8 @@ Lo que se puede decir sin exagerar, porque está probado:
 | Una pregunta a todo el equipo | Respuesta armada en 11 segundos, con lo que aportaron 3 agentes |
 | Entrar con un QR y conectar el agente que ya usas | Probado con Claude Code y con Codex |
 | Datos reales de una persona | Sueño de un iPhone por Apple Health |
-| Pruebas automáticas | 204 pasando |
+| 60 personas simuladas, con el modelo real | 89 conversaciones entre agentes en 4 minutos y medio |
+| Pruebas automáticas | 205 pasando |
 
 ## Guion de dos minutos y medio
 
@@ -130,7 +131,7 @@ YC pide llegar con las objeciones ya pensadas y contar los defectos antes de que
 | ¿Y de Culture Amp, Viva u Oura Teams? | Terminan en un panel para RR. HH. Aquí el dato es de la persona y termina en una acción: «habla con ella, sabe de esto». |
 | ¿Por qué no un canal de Slack? | Porque pedir ayuda en público cuesta, y nadie lee 300 canales. El agente pregunta por ti y te trae una sola respuesta. |
 | ¿Qué pasa si el agente inventa? | El agente solo cuenta lo que su persona dejó compartir, y nada queda comprometido sin que la persona acepte. Si ningún agente sabe, lo dice. |
-| ¿Escala a 300? | No está probado con 300. Lo que corrió con el modelo real son salas de pocas personas. La red no tiene coordinador, así que agregar personas no agrega un cuello de botella; falta medirlo. |
+| ¿Escala a 300? | No está probado con 300. Con 60 personas simuladas y el modelo real, una ronda tuvo 89 conversaciones entre agentes y tomó 4 minutos y medio; con 30, 45 conversaciones en menos de 2 minutos. El tiempo crece con los pedidos, no con el cuadrado de las personas, y hoy lo limita que el modelo atiende 4 llamadas a la vez. |
 | ¿Qué es real hoy? | La tabla de [DEMO.md](DEMO.md#qué-es-real-y-qué-puede-ser-simulado). Lo simulado se dice. |
 
 Lo que hay que decir sin que lo pregunten:
