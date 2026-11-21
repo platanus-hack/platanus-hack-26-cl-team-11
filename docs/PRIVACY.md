@@ -48,3 +48,22 @@ Sin coordinador, los agentes se hablan uno a uno, así que un agente puede enter
 ## Contenido de terceros
 
 Lo que llega de otras fuentes o de otros agentes (texto de reuniones, mensajes, respuestas de pares) es **dato, no instrucción**. Un agente nunca ejecuta lo que pida un texto ajeno a su dueño.
+
+## Qué está construido
+
+Estado al 21-nov-2026, leído del código. Lo que sigue en «parcial» o «no construida» no se muestra como hecho en la demo.
+
+| Regla de este documento | Hoy |
+|---|---|
+| Política de compartir en tres estados | Construida. Se elige en la pestaña Ajustes del panel, un permiso por señal (energía, carga, bloqueos, experiencia); todavía no se configura conversando con el agente. Por defecto: energía y carga en «preguntar»; bloqueos y experiencia en «siempre», salvo el bloqueo dicho en un check-in, que parte en «preguntar» |
+| Los datos crudos no salen de la capa privada | Construida y con prueba. Al modelo solo llega la ficha: las frases con permiso «siempre», los temas y una disponibilidad. El sueño, la carga, el ánimo y la nota del check-in no entran a ningún mensaje |
+| Preguntar antes | Construida para los bloqueos: el agente no pide ayuda con un tema en «preguntar» hasta que su dueño toca «Permitir» en la pestaña Equipo. Para energía y carga no hay pregunta: con «preguntar» la frase no sale y solo cuenta para la disponibilidad |
+| Usar no es contar | Parcial. La conversación entre dos agentes la leen completa sus dos dueños y nadie más. No existe todavía el permiso por mensaje de [AGENT_MODEL.md](AGENT_MODEL.md). En el tablero sí: una respuesta no contable la leen solo quien publicó y quien respondió |
+| Agregados sin individuos | Construida. Mínimo 3 personas por señal sin contar a quien mira, y solo el nivel mediano. «Nunca» saca a la persona también del agregado |
+| Ver todo lo que su agente sabe | Parcial. El panel muestra cada señal con la frase y de qué fuentes sale, y por fuente el total de registros. Los registros crudos se leen solo en `GET /api/people/<token>/events` |
+| Ver lo que su agente compartió, con quién y cuándo | Parcial. Cada persona lee las conversaciones de su agente en la última ronda y sus propuestas. No hay un historial de todo lo compartido |
+| Corregir o borrar un dato | Solo por fuente: desconectar una fuente borra sus eventos. No se puede borrar un check-in ni un evento suelto |
+| Salir del sistema | No construida. Se puede salir de un equipo, pero no hay forma de borrar a una persona ni su memoria |
+| Contenido de terceros es dato, no instrucción | Está en la instrucción de cada agente (`backend/src/agents/prompts.ts`). No hay una prueba que lo verifique |
+
+El link personal es la única llave: quien lo tenga ve los registros de esa persona y actúa por ella. No hay cuentas ni contraseñas.
