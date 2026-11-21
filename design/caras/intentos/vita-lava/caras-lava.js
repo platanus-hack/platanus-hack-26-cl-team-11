@@ -33,11 +33,11 @@
   }
 
   var TEAM = {
-    mati: { face: 'smirk', hair: 'short', color: 'black' },
-    ian: { face: 'happy', hair: 'swept', color: 'brown' },
-    lian: { face: 'warm', hair: 'fringe', color: 'black', glasses: 'round' },
-    andres: { face: 'content', hair: 'short', color: 'darkbrown', flip: true },
-    roberto: { face: 'smile', hair: 'swept', color: 'black' }
+    mati: { face: 'smirk', hair: 'short', color: 'black', blink: 0.12 },
+    ian: { face: 'happy', hair: 'swept', color: 'brown', blink: 0.47 },
+    lian: { face: 'warm', hair: 'fringe', color: 'black', glasses: 'round', blink: 0.81 },
+    andres: { face: 'content', hair: 'short', color: 'darkbrown', flip: true, blink: 0.33 },
+    roberto: { face: 'smile', hair: 'swept', color: 'black', blink: 0.64 }
   };
   var TEAM_LIGHT = { mati: [0, 9, 8, 1], ian: [5, 7, 4, 6], lian: [9, 8, 7, 10], andres: [2, 1, 3, 0], roberto: [6, 5, 8, 7] };
 
