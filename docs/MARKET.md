@@ -40,3 +40,7 @@ Tras el movimiento de team-42, se evaluó una variante de 15 bananas con un inte
 `python3 tools/market/forward.py` prueba la variante de 15 bananas contra las observaciones que llegan a partir de su arranque, con un intervalo de demora en cada lado. Lee la misma SQLite que el monitor y escribe las ventas simuladas en `forward.jsonl` junto a la base. Solo los recibos de la cartola del evento aparecen en la bitácora de órdenes verificadas.
 
 Con `python3 tools/market/pilot.py --exits-only`, el piloto sigue cotizando las 284 acciones existentes y puede venderlas cuando el crédito neto lleve la caja a 1.001 bananas. Tras la primera pérdida, esto requiere recibir al menos 22 bananas en la venta. Este modo puede ejecutarse al mismo tiempo que la simulación.
+
+## Pausa de operaciones · 14:17 UTC
+
+Se detuvo toda ejecución de órdenes del piloto, incluida la venta automática de team-11. El registro quedó con dos recibos, una pérdida realizada de 12 bananas y 979 en caja. La posición previa de 284 acciones de team-11 sigue abierta. Continúan la lectura pública y la simulación local.
