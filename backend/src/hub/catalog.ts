@@ -10,6 +10,7 @@ export interface HubSource {
   how: string;
   account: (name: string) => string;
   pool: MockItem[];
+  onlyWhenConnected?: boolean;
 }
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
@@ -140,6 +141,51 @@ export const HUB_SOURCES: HubSource[] = [
       { summary: 'main: tablero con votos', topics: ['codigo'] },
       { summary: 'main: servidor de contexto', topics: ['codigo', 'demo'] },
     ],
+  },
+  {
+    id: 'chatgpt',
+    label: 'ChatGPT',
+    category: 'Asistente',
+    how: 'Lo que tu asistente sabe de tu trabajo, resumido.',
+    account: () => 'ChatGPT',
+    pool: [{ summary: 'Resumió en qué estás trabajando esta semana', topics: ['demo'] }],
+    onlyWhenConnected: true,
+  },
+  {
+    id: 'grok',
+    label: 'Grok',
+    category: 'Asistente',
+    how: 'Lo que tu asistente sabe de tu trabajo, resumido.',
+    account: () => 'Grok',
+    pool: [{ summary: 'Resumió en qué estás trabajando esta semana', topics: ['demo'] }],
+    onlyWhenConnected: true,
+  },
+  {
+    id: 'openclaw',
+    label: 'OpenClaw',
+    category: 'Asistente',
+    how: 'Lo que tu agente personal hizo por ti, en una línea.',
+    account: () => 'OpenClaw',
+    pool: [{ summary: 'Ordenó tus pendientes de la semana', topics: ['carga'] }],
+    onlyWhenConnected: true,
+  },
+  {
+    id: 'instinct',
+    label: 'Instinct',
+    category: 'Asistente',
+    how: 'Lo que tu agente personal hizo por ti, en una línea.',
+    account: () => 'Instinct',
+    pool: [{ summary: 'Leyó tu correo y separó lo urgente', topics: ['carga'] }],
+    onlyWhenConnected: true,
+  },
+  {
+    id: 'asistente',
+    label: 'Otro asistente',
+    category: 'Asistente',
+    how: 'Lo que tu asistente sabe de tu trabajo, resumido.',
+    account: () => 'Asistente conectado',
+    pool: [{ summary: 'Resumió en qué estás trabajando esta semana', topics: ['demo'] }],
+    onlyWhenConnected: true,
   },
 ];
 

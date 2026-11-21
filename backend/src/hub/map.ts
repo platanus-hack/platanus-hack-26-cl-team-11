@@ -38,7 +38,7 @@ export function buildMap(hub: HubStore, personToken: string, name: string): Cont
   const totals = hub.countBySource(personToken);
   const topicsBySource = new Map<string, Set<string>>();
 
-  const sources = HUB_SOURCES.map((source): MapSource => {
+  const sources = HUB_SOURCES.filter((source) => !source.onlyWhenConnected || connections.has(source.id)).map((source): MapSource => {
     const connection = connections.get(source.id);
     const items = connection ? hub.items(personToken, source.id, ITEMS_PER_SOURCE) : [];
     if (connection) topicsBySource.set(source.id, new Set(hub.items(personToken, source.id, LINK_ITEMS).flatMap((item) => item.topics)));

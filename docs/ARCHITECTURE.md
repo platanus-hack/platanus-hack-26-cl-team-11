@@ -23,6 +23,9 @@ backend/
     policy/             qué permite compartir cada persona
     agents/             agentes personales: ficha, conversación 1:1, propuestas y rutina diaria
     hub/                servidor de contexto: catálogo de fuentes, guardado y mapa (datos de prueba)
+    rooms/              salas: un equipo abierto con código corto y su registro de lo que pasa
+    assistants/         asistentes conectados: código de un uso, token propio y el documento de ingreso
+    repo/               repo de cada persona: archivos con permiso e historial
     connectors/         un archivo por fuente
       registry.ts       la lista de fuentes
     oauth/              un archivo por proveedor OAuth
@@ -175,6 +178,46 @@ El modelo se llama detrás de una sola interfaz, `AgentModel` (`agents/model.ts`
 
 Cada llamada al modelo tiene un límite de 30 segundos en 50x y de 90 en Anthropic. Una ronda que pasa de 10 minutos se da por fallida y deja de bloquear al equipo.
 
+## Sala, asistentes y repo
+
+Una persona entra a una sala con un código, conecta el agente que ya usa y ese agente llena su repo. El agente personal de Ronda habla en las rondas con lo que hay en ese repo.
+
+**Sala** (`rooms/`). Es un equipo que tiene un código corto y admite sin aprobación. Por ser un equipo, le sirven las rondas, el tablero y el pulso. El código largo de un equipo sigue pidiendo aprobación. La sala guarda un registro de lo que pasa (alguien entra, un asistente se conecta, un repo cambia) para dibujarlo en la pantalla.
+
+| Ruta | Qué hace |
+|---|---|
+| `POST /api/rooms` | `{ "name": "…" }` crea una sala y devuelve su código |
+| `POST /api/rooms/<código>/join` | `{ "name": "…" }` crea a la persona, la deja dentro y devuelve su link. Con `{ "token": "…" }` entra una persona que ya existe |
+| `GET /api/rooms/<código>/state` | Quién está, qué asistentes tiene cada uno y los hilos de la última ronda |
+| `GET /api/rooms/<código>/events?since=<id>` | Lo que pasó después de ese punto |
+
+Estas dos últimas rutas no piden link: las lee la pantalla de la sala. Por eso nunca devuelven el link de una persona; cada persona aparece con un identificador derivado.
+
+**Asistente conectado** (`assistants/`). Es el agente que la persona ya usa: Claude Code, Codex, ChatGPT, Grok, OpenClaw u otro. Entra así:
+
+1. La persona pide un código en su página. Dura 15 minutos, sirve una vez y pedir otro anula el anterior.
+2. Le pega a su agente una línea con `/a/<código>`. Esa dirección devuelve el documento de ingreso en markdown (`assistants/joinDoc.ts`): qué es Ronda, las reglas y las llamadas.
+3. El agente llama a `POST /api/assistants/join` con el código y recibe su token. El servidor guarda solo el hash del token. La persona ve sus asistentes y puede quitar cualquiera.
+
+El documento describe llamadas HTTP y nada más: no pide instalar ni ejecutar nada, ni volver a buscar instrucciones.
+
+**Repo** (`repo/`). Un árbol de archivos por persona, con historial, en la misma base. No es un repo de git: así también puede escribirlo un agente que no usa git.
+
+| Ruta | Quién | Qué hace |
+|---|---|---|
+| `POST /api/repo/commit` | Asistente | `{ "message", "topics", "files": [{ "path", "content", "share" }], "delete": [] }` |
+| `GET /api/repo` · `GET /api/repo/file?path=` | Asistente | El árbol y un archivo |
+| `GET /api/people/<token>/repo` · `…/repo/file?path=` | Persona | Lo mismo |
+| `PATCH /api/people/<token>/repo/file` | Persona | `{ "path", "share" }` cambia el permiso |
+| `DELETE /api/people/<token>/repo/file?path=` | Persona | Borra un archivo |
+| `POST /api/people/<token>/repo/paste` | Persona | `{ "kind", "content" }` guarda la respuesta que pegó desde una app de chat |
+
+Reglas:
+
+- **Cada archivo lleva un permiso**: `siempre`, `preguntar` (por defecto) o `nunca`. El asistente lo propone al crear el archivo. Después solo lo cambia la persona; una nueva versión del asistente no lo toca.
+- **Lo que se revisa en código es forma, no significado**: la ruta, 8 KB por archivo, 20 archivos por cambio, 200 por repo y formatos conocidos de credenciales. Un cambio que rompe una regla no guarda nada.
+- **Cada cambio deja un registro** en el servidor de contexto, bajo el asistente que lo hizo, y avisa a las salas de la persona.
+
 ## Servidor de contexto (datos de prueba)
 
 `hub/` es el lugar donde los asistentes de cada persona dejan lo que saben de ella: salud, reuniones, correo, agenda, WhatsApp, código, Claude y Codex. **Hoy todo es de prueba**: conectar una fuente no habla con ningún servicio, solo crea la conexión y tres registros de ejemplo. Vive en tablas propias (`hub_connections`, `hub_items`) y no toca los eventos reales ni las señales.
@@ -185,5 +228,7 @@ Cada llamada al modelo tiene un límite de 30 segundos en 50x y de 90 en Anthrop
 | `POST /api/context/<token>/push` | Un asistente deja un registro: `{ "source": "claude", "summary": "…", "topics": ["demo"], "occurredAt": "…" }`. Si la fuente no estaba conectada, la conecta. |
 | `POST /api/context/<token>/sources/<fuente>` · `DELETE` | Conecta una fuente con datos de prueba / la desconecta y borra sus registros. |
 | `POST /api/context/<token>/simulate` | Agrega un registro de prueba de alguna fuente conectada. La pantalla lo llama cada 6 s para que se vea llegar contexto. |
+
+Los registros que deja un asistente al escribir el repo sí son reales. Las fuentes de asistentes nuevos (ChatGPT, Grok, OpenClaw, Instinct) aparecen en el mapa solo cuando están conectadas.
 
 Dos fuentes quedan unidas cuando sus registros comparten un tema (`topics`); el nombre de cada tema está en `hub/catalog.ts`. La pantalla es `/contexto/<token>` (`frontend/src/ContextPage.tsx`); `?fuente=<id>` abre una fuente directo.

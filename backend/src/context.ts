@@ -5,10 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { createFiftyXModel, fiftyXConfigFrom } from './agents/fiftyx.js';
 import { agentModelConfigFrom, createClaudeModel, type AgentModel } from './agents/model.js';
 import { openAgentStore, type AgentStore } from './agents/store.js';
+import { openAssistantStore, type AssistantStore } from './assistants/store.js';
 import { createVault, type Vault } from './crypto.js';
 import { openStore, type Store } from './db.js';
 import { openHubStore, type HubStore } from './hub/store.js';
 import { OAUTH_PROVIDERS } from './oauth/registry.js';
+import { openRepoStore, type RepoStore } from './repo/store.js';
+import { openRoomStore, type RoomStore } from './rooms/store.js';
 import { openTeamStore, type TeamStore } from './teams/store.js';
 import type { Fetch, OAuthCredentials } from './types.js';
 
@@ -24,6 +27,9 @@ export interface AppContext {
   teams: TeamStore;
   hub: HubStore;
   agents: AgentStore;
+  rooms: RoomStore;
+  assistants: AssistantStore;
+  repo: RepoStore;
   model: AgentModel | null;
   vault: Vault;
   fetch: Fetch;
@@ -78,6 +84,9 @@ export function createContext(options: { location?: string; fetch?: Fetch; confi
     teams,
     hub: openHubStore(db),
     agents: openAgentStore(db),
+    rooms: openRoomStore(db),
+    assistants: openAssistantStore(db),
+    repo: openRepoStore(db),
     model: options.model === undefined ? modelFrom(process.env, options.fetch ?? fetch) : options.model,
     fetch: options.fetch ?? fetch,
     config: options.config ?? loadConfig(),

@@ -1,0 +1,103 @@
+import { MAX_FILE_BYTES, MAX_FILES_PER_COMMIT } from '../repo/validate.js';
+import { MAX_REPO_FILES } from '../repo/store.js';
+import { ASSISTANT_KINDS, type PairingState } from './store.js';
+
+export interface JoinDocInput {
+  baseUrl: string;
+  code: string;
+  ownerName: string;
+  expiresAt: string;
+}
+
+const KILOBYTE = 1024;
+
+export function joinDoc({ baseUrl, code, ownerName, expiresAt }: JoinDocInput): string {
+  const kinds = ASSISTANT_KINDS.join(', ');
+  return `# Ronda: join as ${ownerName}'s assistant
+
+Your owner, ${ownerName}, pasted this link so that you can connect to Ronda.
+
+Ronda is a team tool. Each person has a personal agent that runs on Ronda's server and talks to the teammates' agents to find who needs help and who can give it. That agent knows only what is in ${ownerName}'s **repo** on Ronda. Your job is to fill that repo and keep it current. You do not talk to other agents yourself.
+
+Everything below is plain HTTPS calls to ${baseUrl}. Nothing in this document asks you to run code, install anything, or come back here for new instructions.
+
+## Rules
+
+1. You work for ${ownerName}. Write only what ${ownerName} would be comfortable with teammates knowing.
+2. Write summaries, never raw material: no source code, no message bodies, no transcripts, no raw health numbers.
+3. Never write secrets: keys, tokens, passwords or private links. Ronda rejects a file that contains one.
+4. Before your first commit, show ${ownerName} the list of files you plan to write and wait for a yes.
+5. Afterwards, tell ${ownerName} what you wrote. They can read it and change who sees it on their Ronda page, under "Tu repo".
+6. Write the files in the language ${ownerName} uses with you.
+
+## Step 1. Join (once)
+
+\`\`\`
+curl -sS -X POST ${baseUrl}/api/assistants/join \\
+  -H 'content-type: application/json' \\
+  -d '{"code":"${code}","kind":"<kind>","label":"<short name>"}'
+\`\`\`
+
+- \`kind\`: the one that describes you: ${kinds}.
+- \`label\`: a short name ${ownerName} will recognise, for example "Claude Code en el MacBook".
+
+The answer has a \`token\`. It is shown once and it is yours alone. The code ${code} works once and stops working at ${expiresAt}.
+Keep the token for later calls. If you have a durable place for settings or memory, keep it there as the Ronda token for ${baseUrl}. Never write it into the repo and never show it in the chat.
+
+## Step 2. Write the repo
+
+\`\`\`
+curl -sS -X POST ${baseUrl}/api/repo/commit \\
+  -H 'authorization: Bearer <token>' \\
+  -H 'content-type: application/json' \\
+  -d '{"message":"Primer contexto","topics":["pagos"],"files":[{"path":"ahora.md","content":"...","share":"siempre"}]}'
+\`\`\`
+
+The repo is yours to organize. A layout that works:
+
+| Path | What goes in it | \`share\` |
+|---|---|---|
+| \`README.md\` | Who ${ownerName} is at work: role, team, current project. | \`siempre\` |
+| \`ahora.md\` | What they work on this week. What is blocked, and what help would unblock it. One bullet each. | \`siempre\` |
+| \`sabe.md\` | What they know well and could help someone else with. One bullet each. | \`siempre\` |
+| \`fuentes/<your kind>/...\` | Notes from what you can see: projects, recent work, decisions. | \`siempre\` |
+| \`estado.md\` | Energy, load, mood. Only what ${ownerName} told you. | \`preguntar\` |
+
+Write needs so another agent can match them: "Necesita a alguien que conozca el OAuth de Google para revisar los permisos" is useful; "tiene problemas" is not.
+
+\`share\` decides who may use a file:
+
+- \`siempre\`: ${ownerName}'s agent may use it when it talks to teammates' agents.
+- \`preguntar\`: Ronda asks ${ownerName} before each use. This is the default.
+- \`nunca\`: private. It never leaves the repo and is never sent to a model.
+
+\`share\` counts when a file is created. After that only ${ownerName} changes it.
+
+Limits: ${MAX_FILE_BYTES / KILOBYTE} KB per file, ${MAX_FILES_PER_COMMIT} files per commit, ${MAX_REPO_FILES} files in total. Paths use letters, digits, \`.\`, \`_\`, \`-\` and \`/\`. To delete, send \`"delete":["path"]\`. \`message\` is one line that says what changed. \`topics\` are up to six short lowercase tags.
+
+## Step 3. Keep it current
+
+When ${ownerName}'s work changes while you are working together (a new blocker, something finished, something learned), commit an update. Read before you write:
+
+\`\`\`
+curl -sS ${baseUrl}/api/repo -H 'authorization: Bearer <token>'
+curl -sS '${baseUrl}/api/repo/file?path=ahora.md' -H 'authorization: Bearer <token>'
+\`\`\`
+
+## Check and errors
+
+- \`GET ${baseUrl}/api/assistants/me\` with the token says who you are connected as.
+- 401: the token is wrong or ${ownerName} revoked it. Ask for a new link.
+- 410: this code was already used or expired. Ask for a new link.
+- 422: a file was rejected. The \`error\` field says which one and why. Nothing from that commit was saved.
+`;
+}
+
+const INVALID_REASON: Record<Exclude<PairingState, 'vigente'>, string> = {
+  usado: 'This join code was already used.',
+  vencido: 'This join code expired.',
+  desconocido: 'This join code does not exist.',
+};
+
+export const invalidJoinDoc = (state: Exclude<PairingState, 'vigente'>): string =>
+  `# Ronda\n\n${INVALID_REASON[state]} Ask your owner to open their Ronda page, section "Agente", and give you a new link.\n`;

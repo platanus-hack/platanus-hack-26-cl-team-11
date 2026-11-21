@@ -10,7 +10,7 @@ const MAX_SUMMARY = 200;
 const MAX_TOPICS = 6;
 const UNKNOWN_SOURCE = { error: 'Esa fuente no existe.' } as const;
 
-const cleanTopics = (value: unknown): string[] =>
+export const cleanTopics = (value: unknown): string[] =>
   Array.isArray(value)
     ? [...new Set(value.filter((topic): topic is string => typeof topic === 'string').map((topic) => topic.trim().toLowerCase().slice(0, 40)).filter(Boolean))].slice(0, MAX_TOPICS)
     : [];
