@@ -25,6 +25,23 @@ Somos varias personas y varios agentes sobre el mismo repo al mismo tiempo. Lo q
 - Si no se puede pushear (sin red, conflicto que no sabes resolver), dilo con el error exacto.
   Nunca se deja en silencio.
 
+## Regla 2: toda comunicación del equipo también va por correo
+
+Lo que no queda en un correo se pierde entre WhatsApp, Slack y lo que se habla en persona.
+
+- Cada mensaje al equipo sobre la hack (WhatsApp, Slack, Discord, o una decisión tomada en persona)
+  también se manda por correo, con el mismo contenido.
+- Va a todo el equipo, con copia a la bandeja compartida:
+  - Para: `mati@vita.lat`, `ian@vita.lat`, `lian@vita.lat`, `robert@getvita.ai`, `andres@getvita.ai`
+    (sin repetir a quien lo manda).
+  - CC: `team@mail.vita.lat`.
+- Asunto con el prefijo `[Hack26]`. Las respuestas van con «Responder a todos», sin sacar a nadie.
+- Lo manda quien comunica, desde su cuenta. Un agente redacta el correo y lo envía solo con la
+  aprobación de su persona.
+- Si el mensaje salió primero por otro canal, el correo dice por dónde (por ejemplo «mandado también
+  al grupo Vita de WhatsApp»).
+- Nunca van llaves, tokens ni contraseñas en el correo.
+
 ## Commits
 
 - Un cambio, un commit. Mensaje `tipo: descripción` (`feat`, `fix`, `docs`, `chore`).
