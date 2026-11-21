@@ -97,3 +97,9 @@ Con tres segundos de demora, el inicio de las 13:00 baja a +34. Ninguna venta si
 `python3 tools/market/inventory.py --paper` simula las órdenes contra los precios en vivo, sin sesión, y escribe en `paper-orders.jsonl`. Sin `--paper` pide la sesión por entrada oculta, opera y escribe los recibos en `inventory-orders.jsonl`. Los límites se leen de `inventory.json` en el mismo directorio local mientras el proceso corre: `{"buying": false}` detiene las compras y `{"liquidate": true}` vende todo el inventario salvo team-11. Crear `inventory.stop` detiene el proceso y deja las posiciones como están.
 
 El [reglamento del juego](https://hack.platan.us/26-cl/market/bases) dice que las bananas no son transferibles entre participantes y prohíbe la colusión, las cuentas múltiples, la manipulación de la plataforma y el intercambio de bananas por dinero o favores, con descalificación inmediata. Este proceso usa una sola cuenta y las mismas órdenes que la página.
+
+### Simulación en vivo · 14:47 UTC
+
+`inventory.py --paper` partió a las 14:41 UTC con el tope de 300 bananas. Entre las 14:44:26 y las 14:45:20 simuló 15 compras de 20 bananas, a 19 bananas cada una. A las 14:46:32 alguien empezó a comprar team-10 de a 10 bananas, una orden por segundo. La simulación vendió el lote de team-10 a las 14:46:37, 50 ms después de la sexta orden: 30 bananas netas contra 19 de costo. El precio siguió hasta 0,0166 a las 14:46:49. Es una venta simulada: las acciones no estaban en el mercado y nadie pudo vender antes.
+
+Se comparó vender apenas se cruza el umbral contra esperar a que el precio deje de subir. Sobre la cinta, con inicios entre las 11:00 y las 13:45, la espera dio entre −23 y +12 bananas respecto de la venta inmediata. El proceso conserva la venta inmediata.
