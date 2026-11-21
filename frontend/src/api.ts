@@ -3,12 +3,19 @@ export interface SourceSync {
   total: number;
 }
 
+export interface SourceConnection {
+  account: string;
+  lastSyncedAt: string | null;
+  lastError: string | null;
+}
+
 export interface Source {
   id: string;
   label: string;
   how: string;
-  available: boolean;
+  connect: 'push' | 'key' | 'soon';
   sync: SourceSync | null;
+  connection: SourceConnection | null;
 }
 
 export interface PersonEvent {
@@ -43,11 +50,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export const fetchPerson = (token: string) => request<PersonPage>(`/api/people/${encodeURIComponent(token)}`);
+const post = (body?: unknown): RequestInit => ({
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: body === undefined ? undefined : JSON.stringify(body),
+});
 
-export const createPerson = (name: string) =>
-  request<CreatedPerson>('/api/people', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name }),
-  });
+const personPath = (token: string) => `/api/people/${encodeURIComponent(token)}`;
+
+export const fetchPerson = (token: string) => request<PersonPage>(personPath(token));
+export const createPerson = (name: string) => request<CreatedPerson>('/api/people', post({ name }));
+export const connectSource = (token: string, source: string, secret: string) =>
+  request<{ account: string; imported: number }>(`${personPath(token)}/connections/${source}`, post({ secret }));
+export const syncSource = (token: string, source: string) => request<{ imported: number }>(`${personPath(token)}/connections/${source}/sync`, post());
+export const disconnectSource = (token: string, source: string) => request<{ ok: boolean }>(`${personPath(token)}/connections/${source}`, { method: 'DELETE' });

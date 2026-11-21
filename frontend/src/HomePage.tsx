@@ -35,7 +35,7 @@ export function HomePage() {
         <span className="rd-label">Nueva persona</span>
         <form className="rd-actions" onSubmit={submit}>
           <input
-            className="app-input"
+            className="rd-input app-grow"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Nombre"
@@ -51,7 +51,7 @@ export function HomePage() {
       {created && link && (
         <section className="rd-card rd-glass">
           <span className="rd-label">Link de {created.name}</span>
-          <a className="app-code" href={link}>
+          <a className="rd-code" href={link}>
             {link}
           </a>
           <p className="rd-note">Es personal. Quien lo tenga puede ver sus registros.</p>
