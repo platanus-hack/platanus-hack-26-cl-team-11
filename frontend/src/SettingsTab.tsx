@@ -113,16 +113,6 @@ export function SettingsTab({ token, login, firstSteps, onOpenStep }: SettingsTa
               }
             />
           )}
-          <Item
-            icon={
-              <ItemIcon>
-                <Glyph name="map" />
-              </ItemIcon>
-            }
-            title="Mapa de contexto"
-            subtitle="Tus fuentes alrededor de ti"
-            href={`/contexto/${encodeURIComponent(token)}`}
-          />
         </div>
         <p className="rd-note">Tu link es personal. Quien lo tenga puede ver tus registros.</p>
       </div>

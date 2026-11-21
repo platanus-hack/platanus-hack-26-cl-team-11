@@ -2,7 +2,7 @@ import markUrl from '../../design/logo/montu-mark.svg';
 import { CopyButton } from './CopyButton';
 import { OverflowMenu } from './OverflowMenu';
 
-export function TopBar({ token }: { token: string }) {
+export function TopBar() {
   return (
     <header className="app-top">
       <a className="rd-brand" href="/">
@@ -10,9 +10,6 @@ export function TopBar({ token }: { token: string }) {
         Montu
       </a>
       <OverflowMenu>
-        <a className="rd-menu__item" href={`/contexto/${encodeURIComponent(token)}`}>
-          Ver tu mapa de contexto
-        </a>
         <CopyButton menu text={window.location.origin + window.location.pathname} label="Copiar tu link" />
       </OverflowMenu>
     </header>

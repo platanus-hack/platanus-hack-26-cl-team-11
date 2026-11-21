@@ -56,9 +56,6 @@ export function HomePage() {
             {link}
           </a>
           <p className="rd-note">Es personal. Quien lo tenga puede ver sus registros.</p>
-          <a className="rd-button rd-button--quiet app-link" href={`/contexto/${encodeURIComponent(created.token)}`}>
-            Ver su mapa de contexto
-          </a>
         </section>
       )}
       <RoomStart />
