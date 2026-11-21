@@ -122,8 +122,10 @@ izquierda; solo se centran los nombres bajo una cara.
   (`public/vita-faces`, escala 1,32 y origen Y 74 %) y se agrega a `faces/`.
 - Las caras actuales no buscan parecerse a cada integrante.
 - **En revisión (21-nov):** Mati volvió a abrir la pregunta de las caras. Las alternativas están en
-  `caras/sabores.html` (Vita Faces en vidrio, Tinta, Aura, Monograma). Hasta que Mati decida, rigen
-  las Vita Faces.
+  `caras/sabores.html`. Después de verlas pidió seguir con **Aura**: una gota de luz fluida por
+  persona, con su propia mezcla de colores, y una cara dibujada encima. Falta su visto bueno para
+  pasarla al producto; hasta entonces rigen las Vita Faces. Si se aprueba, cambia la regla «no hay
+  color por persona» de la sección Color.
 
 ## Grafo de agentes: el globo
 
@@ -143,6 +145,10 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
   atlas de 64 Vita Faces compuestas con las piezas de `vita-front` (`faces/atlas/faces.png`, 8 × 8
   de 128 px) y su gemelo desenfocado para el fondo (`faces/atlas/faces-blur.png`). Cerca del borde
   del globo las caras se achican para no amontonarse.
+- **Luz dentro de la esfera** (Mati, 21-nov): con 10, 50 y 300 personas el interior del globo es luz
+  fluida que se mueve lento (`luz/luz.js`, un sombreador WebGL2 sin librerías), y las conversaciones
+  posibles son hilos de luz blancos. Antes eran líneas de tinta gris y la esfera se veía rayada.
+  `?luz=0` vuelve a las líneas; sin WebGL2 también. Con `prefers-reduced-motion` la luz queda quieta.
 - **Escala desde datos**, no a mano:
   - 5 personas: pentágono con caras, nombre y estado al costado (como la referencia).
   - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan.
@@ -298,6 +304,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Contexto personal (`contexto/`): íconos reales de cada app, superficies chunky (tarjeta blanca con canto, ícono como tecla, botón 3D). Mapa como esfera de puntos en 3D, sin cables. El primer mapa plano con cables: rechazado. | Mati |
 | 21-nov-2026 | Dirección «Aura»: luz tipo Apple Intelligence, vidrio, bento, red de agentes al centro. | Mati |
 | 21-nov-2026 | Se conserva de Montu: tarjetas bento redondeadas y números tipo Apple Health. | Mati |
+| 21-nov-2026 | Globo: luz fluida dentro de la esfera e hilos de luz en vez de las líneas grises, que se veían como rayas en el vidrio. Caras: se explora «Aura», gota de luz con cara (`caras/sabores.html`); pendiente de aprobación. | Mati |
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
@@ -323,6 +330,7 @@ un punto, todavía no lo revisó Mati en grande).
 | `logo/ronda-mark.svg` | Isotipo. |
 | `faces/` | Caras del equipo. |
 | `caras/` | Página de prueba con alternativas de caras (`sabores.html`). Propuesta, no es producto. |
+| `luz/` | `luz.js`: la luz fluida del globo y de las caras Aura. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
 | `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (panel bento), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |

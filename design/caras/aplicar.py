@@ -7,6 +7,7 @@ atlas/faces.png con su gemelo atlas/faces-blur.png (64 caras, 8 x 8 de 128 px).
 
 Uso:  python3 design/caras/aplicar.py --sabor vidrio --parts <vita-front>/public/vita-faces --out <carpeta>
       python3 design/caras/aplicar.py --sabor tinta --out <carpeta>
+      python3 design/caras/aplicar.py --sabor aura --out <carpeta>
 
 Escribe en --out, nunca en design/faces/. Aplicar un sabor es copiar esos siete archivos a
 design/faces/ en un commit propio, después de que Mati lo apruebe.
@@ -26,9 +27,9 @@ CELL, TEAM_CELL, BLUR = 128, 320, 5
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def capture(layer, width, height):
+def capture(flavor, layer, width, height):
     target = os.path.join(tempfile.mkdtemp(), layer + '.png')
-    url = 'file://' + os.path.join(HERE, 'atlas.html') + '?capa=' + layer
+    url = 'file://' + os.path.join(HERE, 'atlas.html') + '?sabor=' + flavor + '&capa=' + layer
     subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
                     '--allow-file-access-from-files', '--window-size=%d,%d' % (width, height), '--virtual-time-budget=3000',
                     '--screenshot=' + target, url], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -36,8 +37,8 @@ def capture(layer, width, height):
 
 
 def sheets(flavor, parts):
-    if flavor == 'tinta':
-        return capture('atlas', CELL * 8, CELL * 8), capture('equipo', TEAM_CELL * len(TEAM_FILES), TEAM_CELL)
+    if flavor != 'vidrio':
+        return capture(flavor, 'atlas', CELL * 8, CELL * 8), capture(flavor, 'equipo', TEAM_CELL * len(TEAM_FILES), TEAM_CELL)
     background = componer.glass(CELL)
     atlas = Image.new('RGBA', (CELL * 8, CELL * 8))
     for index in range(64):
@@ -68,7 +69,7 @@ def circle(tile):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sabor', required=True, choices=['vidrio', 'tinta'])
+    parser.add_argument('--sabor', required=True, choices=['vidrio', 'tinta', 'aura'])
     parser.add_argument('--parts')
     parser.add_argument('--out', required=True)
     args = parser.parse_args()
