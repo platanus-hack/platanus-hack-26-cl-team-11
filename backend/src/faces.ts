@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from './pg/database.js';
 
 export const FACE_KINDS = ['capsula', 'ovalo', 'cuenta', 'almendra', 'huevo', 'arco', 'gota', 'media', 'cuadrada'] as const;
 export const FACE_SIZES = ['chica', 'media', 'grande'] as const;

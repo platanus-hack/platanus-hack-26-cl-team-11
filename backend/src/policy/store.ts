@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { DEFAULT_VISIBILITY, type Signals, type SignalVisibility, type Visibility } from '../signals.js';
 
 export interface Policy extends SignalVisibility {

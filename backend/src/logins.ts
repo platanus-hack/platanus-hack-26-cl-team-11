@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from './pg/database.js';
 
 export type LinkOutcome = 'asociada' | 'ya_era_tuya' | 'de_otra_persona';
 

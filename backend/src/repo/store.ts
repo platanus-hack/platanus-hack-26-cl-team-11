@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import type { Visibility } from '../signals.js';
 
 export const DEFAULT_SHARE: Visibility = 'preguntar';

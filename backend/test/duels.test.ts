@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
+import { openDatabase } from '../src/pg/database.js';
 import test from 'node:test';
 import { createGame, FIVE_MINUTES, GRACE } from '../src/duels/game.js';
 
@@ -15,7 +15,7 @@ function tape(ts: number, a = 0.05, b = 0.1) {
   };
 }
 function setup() {
-  const game = createGame(new DatabaseSync(':memory:'));
+  const game = createGame(openDatabase({ kind: 'memory' }));
   for (const id of ['one', 'two', 'three']) game.register(id, id);
   const key = game.place('one', 'ticket', 'a', 'b', tape(start), start);
   return { game, key };

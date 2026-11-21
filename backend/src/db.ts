@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from './pg/database.js';
 import { randomBytes } from 'node:crypto';
 import type { Vault } from './crypto.js';
 import type { Connection, EventDraft, Person, SourceId, StoredEvent } from './types.js';

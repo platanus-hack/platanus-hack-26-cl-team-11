@@ -1,5 +1,6 @@
 import { mkdirSync } from 'node:fs';
-import { DatabaseSync } from 'node:sqlite';
+import { openDatabase, type DatabaseSync } from './pg/database.js';
+import { openSqlite } from './pg/sqlite.js';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { claudeCliConfigFrom, createClaudeCliModel } from './agents/claudeCli.js';
@@ -116,12 +117,23 @@ const channelFrom = (env: NodeJS.ProcessEnv, fetchImpl: Fetch): WhatsAppChannel 
   return config ? createKapsoChannel(config, fetchImpl) : null;
 };
 
+export const SQLITE_FILE = 'ronda.db';
+
+export const dataLocation = (env: NodeJS.ProcessEnv = process.env): string => env.DATA_DIR || defaultDataDir();
+
+function openDatabaseAt(location: string, env: NodeJS.ProcessEnv): DatabaseSync {
+  if (location === ':memory:') return openDatabase({ kind: 'memory' });
+  const url = env.DATABASE_URL?.trim();
+  return url ? openDatabase({ kind: 'postgres', url }) : openSqlite(join(location, SQLITE_FILE));
+}
+
 export function createContext(options: { location?: string; fetch?: Fetch; config?: Config; model?: AgentModel | null; whatsapp?: WhatsAppChannel | null } = {}): AppContext {
-  const location = options.location ?? (process.env.DATA_DIR || defaultDataDir());
+  const location = options.location ?? dataLocation();
   const inMemory = location === ':memory:';
-  if (!inMemory) mkdirSync(location, { recursive: true });
+  const onPostgres = !inMemory && Boolean(process.env.DATABASE_URL?.trim());
+  if (!inMemory && !onPostgres) mkdirSync(location, { recursive: true });
   const vault = createVault(inMemory ? null : location);
-  const db = new DatabaseSync(inMemory ? ':memory:' : join(location, 'ronda.db'));
+  const db = openDatabaseAt(location, process.env);
   const store = openStore(db, vault);
   const teams = openTeamStore(db);
   const ctx: AppContext = {

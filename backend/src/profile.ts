@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from './pg/database.js';
 
 export const MAX_PROFILE_TEXT_LENGTH = 120;
 

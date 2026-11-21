@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { normalizeCode, randomCode } from '../codes.js';
 import type { JsonObject } from '../types.js';
 

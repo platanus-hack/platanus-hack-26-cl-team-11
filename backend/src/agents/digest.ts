@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import * as z from 'zod/v4';
 import type { RepoFile, RepoStore } from '../repo/store.js';
 import type { Need } from './cards.js';

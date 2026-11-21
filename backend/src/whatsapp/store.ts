@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { randomCode } from '../codes.js';
 
 export const LINK_CODE_LENGTH = 6;

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { CHECKIN_SOURCE, CHECKIN_TYPE, isMood, MAX_CHECKIN_TEXT_LENGTH as MAX_TEXT_LENGTH, MOODS, recordCheckin, type Mood } from '../checkins.js';
 import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';

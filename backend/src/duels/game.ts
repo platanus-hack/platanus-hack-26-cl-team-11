@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { HTTPException } from 'hono/http-exception';
 
 export const FIVE_MINUTES = 300_000;

@@ -1,4 +1,4 @@
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from './pg/database.js';
 
 export const MAX_CHAT_TEXT_LENGTH = 1000;
 const DEFAULT_LIMIT = 30;

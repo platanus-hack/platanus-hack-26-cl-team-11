@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { normalizeCode, randomCode, sha256 } from '../codes.js';
 
 export const ASSISTANT_KINDS = ['claude-code', 'claude', 'codex', 'chatgpt', 'grok', 'openclaw', 'cursor', 'gemini', 'instinct', 'otro'] as const;

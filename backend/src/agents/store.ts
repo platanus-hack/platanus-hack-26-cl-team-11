@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 import { topicKeyOf, type TopicDecisions } from './cards.js';
 import type { HelpAnswer } from './prompts.js';
 

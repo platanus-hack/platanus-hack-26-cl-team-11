@@ -5,13 +5,18 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startAgentRoutine } from './agents/routine.js';
 import { createApp } from './app.js';
-import { createContext } from './context.js';
+import { createContext, dataLocation, SQLITE_FILE } from './context.js';
 import { designAssets } from './designAssets.js';
 import { startMesaTicker } from './mesa/ticker.js';
+import { describeImport, importFromSqlite } from './pg/importSqlite.js';
 import { startScheduler } from './scheduler.js';
 
 const ctx = createContext();
 const app = createApp(ctx);
+if (process.env.DATABASE_URL?.trim()) {
+  const imported = importFromSqlite(ctx.db, join(dataLocation(), SQLITE_FILE));
+  if (imported) for (const line of describeImport(imported)) console.log(line);
+}
 startScheduler(ctx);
 startAgentRoutine(ctx);
 startMesaTicker(ctx);

@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from '../pg/database.js';
 
 export const POST_KINDS = ['pregunta', 'pedido', 'propuesta'] as const;
 export const POST_STATUSES = ['abierto', 'cerrado'] as const;
