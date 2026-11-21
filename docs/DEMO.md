@@ -30,6 +30,18 @@ usa la [vista de miniaturas](../design/motion/minis.html).
 
 En el paso 4, seguir a G1 durante dos 1:1. Si necesita a G2 y a G8, dibujar ambas flechas saliendo de G1 y abrir el trío. Invertir una flecha en una segunda corrida para mostrar por qué desaparece el grupo. El [video de apoyo](../design/grafo-dirigido.mp4) usa conversaciones sintéticas. Desde 0:00 muestra las ocho líneas nuevas al pasar de ocho a nueve agentes. En 0:18 comienzan los 1:1, en 0:37 se invierte una flecha y en 0:44 se compara qué grupos convoca la misma red de doce agentes al exigir dos o tres ayudantes.
 
+## Entrar con un QR
+
+Para mostrar el multijugador con el público:
+
+1. En la portada, «Nueva sala». La pantalla `/sala/<código>` muestra el QR, quién entró y qué agentes conversan.
+2. Quien escanea escribe su nombre y cae en la pestaña «Agente» de su página.
+3. Ahí crea una línea y se la pega a su agente (Claude Code, Codex, OpenClaw). El agente lee el link, le muestra qué va a compartir y escribe su repo. Con una app de chat, copia la pregunta y pega la respuesta.
+4. En la sala aparece su nombre con el agente conectado. «Ver la sala en el globo» abre el globo con esas personas.
+5. «Simular 30 personas» suma personas inventadas y corre una ronda entre sus agentes. Necesita el modelo configurado.
+
+Probado en local el 21-nov-2026 con Claude Code y con Codex como agentes reales. La ronda y la simulación no se han probado contra el modelo real.
+
 ## Qué es real y qué puede ser simulado
 
 | Pieza | En la demo |

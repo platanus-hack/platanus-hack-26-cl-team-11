@@ -11,6 +11,9 @@
 | Relación con Montu | Proyecto nuevo con código desde cero; se toma lo aprendido, no el código. |
 | Conversación entre agentes | Primero 1:1. Las necesidades descubiertas forman un grafo dirigido. En el turno 2, las salidas de un mismo solicitante pueden originar grupos. Red sin coordinador, con tablero y función de agregado; detalle en [AGENT_MODEL.md](AGENT_MODEL.md). |
 | Orden de construcción | Base, luego diferenciadores, luego extras; detalle en [ROADMAP.md](ROADMAP.md). |
+| Multijugador | Una sala abierta con QR. El agente que cada persona ya usa entra con un link y escribe su repo; el agente personal de Ronda conversa leyendo ese repo. Detalle en [AGENT_MODEL.md](AGENT_MODEL.md#agente-personal-y-asistentes-conectados). |
+| Cómo se conecta un agente | No hay un estándar único. Se usa un link pegado con un documento de ingreso (como hizo Moltbook con OpenClaw) y, para apps de chat, copiar una pregunta y pegar la respuesta. Un servidor MCP queda como siguiente puerta; A2A no calza porque exige que cada agente sea un servidor con dirección. |
+| Modelo | DeepSeek en 50x, con `FIFTYX_API_KEY`. |
 
 ## Abierto
 
@@ -29,6 +32,14 @@
 - [ ] **Cuánto tiempo se guarda** la memoria privada.
 - [ ] **Qué ve un líder** cuando una persona eligió no compartir nada.
 
+### Multijugador
+
+- [ ] **Cargar `FIFTYX_API_KEY` en Render** y probar una ronda y una simulación contra el modelo real. Hasta entonces corren solo con un modelo falso en las pruebas.
+- [ ] **El globo dentro de `/sala/<código>`.** Hoy es una página de prueba (`design/grafo/sala.html`). Falta que Mati decida cómo nace un nodo, cómo se ve antes y después de conectar su agente, y la dirección del arco.
+- [ ] **Puerta MCP** para conectar apps de chat sin copiar y pegar, y **respuestas en vivo** de un asistente que esté abierto durante la ronda. No construidas.
+- [ ] **«Preguntar antes» por archivo.** Hoy un archivo en ese estado espera a que la persona lo cambie. Falta que el agente le pregunte por WhatsApp.
+- [ ] **Logos de ChatGPT, Grok, OpenClaw e Instinct.** Usan un glifo genérico.
+
 ### Técnica
 
 - [x] **Framework de agentes.** Ninguno: llamadas directas al modelo con salida estructurada, en `backend/src/agents/`. Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
@@ -42,7 +53,7 @@
 ### Equipo
 
 - [ ] Quién toma cada ítem de [ROADMAP.md](ROADMAP.md) y quién arma la presentación.
-- [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo.
+- [ ] Confirmar en el sitio de Y Combinator si «Multiplayer AI» está en sus Requests for Startups antes de citarlo. Fuentes secundarias (21-nov-2026) dicen que es el n.º 4 de Fall 2026, de Aaron Epstein; falta verlo en la página de YC.
 
 ### Hallazgos de la revisión del backend sin verificar (21-nov-2026)
 
