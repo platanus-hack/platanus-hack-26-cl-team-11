@@ -63,6 +63,7 @@ const mergeTopics = (first: string[], second: string[]): string[] => {
 
 export function buildCard({ token, name, signals, decisions, repo }: CardSource): AgentCard {
   const statements: string[] = [...(repo?.workingOn ?? [])];
+  if (signals.visibility.expertise === 'siempre') statements.push(...signals.focus);
   if (signals.visibility.energy === 'siempre' && signals.energy.level !== 'sin_datos') statements.push(signals.energy.statement);
   if (signals.visibility.load === 'siempre' && signals.load.level !== 'sin_datos') statements.push(signals.load.statement);
 

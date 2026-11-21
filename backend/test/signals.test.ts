@@ -293,3 +293,27 @@ test('a blocker told in a check-in asks before it is shared, a stale task does n
   assert.equal(signals.blockers.find((blocker) => blocker.source === 'checkin')?.visibility, 'preguntar');
   assert.equal(signals.blockers.find((blocker) => blocker.source === 'linear')?.visibility, 'siempre');
 });
+
+test('what a person is working on comes from their started tasks, open pull requests and recent commits, with no text written by them', () => {
+  const task = (identifier: string, title: string, stateType: string, daysAgo: number) =>
+    event('linear', 'tarea', momentAgo(daysAgo), { identifier, title, stateType, updatedAt: momentAgo(daysAgo), dueDate: null });
+  const pull = (action: string, title: string, daysAgo: number) =>
+    event('github', 'pull_request', momentAgo(daysAgo), { repo: 'vita/pagos-api', action, title, url: `https://github.com/vita/pagos-api/pull/${title.length}` });
+  const commit = (repo: string, daysAgo: number) => event('github', 'commit', momentAgo(daysAgo), { repo, commits: 2 });
+
+  const signals = deriveSignals(
+    [
+      task('VIT-1', 'Reintentos del webhook de pagos', 'started', 1),
+      task('VIT-2', 'Migrar clientes antiguos', 'completed', 1),
+      pull('opened', 'Valida la firma del webhook', 2),
+      pull('opened', 'Arregla el redondeo', 3),
+      pull('closed', 'Arregla el redondeo', 1),
+      commit('vita/panel', 1),
+      commit('vita/pagos-api', 1),
+      commit('vita/viejo', 9),
+    ],
+    NOW,
+  );
+
+  assert.deepEqual(signals.focus, ['Trabaja en «Reintentos del webhook de pagos»', 'Tiene abierto «Valida la firma del webhook» en pagos-api', 'Hizo commits en panel en los últimos días']);
+});

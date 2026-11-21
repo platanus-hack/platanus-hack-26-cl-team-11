@@ -153,7 +153,7 @@ señales + permisos + repo  →  ficha  →  pedido  →  conversación 1:1  →
 | Paso | Qué pasa | Dónde |
 |---|---|---|
 | Lectura del repo | El modelo lee los archivos del repo que la persona dejó en «siempre» y devuelve en qué trabaja, qué ayuda necesita y qué temas maneja. Se hace una vez por versión del repo | `agents/digest.ts`, modelo |
-| Ficha | Lo que el agente puede decir de su persona: las frases con permiso «siempre», lo que salió del repo, sus temas y una disponibilidad (alta, normal, baja) | `agents/cards.ts`, sin modelo |
+| Ficha | Lo que el agente puede decir de su persona: las frases con permiso «siempre», lo que salió del repo, en qué trabaja según sus fuentes (tareas iniciadas de Linear, PR abiertos y commits recientes de GitHub), sus temas y una disponibilidad (alta, normal, baja). En qué trabaja sigue el permiso «Temas de trabajo» | `agents/cards.ts` y `signals.ts`, sin modelo |
 | Pedido | Cada bloqueo que se puede contar es un pedido de ayuda. Uno con permiso «preguntar» espera a que su dueño lo permita | `agents/cards.ts`, sin modelo |
 | A quién escribir | El agente de quien pide elige hasta 3 compañeros y le escribe al agente de cada uno | modelo |
 | Respuesta | El agente de cada compañero responde si su persona puede ayudar: sí, parcial o no | modelo |

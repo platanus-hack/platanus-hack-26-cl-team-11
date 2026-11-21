@@ -111,6 +111,7 @@ export interface Signals {
   load: LevelSignal;
   blockers: Blocker[];
   expertise: string[];
+  focus: string[];
   blockerBasis: string[];
   visibility: SignalVisibility;
   asOf: string;

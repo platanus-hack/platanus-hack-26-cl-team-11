@@ -31,6 +31,7 @@ export interface Signals {
   blockers: Blocker[];
   blockerBasis: string[];
   expertise: string[];
+  focus: string[];
   visibility: SignalVisibility;
   asOf: string;
 }
@@ -77,6 +78,11 @@ const STARTED_STATE = 'started';
 const CLOSED_STATES = ['completed', 'canceled'];
 
 const MAX_REPOS = 5;
+const MAX_FOCUS_TASKS = 3;
+const MAX_FOCUS_PULLS = 2;
+const MAX_FOCUS_REPOS = 2;
+const RECENT_PULL_DAYS = 7;
+const RECENT_COMMIT_DAYS = 3;
 const MAX_TOPICS = 5;
 const MIN_TOPIC_TITLES = 2;
 const MIN_TOPIC_LENGTH = 3;
@@ -369,6 +375,42 @@ function deriveExpertise(events: StoredEvent[], tasks: Task[]): string[] {
   return [...new Set([...rankedKeys(repoActivity, 1, MAX_REPOS), ...rankedKeys(titlesPerWord, MIN_TOPIC_TITLES, MAX_TOPICS)])];
 }
 
+function deriveFocus(events: StoredEvent[], tasks: Task[], now: Date): string[] {
+  const started = tasks
+    .filter((task) => task.stateType === STARTED_STATE)
+    .sort((left, right) => right.updatedAt - left.updatedAt)
+    .slice(0, MAX_FOCUS_TASKS)
+    .map((task) => `Trabaja en «${task.title}»`);
+
+  const openPulls = new Map<string, { title: string; repo: string; at: number }>();
+  const lastCommitByRepo = new Map<string, number>();
+  const ordered = events.filter((event) => event.source === 'github').sort((left, right) => (instantOf(left.occurredAt) ?? 0) - (instantOf(right.occurredAt) ?? 0));
+  for (const event of ordered) {
+    const raw = rawOf(event);
+    const repo = textOf(raw.repo);
+    const at = instantOf(event.occurredAt);
+    if (!repo || at === null) continue;
+    if (event.type === 'commit' && now.getTime() - at <= RECENT_COMMIT_DAYS * DAY_MS) lastCommitByRepo.set(shortRepoName(repo), at);
+    const title = event.type === 'pull_request' ? textOf(raw.title) : null;
+    if (!title) continue;
+    const key = textOf(raw.url) ?? `${repo}:${title}`;
+    if (raw.action === 'opened' && now.getTime() - at <= RECENT_PULL_DAYS * DAY_MS) openPulls.set(key, { title, repo: shortRepoName(repo), at });
+    if (raw.action === 'closed') openPulls.delete(key);
+  }
+  const pulls = [...openPulls.values()]
+    .sort((left, right) => right.at - left.at)
+    .slice(0, MAX_FOCUS_PULLS)
+    .map((pull) => `Tiene abierto «${pull.title}» en ${pull.repo}`);
+  const pullRepos = new Set([...openPulls.values()].map((pull) => pull.repo));
+  const repos = [...lastCommitByRepo.entries()]
+    .filter(([repo]) => !pullRepos.has(repo))
+    .sort(([, left], [, right]) => right - left)
+    .slice(0, MAX_FOCUS_REPOS)
+    .map(([repo]) => `Hizo commits en ${repo} en los últimos días`);
+
+  return [...started, ...pulls, ...repos];
+}
+
 export function deriveSignals(events: StoredEvent[], now: Date, options: SignalOptions = {}): Signals {
   const timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
   const today = dayKeyOf(now, timeZone);
@@ -384,6 +426,7 @@ export function deriveSignals(events: StoredEvent[], now: Date, options: SignalO
     blockers: [...(reportedBlocker ? [reportedBlocker] : []), ...staleTaskBlockers(tasks, now, today, timeZone)],
     blockerBasis: [...(hasRecentCheckin ? ['checkin'] : []), ...(tasks.length > 0 ? ['linear'] : [])],
     expertise: deriveExpertise(events, tasks),
+    focus: deriveFocus(events, tasks, now),
     visibility: { ...DEFAULT_VISIBILITY },
     asOf: now.toISOString(),
   };

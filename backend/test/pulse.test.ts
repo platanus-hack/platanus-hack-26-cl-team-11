@@ -13,6 +13,7 @@ const signals = (energy: SignalLevel, load: SignalLevel, blockers = 0): Signals 
   blockers: Array.from({ length: blockers }, (_, index) => ({ topic: `tema ${index}`, since: '', statement: '', source: 'checkin' as const, visibility: 'preguntar' as const })),
   blockerBasis: ['checkin'],
   expertise: [],
+  focus: [],
   visibility: { ...DEFAULT_VISIBILITY },
   asOf: '',
 });

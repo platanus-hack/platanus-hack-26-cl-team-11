@@ -28,7 +28,7 @@ export function statementsOf(signals: Signals, key: SignalKey, complete = false)
   if (key === 'energy') return [signals.energy.statement];
   if (key === 'load') return [signals.load.statement];
   if (key === 'blockers') return signals.blockers.length > 0 ? signals.blockers.map((blocker) => blocker.statement) : ['Sin bloqueos abiertos'];
-  return [topicsText(complete ? signals.expertise : signals.expertise.slice(0, MAX_TOPICS_SHOWN))];
+  return [...signals.focus, topicsText(complete ? signals.expertise : signals.expertise.slice(0, MAX_TOPICS_SHOWN))];
 }
 
 export function basisOf(signals: Signals, key: SignalKey): string[] {
