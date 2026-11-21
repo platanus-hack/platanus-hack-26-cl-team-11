@@ -136,6 +136,11 @@
 .rd-player__position > span { display: block; height: 100%; background: var(--rd-ink); transform-origin: left; }
 .rd-player__time { color: var(--rd-muted); font-size: var(--rd-text-small); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+/* Objeto táctil sobre una conexión. El dibujo interno sigue la caja del host. */
+.rd-mini { display: inline-block; width: var(--mini-size, 72px); aspect-ratio: 1; }
+a.rd-mini-link { color: inherit; text-decoration: none; }
+a.rd-mini-link:focus-visible { outline: 2px solid var(--rd-ink); outline-offset: 3px; border-radius: var(--rd-space-2); }
+
 /* ---------- Teléfono ---------- */
 @media (max-width: 700px) {
   .rd-chip--status { white-space: normal; }

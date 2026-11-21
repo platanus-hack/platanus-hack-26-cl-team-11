@@ -36,6 +36,22 @@
   --rd-aura-pink: #ff5fa8;
   --rd-aura-orange: #ffa24a;
 
+  /* Objetos de actividad en el grafo: esmalte, papel, tinta y caras en sombra. */
+  --rd-mini-ink: #392c2b;
+  --rd-mini-paper: #fff4d9;
+  --rd-mini-paper-side: #d2ad82;
+  --rd-mini-yellow: #ffc64c;
+  --rd-mini-ochre: #c87d27;
+  --rd-mini-orange: #fd8455;
+  --rd-mini-rust: #bd533b;
+  --rd-mini-mint: #85d5ba;
+  --rd-mini-teal: #418e86;
+  --rd-mini-blue: #96bdf4;
+  --rd-mini-denim: #5e78ac;
+  --rd-mini-screen: #284b47;
+  --rd-mini-phosphor: #c8ff90;
+  --rd-mini-shadow: rgba(68, 44, 37, .17);
+
   /* ---- Tipografía ---- */
   --rd-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
   --rd-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace; /* solo código, llaves y direcciones */

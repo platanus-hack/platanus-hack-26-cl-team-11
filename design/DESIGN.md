@@ -102,6 +102,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-face` (`--small`, `--tiny`), `rd-person` | Cara y nombre con estado. | Siempre juntos. |
 | `rd-graph`, `rd-node`, `rd-edge*` | El grafo de agentes. | **En trabajo**, ver abajo. |
 | `rd-input`, `rd-row`, `rd-code` | Campo de texto, fila de lista con divisor y bloque de código. | Para pantallas de configuración. El código usa `--rd-font-mono`, nada más lo usa. |
+| `rd-mini`, `rd-mini-link` | Miniatura de una interacción sobre su conexión. | Un objeto, un gesto reconocible y su ejemplo ampliado. |
 | `rd-player`, `rd-player__position`, `rd-player__time` | Controles de una escena. | Pausa y repetición, avance de izquierda a derecha y tiempo transcurrido. |
 | `rd-layout`, `rd-stack` | Dos columnas: contenido y columna de tarjetas de 392 px. | En teléfono queda una columna. |
 
@@ -142,8 +143,29 @@ Lo que **está abierto** (no lo cierres por tu cuenta; propón y pregunta):
 
 ## Movimiento
 
-Una sola animación continua: la luz que recorre las conexiones activas. Lo demás aparece sin
+En las pantallas generales, la animación continua es la luz que recorre las conexiones activas. Las miniaturas del grafo tienen la coreografía descrita abajo. Lo demás aparece sin
 rebotes ni giros. Se respeta `prefers-reduced-motion`.
+
+### Miniaturas de interacción
+
+En el grafo se ven varias acciones a la vez. Cada una se lee por la silueta y por el
+movimiento de un objeto físico. La referencia que pidió Mati es el estilo chunky de
+PostHog: objetos pequeños de escritorio, con volumen, color local y una mecánica reconocible.
+
+- **Superficies.** Dibujar frente, canto y cara superior. La luz viene de arriba a la izquierda.
+  Usar contorno de tinta cálida, brillo corto en el bisel y sombra de contacto suave. Las tapas
+  esmaltadas, las hojas de papel y el cristal del monitor tienen acabados distintos. Los colores
+  están en los tokens `--rd-mini-*`. Esta paleta se usa en los objetos del grafo.
+- **Escala.** Diseñar para leer primero la silueta a 48–88 px. Los detalles explican la acción al
+  acercarse. El nombre queda por fuera del objeto y la conexión pasa por debajo. Las caras de las
+  personas conservan espacio propio.
+- **Movimiento.** Cada mini repite preparación, acción y reposo. Desfasar los inicios para que
+  se vean conversaciones independientes. Mantener inmóvil el anclaje al grafo, mover las partes
+  del objeto. Pausar conserva la fase actual. Con movimiento reducido se ve el resultado quieto.
+- **Significados.** Chat alterna dos bocadillos. Calendarios alinea una ranura de ambas agendas.
+  Salud lee en el monitor y cierra el candado. Permisos estampa la autorización antes de que salga
+  el papel. Ayuda encaja dos piezas después de que ambas aceptan. Las miniaturas compartidas
+  representan la actividad con símbolos y prescinden de valores personales.
 
 ## Lo que no se hace
 
@@ -163,6 +185,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Dirección «Aura»: luz tipo Apple Intelligence, vidrio, bento, red de agentes al centro. | Mati |
 | 21-nov-2026 | Se conserva de Montu: tarjetas bento redondeadas y números tipo Apple Health. | Mati |
 | 21-nov-2026 | Caras: Vita Faces (alternativas mencionadas: estilo Notion o fotos reales; no elegidas). | Mati |
+| 21-nov-2026 | Miniaturas simultáneas en las conexiones, con superficies 3D chunky de inspiración PostHog y movimiento propio por acción. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 
 Abierto: nombre definitivo («Ronda» es provisorio) e isotipo definitivo (el actual, tres órbitas y
