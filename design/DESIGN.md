@@ -124,23 +124,35 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 
 - Un globo de vidrio en 3D, dibujado en `<canvas>` con perspectiva propia (sin librerías). Las
   personas viven sobre la esfera; cada conversación posible es un arco que pasa por encima de la
-  superficie. Lo que queda atrás se dibuja más tenue (tres capas de profundidad).
-- **Escala desde datos**, no a mano: la lista de personas y de pares decide todo.
+  superficie.
+- **Profundidad:** lo que queda detrás del globo se dibuja primero, desenfocado y tenue; encima va
+  un velo de vidrio (relleno claro, brillo que se desplaza lento y borde blanco) y recién después lo
+  de adelante. Así los nodos de atrás nunca se confunden con los de adelante.
+- **Toda persona tiene cara.** El equipo usa sus Vita Faces (`faces/*.png`); el resto sale de un
+  atlas de 64 Vita Faces compuestas con las piezas de `vita-front` (`faces/atlas/faces.png`, 8 × 8
+  de 128 px) y su gemelo desenfocado para el fondo (`faces/atlas/faces-blur.png`). Cerca del borde
+  del globo las caras se achican para no amontonarse.
+- **Escala desde datos**, no a mano:
   - 5 personas: pentágono con caras, nombre y estado al costado (como la referencia).
-  - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan y se
-    vuelven más tenues. Con 300 las 44.850 líneas son una neblina de luz dentro del globo, con
-    brillo de vidrio arriba a la izquierda y un borde blanco fino. Nunca una mancha oscura.
-  - Las demás personas son perlas blancas, sin cara ni nombre.
-- **O(1) a la vista:** con más de 5 solo tienen cara Tú y las personas con quienes tu agente está
-  negociando ahora (Ian y Lian en la demo). Solo esas conversaciones van con degradado, halo, chip
-  y el punto de luz que las recorre.
-- **Interactivo:** se arrastra para girar el globo (con inercia; después de 4 s sin tocarlo vuelve
-  solo a su posición). Al pasar el cursor por una persona se encienden sus n − 1 conversaciones
-  en gris, más fuerte las de adelante, y un chip dice «N conversaciones posibles».
-- **Movimiento:** el globo se mece despacio; al cambiar de tamaño las personas viajan a su nuevo
-  lugar y las nuevas crecen desde cero. Sin `prefers-reduced-motion`: queda quieto, sin luz que
-  recorra, y todo cambio es inmediato.
-- Se reproduce solo 5 → 10 → 50 → 300; tocar un tamaño lo detiene ahí.
+  - 10, 50, 300: esfera (espiral de ángulo áureo). La cámara retrocede, las líneas se adelgazan.
+    Con 300 las 44.850 líneas son una neblina de luz dentro del globo. Nunca una mancha oscura.
+- **Grupos negociando a la vez** (2 con 5 personas, 3 con 10, 6 con 50, 10 con 300). Tu grupo
+  (Tú, Ian, Lian) siempre está activo y con chips; los demás nacen, negocian y cierran solos:
+  - nace: las líneas se dibujan desde quien pide ayuda, con una punta de luz;
+  - negocia: degradado, halo y luz que recorre la línea;
+  - acuerdo: la línea destella en blanco y sale un anillo con degradado y chispas; luego se apaga y
+    el grupo reaparece en otra parte del globo.
+  - Cada miembro de un grupo activo lleva un **aro con degradado** (la indicación de grupo).
+- **Interacción:**
+  - Arrastrar gira el globo (con inercia; a los 4 s sin tocarlo vuelve solo).
+  - Pasar el cursor por una persona enciende sus n − 1 conversaciones y un chip con su nombre.
+  - Tocar a alguien con aro destaca su grupo: el globo gira para dejarlo al frente, el resto se
+    atenúa, aparece el tema sobre el grupo y una tarjeta a la derecha con el tema, cada miembro con
+    cara, nombre y rol («Pide ayuda» / «Puede ayudar»), y «N agentes, M conversaciones. Nadie más se
+    entera.». Tocar fuera o «Cerrar» lo suelta.
+- Se reproduce solo 5 → 10 → 50 → 300; tocar un tamaño o un grupo lo detiene.
+- `prefers-reduced-motion`: sin vaivén, sin luz que recorre, sin nacimientos ni destellos; todo
+  cambio es inmediato.
 
 **Sigue abierto** (proponer y preguntar):
 
@@ -231,6 +243,7 @@ Cada punto es una dirección que Mati ya rechazó.
 | 21-nov-2026 | Se piden miniaturas simultáneas en las conexiones y la referencia chunky 3D de PostHog. Mati rechaza la primera ejecución de las cinco piezas. Rediseño pendiente. | Mati |
 | 21-nov-2026 | El grafo queda abierto: «necesita trabajo». | Mati |
 | 21-nov-2026 | Grafo con anillo/nube en 2D: descartado («horrible»). | Mati |
+| 21-nov-2026 | Globo: cara en todos los nodos, nodos de atrás desenfocados bajo un velo de vidrio, varios grupos negociando con aro de grupo, tocar un grupo lo destaca, efectos de nacimiento y acuerdo. | Mati |
 | 21-nov-2026 | Grafo = globo de vidrio en 3D: escala 5 → 300 desde datos, solo tus conversaciones con cara y degradado, se arrastra para girar y se resalta una persona al pasar el cursor. | Mati |
 
 Abierto: nombre definitivo («Ronda» es provisorio) e isotipo definitivo (el actual, tres órbitas y

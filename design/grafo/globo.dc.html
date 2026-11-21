@@ -17,14 +17,19 @@ body{margin:0}
 .aura i:nth-child(4){left:72%;top:58%;width:29%;background:#ffa24a;opacity:.24;filter:blur(120px)}
 .grad{background:linear-gradient(100deg,#1e9bff 0%,#7b61ff 30%,#e840d8 55%,#ff3b6b 76%,#ff8a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .pill{height:40px;min-width:64px;padding:0 18px;border:0;border-radius:999px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .25s ease,color .25s ease}
-.pill:focus-visible{outline:2px solid #7b61ff;outline-offset:3px}
+.pill:focus-visible,.close:focus-visible{outline:2px solid #7b61ff;outline-offset:3px}
+.ring{width:14px;height:14px;border-radius:50%;padding:2px;background:linear-gradient(100deg,#1e9bff,#7b61ff,#e840d8,#ff3b6b,#ff8a1f);box-sizing:border-box;flex:0 0 auto}
+.ring i{display:block;width:100%;height:100%;border-radius:50%;background:#f7f7fa}
+.fadein{animation:fadein .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.fadein{animation:none}}
 </style>
 </helmet>
 <div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: #f7f7fa; color: #1d1d1f; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif">
   <div class="aura" aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none"><i></i><i></i><i></i><i></i></div>
-  <canvas ref="{{canvasRef}}" aria-hidden="true" style="position: absolute; inset: 0; width: 1440px; height: 900px; display: block"></canvas>
+  <canvas ref="{{canvasRef}}" role="img" aria-label="Globo de agentes. Arrastra para girarlo; toca a una persona con aro para ver su grupo." style="position: absolute; inset: 0; width: 1440px; height: 900px; display: block"></canvas>
 
-  <header style="position: absolute; left: 44px; right: 44px; top: 26px; display: flex; align-items: center; justify-content: space-between">
+  <header style="position: absolute; left: 44px; right: 44px; top: 26px; display: flex; align-items: center; justify-content: space-between; pointer-events: none">
     <div style="display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 600; letter-spacing: -0.02em"><img src="/_blob/0d17598bfabb8ce4825e7ea44797ac6d" alt="" style="width: 40px; height: 40px; display: block">Ronda</div>
     <div style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); -webkit-backdrop-filter: blur(28px) saturate(1.4); backdrop-filter: blur(28px) saturate(1.4); font-size: 13px; font-weight: 600"><span style="width: 7px; height: 7px; border-radius: 50%; background: #30d158"></span>Viernes 8:45 · {{onlineLabel}}</div>
   </header>
@@ -41,11 +46,41 @@ body{margin:0}
       </div>
       <span style="font-size: 13px; color: #6e6e73; line-height: 1.35">Los agentes viven en O(n²). Tú vives en O(1).</span>
     </div>
+
     <div role="group" aria-label="Personas" style="display: flex; gap: 6px; padding: 5px; border-radius: 999px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); align-self: flex-start">
       <sc-for list="{{options}}" as="opt" hint-placeholder-count="4">
         <button type="button" class="pill" aria-pressed="{{opt.pressed}}" onClick="{{opt.pick}}" style="{{opt.style}}">{{opt.label}}</button>
       </sc-for>
     </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px; font-size: 13px; color: #6e6e73">
+      <span class="ring"><i></i></span>
+      <span><span style="color: #1d1d1f; font-weight: 600">{{groupsLabel}}</span> · toca un aro para ver el grupo</span>
+    </div>
+
+    <sc-if value="{{hasFocus}}" hint-placeholder-val="{{false}}">
+      <div class="fadein" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 24px 22px; border-radius: 28px; background: rgba(255,255,255,.66); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px rgba(40,30,90,.08); -webkit-backdrop-filter: blur(28px) saturate(1.4); backdrop-filter: blur(28px) saturate(1.4)">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span class="grad" style="font-size: 13px; font-weight: 600; align-self: flex-start">Grupo negociando</span>
+            <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2">{{focus.topic}}</span>
+          </div>
+          <button type="button" class="close" aria-label="Cerrar grupo" onClick="{{clearFocus}}" style="width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(120,120,140,.14); color: #1d1d1f; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 2l8 8M10 2l-8 8"></path></svg></button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{focus.members}}" as="m" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span aria-hidden="true" style="{{m.face}}"></span>
+              <div style="display: flex; flex-direction: column; line-height: 1.3">
+                <span style="font-size: 15px; font-weight: 600">{{m.name}}</span>
+                <span style="font-size: 13px; color: #6e6e73">{{m.role}}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <span style="font-size: 13px; color: #6e6e73">{{focus.note}}</span>
+      </div>
+    </sc-if>
   </aside>
 </div>
 </x-dc>
@@ -53,358 +88,50 @@ body{margin:0}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { n: 5, auto: props.autoplay !== false };
+    this.state = { n: 5, auto: props.autoplay !== false, focus: null, groupCount: 2 };
     this.canvasRef = { current: null };
     this.SEQ = [5, 10, 50, 300];
     this.MAX = 300;
-  }
-
-  attachMiniatures(cv) {
-    // BEGIN GENERATED MINIATURES
-    // Ronda's graph activity objects. Each instance owns a small inline vector scene.
-// Use <ronda-mini kind="chat" class="rd-mini"> inside an edge's accessible link.
-(() => {
-  if (customElements.get("ronda-mini")) return;
-  const ink = "var(--rd-mini-ink)";
-  const color = tone => "var(--rd-mini-" + tone + ")";
-  const path = (d, fill, width = 2.5) =>
-    '<path d="' + d + '" fill="' + fill + '" stroke="' + (width ? ink : "none") + '" stroke-width="' + width + '"/>';
-  const line = (d, tone, width = 2.3) =>
-    '<path d="' + d + '" fill="none" stroke="' + color(tone) + '" stroke-width="' + width + '"/>';
-  const dot = (x, y, r, tone) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + color(tone) + '"/>';
-  const group = (name, inside) => '<g class="' + name + '">' + inside + '</g>';
-  const at = (transform, inside) => '<g transform="' + transform + '">' + inside + '</g>';
-  const shadow = (x, y, rx) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="6" fill="var(--rd-mini-shadow)"/>';
-  function relief(d, face, edge, depth = 5) {
-    // Project the silhouette towards the lower right. The outline belongs to
-    // the two outer faces; filling the steps between them gives one solid rim.
-    let sides = "";
-    for (let i = depth; i >= 0; i--) {
-      sides += at("translate(" + i * .55 + " " + i + ")", path(d, color(edge), i === depth ? 2.5 : 0));
-    }
-    return sides + path(d, color(face));
-  }
-
-  function chat() {
-    const near = "M14 43Q14 36 22 36H63Q70 36 70 43V65Q70 72 63 72H40L26 82L28 72H22Q14 72 14 65Z";
-    const far = "M51 21Q51 15 58 15H94Q101 15 101 22V42Q101 48 94 48H89L91 57L76 48H58Q51 48 51 42Z";
-    const answer = relief(far, "yellow", "ochre") + line("M57 23Q57 20 62 20H89", "paper", 2)
-      + group("reply-ink", line("M63 33H87M64 39H77", "ink", 3.2));
-    const question = relief(near, "mint", "teal", 6) + line("M19 45Q19 41 24 41H47", "paper", 2)
-      + [29, 41, 53].map((x, i) => group("dot d" + i, dot(x, 55, 3.4, "ink"))).join("");
-    return shadow(58, 88, 44) + at("rotate(6 77 36)", group("chat-reply", answer))
-      + at("rotate(-8 40 58)", group("chat-ask", question));
-  }
-
-  function pad(cover, rim) {
-    const sheet = "M23 19H69Q73 19 73 24V70Q73 74 69 74H23Q19 74 19 70V24Q19 19 23 19Z";
-    const binding = [30, 45, 60].map(x => line("M" + x + " 23v-9q0-4 4-4", "ink", 4.5)).join("");
-    return relief(sheet, "paper", "paper-side", 6)
-      + path("M23 19H69Q73 19 73 24V34H19V24Q19 19 23 19Z", color(cover), 2)
-      + line("M22 26H69", rim, 2) + binding
-      + line("M27 42h8m10 0h12M28 64h12m8 0h9", "paper-side", 3.2)
-      + group("cal-match", path("M22 46H70V58H22Z", color("mint"), 1.5) + line("m40 52 4 3 9-7", "ink", 2));
-  }
-  function calendars() {
-    return shadow(61, 88, 43)
-      + at("translate(38 0) rotate(9 43 53) scale(.9)", group("cal-back", pad("blue", "denim")))
-      + at("translate(-2 12) rotate(-8 45 55) scale(.91)", group("cal-front", pad("orange", "rust")));
-  }
-
-  function health() {
-    const caseShape = "M22 24Q22 17 30 17H88Q96 17 96 25V66Q96 74 87 74H29Q22 74 22 65Z";
-    const lock = line("M78 64v-6q0-11 9-11t9 10v7", "ink", 6)
-      + line("M78 62v-4q0-9 8-9t8 9v5", "paper", 2.4)
-      + relief("M75 62H98Q101 62 101 66V81Q101 84 98 84H75Q72 84 72 81V66Q72 62 75 62Z", "yellow", "ochre", 3)
-      + dot(86, 72, 2.5, "ink") + line("M86 73v4", "ink", 2.5);
-    return shadow(60, 89, 43)
-      + path("M45 72l-2 9-11 3v3h50v-4l-13-3-2-10Z", color("teal"))
-      + at("rotate(-5 60 47)", relief(caseShape, "mint", "teal", 6)
-        + line("M28 28q0-5 5-5h38", "paper", 2)
-        + path("M34 30Q34 27 38 27H80Q86 27 86 32V55Q86 60 80 60H39Q33 60 33 55Z", color("screen"))
-        + line("M39 36l7-4m-5 10 14-9", "teal", 1.4)
-        + group("signal", line("M39 46h10l4-7 5 14 5-21 5 15h12", "phosphor", 2.8))
-        + dot(35, 66, 2.2, "phosphor") + line("M42 66h13m3 0h4", "ink", 2.2))
-      + group("lock", lock);
-  }
-
-  function permission() {
-    const page = "M16 61 70 51 101 70 47 84Z";
-    const stamp = relief("M33 46 68 39 85 49 49 57Z", "blue", "denim", 5)
-      + path("M46 44q6-5 4-11l-3-10 14-3 1 10q-1 9 5 13l-12 5Z", color("rust"))
-      + relief("M43 19q1-6 11-8 13-3 19 4 3 6-5 10-10 5-20 3-8-1-5-9Z", "orange", "rust", 4)
-      + line("M48 18q6-4 14-4", "paper", 2.4);
-    return shadow(60, 90, 44)
-      + group("paper", relief(page, "paper", "paper-side", 4)
-        + line("m24 63 19-4m-13 7 13-3", "paper-side", 2)
-        + group("inkmark", line("m52 68 6 3 11-10", "teal", 4)))
-      + group("stamp", stamp);
-  }
-
-  function help() {
-    const left = "M14 34H49V44C56 40 64 44 64 51S56 62 49 57V71H16Q12 71 12 67V38Q12 34 14 34Z";
-    const right = "M50 34H88Q92 34 92 38V67Q92 71 88 71H50V57C57 62 65 58 65 51S57 40 50 44Z";
-    function accepted(x, name) {
-      return group(name, dot(x, 55, 7, "paper") + line("m" + (x-3.5) + " 55 2.5 2.5 4.8-5.3", "ink", 2.1));
-    }
-    return shadow(58, 85, 44) + at("translate(5 -3) rotate(-10 54 55)",
-      group("puzzle-r", relief(right, "blue", "denim", 6) + line("M55 39H84", "paper", 2) + accepted(77, "yes-r"))
-      + group("puzzle-l", relief(left, "yellow", "ochre", 6) + line("M17 43v-4h26", "paper", 2) + accepted(29, "yes-l")));
-  }
-
-  const drawings = {chat, calendars, health, permission, help};
-  const styles = `
-    :host { display:inline-block; width:var(--mini-size,72px); aspect-ratio:1; }
-    svg { display:block; width:100%; height:100%; overflow:visible; }
-    .chat-ask,.chat-reply,.dot,.cal-back,.cal-front,.cal-match,.signal,.lock,.stamp,.paper,.inkmark,.puzzle-l,.puzzle-r,.yes-l,.yes-r {
-      animation-duration:var(--mini-cycle,5s); animation-iteration-count:infinite;
-      animation-timing-function:cubic-bezier(.36,.05,.22,1); animation-delay:var(--mini-delay,0s);
-      transform-box:fill-box; transform-origin:center;
-    }
-    .chat-ask {animation-name:ask} .chat-reply {animation-name:reply}
-    .d0 {animation-name:dot-a} .d1 {animation-name:dot-b} .d2 {animation-name:dot-c}
-    .cal-back {animation-name:back} .cal-front {animation-name:front} .cal-match,.inkmark {animation-name:print}
-    .signal path {stroke-dasharray:85; animation:trace var(--mini-cycle,5s) linear var(--mini-delay,0s) infinite}
-    .lock {animation-name:latch} .stamp {animation-name:press} .paper {animation-name:send}
-    .puzzle-l {animation-name:join-left} .puzzle-r {animation-name:join-right}
-    .yes-l {animation-name:agree-left} .yes-r {animation-name:agree-right}
-    @keyframes ask {0%,45%,100%{transform:none} 17%,26%{transform:translate(2px,-7px) rotate(-3deg)}}
-    @keyframes reply {0%,34%,83%,100%{transform:none} 54%,64%{transform:translate(-2px,-9px) rotate(4deg)}}
-    @keyframes dot-a {12%,29%{transform:none} 19%{transform:translateY(-4px)}}
-    @keyframes dot-b {15%,32%{transform:none} 22%{transform:translateY(-4px)}}
-    @keyframes dot-c {18%,35%{transform:none} 25%{transform:translateY(-4px)}}
-    @keyframes back {0%,12%,92%,100%{transform:translate(4px,-5px) rotate(5deg)} 42%,72%{transform:none}}
-    @keyframes front {0%,12%,92%,100%{transform:translate(-4px,2px) rotate(-6deg)} 42%,72%{transform:none}}
-    @keyframes print {0%,28%,96%,100%{opacity:0} 37%,88%{opacity:1}}
-    @keyframes trace {0%,10%{stroke-dashoffset:85} 49%,88%{stroke-dashoffset:0} 99%,100%{stroke-dashoffset:-85}}
-    @keyframes latch {0%,33%,95%,100%{transform:translate(5px,-6px) rotate(9deg)} 53%,79%{transform:none}}
-    @keyframes press {0%,15%,87%,100%{transform:translate(0,-4px) rotate(-5deg)} 36%,43%{transform:translate(0,12px)} 57%,77%{transform:translate(-1px,-7px) rotate(-5deg)}}
-    @keyframes send {0%,49%,100%{transform:none} 74%,84%{transform:translate(10px,-2px)}}
-    @keyframes join-left {0%,31%,94%,100%{transform:translate(-7px,1px)} 51%,76%{transform:none}}
-    @keyframes join-right {0%,31%,94%,100%{transform:translate(11px,-2px)} 51%,76%{transform:none}}
-    @keyframes agree-left {0%,8%,96%,100%{opacity:0} 17%,83%{opacity:1}}
-    @keyframes agree-right {0%,22%,96%,100%{opacity:0} 30%,83%{opacity:1}}
-    :host([paused]) * {animation-play-state:paused}
-    :host([poster]) *, :host([poster]) .signal path {animation:none}
-    @media(prefers-reduced-motion:reduce){:host svg *{animation:none!important}}
-  `;
-  class RondaMini extends HTMLElement {
-    static observedAttributes = ["kind"];
-    constructor() { super(); this.attachShadow({mode:"open"}); }
-    connectedCallback() { this.draw(); }
-    attributeChangedCallback() { if (this.isConnected) this.draw(); }
-    draw() {
-      const render = drawings[this.getAttribute("kind")];
-      if (!Object.hasOwn(drawings, this.getAttribute("kind"))) { this.shadowRoot.replaceChildren(); return; }
-      this.shadowRoot.innerHTML = '<style>' + styles + '</style><svg aria-hidden="true" viewBox="0 0 116 104" stroke-linejoin="round" stroke-linecap="round">' + render() + '</svg>';
-    }
-  }
-  customElements.define("ronda-mini", RondaMini);
-})();
-
-// Position parameters are in the host graph's viewBox. Only the public kind
-// and participants reach the object. Its SVG never receives private values.
-(() => {
-  const kinds = {
-    chat: "Chat", calendars: "Agendas", health: "Salud privada", permission: "Permiso", help: "Ayuda",
-  };
-  function demo(ids) {
-    const [a,b,c,d,e] = ids;
-    return [
-      {kind:"chat", from:a, to:b}, {kind:"calendars", from:b, to:c},
-      {kind:"health", from:e, to:c}, {kind:"permission", from:e, to:a},
-      {kind:"help", from:d, to:c},
-    ];
-  }
-  function link(activity, prefix, index) {
-    const label = kinds[activity.kind];
-    if (!Object.hasOwn(kinds, activity.kind)) throw new Error("Unknown activity kind");
-    const anchor = document.createElement("a");
-    anchor.className = "rd-mini-link";
-    anchor.href = prefix + activity.kind + ".html";
-    anchor.title = label + " · Ver escena";
-    anchor.setAttribute("aria-label", "Ver escena de " + label.toLowerCase());
-    const object = document.createElement("ronda-mini");
-    object.className = "rd-mini";
-    object.setAttribute("kind", activity.kind);
-    object.style.setProperty("--mini-delay", (-index * .93) + "s");
-    object.style.setProperty("--mini-cycle", (4.4 + index * .24) + "s");
-    const caption = document.createElement("span");
-    caption.className = "rd-mini-caption";
-    caption.textContent = label;
-    anchor.append(object, caption);
-    return anchor;
-  }
-  function quadratic(p, q, control, t) {
-    const s = 1 - t;
-    return {x:s*s*p.x + 2*s*t*control.x + t*t*q.x,
-            y:s*s*p.y + 2*s*t*control.y + t*t*q.y};
-  }
-  window.RondaGraphMinis = {demo, link, quadratic};
-})();
-
-// Host units are the globe's original 1440 × 900 drawing coordinates. The
-// adapter owns five foreground objects, independent of the number of edges.
-function mountGlobeMinis(canvas, scenePrefix, frozen) {
-  const layer = document.createElement("div");
-  layer.className = "globe-minis";
-  layer.style.cssText = "position:absolute;left:0;top:0;width:1440px;height:900px;pointer-events:none;transform-origin:0 0";
-  canvas.after(layer);
-  const styles = document.createElement("style");
-  styles.textContent = `
-    .globe-object { position:absolute;left:0;top:0;width:0;height:0; }
-    .globe-object[hidden]{display:none}
-    .mini-leader {position:absolute;left:0;top:0;height:1.5px;background:var(--rd-mini-ink);opacity:.42;transform-origin:left center;pointer-events:none}
-    .globe-object .rd-mini-link { pointer-events:auto;position:absolute;display:grid;place-items:center;left:0;top:0;transform:translate(-50%,-50%);text-decoration:none;color:inherit; }
-    .globe-object .rd-mini { width:var(--mini-size,76px);aspect-ratio:1;display:block; }
-    .globe-object .rd-mini-caption { margin-top:-5px;font:600 var(--mini-label-size,12px)/1.25 var(--rd-font,system-ui);white-space:nowrap;border-radius:99px;padding:2px 7px;background:var(--rd-glass-solid,#fff);color:var(--rd-ink,#222); }
-    .globe-object .rd-mini-link:focus-visible {outline:2px solid var(--rd-mini-ink);outline-offset:1px;border-radius:8px}
-    .globe-object .rd-mini-link:is(:hover,:focus-visible) .rd-mini-caption { background:var(--rd-mini-ink);color:var(--rd-mini-paper) }
-  `;
-  layer.append(styles);
-  const demo = window.RondaGraphMinis.demo([0,1,2,3,4]);
-  const notes = ["¿Quién cubre las 11?", "Review antes de las 10:30", "Consulta privada de salud", "Permiso de un solo uso", "Presentación aceptada"];
-  const elements = demo.map((activity,i)=>{
-    const holder = document.createElement("div");
-    holder.className = "globe-object";
-    holder.hidden = true;
-    const link = window.RondaGraphMinis.link(activity, scenePrefix, i);
-    link.title = notes[i];
-    if (!scenePrefix) link.removeAttribute("href"); // Canvas design preview has no sibling HTML files.
-    link.querySelector("ronda-mini").toggleAttribute("poster", new URLSearchParams(location.search).has("still"));
-    const leader = document.createElement("i");
-    leader.className = "mini-leader";
-    leader.setAttribute("aria-hidden","true");
-    holder.append(leader,link);
-    layer.append(holder);
-    return holder;
-  });
-  const rows = demo.map((a,i)=>[a.from,a.to,notes[i]]);
-  const denseRows = rows.slice(0,2);
-  const candidates = [.5,.38,.62,.29,.71];
-  let used = [];
-  let occupied = [];
-  const lastT = demo.map(()=>.5);
-  const offsets = demo.map(()=>({x:0,y:0}));
-  let radius=40;
-  let dimensionsKey = "";
-  let userPaused = false;
-  function pauseObjects() {
-    for (const holder of elements) holder.querySelector("ronda-mini").toggleAttribute("paused", userPaused || document.hidden);
-  }
-  document.addEventListener("visibilitychange",pauseObjects);
-  function begin(count, points, faceSize) {
-    // A media layout can project the whole canvas; keep the DOM and canvas
-    // layers on the very same transform and keep the glyph readable on phones.
-    const box = canvas.getBoundingClientRect();
-    const scale = box.width / 1440 || 1;
-    const key = [count,scale,canvas.style.left,canvas.style.top].join(",");
-    if (key !== dimensionsKey) {
-      dimensionsKey = key;
-      layer.style.transform = canvas.style.transform;
-      layer.style.left = canvas.style.left;
-      layer.style.top = canvas.style.top;
-      const small = scale < .7;
-      const size=Math.min(140, (small?51:count===5?76:62)/scale);
-      radius=size*.48;
-      layer.style.setProperty("--mini-size", size+"px");
-      layer.style.setProperty("--mini-label-size", Math.min(28,(small?10:12)/scale)+"px");
-    }
-    occupied = points.slice(0,count===5?5:3).map((p,i)=>({x:p.x,y:p.y,r:faceSize*(count>5&&i>0?.62:i>=3?.8:1)*p.f}));
-    used = [];
-    for(let i=0;i<elements.length;i++) elements[i].hidden = i >= (count===5?5:2);
-  }
-  function place(index,p,q,control) {
-    function room(xy) {
-      let space=Math.min(xy.x,1440-xy.x,xy.y,900-xy.y);
-      for (const n of occupied) space=Math.min(space,Math.hypot(xy.x-n.x,xy.y-n.y)-n.r);
-      for (const n of used) space=Math.min(space,Math.hypot(xy.x-n.x,xy.y-n.y)-radius);
-      return space;
-    }
-    let bestT=.5, score=-Infinity;
-    for (const t of candidates) {
-      const distance=room(window.RondaGraphMinis.quadratic(p,q,control,t));
-      if (distance>score) {score=distance;bestT=t;}
-      if (distance>=radius+8) break;
-    }
-    const ease=frozen?1:.18;
-    lastT[index]+=(bestT-lastT[index])*ease;
-    const anchor=window.RondaGraphMinis.quadratic(p,q,control,lastT[index]);
-    let delta={x:0,y:0};
-    // After a turn, two projected arcs may coincide. Move the object just
-    // off its arc and draw a leader back to the exact attachment point.
-    if (room(anchor)<radius+4) {
-      let quality=-Infinity;
-      for (const step of [radius,1.55*radius,2.1*radius]) {
-        for (let j=0;j<8;j++) {
-          const angle=j*Math.PI/4;
-          const x=step*Math.cos(angle),y=step*Math.sin(angle);
-          const available=room({x:anchor.x+x,y:anchor.y+y});
-          const value=Math.min(available,radius+8)-step*.13-Math.hypot(x-offsets[index].x,y-offsets[index].y)*.08;
-          if(value>quality){quality=value;delta={x,y};}
-        }
-      }
-    }
-    const offset=offsets[index];
-    offset.x+=(delta.x-offset.x)*ease;offset.y+=(delta.y-offset.y)*ease;
-    const spot={x:anchor.x+offset.x,y:anchor.y+offset.y};
-    used.push(spot);
-    const holder=elements[index],leader=holder.firstElementChild;
-    const length=Math.hypot(offset.x,offset.y);
-    leader.hidden=length<radius;
-    if (!leader.hidden) {
-      leader.style.width=length.toFixed(1)+"px";
-      leader.style.transform="rotate("+Math.atan2(-offset.y,-offset.x)+"rad)";
-    }
-    holder.style.transform="translate("+spot.x.toFixed(1)+"px,"+spot.y.toFixed(1)+"px)";
-  }
-  return {rows:n=>n===5?rows:denseRows,begin,place,
-    pause(value) { userPaused=value; pauseObjects(); },
-    destroy() { document.removeEventListener("visibilitychange",pauseObjects); layer.remove(); }};
-}
-
-    const controller = mountGlobeMinis(cv, "", this.reduced || new URLSearchParams(location.search).has('still'));
-    cv.nextElementSibling.style.cssText += ";--rd-mini-ink: #392c2b;\n--rd-mini-paper: #fff4d9;\n--rd-mini-paper-side: #d2ad82;\n--rd-mini-yellow: #ffc64c;\n--rd-mini-ochre: #c87d27;\n--rd-mini-orange: #fd8455;\n--rd-mini-rust: #bd533b;\n--rd-mini-mint: #85d5ba;\n--rd-mini-teal: #418e86;\n--rd-mini-blue: #96bdf4;\n--rd-mini-denim: #5e78ac;\n--rd-mini-screen: #284b47;\n--rd-mini-phosphor: #c8ff90;\n--rd-mini-shadow: rgba(68, 44, 37, .17);";
-    return controller;
-    // END GENERATED MINIATURES
+    this.ATLAS = '/_blob/e288a0bc2f7434eb79b8c8bc72f281e3';
+    this.ATLAS_BLUR = '/_blob/b8010edf0e04f17eb84c213526ec402f';
+    this.TEAM_SRC = ['/_blob/99f89ebce844c0146b9057f1306965b8', '/_blob/8603a08d152decb5f7e246585a4965f3', '/_blob/72c77a593cf5b42fed6fe4280d65a858', '/_blob/4d17422fc0319c81c3227a4cb57cf3ee', '/_blob/f35903635b1800513173f450be2e5781'];
+    var NAMES = ['Camila', 'Benjamín', 'Sofía', 'Matías', 'Valentina', 'Tomás', 'Isidora', 'Vicente', 'Florencia', 'Agustín', 'Josefa', 'Martín', 'Antonia', 'Joaquín', 'Catalina', 'Lucas', 'Fernanda', 'Diego', 'Trinidad', 'Maximiliano', 'Javiera', 'Cristóbal', 'Emilia', 'Felipe', 'Constanza', 'Ignacio', 'Amanda', 'Nicolás', 'Paz', 'Sebastián', 'Renata', 'Gaspar'];
+    var team = [['Tú', 'Pide cobertura'], ['Ian', 'Tiene la cifra'], ['Lian', 'Hueco de 9:30 a 10:15'], ['Andrés', 'Plan B listo'], ['Roberto', 'En reuniones']];
+    this.people = [];
+    for (var i = 0; i < this.MAX; i++) this.people.push(i < 5 ? { name: team[i][0], status: team[i][1] } : { name: NAMES[(i * 7) % NAMES.length], tile: (i - 5) % 64 });
+    this.TOPICS = ['Turno del sábado', 'Mover la reunión del lunes', 'Datos para el pitch', 'Bug de pagos', 'Quién lleva al cliente', 'Revisar el contrato', 'Almuerzo del equipo', 'Llaves de la oficina'];
+    this.COLS = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
+    this.groups = []; this.lastPhase = {};
+    this.buildGroups(5);
   }
 
   componentDidMount() {
     var self = this;
-    this.faces = {};
-    var src = { 0: '/_blob/99f89ebce844c0146b9057f1306965b8', 1: '/_blob/8603a08d152decb5f7e246585a4965f3', 2: '/_blob/72c77a593cf5b42fed6fe4280d65a858', 3: '/_blob/4d17422fc0319c81c3227a4cb57cf3ee', 4: '/_blob/f35903635b1800513173f450be2e5781' };
-    Object.keys(src).forEach(function (k) { var im = new Image(); im.src = src[k]; self.faces[k] = im; });
-    this.people = [
-      { name: 'Tú', status: 'Pide cobertura' },
-      { name: 'Ian', status: 'Tiene la cifra' },
-      { name: 'Lian', status: 'Hueco de 9:30 a 10:15' },
-      { name: 'Andrés', status: 'Plan B listo' },
-      { name: 'Roberto', status: 'En reuniones' }
-    ];
+    var load = function (s) { var im = new Image(); im.src = s; return im; };
+    this.team = this.TEAM_SRC.map(load);
+    this.atlas = load(this.ATLAS); this.atlasBlur = load(this.ATLAS_BLUR);
     this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.cur = []; this.vis = [];
     for (var i = 0; i < this.MAX; i++) { this.cur.push(null); this.vis.push(0); }
     this.p = this.look(this.state.n);
-    this.edgeFade = 1;
-    this.t0 = performance.now(); this.last = this.t0;
-    this.lastStep = this.t0;
-    this.uy = 0; this.up = 0; this.vy = 0; this.vp = 0; this.drag = null; this.hover = -1; this.mouse = null; this.idle = 0;
+    this.edgeFade = 1; this.dimK = 0;
+    this.t0 = performance.now(); this.last = this.t0; this.lastStep = this.t0;
+    this.uy = 0; this.up = 0; this.vy = 0; this.vp = 0; this.drag = null; this.hover = -1; this.mouse = null; this.idle = 0; this.turnTo = null;
     var cv = this.canvasRef.current;
     if (cv) {
-      this.minis = this.attachMiniatures(cv);
       cv.style.cursor = 'grab'; cv.style.touchAction = 'none';
       var at = function (e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * 1440 / r.width, y: (e.clientY - r.top) * 900 / r.height }; };
-      this.onDown = function (e) { var m = at(e); self.drag = { x: m.x, y: m.y, t: performance.now() }; self.vy = 0; self.vp = 0; cv.style.cursor = 'grabbing'; cv.setPointerCapture && cv.setPointerCapture(e.pointerId); };
+      this.onDown = function (e) { var m = at(e); self.drag = { x: m.x, y: m.y, t: performance.now(), moved: 0 }; self.vy = 0; self.vp = 0; if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId); };
       this.onMove = function (e) {
         var m = at(e); self.mouse = m;
         if (!self.drag) return;
         var now = performance.now(), dts = Math.max(0.008, (now - self.drag.t) / 1000);
         var dy = (m.x - self.drag.x) * 0.006, dp = (m.y - self.drag.y) * 0.006;
-        self.uy += dy; self.up = Math.max(-0.9, Math.min(0.9, self.up + dp));
-        self.vy = dy / dts; self.vp = dp / dts;
-        self.drag = { x: m.x, y: m.y, t: now }; self.idle = 0;
+        self.drag.moved += Math.abs(m.x - self.drag.x) + Math.abs(m.y - self.drag.y);
+        if (self.drag.moved > 5) { cv.style.cursor = 'grabbing'; self.uy += dy; self.up = Math.max(-0.9, Math.min(0.9, self.up + dp)); self.vy = dy / dts; self.vp = dp / dts; self.idle = 0; self.turnTo = null; }
+        self.drag.x = m.x; self.drag.y = m.y; self.drag.t = now;
       };
-      this.onUp = function () { self.drag = null; cv.style.cursor = 'grab'; };
+      this.onUp = function (e) { var d = self.drag; self.drag = null; cv.style.cursor = 'grab'; if (d && d.moved <= 5) self.click(at(e)); };
       this.onLeave = function () { self.mouse = null; };
       cv.addEventListener('pointerdown', this.onDown);
       cv.addEventListener('pointermove', this.onMove);
@@ -418,7 +145,6 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
 
   componentWillUnmount() {
     cancelAnimationFrame(this.raf);
-    if (this.minis) this.minis.destroy();
     var cv = this.canvasRef.current;
     if (cv && this.onDown) { cv.removeEventListener('pointerdown', this.onDown); cv.removeEventListener('pointermove', this.onMove); cv.removeEventListener('pointerup', this.onUp); cv.removeEventListener('pointercancel', this.onUp); cv.removeEventListener('pointerleave', this.onLeave); }
   }
@@ -427,40 +153,128 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
     if (n === this.state.n) { if (!keepAuto) this.setState({ auto: false }); return; }
     this.edgeFade = 0;
     this.lastStep = performance.now();
-    this.setState(keepAuto ? { n: n } : { n: n, auto: false });
+    this.buildGroups(n);
+    this.turnTo = null;
+    var s = { n: n, focus: null, groupCount: this.groups.length };
+    if (!keepAuto) s.auto = false;
+    this.setState(s);
   }
 
   look(n) {
-    if (n <= 5) return { S: 285, lw: 1, ea: 0.18, pearl: 6, faceR: 42 };
-    if (n <= 10) return { S: 255, lw: 1, ea: 0.2, pearl: 6.5, faceR: 40 };
-    if (n <= 50) return { S: 255, lw: 0.6, ea: 0.13, pearl: 4.2, faceR: 36 };
-    return { S: 255, lw: 0.4, ea: 0.075, pearl: 2.4, faceR: 34 };
+    if (n <= 5) return { S: 285, lw: 1, ea: 0.18, faceR: 42, small: 42, mid: 34, dot: 34 };
+    if (n <= 10) return { S: 255, lw: 1, ea: 0.2, faceR: 38, small: 26, mid: 22, dot: 20 };
+    if (n <= 50) return { S: 255, lw: 0.6, ea: 0.13, faceR: 34, small: 22, mid: 15, dot: 11 };
+    return { S: 255, lw: 0.4, ea: 0.075, faceR: 32, small: 20, mid: 11, dot: 6.5 };
   }
 
   norm(v) { var l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; }
 
   target(i, n) {
-    var front = this.norm([0, 0.5, 0.86]);
-    if (i === 0) return front;
+    if (i === 0) return this.norm([0, 0.5, 0.86]);
     if (n <= 5) {
       var a = -Math.PI / 2 + (2 * Math.PI * i) / n, r = 0.78;
       return this.norm([r * Math.cos(a) * 1.18, -r * Math.sin(a) * 0.82 - 0.05, Math.sqrt(Math.max(0.05, 1 - r * r))]);
     }
     if (i === 1) return this.norm([0.62, 0.02, 0.78]);
     if (i === 2) return this.norm([0.3, -0.56, 0.77]);
-    var g = Math.PI * (3 - Math.sqrt(5)), k = i - 3, m = n - 3;
+    if (i === 3) return this.norm([-0.62, -0.18, 0.76]);
+    if (i === 4) return this.norm([-0.4, -0.6, 0.68]);
+    if (n <= 10) return this.norm([[-0.84, 0.42, 0.36], [0.8, 0.56, -0.1], [0.06, -0.96, 0.28], [-0.88, -0.2, -0.4], [0.45, 0.35, -0.82]][i - 5]);
+    var g = Math.PI * (3 - Math.sqrt(5)), k = i - 5, m = n - 5;
     var y = 1 - 2 * (k + 0.5) / m, rr = Math.sqrt(1 - y * y), th = k * g + 0.7;
     return [rr * Math.cos(th), y, rr * Math.sin(th)];
+  }
+
+  buildGroups(n) {
+    var gs = [{ id: 'mia', mine: true, members: [0, 1, 2], edges: [[0, 1, '¿Quién cubre las 11?'], [1, 2, 'Review antes de las 10:30']], topic: 'Cubrir la reunión de las 11', offset: 0 }];
+    gs.push({ id: 'planb', members: [3, 4], edges: [[3, 4]], topic: 'Plan B para el cliente', offset: 4.5 });
+    var extra = n <= 5 ? 0 : n <= 10 ? 1 : n <= 50 ? 4 : 8;
+    for (var e = 0; e < extra; e++) gs.push({ id: 'g' + e, seed: e, size: [3, 2, 4, 3, 2, 3, 4, 2][e], topic: this.TOPICS[e], offset: 1.6 * e + 2.2 });
+    this.groups = gs;
+    if (n === 10) { gs[2].members = [5, 8]; gs[2].edges = [[5, 8]]; gs[2].fixed = true; }
+    for (var j = 2; j < gs.length; j++) if (!gs[j].fixed) this.pickMembers(gs[j], n, Math.floor((this.nowT || 0) / 13));
+  }
+
+  pickMembers(g, n, cycle) {
+    var used = {}, self = this, near = function (i) { for (var tq = 0; tq < 5; tq++) { var a = self.target(tq, n), b = self.target(i, n); if ((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]) + (a[2] - b[2]) * (a[2] - b[2]) < 0.3) return true; } return false; };
+    for (var nn = 5; nn < n; nn++) if (near(nn)) used[nn] = 1;
+    this.groups.forEach(function (o) { if (o !== g && o.members) o.members.forEach(function (m) { used[m] = 1; }); });
+    var elig = [];
+    for (var ei = 5; ei < n; ei++) if (!used[ei] && this.target(ei, n)[2] > 0.32) elig.push(ei);
+    if (!elig.length) for (var ej = 5; ej < n; ej++) if (!used[ej]) elig.push(ej);
+    var start = elig[Math.floor((((g.seed + 1) * 0.618 + cycle * 0.377) % 1) * elig.length)];
+    var c = this.target(start, n), cand = [];
+    for (var i = 5; i < n; i++) {
+      if (i === start || used[i]) continue;
+      var t = this.target(i, n);
+      cand.push([i, (t[0] - c[0]) * (t[0] - c[0]) + (t[1] - c[1]) * (t[1] - c[1]) + (t[2] - c[2]) * (t[2] - c[2])]);
+    }
+    cand.sort(function (a, b) { return a[1] - b[1]; });
+    var step = n > 50 ? 3 : 1, mem = [start];
+    for (var k = 0; k < g.size - 1; k++) { var pick = cand[k * step] || cand[k]; if (pick) mem.push(pick[0]); }
+    g.members = mem;
+    g.edges = mem.slice(1).map(function (m) { return [mem[0], m]; });
+    g.cycle = cycle;
+  }
+
+  phase(g, t) {
+    if (g.mine || this.state.focus === g.id) return { draw: 1, live: 1, agree: 0, alpha: 1 };
+    if (this.reduced) return { draw: 1, live: 1, agree: 0, alpha: 1 };
+    var P = 13, tt = t + g.offset, local = tt % P, cycle = Math.floor(tt / P);
+    if (g.seed !== undefined && !g.fixed && g.cycle !== cycle) this.pickMembers(g, this.state.n, cycle);
+    if (local < 1.4) { var u = local / 1.4; return { draw: 1 - Math.pow(1 - u, 3), live: 0, agree: 0, alpha: 1 }; }
+    if (local < 9.5) return { draw: 1, live: 1, agree: 0, alpha: 1 };
+    if (local < 11.5) { var a = (local - 9.5) / 2; return { draw: 1, live: 0, agree: a, alpha: 1 - Math.max(0, (a - 0.35) / 0.65) }; }
+    return { draw: 0, live: 0, agree: 0, alpha: 0 };
+  }
+
+  click(m) {
+    var h = this.hit(m);
+    if (h >= 0) {
+      for (var i = 0; i < this.groups.length; i++) {
+        var g = this.groups[i];
+        if (g.members && g.members.indexOf(h) >= 0 && (this.lastPhase[g.id] || 0) > 0.5) { this.focusGroup(g); return; }
+      }
+    }
+    this.turnTo = null;
+    if (this.state.focus) this.setState({ focus: null });
+  }
+
+  focusGroup(g) {
+    var c = [0, 0, 0], self = this;
+    g.members.forEach(function (m) { var v = self.cur[m] || self.target(m, self.state.n); c[0] += v[0]; c[1] += v[1]; c[2] += v[2]; });
+    c = this.norm(c);
+    var big = this.state.n > 5;
+    if (big) this.turnTo = { uy: -Math.atan2(c[0], c[2]) - 0.12, up: Math.atan2(c[1], Math.hypot(c[0], c[2])) - 0.28 };
+    this.vy = 0; this.vp = 0; this.idle = 0;
+    this.setState({ focus: g.id, auto: false });
+  }
+
+  hit(m) {
+    if (!this.P) return -1;
+    var best = Infinity, id = -1;
+    for (var h = 0; h < this.P.length; h++) {
+      var q = this.P[h]; if (!q || this.vis[h] < 0.5 || q.z < -0.05) continue;
+      var dx = q.x - m.x, dy = q.y - m.y, d2 = dx * dx + dy * dy, lim = Math.max(12, (q.r || 6) + 4);
+      if (d2 < lim * lim && d2 < best) { best = d2; id = h; }
+    }
+    return id;
+  }
+
+  grad(ctx, x0, y0, x1, y1) {
+    var g = ctx.createLinearGradient(x0, y0, x1, y1);
+    this.COLS.forEach(function (col, j) { g.addColorStop(j / 4, col); });
+    return g;
   }
 
   frame(now) {
     var cv = this.canvasRef.current; if (!cv) return;
     var dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
-    var t = this.reduced ? 0 : (now - this.t0) / 1000;
-    var n = this.state.n;
+    var t = this.reduced ? 0 : (now - this.t0) / 1000; this.nowT = t;
+    var n = this.state.n, self = this;
 
-    if (this.state.auto && !this.reduced) {
-      var hold = n === 300 ? 6500 : n === 5 ? 5000 : 3200;
+    if (this.state.auto && !this.reduced && !this.state.focus) {
+      var hold = n === 300 ? 10000 : n === 5 ? 6000 : 4500;
       if (now - this.lastStep > hold) { var idx = this.SEQ.indexOf(n); this.setN(this.SEQ[(idx + 1) % this.SEQ.length], true); n = this.state.n; }
     }
 
@@ -474,59 +288,67 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
     var tg = this.look(n), p = this.p;
     for (var key in tg) p[key] += (tg[key] - p[key]) * k;
     this.edgeFade += (1 - this.edgeFade) * (this.reduced ? 1 : 1 - Math.exp(-dt * 1.6));
+    var focusing = !!this.state.focus;
+    this.dimK += ((focusing ? 1 : 0) - this.dimK) * (this.reduced ? 1 : 1 - Math.exp(-dt * 5));
 
     for (var i = 0; i < this.MAX; i++) {
       if (i < n) {
         var tp = this.target(i, n);
         if (!this.cur[i]) this.cur[i] = tp.slice();
-        var c = this.cur[i];
-        this.cur[i] = this.norm([c[0] + (tp[0] - c[0]) * k, c[1] + (tp[1] - c[1]) * k, c[2] + (tp[2] - c[2]) * k]);
+        var c0 = this.cur[i];
+        this.cur[i] = this.norm([c0[0] + (tp[0] - c0[0]) * k, c0[1] + (tp[1] - c0[1]) * k, c0[2] + (tp[2] - c0[2]) * k]);
         this.vis[i] += (1 - this.vis[i]) * (this.reduced ? 1 : 1 - Math.exp(-dt * 2.4));
-      } else {
-        this.vis[i] += (0 - this.vis[i]) * (this.reduced ? 1 : 1 - Math.exp(-dt * 4));
-      }
+      } else this.vis[i] += (0 - this.vis[i]) * (this.reduced ? 1 : 1 - Math.exp(-dt * 4));
     }
 
     var big = n > 5;
-    if (!this.drag) {
+    var swayY = Math.sin(t * 0.16) * (big ? 0.42 : 0.2), swayP = Math.sin(t * 0.11) * 0.05;
+    if (this.turnTo && !this.drag) {
+      var kt = this.reduced ? 1 : 1 - Math.exp(-dt * 3);
+      this.uy += (this.turnTo.uy - swayY - this.uy) * kt; this.up += (this.turnTo.up - swayP - this.up) * kt; this.idle = 0;
+    } else if (!this.drag) {
       this.uy += this.vy * dt; this.up = Math.max(-0.9, Math.min(0.9, this.up + this.vp * dt));
       var fr = Math.exp(-dt * 2.2); this.vy *= fr; this.vp *= fr;
       this.idle += dt;
-      if (this.idle > 4) { var back = 1 - Math.exp(-dt * 0.8); this.uy -= this.uy * back; this.up -= this.up * back; }
+      if (this.idle > 4 && !focusing) { var back = 1 - Math.exp(-dt * 0.8); this.uy -= this.uy * back; this.up -= this.up * back; }
     }
     if (!big) { this.uy = Math.max(-0.7, Math.min(0.7, this.uy)); this.up = Math.max(-0.5, Math.min(0.5, this.up)); }
-    var yaw = Math.sin(t * 0.16) * (big ? 0.42 : 0.2) + (big ? 0.12 : 0) + this.uy;
-    var pitch = 0.1 + Math.sin(t * 0.11) * 0.05 + this.up;
+    var yaw = swayY + (big ? 0.12 : 0) + this.uy, pitch = 0.1 + swayP + this.up;
     var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     var CX = 590, CY = 545, D = 3.4, S = p.S;
-    var self = this;
-    function rot(v) {
-      var x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy;
-      var y2 = v[1] * cp - z * sp, z2 = v[1] * sp + z * cp;
-      return [x, y2, z2];
-    }
+    function rot(v) { var x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy; return [x, v[1] * cp - z * sp, v[1] * sp + z * cp]; }
     function proj(v) { var f = D / (D - v[2]); return { x: CX + v[0] * S * f, y: CY - v[1] * S * f, z: v[2], f: f }; }
-
-    var live = this.minis.rows(n);
-    var liveKey = {};
-    live.forEach(function (row) { liveKey[Math.min(row[0], row[1]) + '-' + Math.max(row[0], row[1])] = 1; });
 
     var count = 0;
     for (var a0 = 0; a0 < this.MAX; a0++) if (this.vis[a0] > 0.02) count = a0 + 1;
     var P = [], R = [];
     for (var q = 0; q < count; q++) { R[q] = rot(this.cur[q] || [0, 0, 1]); P[q] = proj(R[q]); }
 
-    this.hover = -1;
-    if (this.mouse && !this.drag) {
-      var best = Infinity;
-      for (var h = 0; h < count; h++) {
-        if (this.vis[h] < 0.5 || P[h].z < -0.15) continue;
-        var hx0 = P[h].x - this.mouse.x, hy0 = P[h].y - this.mouse.y, d2 = hx0 * hx0 + hy0 * hy0;
-        var lim = (h < 5 && (!big || h <= 2)) ? 44 : 14;
-        if (d2 < lim * lim && d2 < best) { best = d2; this.hover = h; }
-      }
+    var phases = {}, member = {}, focusSet = {};
+    for (var gi = 0; gi < this.groups.length; gi++) {
+      var G = this.groups[gi], ph = this.phase(G, t); phases[G.id] = ph; this.lastPhase[G.id] = ph.alpha * ph.draw;
+      G.members.forEach(function (m) { if (m < n && ph.alpha * ph.draw > 0.05) member[m] = Math.max(member[m] || 0, ph.alpha * ph.draw); });
+      if (this.state.focus === G.id) G.members.forEach(function (m) { focusSet[m] = 1; });
     }
-    var cvs = this.canvasRef.current; if (cvs && !this.drag) cvs.style.cursor = this.hover >= 0 ? 'pointer' : 'grab';
+    var liveKey = {};
+    this.groups.forEach(function (G) { G.edges.forEach(function (e) { liveKey[Math.min(e[0], e[1]) + '-' + Math.max(e[0], e[1])] = 1; }); });
+
+    var radius = function (id) {
+      var base;
+      if (n <= 5) base = id <= 2 ? p.faceR : p.mid;
+      else if (id === 0) base = p.faceR;
+      else if (id <= 2) base = p.small;
+      else if (focusSet[id]) base = Math.max(p.mid * 1.45, 15);
+      else if (member[id]) base = p.mid;
+      else base = id < 5 && n <= 10 ? p.mid : p.dot;
+      var edgeOn = n > 10 && id >= 5 ? 0.45 + 0.55 * Math.min(1, Math.abs(P[id].z) * 1.6) : 1;
+      return base * P[id].f * (0.82 + 0.18 * (P[id].z + 1) / 2) * edgeOn * self.vis[id];
+    };
+    for (var rq = 0; rq < count; rq++) P[rq].r = radius(rq);
+    this.P = P;
+
+    this.hover = (this.mouse && !this.drag) ? this.hit(this.mouse) : -1;
+    if (!this.drag) cv.style.cursor = this.hover >= 0 ? 'pointer' : 'grab';
 
     function ctrl(a, b) {
       var va = R[a], vb = R[b];
@@ -537,31 +359,70 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
       return { x: 2 * pm.x - (P[a].x + P[b].x) / 2, y: 2 * pm.y - (P[a].y + P[b].y) / 2, z: (va[2] + vb[2]) / 2 };
     }
 
+    var dim = 1 - 0.65 * this.dimK;
     var buckets = [new Path2D(), new Path2D(), new Path2D()];
     for (var a = 0; a < count; a++) {
       if (this.vis[a] < 0.5) continue;
       for (var b = a + 1; b < count; b++) {
         if (this.vis[b] < 0.5 || liveKey[a + '-' + b]) continue;
-        var cc = ctrl(a, b), bi = cc.z > 0.25 ? 0 : cc.z > -0.35 ? 1 : 2;
-        buckets[bi].moveTo(P[a].x, P[a].y);
-        buckets[bi].quadraticCurveTo(cc.x, cc.y, P[b].x, P[b].y);
+        var cc = ctrl(a, b), bi = cc.z > 0.25 ? 0 : cc.z > -0.1 ? 1 : 2;
+        buckets[bi].moveTo(P[a].x, P[a].y); buckets[bi].quadraticCurveTo(cc.x, cc.y, P[b].x, P[b].y);
       }
     }
-    ctx.lineCap = 'round';
-    ctx.lineWidth = p.lw;
     var mult = [1, 0.55, 0.22];
-    for (var bb = 2; bb >= 0; bb--) {
-      ctx.strokeStyle = 'rgba(70,70,150,' + (p.ea * mult[bb] * this.edgeFade).toFixed(4) + ')';
-      ctx.stroke(buckets[bb]);
-    }
+    var edgeStroke = function (bb) { ctx.lineCap = 'round'; ctx.lineWidth = p.lw; ctx.strokeStyle = 'rgba(70,70,150,' + (p.ea * mult[bb] * self.edgeFade * dim).toFixed(4) + ')'; ctx.stroke(buckets[bb]); };
+
+    var order = [];
+    for (var o = 0; o < count; o++) if (this.vis[o] > 0.01) order.push(o);
+    order.sort(function (x, y) { return P[x].z - P[y].z; });
+
+    var drawFace = function (id) {
+      var pp = P[id], r = pp.r;
+      if (r < 0.6) return;
+      var depth = (pp.z + 1) / 2, back = pp.z < -0.05;
+      var a = (back ? 0.35 + 0.4 * depth : 1) * self.vis[id];
+      if (self.dimK > 0.01 && !focusSet[id] && id !== 0) a *= 1 - 0.7 * self.dimK;
+      ctx.globalAlpha = a;
+      if (r > 5 && !back) {
+        ctx.save(); ctx.shadowColor = 'rgba(40,30,90,0.16)'; ctx.shadowBlur = Math.min(24, r * 0.7); ctx.shadowOffsetY = Math.min(10, r * 0.28);
+        ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + (r > 14 ? 3 : 1.5), 0, 6.2832); ctx.fill(); ctx.restore();
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,' + (back ? 0.5 : 0.9) + ')'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + 1.2, 0, 6.2832); ctx.fill();
+      }
+      ctx.save(); ctx.beginPath(); ctx.arc(pp.x, pp.y, r, 0, 6.2832); ctx.clip();
+      if (id < 5) {
+        var im = self.team[id];
+        if (im.complete && im.naturalWidth) { if (back) ctx.filter = 'blur(' + Math.max(1, r * 0.12).toFixed(1) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
+      } else {
+        var atl = back ? self.atlasBlur : self.atlas, tile = self.people[id].tile;
+        if (atl.complete && atl.naturalWidth) ctx.drawImage(atl, (tile % 8) * 128 + 4, Math.floor(tile / 8) * 128 + 4, 120, 120, pp.x - r, pp.y - r, r * 2, r * 2);
+      }
+      ctx.restore();
+      if (member[id] && !back) {
+        ctx.globalAlpha = a * member[id]; ctx.strokeStyle = self.grad(ctx, pp.x - r, pp.y - r, pp.x + r, pp.y + r); ctx.lineWidth = r > 14 ? 2.5 : 1.6;
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, r + (r > 14 ? 5 : 3), 0, 6.2832); ctx.stroke();
+      }
+      if (id === self.hover) { ctx.globalAlpha = 1; ctx.strokeStyle = '#1d1d1f'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + (member[id] ? 9 : 4), 0, 6.2832); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    };
+
+    edgeStroke(2);
+    for (var oi = 0; oi < order.length; oi++) if (P[order[oi]].z < -0.05) drawFace(order[oi]);
 
     if (big) {
-      var sr = S * 1.06, hx = CX - sr * 0.35, hy = CY - sr * 0.45;
-      var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, sr * 1.25);
-      hg.addColorStop(0, 'rgba(255,255,255,0.55)'); hg.addColorStop(0.45, 'rgba(255,255,255,0.12)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+      var sr = S * 1.06, sw = t * 0.07;
+      ctx.fillStyle = 'rgba(247,247,250,0.32)'; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.fill();
+      var hx = CX + Math.cos(2.4 + Math.sin(sw) * 0.5) * sr * 0.5, hy = CY - sr * 0.42 + Math.sin(sw * 1.3) * sr * 0.06;
+      var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, sr * 1.2);
+      hg.addColorStop(0, 'rgba(255,255,255,0.55)'); hg.addColorStop(0.4, 'rgba(255,255,255,0.12)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.stroke();
+      var rim = ctx.createRadialGradient(CX, CY, sr * 0.86, CX, CY, sr);
+      rim.addColorStop(0, 'rgba(255,255,255,0)'); rim.addColorStop(1, 'rgba(255,255,255,0.5)');
+      ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(CX, CY, sr, 0, 6.2832); ctx.stroke();
     }
+
+    edgeStroke(1); edgeStroke(0);
 
     if (this.hover >= 0) {
       var hp = new Path2D(), hb = new Path2D(), H0 = this.hover;
@@ -576,103 +437,103 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
       ctx.strokeStyle = 'rgba(70,70,150,' + ha + ')'; ctx.stroke(hp);
     }
 
-    var order = [];
-    for (var o = 0; o < count; o++) if (this.vis[o] > 0.01) order.push(o);
-    order.sort(function (x, y) { return P[x].z - P[y].z; });
-
-    var withFace = function (i) { return i < 5 && (!big || i <= 2); };
-
-    for (var oi = 0; oi < order.length; oi++) {
-      var id = order[oi]; if (withFace(id)) continue;
-      var pp = P[id], depth = (pp.z + 1) / 2, va = this.vis[id];
-      var r = p.pearl * pp.f * (0.75 + 0.25 * depth) * va;
-      ctx.globalAlpha = (0.35 + 0.65 * depth) * va;
-      ctx.fillStyle = 'rgba(120,110,200,0.10)';
-      ctx.beginPath(); ctx.arc(pp.x, pp.y + r * 0.35, r * 2.1, 0, 6.2832); ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(pp.x, pp.y, r, 0, 6.2832); ctx.fill();
-      ctx.strokeStyle = 'rgba(60,60,110,0.18)'; ctx.lineWidth = 0.6; ctx.stroke();
-      if (id === this.hover) { ctx.globalAlpha = 1; ctx.strokeStyle = '#1d1d1f'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + 4, 0, 6.2832); ctx.stroke(); }
-    }
-    ctx.globalAlpha = 1;
-
-    this.minis.begin(n, P, p.faceR);
-    var grads = ['#1e9bff', '#7b61ff', '#e840d8', '#ff3b6b', '#ff8a1f'];
-    for (var li = 0; li < live.length; li++) {
-      var A = live[li][0], B = live[li][1];
-      if (A >= count || B >= count) continue;
-      var c2 = ctrl(A, B), pa = P[A], pb = P[B];
-      var g = ctx.createLinearGradient(pa.x, pa.y, pb.x, pb.y);
-      grads.forEach(function (col, gi) { g.addColorStop(gi / 4, col); });
-      var path = new Path2D(); path.moveTo(pa.x, pa.y); path.quadraticCurveTo(c2.x, c2.y, pb.x, pb.y);
-      ctx.save(); ctx.globalAlpha = 0.35; ctx.filter = 'blur(7px)'; ctx.strokeStyle = g; ctx.lineWidth = 12; ctx.stroke(path); ctx.restore();
-      ctx.strokeStyle = g; ctx.lineWidth = 3.5; ctx.stroke(path);
-      if (!this.reduced) {
-        for (var s = 0; s < 7; s++) {
-          var u = ((t * 0.42 + li * 0.5) % 1) - s * 0.018; if (u < 0) continue;
-          var x = (1 - u) * (1 - u) * pa.x + 2 * (1 - u) * u * c2.x + u * u * pb.x;
-          var y = (1 - u) * (1 - u) * pa.y + 2 * (1 - u) * u * c2.y + u * u * pb.y;
-          ctx.globalAlpha = s === 0 ? 1 : 0.55 * (1 - s / 7);
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath(); ctx.arc(x, y, s === 0 ? 2.6 : 2 - s * 0.2, 0, 6.2832); ctx.fill();
+    var chips = [], pulses = [];
+    for (var g2 = 0; g2 < this.groups.length; g2++) {
+      var Gr = this.groups[g2], ph2 = phases[Gr.id];
+      if (ph2.alpha * ph2.draw < 0.01) continue;
+      var isFocus = this.state.focus === Gr.id;
+      var gAlpha = ph2.alpha * (this.dimK > 0.01 && !isFocus && !Gr.mine ? 1 - 0.75 * this.dimK : 1);
+      var thin = !Gr.mine && !isFocus;
+      for (var ei = 0; ei < Gr.edges.length; ei++) {
+        var A = Gr.edges[ei][0], B = Gr.edges[ei][1];
+        if (A >= count || B >= count || this.vis[A] < 0.3 || this.vis[B] < 0.3) continue;
+        var c2 = ctrl(A, B), pa = P[A], pb = P[B], u = ph2.draw;
+        var qx = (1 - u) * pa.x + u * c2.x, qy = (1 - u) * pa.y + u * c2.y;
+        var ex = (1 - u) * (1 - u) * pa.x + 2 * (1 - u) * u * c2.x + u * u * pb.x, ey = (1 - u) * (1 - u) * pa.y + 2 * (1 - u) * u * c2.y + u * u * pb.y;
+        var path = new Path2D(); path.moveTo(pa.x, pa.y); path.quadraticCurveTo(qx, qy, ex, ey);
+        var depthK = c2.z < -0.2 ? 0.4 : 1;
+        var grd = this.grad(ctx, pa.x, pa.y, pb.x, pb.y);
+        ctx.save(); ctx.globalAlpha = 0.32 * gAlpha * depthK; ctx.filter = 'blur(' + (thin ? 5 : 7) + 'px)'; ctx.strokeStyle = grd; ctx.lineWidth = thin ? 8 : 12; ctx.lineCap = 'round'; ctx.stroke(path); ctx.restore();
+        ctx.globalAlpha = gAlpha * depthK; ctx.lineCap = 'round';
+        if (ph2.agree > 0) { ctx.strokeStyle = 'rgba(255,255,255,' + (0.9 * Math.sin(Math.min(1, ph2.agree * 2) * Math.PI)).toFixed(3) + ')'; ctx.lineWidth = thin ? 4.5 : 6; ctx.stroke(path); }
+        ctx.strokeStyle = grd; ctx.lineWidth = thin ? 2.2 : 3.5; ctx.stroke(path);
+        if (u > 0 && u < 1) { ctx.save(); ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#b36bff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(ex, ey, 3, 0, 6.2832); ctx.fill(); ctx.restore(); }
+        if (ph2.live && !this.reduced) {
+          for (var s = 0; s < 7; s++) {
+            var su = ((t * (thin ? 0.33 : 0.42) + ei * 0.5 + g2 * 0.21) % 1) - s * 0.018; if (su < 0) continue;
+            var x = (1 - su) * (1 - su) * pa.x + 2 * (1 - su) * su * c2.x + su * su * pb.x, y = (1 - su) * (1 - su) * pa.y + 2 * (1 - su) * su * c2.y + su * su * pb.y;
+            ctx.globalAlpha = gAlpha * depthK * (s === 0 ? 1 : 0.55 * (1 - s / 7)); ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(x, y, (s === 0 ? 2.6 : 2 - s * 0.2) * (thin ? 0.85 : 1), 0, 6.2832); ctx.fill();
+          }
         }
         ctx.globalAlpha = 1;
+        if (Gr.edges[ei][2] && u > 0.95) chips.push([Gr.edges[ei][2], 0.25 * pa.x + 0.5 * c2.x + 0.25 * pb.x, 0.25 * pa.y + 0.5 * c2.y + 0.25 * pb.y, gAlpha]);
       }
-      this.minis.place(li, pa, pb, c2);
+      if (ph2.agree > 0 || (isFocus && !Gr.mine)) {
+        var mx = 0, my = 0, cnt = 0, top = Infinity;
+        Gr.members.forEach(function (m) { if (m < count) { mx += P[m].x; my += P[m].y; cnt++; top = Math.min(top, P[m].y - P[m].r); } });
+        if (cnt) {
+          mx /= cnt; my /= cnt;
+          if (ph2.agree > 0) pulses.push([mx, my, ph2.agree]);
+          if (isFocus && !Gr.mine) chips.push([Gr.topic, mx, top - 28, 1]);
+        }
+      }
     }
 
-    for (var fi = 0; fi < order.length; fi++) {
-      var id2 = order[fi]; if (!withFace(id2)) continue;
-      var fp = P[id2], vis = this.vis[id2], im = this.faces[id2];
-      var main = id2 === 0 || !big;
-      var R0 = (big && id2 !== 0 ? p.faceR * 0.62 : (id2 >= 3 ? p.faceR * 0.8 : p.faceR)) * fp.f * vis;
-      if (R0 < 1) continue;
-      ctx.save();
-      ctx.shadowColor = 'rgba(40,30,90,0.18)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12;
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.beginPath(); ctx.arc(fp.x, fp.y, R0 + 3, 0, 6.2832); ctx.fill();
-      ctx.restore();
-      if (im && im.complete && im.naturalWidth) {
-        ctx.save(); ctx.beginPath(); ctx.arc(fp.x, fp.y, R0, 0, 6.2832); ctx.clip();
-        ctx.drawImage(im, fp.x - R0, fp.y - R0, R0 * 2, R0 * 2); ctx.restore();
-      }
-      ctx.globalAlpha = vis;
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#1d1d1f';
-      ctx.font = '600 16px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
-      var person = this.people[id2];
-      if (id2 === 0) {
-        ctx.fillText(person.name, fp.x, fp.y - R0 - 34);
-        if (!big) { ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, fp.x, fp.y - R0 - 15); }
-        else { ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, fp.x, fp.y - R0 - 15); }
-      } else if (big) {
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText(person.name, fp.x + R0 + 12, fp.y);
-        ctx.textBaseline = 'alphabetic';
-      } else {
-        var right = fp.x >= CX, gap = R0 + 16;
-        ctx.textAlign = right ? 'left' : 'right';
-        var lx = right ? fp.x + gap : fp.x - gap;
-        ctx.fillText(person.name, lx, fp.y - 2);
-        ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, lx, fp.y + 17);
+    pulses.forEach(function (pl) {
+      var u2 = pl[2], rr2 = 10 + u2 * 70;
+      ctx.globalAlpha = (1 - u2) * 0.8; ctx.strokeStyle = self.grad(ctx, pl[0] - rr2, pl[1], pl[0] + rr2, pl[1]); ctx.lineWidth = 2 * (1 - u2) + 0.5;
+      ctx.beginPath(); ctx.arc(pl[0], pl[1], rr2, 0, 6.2832); ctx.stroke();
+      for (var sp2 = 0; sp2 < 8; sp2++) {
+        var ang = sp2 * 0.785 + u2, d0 = 12 + u2 * 46;
+        ctx.globalAlpha = (1 - u2) * 0.9; ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(pl[0] + Math.cos(ang) * d0, pl[1] + Math.sin(ang) * d0, 1.8 * (1 - u2) + 0.4, 0, 6.2832); ctx.fill();
       }
       ctx.globalAlpha = 1;
+    });
+
+    for (var fi = 0; fi < order.length; fi++) if (P[order[fi]].z >= -0.05) drawFace(order[fi]);
+
+    for (var li = 0; li < order.length; li++) {
+      var id2 = order[li], fp = P[id2]; if (fp.z < -0.05 || fp.r < 2) continue;
+      if (!(n <= 10 || id2 <= 2 || focusSet[id2])) continue;
+      var la = this.vis[id2] * (this.dimK > 0.01 && !focusSet[id2] && id2 !== 0 ? 1 - 0.7 * this.dimK : 1);
+      ctx.globalAlpha = la; ctx.fillStyle = '#1d1d1f'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = 'rgba(247,247,250,0.95)'; ctx.shadowBlur = 8;
+      var person = this.people[id2], R0 = fp.r;
+      ctx.font = '600 ' + (n <= 5 || id2 <= 2 ? 16 : 13) + 'px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
+      if (id2 === 0) {
+        ctx.textAlign = 'center';
+        ctx.fillText(person.name, fp.x, fp.y - R0 - 34);
+        ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, fp.x, fp.y - R0 - 15);
+      } else {
+        var right = fp.x >= CX, gap = R0 + (member[id2] ? 14 : 10), lx = right ? fp.x + gap : fp.x - gap;
+        ctx.textAlign = right ? 'left' : 'right';
+        if (n <= 5) {
+          ctx.fillText(person.name, lx, fp.y - 2);
+          ctx.fillStyle = '#6e6e73'; ctx.font = '400 13px -apple-system, system-ui, sans-serif'; ctx.fillText(person.status, lx, fp.y + 17);
+        } else { ctx.textBaseline = 'middle'; ctx.fillText(person.name, lx, fp.y); ctx.textBaseline = 'alphabetic'; }
+      }
     }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+
+    chips.forEach(function (c) { ctx.globalAlpha = c[3]; self.chip(ctx, c[0], c[1], c[2]); ctx.globalAlpha = 1; });
+
     if (this.hover >= 0 && count > 1) {
-      var hv = P[this.hover], who = this.hover < 5 && (!big || this.hover <= 2) ? this.people[this.hover].name + ' · ' : '';
-      var conv = (n - 1).toLocaleString('es-CL') + (n - 1 === 1 ? ' conversación posible' : ' conversaciones posibles');
-      this.chip(ctx, who + conv, hv.x, hv.y - (this.hover < 5 && (!big || this.hover <= 2) ? 78 : 22));
+      var hv = P[this.hover], conv = (n - 1).toLocaleString('es-CL') + (n - 1 === 1 ? ' conversación posible' : ' conversaciones posibles');
+      this.chip(ctx, this.people[this.hover].name + ' · ' + conv, hv.x, hv.y + hv.r + 26);
     }
   }
 
   chip(ctx, text, x, y) {
     ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
-    var w = ctx.measureText(text).width + 26, h = 30;
+    var w = ctx.measureText(text).width + 26, h = 30, a = ctx.globalAlpha;
     ctx.save();
     ctx.shadowColor = 'rgba(40,30,90,0.10)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
-    ctx.fillStyle = 'rgba(255,255,255,0.82)';
+    ctx.fillStyle = 'rgba(255,255,255,0.86)';
     ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 15); ctx.fill();
     ctx.restore();
+    ctx.globalAlpha = a;
     ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 15); ctx.stroke();
     ctx.fillStyle = '#1d1d1f'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -680,17 +541,38 @@ function mountGlobeMinis(canvas, scenePrefix, frozen) {
     ctx.textBaseline = 'alphabetic';
   }
 
+  faceStyle(id) {
+    var base = { display: 'block', width: '36px', height: '36px', borderRadius: '50%', flex: '0 0 auto', boxShadow: '0 0 0 2px rgba(255,255,255,0.95), 0 6px 14px rgba(40,30,90,0.14)' };
+    if (id < 5) return Object.assign(base, { backgroundImage: 'url(' + this.TEAM_SRC[id] + ')', backgroundSize: 'cover' });
+    var tile = this.people[id].tile;
+    return Object.assign(base, { backgroundImage: 'url(' + this.ATLAS + ')', backgroundSize: '800% 800%', backgroundPosition: ((tile % 8) * 100 / 7) + '% ' + (Math.floor(tile / 8) * 100 / 7) + '%' });
+  }
+
   renderVals() {
-    var self = this, n = this.state.n;
+    var self = this, n = this.state.n, fmt = function (v) { return v.toLocaleString('es-CL'); };
+    var focus = null;
+    if (this.state.focus) {
+      var g = this.groups.filter(function (x) { return x.id === self.state.focus; })[0];
+      if (g) focus = {
+        topic: g.topic,
+        members: g.members.map(function (m, i) { return { name: self.people[m].name, role: i === 0 ? 'Pide ayuda' : 'Puede ayudar', face: self.faceStyle(m) }; }),
+        note: g.members.length + ' agentes, ' + (g.members.length * (g.members.length - 1) / 2) + (g.members.length === 2 ? ' conversación' : ' conversaciones') + '. Nadie más se entera.'
+      };
+    }
+    var gc = this.state.groupCount;
     return {
       canvasRef: this.canvasRef,
-      n: n.toLocaleString('es-CL'),
-      pairs: (n * (n - 1) / 2).toLocaleString('es-CL'),
-      onlineLabel: n.toLocaleString('es-CL') + ' agentes en línea',
+      n: fmt(n),
+      pairs: fmt(n * (n - 1) / 2),
+      onlineLabel: fmt(n) + ' agentes en línea',
+      groupsLabel: gc + (gc === 1 ? ' grupo negociando' : ' grupos negociando'),
+      hasFocus: !!focus,
+      focus: focus || { topic: '', members: [], note: '' },
+      clearFocus: function () { self.turnTo = null; self.setState({ focus: null }); },
       options: this.SEQ.map(function (v) {
         var on = v === n;
         return {
-          label: v.toLocaleString('es-CL'),
+          label: fmt(v),
           pressed: on ? 'true' : 'false',
           style: on ? { background: '#1d1d1f', color: '#ffffff' } : { background: 'transparent', color: '#1d1d1f' },
           pick: function () { self.setN(v, false); }
