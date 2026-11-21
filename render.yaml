@@ -36,3 +36,10 @@ services:
         value: /var/data
       - key: SECRET_KEY
         generateValue: true
+
+databases:
+  - name: montu-db
+    plan: free
+    region: virginia
+    databaseName: montu
+    user: montu
