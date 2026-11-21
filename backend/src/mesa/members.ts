@@ -21,7 +21,12 @@ const mesaTeams = (ctx: AppContext): TeamStore => ({
 
 export const mesaCardDeps = (ctx: AppContext): CardDeps => ({ ...cardDepsFrom(ctx), teams: mesaTeams(ctx), cardFilter: hasPublished });
 
-export const mesaRoundDeps = (ctx: AppContext, model: AgentModel): RoundDeps => ({ ...roundDepsFrom(ctx, model), teams: mesaTeams(ctx), cardFilter: hasPublished });
+export const mesaRoundDeps = (ctx: AppContext, model: AgentModel): RoundDeps => ({
+  ...roundDepsFrom(ctx, model),
+  teams: mesaTeams(ctx),
+  cardFilter: hasPublished,
+  onEvent: (teamId, type, payload) => ctx.rooms.record(teamId, type, payload),
+});
 
 export function activityFingerprint(ctx: AppContext, now: Date): string {
   const deps: CardDeps = { ...mesaCardDeps(ctx), repo: undefined, digests: undefined };

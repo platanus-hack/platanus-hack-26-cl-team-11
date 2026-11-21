@@ -2,7 +2,7 @@ import type { DatabaseSync } from '../pg/database.js';
 import { normalizeCode, randomCode } from '../codes.js';
 import type { JsonObject } from '../types.js';
 
-export const ROOM_EVENT_TYPES = ['persona_entra', 'asistente_conecta', 'repo_cambia', 'ronda_empieza', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'ronda_termina'] as const;
+export const ROOM_EVENT_TYPES = ['persona_entra', 'asistente_conecta', 'repo_cambia', 'ronda_empieza', 'pedido_busca', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'] as const;
 export type RoomEventType = (typeof ROOM_EVENT_TYPES)[number];
 
 const ROOM_CODE_LENGTH = 6;
@@ -28,6 +28,7 @@ export interface RoomStore {
   record(teamId: string, type: RoomEventType, payload: JsonObject): void;
   eventsAfter(teamId: string, afterId: number, limit: number): RoomEvent[];
   lastEventId(teamId: string): number;
+  lastEventOfType(teamId: string, type: RoomEventType): number;
 }
 
 interface RoomRow {
@@ -102,6 +103,11 @@ export function openRoomStore(db: DatabaseSync, now: () => Date = () => new Date
 
     lastEventId(teamId) {
       const row = db.prepare('SELECT MAX(id) AS last FROM room_events WHERE team_id = ?').get(teamId) as { last: number | null } | undefined;
+      return Number(row?.last ?? 0);
+    },
+
+    lastEventOfType(teamId, type) {
+      const row = db.prepare('SELECT MAX(id) AS last FROM room_events WHERE team_id = ? AND type = ?').get(teamId, type) as { last: number | null } | undefined;
       return Number(row?.last ?? 0);
     },
   };

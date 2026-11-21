@@ -69,7 +69,20 @@ export async function inBatches<Item>(items: Item[], size: number, work: (item: 
   return results;
 }
 
-async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: OpenNeed, cards: AgentCard[]): Promise<void> {
+export type NeedOutcome = 'nadie' | 'sin_ayuda' | 'propuesta' | 'falla';
+
+async function resolveNeed(deps: RoundDeps, round: Round, open: OpenNeed, cards: AgentCard[]): Promise<void> {
+  const step = { from: publicIdOf(open.requester.token), topic: open.need.topic };
+  deps.onEvent?.(round.teamId, 'pedido_busca', step);
+  let outcome: NeedOutcome = 'falla';
+  try {
+    outcome = await talkAbout(deps, round, open, cards);
+  } finally {
+    deps.onEvent?.(round.teamId, 'pedido_cierra', { ...step, outcome });
+  }
+}
+
+async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: OpenNeed, cards: AgentCard[]): Promise<NeedOutcome> {
   const teammates: Teammate[] = cards.filter((card) => card.token !== requester.token).map((card, position) => ({ id: `p${position + 1}`, card }));
   const byId = new Map(teammates.map((teammate) => [teammate.id, teammate]));
 
@@ -79,6 +92,7 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
     const message = contact.message.trim();
     if (byId.has(contact.teammate) && message && !contacts.has(contact.teammate) && contacts.size < MAX_CONTACTS) contacts.set(contact.teammate, message);
   }
+  if (contacts.size === 0) return 'nadie';
 
   const settled = await Promise.allSettled(
     [...contacts].map(async ([teammateId, message]): Promise<CollectedReply> => {
@@ -101,17 +115,18 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
   if (replies.length === 0 && unanswered) throw unanswered.reason;
 
   const willing = replies.filter((reply) => reply.help !== 'no');
-  if (willing.length === 0) return;
+  if (willing.length === 0) return 'sin_ayuda';
 
   const draft = await deps.model.decide({ system: systemFor(requester.name), prompt: proposalPrompt(requester, need, willing), schema: ProposalDraft });
   const willingIds = new Set(willing.map((reply) => reply.id));
   const helperTokens = [...new Set(draft.helpers.filter((id) => willingIds.has(id)))].slice(0, MAX_HELPERS).map((id) => (byId.get(id) as Teammate).card.token);
   const text = draft.text.trim().slice(0, MAX_PROPOSAL_LENGTH);
-  if (helperTokens.length === 0 || !text) return;
+  if (helperTokens.length === 0 || !text) return 'sin_ayuda';
 
   const proposal = deps.agents.addProposal({ roundId: round.id, teamId: round.teamId, requesterToken: requester.token, helperTokens, topic: need.topic, text });
   deps.onProposal?.(proposal);
-  deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic });
+  deps.onEvent?.(round.teamId, 'propuesta_nace', { from: publicIdOf(requester.token), helpers: helperTokens.map(publicIdOf), topic: need.topic, proposal: proposal.id });
+  return 'propuesta';
 }
 
 const keepEveryCard = () => true;
@@ -169,7 +184,7 @@ export async function runRound(source: RoundDeps, round: Round, now: Date = new 
   const finish = (status: 'lista' | 'fallida', problem: string | null) => {
     deps.agents.saveRoundUsage(round.id, { needs, ...meter.usage });
     deps.agents.finishRound(round.id, status, problem);
-    deps.onEvent?.(round.teamId, 'ronda_termina', { round: round.id, status });
+    deps.onEvent?.(round.teamId, 'ronda_termina', { round: round.id, status, needs, calls: meter.usage.calls, tokens: meter.usage.inputTokens + meter.usage.outputTokens });
   };
   try {
     deps.onEvent?.(round.teamId, 'ronda_empieza', { round: round.id });

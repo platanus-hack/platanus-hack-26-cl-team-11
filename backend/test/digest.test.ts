@@ -87,7 +87,7 @@ test('a need that an assistant wrote in a shared file becomes a conversation and
   assert.ok(contact?.includes('Google Cloud'));
 
   const happened = (await events()).map((event) => event.type);
-  assert.deepEqual(happened.slice(-5), ['ronda_empieza', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'ronda_termina']);
+  assert.deepEqual(happened.slice(-7), ['ronda_empieza', 'pedido_busca', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina']);
   const state = (await (await app.request(`/api/rooms/${room.code}/state`)).json()) as { threads: Array<{ topic: string; help: string }>; round: { status: string } };
   assert.deepEqual(
     state.threads.map((thread) => [thread.topic, thread.help]),

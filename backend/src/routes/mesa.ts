@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { estimateRound } from '../agents/estimate.js';
 import { cardFor } from '../agents/round.js';
+import { publicIdOf } from '../codes.js';
 import type { AppContext } from '../context.js';
-import { hasPublished, isMesaOperator, mesaCardDeps } from '../mesa/members.js';
+import { hasPublished, isMesaOperator, mesaCardDeps, mesaMembersOf } from '../mesa/members.js';
 import { isInterval, MAX_INTERVAL_SECONDS, MESA_NAME, MESA_TEAM_ID, MIN_INTERVAL_SECONDS } from '../mesa/store.js';
 import { mesaDailyCapOf, mesaTokensLastDay, startMesaRound } from '../mesa/ticker.js';
 import { isVisibleTo, viewProposal, viewThread } from './agents.js';
@@ -13,9 +14,12 @@ const NOT_CONFIGURED = { error: 'Faltan las credenciales del modelo en el servid
 const ROUND_RUNNING = { error: 'Ya hay una ronda en curso en la mesa.' } as const;
 const INVALID_INTERVAL = { error: `El intervalo va entre ${MIN_INTERVAL_SECONDS} segundos y ${MAX_INTERVAL_SECONDS / 3600} horas, o vacío para dejarlo manual.` } as const;
 const INVALID_MEMBERSHIP = { error: 'La participación en la mesa debe ser verdadera o falsa.' } as const;
+const MAX_LIVE_EVENTS = 200;
+const ASK_MESSAGE = 0;
+const REPLY_MESSAGE = 1;
 
 export function mesaRoutes(ctx: AppContext) {
-  const { store, agents, mesa } = ctx;
+  const { store, agents, mesa, rooms } = ctx;
   const routes = new Hono();
 
   const viewOf = (personToken: string, name: string) => {
@@ -51,6 +55,46 @@ export function mesaRoutes(ctx: AppContext) {
     const person = store.findPerson(c.req.param('token'));
     if (!person) return c.json(NOT_FOUND, 404);
     return c.json(viewOf(person.token, person.name));
+  });
+
+  routes.get('/people/:token/mesa/live', (c) => {
+    const person = store.findPerson(c.req.param('token'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    const me = publicIdOf(person.token);
+    const now = new Date();
+    const asked = Number(c.req.query('since'));
+    const since = Number.isInteger(asked) && asked > 0 ? asked : Math.max(0, rooms.lastEventOfType(MESA_TEAM_ID, 'ronda_empieza') - 1);
+    const round = agents.latestRound(MESA_TEAM_ID);
+    const threads = new Map((round ? agents.threadsOf(round.id) : []).map((thread) => [thread.id, thread]));
+    const deps = mesaCardDeps(ctx);
+    const members = mesaMembersOf(ctx);
+    const names = new Map(members.map((member) => [publicIdOf(member.token), member.name]));
+    names.set(me, person.name);
+    const seated = new Set([me, ...members.filter((member) => hasPublished(cardFor(deps, member, now))).map((member) => publicIdOf(member.token))]);
+
+    const events = rooms.eventsAfter(MESA_TEAM_ID, since, MAX_LIVE_EVENTS).map((event) => {
+      const { from, to, helpers, thread, proposal } = event.payload;
+      const involved = [from, to, ...(Array.isArray(helpers) ? helpers : [])].filter((id): id is string => typeof id === 'string');
+      for (const id of involved) seated.add(id);
+      const mine = involved.includes(me);
+      const spoken = typeof thread === 'string' ? threads.get(thread)?.messages : undefined;
+      const text =
+        !mine ? null
+        : event.type === 'hilo_abre' ? spoken?.[ASK_MESSAGE]?.text ?? null
+        : event.type === 'hilo_responde' ? spoken?.[REPLY_MESSAGE]?.text ?? null
+        : event.type === 'propuesta_nace' && typeof proposal === 'string' ? agents.findProposal(proposal)?.text ?? null
+        : null;
+      return { ...event.payload, id: event.id, type: event.type, at: event.createdAt, text };
+    });
+
+    return c.json({
+      me,
+      now: now.toISOString(),
+      people: [...seated].flatMap((id) => (names.has(id) ? [{ id, name: names.get(id) as string }] : [])),
+      round: round ? { id: round.id, status: round.status } : null,
+      events,
+      lastEventId: events.at(-1)?.id ?? Math.max(since, rooms.lastEventId(MESA_TEAM_ID)),
+    });
   });
 
   routes.post('/people/:token/mesa/rounds', (c) => {

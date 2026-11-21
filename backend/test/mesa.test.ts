@@ -216,3 +216,69 @@ test('without a model the public table says so and starts nothing', async () => 
   assert.equal(runMesaTick(ctx).outcome, 'sin_modelo');
   assert.equal((await createApp(ctx).request('/api/people/nadie/mesa')).status, 404);
 });
+
+interface LiveView {
+  me: string;
+  people: Array<{ id: string; name: string }>;
+  round: { id: string; status: string } | null;
+  events: Array<{ id: number; type: string; from?: string; to?: string; topic?: string; help?: string; outcome?: string; text: string | null; calls?: number; tokens?: number }>;
+  lastEventId: number;
+}
+
+test('the live view streams each step of the round, with the words only for the two people in a conversation', async () => {
+  const { ctx, app, people, tokenOf, startRound, settled } = setup();
+  const live = async (name: string, since = 0) => (await (await app.request(`/api/people/${tokenOf(name)}/mesa/live?since=${since}`)).json()) as LiveView;
+
+  const idle = await live('Ana');
+  assert.equal(idle.people.length, people.length);
+  assert.equal(idle.people.find((person) => person.id === idle.me)?.name, 'Ana');
+  assert.deepEqual(idle.events, []);
+
+  ctx.agents.decideTopic(tokenOf('Ana'), TOPIC, true);
+  assert.equal((await startRound('Ana')).status, 202);
+  await settled('Ana');
+
+  const mine = await live('Ana');
+  assert.deepEqual(mine.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'hilo_abre', 'hilo_responde', 'propuesta_nace', 'pedido_cierra', 'ronda_termina']);
+  const [, search, ask, reply, proposal, close, end] = mine.events;
+  assert.equal(search?.from, mine.me);
+  assert.equal(search?.topic, TOPIC);
+  assert.equal(ask?.text, 'Ana necesita ayuda con pagos.');
+  assert.equal(reply?.text, 'Puede ayudar con eso.');
+  assert.equal(reply?.help, 'si');
+  assert.equal(proposal?.text, 'Tomás ayuda a Ana con la integración de pagos.');
+  assert.equal(close?.outcome, 'propuesta');
+  assert.equal(end?.calls, 3);
+  assert.equal(end?.tokens, 330);
+
+  const outside = await live('Carla');
+  assert.deepEqual(outside.events.map((event) => event.type), mine.events.map((event) => event.type));
+  assert.deepEqual(outside.events.map((event) => event.text), [null, null, null, null, null, null, null]);
+  assert.equal(outside.events[2]?.from, mine.me);
+
+  assert.deepEqual((await live('Ana', mine.lastEventId)).events, []);
+  assert.equal((await app.request('/api/people/nadie/mesa/live')).status, 404);
+});
+
+test('a need nobody relates to closes saying so, and a second round only streams its own steps', async () => {
+  const alone: AgentModel = {
+    async decide<Schema extends z.ZodType>(request: AgentRequest<Schema>): Promise<z.infer<Schema>> {
+      return request.schema.parse({ contacts: [] });
+    },
+  };
+  const { ctx, app, tokenOf, startRound, settled } = setup({ model: alone });
+  const live = async () => (await (await app.request(`/api/people/${tokenOf('Ana')}/mesa/live`)).json()) as LiveView;
+  ctx.agents.decideTopic(tokenOf('Ana'), TOPIC, true);
+
+  assert.equal((await startRound('Ana')).status, 202);
+  await settled('Ana');
+  const first = await live();
+  assert.deepEqual(first.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'pedido_cierra', 'ronda_termina']);
+  assert.equal(first.events[2]?.outcome, 'nadie');
+
+  assert.equal((await startRound('Ana')).status, 202);
+  await settled('Ana');
+  const second = await live();
+  assert.equal(second.events.length, 4);
+  assert.ok((second.events[0]?.id ?? 0) > first.lastEventId);
+});
