@@ -26,6 +26,7 @@ type SourceRow = Record<string, SqlValue>;
 interface Plan {
   table: string;
   columns: string[];
+  key: string[];
   types: Map<string, string>;
   rows: SourceRow[];
 }
@@ -51,19 +52,33 @@ function planFor(source: SqliteDatabase, db: DatabaseSync, table: string): Plan 
       (column) => [column.name.toLowerCase(), column.type],
     ),
   );
+  const key = (
+    db
+      .prepare(
+        `SELECT kcu.column_name AS name FROM information_schema.table_constraints tc
+         JOIN information_schema.key_column_usage kcu ON kcu.constraint_name = tc.constraint_name AND kcu.table_schema = tc.table_schema AND kcu.table_name = tc.table_name
+         WHERE tc.table_schema = current_schema() AND tc.table_name = ? AND tc.constraint_type = 'PRIMARY KEY'
+         ORDER BY kcu.ordinal_position`,
+      )
+      .all(table.toLowerCase()) as Array<{ name: string }>
+  ).map((column) => column.name.toLowerCase());
   const targetNames = new Set(targetColumns.map((column) => column.name.toLowerCase()));
   const sourceColumns = (source.prepare(`PRAGMA table_info(${quoted(table)})`).all() as Array<{ name: string }>).map((column) => column.name);
   const shared = sourceColumns.filter((name) => targetNames.has(name.toLowerCase()));
   const keepsOrder = targetNames.has('rowid') && !sourceColumns.some((name) => name.toLowerCase() === 'rowid');
   const selected = [...(keepsOrder ? ['rowid AS rowid'] : []), ...shared.map(quoted)].join(', ');
   const rows = source.prepare(`SELECT ${selected} FROM ${quoted(table)}${keepsOrder ? ' ORDER BY rowid' : ''}`).all() as SourceRow[];
-  return { table, columns: [...(keepsOrder ? ['rowid'] : []), ...shared], types, rows };
+  return { table, columns: [...(keepsOrder ? ['rowid'] : []), ...shared], key, types, rows };
 }
 
 function insert(db: DatabaseSync, plan: Plan, rows: SourceRow[]): number {
   const row = `(${plan.columns.map(() => '?').join(', ')})`;
   const values = rows.flatMap((source) => plan.columns.map((column) => fitted(source[column] ?? null, plan.types.get(column.toLowerCase()))));
-  const sql = `INSERT INTO ${quoted(plan.table.toLowerCase())} (${plan.columns.map((column) => quoted(column.toLowerCase())).join(', ')}) VALUES ${rows.map(() => row).join(', ')} ON CONFLICT DO NOTHING RETURNING 1 AS copied`;
+  const names = plan.columns.map((column) => column.toLowerCase());
+  const rest = names.filter((name) => !plan.key.includes(name));
+  const replacesSeeded = plan.key.length > 0 && rest.length > 0 && plan.key.every((name) => names.includes(name));
+  const onConflict = replacesSeeded ? `ON CONFLICT (${plan.key.map(quoted).join(', ')}) DO UPDATE SET ${rest.map((name) => `${quoted(name)} = excluded.${quoted(name)}`).join(', ')}` : 'ON CONFLICT DO NOTHING';
+  const sql = `INSERT INTO ${quoted(plan.table.toLowerCase())} (${names.map(quoted).join(', ')}) VALUES ${rows.map(() => row).join(', ')} ${onConflict} RETURNING 1 AS copied`;
   return db.prepare(sql).all(...values).length;
 }
 
