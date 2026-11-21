@@ -9,13 +9,13 @@ Todo conector hace una sola cosa: convierte su fuente en **eventos con el mismo 
 | Campo del evento | Contenido |
 |---|---|
 | Persona | A quién pertenece |
-| Fuente | `apple_health`, `google_calendar`, `gmail`, `granola`, `github` |
-| Tipo | `salud_diaria`, `reunión`, `correo`, `nota_de_reunión`, `commit` |
+| Fuente | `apple_health`, `google_calendar`, `gmail`, `granola`, `github`, `linear`, `checkin` |
+| Tipo | `salud_diaria`, `reunion`, `correo`, `nota_de_reunion`, `commit`, `pull_request`, `tarea`, `checkin` |
 | Cuándo ocurrió | Fecha del hecho, no de la recepción |
 | Resumen | Una línea legible |
 | Dato crudo | Lo que mandó la fuente, sin tocar |
 
-Cada persona tiene una página `/conectar/<token>` con una fila por fuente. El link se lo manda su agente por WhatsApp. El token del link es su identidad: no hay cuentas ni contraseñas.
+Cada persona tiene una página `/conectar/<token>` con una fila por fuente. Hoy el link se crea en la portada o con `npm run add-person`; que su agente se lo mande por WhatsApp no está construido. El token del link es su identidad: no hay cuentas ni contraseñas.
 
 ## Estado
 
@@ -136,10 +136,12 @@ Las conexiones que cada uno tiene en su asistente (Claude, Codex) son de esa cue
 
 ## Abierto
 
-- [ ] **OAuth a mano o con una plataforma.** Composio, Nango y Pipedream Connect resuelven Google, GitHub y Linear con un link por persona. Ninguna cubre Apple Health ni Granola.
-- [ ] **Dónde se despliega** el receptor para tener HTTPS público.
-- [ ] **Base definitiva.** El backend usa SQLite local para funcionar sin montar nada. Si se pasa a Postgres, cambia solo `backend/src/db.ts`.
-- [ ] **Cifrado** de tokens y llaves antes de guardar la primera credencial real.
+- [x] **OAuth a mano o con una plataforma.** Quedó hecho a mano para Google, GitHub y Linear, en `backend/src/oauth/`. No se usó Composio, Nango ni Pipedream Connect.
+- [x] **Dónde se despliega.** En Render, con HTTPS público. Detalle en [DEPLOY.md](DEPLOY.md).
+- [x] **Cifrado** de tokens y llaves. Hecho con AES-256-GCM; detalle en [ARCHITECTURE.md](ARCHITECTURE.md#credenciales).
+- [ ] **Base definitiva.** El backend usa SQLite en disco. Si se pasa a Postgres, cambian `backend/src/db.ts` y las tiendas de `teams/`, `board/`, `policy/`, `agents/` y `hub/`.
+- [ ] **Credenciales de cada aplicación OAuth.** Falta crear las tres aplicaciones y cargar sus variables en Render; ver «Aplicaciones OAuth por crear».
+- [ ] **Probar cada fuente contra el servicio real.** Solo Apple Health está probada.
 
 ## Fuentes
 
