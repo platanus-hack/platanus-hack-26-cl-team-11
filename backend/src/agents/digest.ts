@@ -131,12 +131,13 @@ export const currentDigest = ({ repo, digests }: DigestDeps, personToken: string
   return version === 0 ? undefined : digests.find(personToken, version);
 };
 
-export async function refreshDigests(deps: DigestDeps & { model: AgentModel }, members: Array<{ token: string; name: string }>): Promise<void> {
+export async function refreshDigests(deps: DigestDeps & { model: AgentModel }, members: Array<{ token: string; name: string }>): Promise<unknown[]> {
   const stale = members.filter((member) => deps.repo.version(member.token) > 0 && !currentDigest(deps, member.token));
-  await Promise.allSettled(
+  const settled = await Promise.allSettled(
     stale.map(async (member) => {
       const version = deps.repo.version(member.token);
       deps.digests.save(member.token, version, await digestFiles(deps.model, member.name, deps.repo.shared(member.token)));
     }),
   );
+  return settled.flatMap((result) => (result.status === 'rejected' ? [result.reason as unknown] : []));
 }

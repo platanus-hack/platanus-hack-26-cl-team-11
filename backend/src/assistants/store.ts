@@ -113,7 +113,7 @@ export function openAssistantStore(db: DatabaseSync, now: () => Date = () => new
   };
 
   const assistantsOf = (personToken: string) =>
-    (db.prepare(`SELECT ${ASSISTANT_COLUMNS} FROM assistants WHERE person_token = ? AND revoked_at IS NULL ORDER BY created_at, id`).all(personToken) as unknown as AssistantRow[]).map(toAssistant);
+    (db.prepare(`SELECT ${ASSISTANT_COLUMNS} FROM assistants WHERE person_token = ? AND revoked_at IS NULL ORDER BY created_at, rowid`).all(personToken) as unknown as AssistantRow[]).map(toAssistant);
 
   const newToken = () => `${ASSISTANT_TOKEN_PREFIX}${randomBytes(TOKEN_BYTES).toString('base64url')}`;
 

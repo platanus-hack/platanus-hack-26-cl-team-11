@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type * as z from 'zod/v4';
 import { RepoDigestAnswer } from '../src/agents/digest.js';
-import type { AgentModel, AgentRequest } from '../src/agents/model.js';
+import { AgentModelError, type AgentModel, type AgentRequest } from '../src/agents/model.js';
 import { ContactPlan, HelpReply, ProposalDraft } from '../src/agents/prompts.js';
 import { createApp } from '../src/app.js';
 import { createContext } from '../src/context.js';
@@ -15,7 +15,7 @@ interface DigestScript {
   expertise?: string[];
 }
 
-function fakeModel(digestOf: (ownerPrompt: string) => DigestScript) {
+function fakeModel(digestOf: (ownerPrompt: string) => DigestScript | 'falla') {
   const prompts: string[] = [];
   let digests = 0;
   const model: AgentModel = {
@@ -24,7 +24,9 @@ function fakeModel(digestOf: (ownerPrompt: string) => DigestScript) {
       const schema: z.ZodType = request.schema;
       if (schema === RepoDigestAnswer) {
         digests += 1;
-        return request.schema.parse({ workingOn: [], needs: [], expertise: [], ...digestOf(request.system) });
+        const script = digestOf(request.system);
+        if (script === 'falla') throw new AgentModelError('El modelo rechazó las credenciales del servidor.');
+        return request.schema.parse({ workingOn: [], needs: [], expertise: [], ...script });
       }
       if (schema === ContactPlan) return request.schema.parse({ contacts: [{ teammate: 'p1', message: 'Ana necesita ayuda con OAuth.' }] });
       if (schema === HelpReply) return request.schema.parse({ help: 'si', message: 'Puede ayudar con eso.' });
@@ -37,7 +39,7 @@ function fakeModel(digestOf: (ownerPrompt: string) => DigestScript) {
 
 const NEED = { topic: 'OAuth de Google', statement: 'Necesita a alguien que conozca el OAuth de Google para revisar los permisos.', path: 'ahora.md' };
 
-async function setup(digestOf: (ownerPrompt: string) => DigestScript) {
+async function setup(digestOf: (ownerPrompt: string) => DigestScript | 'falla') {
   const fake = fakeModel(digestOf);
   const ctx = createContext({ location: ':memory:', model: fake.model });
   const app = createApp(ctx);
@@ -134,4 +136,13 @@ test('a need the person refused is not asked, even if it is still written in her
   assert.equal((await app.request(`/api/people/${ana.token}/agents/asks`, json({ topic: 'oauth de google', allow: false }))).status, 200);
   await round();
   assert.deepEqual(ctx.agents.proposalsOf(teamId), []);
+});
+
+test('when the model cannot read the repos the round says so instead of ending quietly with nothing', async () => {
+  const { ctx, ana, teamId, round, events } = await setup(() => 'falla');
+  await ana.commit({ message: 'Contexto', files: [{ path: 'ahora.md', content: 'Necesita ayuda con OAuth.', share: 'siempre' }] });
+  await round();
+  const latest = ctx.agents.latestRound(teamId);
+  assert.deepEqual({ status: latest?.status, problem: latest?.problem }, { status: 'fallida', problem: 'El modelo rechazó las credenciales del servidor.' });
+  assert.deepEqual((await events()).at(-1)?.payload.status, 'fallida');
 });

@@ -61,7 +61,7 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 | `FIFTYX_API_KEY` | La llave de 50x | Los agentes conversan con DeepSeek en 50x. Si está definida, tiene prioridad sobre las variables de Anthropic |
 | `FIFTYX_BASE_URL` | Opcional. Por defecto `https://api.ai.50x.energy/v1` | Dirección de 50x |
 | `ANTHROPIC_API_KEY` | Una llave de la API de Anthropic | Acceso directo al modelo |
-| `ANTHROPIC_BASE_URL` | La dirección del proxy de la hack, si se usa en vez de una llave | Con solo esta variable, el servidor llama al proxy sin llave |
+| `ANTHROPIC_BASE_URL` | La dirección del proxy de la hack, si se usa en vez de una llave | Con solo esta variable, el servidor llama al proxy sin llave. Probado el 21-nov-2026 desde un computador del equipo: el proxy respondió 401 «Invalid bearer token», así que necesita además `ANTHROPIC_AUTH_TOKEN` |
 | `ANTHROPIC_AUTH_TOKEN` | Un token, si el proxy lo pide en vez de una llave | Se manda como token de autorización. Basta una de las tres variables para que el modelo quede configurado |
 | `AGENT_MODEL` | Opcional. Por defecto `claude-opus-5-5` | Qué modelo conversa |
 | `AGENT_ROUND_HOUR` | Opcional. Hora de Santiago, de 0 a 23; por defecto 9. Cualquier otro valor apaga la ronda diaria | Desde qué hora corre sola la ronda de cada día |

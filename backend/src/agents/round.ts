@@ -122,8 +122,13 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
   return { cards, openNeeds };
 }
 
-export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' | 'digests' | 'model'>, teamId: string): Promise<void> {
-  if (deps.repo && deps.digests) await refreshDigests({ repo: deps.repo, digests: deps.digests, model: deps.model }, deps.teams.membersOf(teamId));
+const problemOf = (reason: unknown): string => (reason instanceof AgentModelError ? reason.message : UNEXPECTED_FAILURE);
+
+export async function refreshTeamDigests(deps: Pick<RoundDeps, 'teams' | 'repo' | 'digests' | 'model'>, teamId: string): Promise<string | null> {
+  if (!deps.repo || !deps.digests) return null;
+  const failures = await refreshDigests({ repo: deps.repo, digests: deps.digests, model: deps.model }, deps.teams.membersOf(teamId));
+  for (const failure of failures) if (!(failure instanceof AgentModelError)) console.error('Reading a repo failed.', failure);
+  return failures.length > 0 ? problemOf(failures[0]) : null;
 }
 
 export async function runRound(deps: RoundDeps, round: Round, now: Date = new Date()): Promise<void> {
@@ -133,7 +138,7 @@ export async function runRound(deps: RoundDeps, round: Round, now: Date = new Da
   };
   try {
     deps.onEvent?.(round.teamId, 'ronda_empieza', { round: round.id });
-    await refreshTeamDigests(deps, round.teamId);
+    const unread = await refreshTeamDigests(deps, round.teamId);
     const { cards, openNeeds } = openNeedsOf(deps, round.teamId, now);
     if (cards.length < MIN_TEAM_SIZE) return finish('lista', TEAM_TOO_SMALL);
 
@@ -141,10 +146,10 @@ export async function runRound(deps: RoundDeps, round: Round, now: Date = new Da
     const failures = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
     for (const failure of failures) if (!(failure.reason instanceof AgentModelError)) console.error('Agent round step failed.', failure.reason);
 
-    const firstReason: unknown = failures[0]?.reason;
-    const problem = failures.length === 0 ? null : firstReason instanceof AgentModelError ? firstReason.message : UNEXPECTED_FAILURE;
+    const problem = failures.length === 0 ? unread : problemOf(failures[0]?.reason);
     const everyNeedFailed = openNeeds.length > 0 && failures.length === openNeeds.length;
-    finish(everyNeedFailed ? 'fallida' : 'lista', problem);
+    const nothingToAsk = unread !== null && openNeeds.length === 0;
+    finish(everyNeedFailed || nothingToAsk ? 'fallida' : 'lista', problem);
   } catch (failure) {
     console.error('Agent round failed.', failure);
     finish('fallida', UNEXPECTED_FAILURE);
