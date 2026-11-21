@@ -6,7 +6,8 @@ const ledger = 'exchange/26-cl/v1.json';
 // Each retry gets a fresh copy, including any successful nonce receipt from another invocation.
 export async function transact(create, update) {
   for (let attempt = 0; attempt < 9; attempt++) {
-    const stored = await get(ledger, { access: 'private', useCache: false });
+    // Compressed responses carry weak ETags, which cannot guard a conditional write.
+    const stored = await get(ledger, { access: 'private', useCache: false, headers: { 'Accept-Encoding': 'identity' } });
     const state = stored ? await new Response(stored.stream).json() : create();
     const { changed, result } = await update(state);
     if (!changed && stored) return result;
