@@ -7,3 +7,4 @@ body { margin: 0; }
 .app-title { font-size: var(--rd-text-name); font-weight: var(--rd-weight); }
 .app-grow { flex: 2 1 200px; }
 .app-off { opacity: 0.55; }
+.app-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }

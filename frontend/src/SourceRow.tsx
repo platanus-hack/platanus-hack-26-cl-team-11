@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { connectSource, disconnectSource, syncSource, type Source } from './api';
+import { connectSource, disconnectSource, oauthStartUrl, syncSource, type Source } from './api';
 import { formatWhen } from './format';
 
 function statusText(source: Source) {
@@ -73,7 +73,15 @@ export function SourceRow({ token, source, onChange }: { token: string; source: 
         </form>
       )}
 
-      {source.connect === 'key' && source.connection && (
+      {source.connect === 'oauth' && source.provider && !source.connection && (
+        <div className="rd-actions">
+          <a className="rd-button app-link" href={oauthStartUrl(token, source.provider)}>
+            Conectar {source.how.toLowerCase()}
+          </a>
+        </div>
+      )}
+
+      {source.connect !== 'push' && source.connection && (
         <div className="rd-actions">
           <button className="rd-button rd-button--quiet" type="button" disabled={busy} onClick={() => void run(async () => imported((await syncSource(token, source.id)).imported))}>
             {busy ? 'Trabajando…' : 'Sincronizar'}

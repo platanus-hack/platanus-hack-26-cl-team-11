@@ -13,7 +13,8 @@ export interface Source {
   id: string;
   label: string;
   how: string;
-  connect: 'push' | 'key' | 'soon';
+  connect: 'push' | 'key' | 'oauth' | 'soon';
+  provider: string | null;
   sync: SourceSync | null;
   connection: SourceConnection | null;
 }
@@ -63,4 +64,5 @@ export const createPerson = (name: string) => request<CreatedPerson>('/api/peopl
 export const connectSource = (token: string, source: string, secret: string) =>
   request<{ account: string; imported: number }>(`${personPath(token)}/connections/${source}`, post({ secret }));
 export const syncSource = (token: string, source: string) => request<{ imported: number }>(`${personPath(token)}/connections/${source}/sync`, post());
+export const oauthStartUrl = (token: string, provider: string) => `${personPath(token)}/oauth/${encodeURIComponent(provider)}/start`;
 export const disconnectSource = (token: string, source: string) => request<{ ok: boolean }>(`${personPath(token)}/connections/${source}`, { method: 'DELETE' });
