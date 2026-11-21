@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda · las caras</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.35' cy='.3' r='.9'%3E%3Cstop offset='0' stop-color='%23ff5fa8'/%3E%3Cstop offset='.5' stop-color='%237b61ff'/%3E%3Cstop offset='1' stop-color='%231e9bff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Crect x='31' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3Crect x='58' y='40' width='11' height='24' rx='5.5' fill='%231d1d1f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<style>
+  /* Página de las caras de Ronda: el equipo, cada estado, los tamaños y cómo se usan. */
+  body { margin: 0; }
+  .ca-intro { display: flex; flex-direction: column; gap: var(--rd-space-3); max-width: 760px; padding-top: 34px; }
+  .ca-intro p { margin: 0; }
+  .ca-sections { display: flex; flex-direction: column; gap: var(--rd-space-4); padding-top: var(--rd-space-7); }
+  .ca-card { gap: var(--rd-space-4); }
+  .ca-lead { margin: 0; max-width: 780px; }
+  .ca-team { display: flex; flex-wrap: wrap; gap: var(--rd-space-11); padding: var(--rd-space-6) var(--rd-space-3) var(--rd-space-3); }
+  .ca-person { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+  .ca-states { display: grid; grid-template-columns: 96px repeat(7, minmax(0, 1fr)); gap: var(--rd-space-6) var(--rd-space-3); align-items: center; padding: var(--rd-space-4) 0 var(--rd-space-2); }
+  .ca-states__head { display: flex; flex-direction: column; gap: 2px; text-align: center; }
+  .ca-states__cell { display: grid; place-items: center; min-height: 124px; }
+  .ca-play { display: grid; gap: var(--rd-space-7); align-items: center; padding: var(--rd-space-4) 0; }
+  @media (min-width: 900px) { .ca-play { grid-template-columns: 300px minmax(0, 1fr); } }
+  .ca-play__stage { display: grid; place-items: center; min-height: 290px; }
+  .ca-play__side { display: flex; flex-direction: column; gap: var(--rd-space-4); }
+  .ca-play__buttons { display: flex; flex-wrap: wrap; gap: var(--rd-space-2); }
+  .ca-play__buttons .rd-button { flex: 0 0 auto; }
+  .ca-play__buttons .rd-button[aria-pressed="true"] { background: var(--rd-ink); color: var(--rd-on-ink); }
+  .ca-sizes { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--rd-space-7); padding: var(--rd-space-4) var(--rd-space-3); }
+  .ca-size { display: flex; flex-direction: column; align-items: center; gap: var(--rd-space-3); }
+  .ca-two { display: grid; gap: var(--rd-space-7); align-items: start; }
+  @media (min-width: 1000px) { .ca-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); } }
+  .ca-crowd { display: grid; grid-template-columns: repeat(12, 44px); gap: var(--rd-space-3); padding: var(--rd-space-2) 0; }
+  .ca-table { display: flex; flex-direction: column; }
+  .ca-table > div { display: grid; grid-template-columns: 132px minmax(0, 1fr) minmax(0, 1fr); gap: var(--rd-space-4); padding: var(--rd-space-3) 0; font-size: var(--rd-text-small); line-height: 1.4; }
+  .ca-table > div + div { border-top: 1px solid var(--rd-hairline); }
+  .ca-table b { font-weight: var(--rd-weight); }
+  .ca-foot { padding-top: var(--rd-space-7); max-width: 780px; }
+</style>
+</head>
+<body>
+<div class="rd-page">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner">
+    <header class="rd-bar">
+      <span class="rd-brand"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda · las caras</span>
+      <span class="rd-chip rd-chip--status rd-glass"><span class="rd-dot"></span>Aprobadas por Mati el 21-nov</span>
+    </header>
+
+    <section class="ca-intro">
+      <h1 class="rd-title">Una gota de luz con ojos</h1>
+      <p>Cada persona es una gota de vidrio con su propia lámpara de lava adentro, y solo tiene ojos. La forma de los ojos, los anteojos, una ceja y la manera de mirar dicen quién es; los colores son los suyos.</p>
+      <p class="rd-note">Pasa el puntero por una cara, presiónala y suéltala. Todo lo de esta página es el mismo componente: <code>caras.js</code> con las clases <code>rd-cara</code>.</p>
+    </section>
+
+    <main class="ca-sections">
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">El equipo</h2></div>
+        <div class="ca-team" id="team"></div>
+      </section>
+
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">Los estados</h2></div>
+        <p class="ca-lead">Reposo, hover y presionada salen solos del puntero, del foco y del teclado. Los otros cuatro los fija el producto según lo que le pasa a la persona.</p>
+        <div class="ca-states" id="states"></div>
+      </section>
+
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">Pruébala</h2></div>
+        <div class="ca-play">
+          <div class="ca-play__stage" id="stage"></div>
+          <div class="ca-play__side">
+            <p class="ca-lead">Elige un estado y después pasa el puntero, presiona y suelta. Con el teclado: Tab para llegar a la cara, Espacio para presionarla.</p>
+            <div class="ca-play__buttons" id="buttons" role="group" aria-label="Estado de la cara"></div>
+            <span class="rd-note" id="meaning"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">Los tamaños</h2></div>
+        <p class="ca-lead">La cara decide qué muestra según su tamaño. Bajo 64 px pierde la ceja y las marcas; bajo 32 px quedan dos fichas de tinta y el color.</p>
+        <div class="ca-sizes" id="sizes"></div>
+      </section>
+
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">En una lista y entre muchas</h2></div>
+        <div class="ca-two">
+          <div class="rd-list" id="rows"></div>
+          <div class="ca-crowd" id="crowd"></div>
+        </div>
+      </section>
+
+      <section class="rd-card rd-glass ca-card">
+        <div class="rd-head"><h2 class="rd-title">Qué hace cada estado</h2></div>
+        <div class="ca-table" id="table"></div>
+      </section>
+    </main>
+
+    <p class="rd-note cc ca-foot">Uso: <code>var cara = RondaCaras.mount(nodo, 'Camila', { size: 92 })</code> y después <code>cara.set('activa')</code>. El mismo nombre da siempre la misma cara y los mismos colores. Con menos movimiento la cara queda quieta y los estados cambian sin transición. Regla completa en <code>design/DESIGN.md</code>, sección Caras.</p>
+  </div>
+</div>
+
+<script src="../luz/luz.js"></script>
+<script src="../faces/caras.js"></script>
+<script>
+(function () {
+  'use strict';
+  var Caras = window.RondaCaras;
+  var query = new URLSearchParams(window.location.search);
+
+  var TEAM = [
+    { key: 'mati', name: 'Tú', status: 'Pide cobertura' },
+    { key: 'ian', name: 'Ian', status: 'Tiene la cifra' },
+    { key: 'lian', name: 'Lian', status: 'Hueco de 9:30 a 10:15' },
+    { key: 'andres', name: 'Andrés', status: 'Plan B listo' },
+    { key: 'roberto', name: 'Roberto', status: 'En reuniones' }
+  ];
+  var NAMES = ['Camila', 'Benjamín', 'Antonia', 'Vicente', 'Josefa', 'Tomás', 'Isidora', 'Matías', 'Florencia', 'Agustín', 'Catalina', 'Joaquín', 'Martina', 'Cristóbal', 'Valentina', 'Sebastián', 'Emilia', 'Diego', 'Trinidad', 'Felipe', 'Amanda', 'Nicolás', 'Sofía', 'Maximiliano', 'Fernanda', 'Gaspar', 'Constanza', 'Lucas', 'Javiera', 'Simón', 'Ignacia', 'Rodrigo', 'Paula', 'Clemente', 'Daniela', 'Bruno'];
+  var STATES = [
+    { id: 'reposo', label: 'Reposo', when: 'Siempre que no pasa otra cosa.', eyes: 'Mira alrededor y parpadea a su ritmo.', drop: 'La lava fluye tranquila.' },
+    { id: 'hover', label: 'Hover', pointer: { hover: true }, when: 'El puntero o el foco del teclado está encima.', eyes: 'Se abren un poco, la ceja sube y siguen al puntero.', drop: 'La gota se levanta, crece su sombra, aparece un halo de su color y la lava se acelera.' },
+    { id: 'press', label: 'Presionada', pointer: { hover: true, press: true }, when: 'Mientras se mantiene el clic, el dedo o la tecla Espacio.', eyes: 'Se aprietan, como al hacer fuerza.', drop: 'La gota se aplasta como gel y la lava se agita. Al soltar rebota, parpadea y sale una onda.' },
+    { id: 'activa', label: 'Activa', when: 'La persona está en la conversación que se muestra, o es la elegida.', eyes: 'Atentos y más firmes: miran menos a los lados.', drop: 'Aro con el degradado de Ronda que gira lento, halo y una respiración suave.' },
+    { id: 'pensando', label: 'Pensando', when: 'Su agente está negociando por ella.', eyes: 'Miran hacia arriba y se pasean, con el párpado algo caído.', drop: 'El aro gira rápido, el halo late y la lava se mueve más.' },
+    { id: 'lista', label: 'Lista', when: 'Hay acuerdo o la persona aceptó.', eyes: 'Sonríen: el párpado de abajo sube en curva.', drop: 'Un salto corto, una onda y el halo encendido.' },
+    { id: 'ausente', label: 'Ausente', when: 'No está disponible o pausó a su agente.', eyes: 'Cerrados, sin mirada ni parpadeo.', drop: 'La lava casi se detiene y pierde color.' }
+  ];
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function cara(seed, size, options) {
+    var node = element('span');
+    node.style.width = node.style.height = size + 'px';
+    var settings = options || {};
+    settings.size = size;
+    return { node: node, mount: function () { return Caras.mount(node, seed, settings); } };
+  }
+  function person(entry) {
+    var label = element('span', 'rd-person');
+    label.appendChild(element('span', 'rd-person__name', entry.name));
+    label.appendChild(element('span', 'rd-person__status', entry.status));
+    return label;
+  }
+  var pending = [];
+  function place(host, seed, size, options, after) {
+    var item = cara(seed, size, options);
+    host.appendChild(item.node);
+    pending.push(function () { var face = item.mount(); if (after) after(face); });
+    return item.node;
+  }
+
+  var team = document.getElementById('team'), friends = Caras.group();
+  TEAM.forEach(function (entry) {
+    var cell = element('div', 'ca-person');
+    var node = place(cell, entry.key, 168, { group: friends });
+    node.tabIndex = 0;
+    node.setAttribute('role', 'img');
+    node.setAttribute('aria-label', entry.name);
+    cell.appendChild(person(entry));
+    team.appendChild(cell);
+  });
+
+  var states = document.getElementById('states');
+  states.appendChild(element('span'));
+  STATES.forEach(function (state) {
+    var head = element('div', 'ca-states__head');
+    head.appendChild(element('span', 'rd-person__name', state.label));
+    states.appendChild(head);
+  });
+  ['mati', 'ian', 'lian'].forEach(function (key, row) {
+    states.appendChild(element('span', 'rd-label', TEAM[row].name));
+    STATES.forEach(function (state) {
+      var cell = element('div', 'ca-states__cell');
+      place(cell, key, 96, { interactive: false }, function (face) {
+        if (state.pointer) face.hold(state.pointer); else face.set(state.id);
+      });
+      states.appendChild(cell);
+    });
+  });
+
+  var stage = document.getElementById('stage'), buttons = document.getElementById('buttons'), meaning = document.getElementById('meaning');
+  var hero = null;
+  var heroNode = place(stage, 'mati', 220, {}, function (face) { hero = face; });
+  heroNode.tabIndex = 0;
+  heroNode.setAttribute('role', 'button');
+  heroNode.setAttribute('aria-label', 'Cara de prueba');
+  STATES.filter(function (state) { return !state.pointer; }).forEach(function (state, index) {
+    var button = element('button', 'rd-button rd-button--quiet rd-button--small', state.label);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
+    button.onclick = function () {
+      Array.prototype.forEach.call(buttons.children, function (other) { other.setAttribute('aria-pressed', other === button ? 'true' : 'false'); });
+      hero.set(state.id);
+      meaning.textContent = state.when + ' ' + state.eyes + ' ' + state.drop;
+    };
+    buttons.appendChild(button);
+  });
+  meaning.textContent = STATES[0].when + ' ' + STATES[0].eyes + ' ' + STATES[0].drop;
+
+  var sizes = document.getElementById('sizes');
+  [184, 92, 72, 40, 28, 16].forEach(function (size) {
+    var cell = element('div', 'ca-size');
+    place(cell, 'lian', size);
+    cell.appendChild(element('span', 'rd-note', size + ' px'));
+    sizes.appendChild(cell);
+  });
+
+  var rows = document.getElementById('rows');
+  [['ian', 'activa', 'En la conversación'], ['lian', 'pensando', 'Su agente está negociando'], ['roberto', 'lista', 'Aceptó la propuesta'], ['andres', 'ausente', 'Pausó a su agente']].forEach(function (row) {
+    var entry = TEAM.filter(function (item) { return item.key === row[0]; })[0];
+    var item = element('div', 'rd-item');
+    place(item, row[0], 40, {}, function (face) { face.set(row[1]); });
+    var text = element('span', 'rd-item__text');
+    text.appendChild(element('span', 'rd-item__title', entry.name));
+    text.appendChild(element('span', 'rd-item__sub', row[2]));
+    item.appendChild(text);
+    rows.appendChild(item);
+  });
+
+  var crowd = document.getElementById('crowd'), mood = ['reposo', 'reposo', 'reposo', 'activa', 'reposo', 'pensando', 'reposo', 'reposo', 'ausente', 'reposo', 'lista', 'reposo'];
+  NAMES.forEach(function (name, index) {
+    place(crowd, name, 44, {}, function (face) { face.set(mood[index % mood.length]); });
+  });
+
+  var table = document.getElementById('table');
+  STATES.forEach(function (state) {
+    var row = element('div');
+    var first = element('span');
+    first.appendChild(element('b', '', state.label));
+    row.appendChild(first);
+    row.appendChild(element('span', '', state.when + ' ' + state.eyes));
+    row.appendChild(element('span', '', state.drop));
+    table.appendChild(row);
+  });
+
+  pending.forEach(function (run) { run(); });
+  if (query.has('t')) Caras.still(Number(query.get('t')));
+})();
+</script>
+</body>
+</html>

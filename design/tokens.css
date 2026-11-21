@@ -78,11 +78,15 @@
   --rd-radius-pill: 999px;
   --rd-radius-mark: 27.5%; /* isotipo: cuadrado redondeado */
   --rd-ring: 1.5px;        /* grosor del borde degradado */
+  --rd-cara-aro: 3px;      /* grosor del aro de una cara activa */
+  --rd-cara-aire: 3px;     /* espacio entre la gota y su aro: el borde blanco */
 
   /* ---- Sombra ---- */
   --rd-shadow-card: 0 24px 60px rgba(40, 30, 90, 0.08);
   --rd-shadow-glow: 0 24px 60px rgba(120, 60, 200, 0.18);
   --rd-shadow-face: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 12px 28px rgba(40, 30, 90, 0.16);
+  --rd-shadow-face-small: 0 0 0 1.5px rgba(255, 255, 255, 0.92), 0 3px 8px rgba(40, 30, 90, 0.14);   /* cara de menos de 56 px */
+  --rd-shadow-face-lift: 0 0 0 3px rgba(255, 255, 255, 0.98), 0 20px 40px rgba(40, 30, 90, 0.22);    /* cara con el puntero encima */
 
   /* ---- Espacio (múltiplos de 4) ---- */
   --rd-space-1: 4px;

@@ -1,6 +1,7 @@
 /*
  * Ronda · luz de lámpara de lava. Un sombreador WebGL2, sin librerías, con dos usos:
- *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de vidrio con lava dentro, una por persona
+ *   RondaLuz.grid(canvas, opciones)    una grilla de gotas de vidrio con lava dentro, una por persona;
+ *                                      cada celda puede llevar su propio reloj (ver render) y cambiar de tonos (setCell)
  *   RondaLuz.sphere(canvas, opciones)  la misma lava, más calmada, dentro del globo de vidrio
  * Cada gota es una esfera de vidrio con cinco esferas de cera que suben, bajan, se estiran y se funden
  * por cuellos viscosos (unión suave de distancias, marcha de rayos con refracción).
@@ -35,12 +36,15 @@
 
   var FRAGMENT = `#version 300 es
 precision highp float;
+precision highp sampler2D;
 uniform vec2 uRes;
 uniform float uTime;
 uniform vec3 uPal[${TONES}];
 uniform int uMode;
 uniform vec2 uGrid;
 uniform sampler2D uCells;
+uniform sampler2D uPhase;
+uniform float uUsePhase;
 uniform float uSquare;
 uniform vec3 uSphere;
 uniform ivec4 uSpherePal;
@@ -165,7 +169,8 @@ void main() {
     vec2 uv = (fract(frag / cell) - 0.5) * 2.0;
     uv.y = -uv.y;
     ivec4 tone = ivec4(texelFetch(uCells, ivec2(id), 0) * 255.0 + 0.5);
-    float s = hash(id.x * 7.0 + id.y * 131.0 + 17.0);
+    vec2 own = uUsePhase > 0.5 ? texelFetch(uPhase, ivec2(id), 0).rg : vec2(uTime, 0.0);
+    float s = own.g > 0.0 ? own.g : hash(id.x * 7.0 + id.y * 131.0 + 17.0);
     float px = cell.x;
     float aa = 2.0 / px;
     float r = length(uv);
@@ -175,7 +180,7 @@ void main() {
     int steps = px >= 96.0 ? 22 : (px >= 48.0 ? 16 : 12);
     float sizeMul = px >= 96.0 ? 1.0 : (px >= 48.0 ? 1.1 : 1.3);
     float speed = mix(1.0, 1.8, 1.0 - clamp(px / 128.0, 0.0, 1.0));
-    float t = uTime * speed + s * 40.0;
+    float t = own.r * speed + s * 40.0;
     vec3 col = lava(uv, t, s, uPal[tone.x], uPal[tone.y], uPal[tone.z], uPal[tone.w], 0.0, nb, steps, aa, sizeMul, cover);
     outColor = vec4(col * alpha, alpha);
   } else {
@@ -230,15 +235,26 @@ void main() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 1, 9, 8]));
     gl.uniform1i(uniform('uCells'), 0);
+    var phase = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, phase);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, 1, 1, 0, gl.RG, gl.FLOAT, new Float32Array(2));
+    gl.uniform1i(uniform('uPhase'), 1);
+    gl.activeTexture(gl.TEXTURE0);
     gl.clearColor(0, 0, 0, 0);
-    return { gl: gl, uniform: uniform };
+    return { gl: gl, uniform: uniform, cells: texture, phase: phase };
   }
 
-  function draw(kit, canvas, time) {
+  function draw(kit, canvas, time, height) {
     var gl = kit.gl;
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(kit.uniform('uRes'), canvas.width, canvas.height);
     gl.uniform1f(kit.uniform('uTime'), time);
+    if (height && height < canvas.height) { gl.enable(gl.SCISSOR_TEST); gl.scissor(0, canvas.height - height, canvas.width, height); } else gl.disable(gl.SCISSOR_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -280,7 +296,31 @@ void main() {
     gl.uniform1i(kit.uniform('uMode'), 0);
     gl.uniform2f(kit.uniform('uGrid'), cols, rows);
     gl.uniform1f(kit.uniform('uSquare'), options.square ? 1 : 0);
-    return { canvas: canvas, cols: cols, rows: rows, cell: cell, render: function (time) { draw(kit, canvas, time); } };
+    var own = new Float32Array(cols * rows * 2);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, cols, rows, 0, gl.RG, gl.FLOAT, own);
+    gl.activeTexture(gl.TEXTURE0);
+    return {
+      canvas: canvas, cols: cols, rows: rows, cell: cell,
+      // Una persona nueva ocupa esa gota: sus cuatro tonos y, si viene, su semilla (entre 0 y 1),
+      // que fija cómo se mueve su cera. Con la misma semilla la persona se ve igual en cualquier celda.
+      setCell: function (index, palette, seed) {
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, index % cols, Math.floor(index / cols), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(palette));
+        own[index * 2 + 1] = seed || 0;
+      },
+      // clocks: un reloj propio por celda, en segundos (Float32Array de cols x rows), para que cada gota vaya a su ritmo.
+      // usedRows: dibuja solo las primeras filas, las que tienen gente.
+      render: function (time, clocks, usedRows) {
+        if (clocks) {
+          for (var index = 0; index < cols * rows; index += 1) own[index * 2] = clocks[index];
+          gl.activeTexture(gl.TEXTURE1);
+          gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, cols, rows, gl.RG, gl.FLOAT, own);
+          gl.activeTexture(gl.TEXTURE0);
+        }
+        gl.uniform1f(kit.uniform('uUsePhase'), clocks ? 1 : 0);
+        draw(kit, canvas, time, usedRows ? usedRows * cell : 0);
+      }
+    };
   }
 
   function sphere(canvas, options) {
@@ -299,5 +339,8 @@ void main() {
     };
   }
 
-  root.RondaLuz = { grid: grid, sphere: sphere, paletteFor: paletteFor, css: css, TONES: TONES };
+  // El color de un tono, de 0 a 1 por canal: para el halo de una cara.
+  function tone(index) { return PALETTE[index % TONES].slice(); }
+
+  root.RondaLuz = { grid: grid, sphere: sphere, paletteFor: paletteFor, css: css, tone: tone, TONES: TONES };
 })(window);

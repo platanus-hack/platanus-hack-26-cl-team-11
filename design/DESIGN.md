@@ -47,7 +47,8 @@ Azul → violeta → rosa → rojo → naranjo (`--rd-gradient`).
 
 1. La segunda línea del titular de la pantalla (`rd-gradient-text`).
 2. El borde de la tarjeta de decisión y su etiqueta.
-3. Las líneas del grafo que están negociando ahora.
+3. Las líneas del grafo que están negociando ahora, y el aro de la cara que está en esa
+   negociación (`rd-cara` activa o pensando; es la misma señal, no un quinto lugar).
 4. El número que representa «lo tuyo» frente a «lo de los agentes» (el `1` de «1 decisión»).
 
 **No:** botones, fondos de tarjeta, íconos, texto corrido, bordes de otras tarjetas, gráficos de
@@ -67,8 +68,10 @@ Todos los valores están en `tokens.css`. No se escribe un color a mano en ning�
 | `--rd-aura-*` | Las cuatro manchas del fondo. Solo dentro de `rd-aura`. |
 | `--rd-live` | El punto verde «en línea». Nada más es verde. |
 
-No hay color por persona, ni rojo de error, ni amarillo de alerta. Si una pantalla necesita un
-estado nuevo (error, alerta), se define acá antes de usarlo.
+El único color por persona es la luz de su cara (ver «Caras»): vive dentro de la gota y en el
+halo que la rodea, y no sale de ahí. El nombre, la fila y la tarjeta de una persona no llevan su
+color. No hay rojo de error ni amarillo de alerta. Si una pantalla necesita un estado nuevo
+(error, alerta), se define acá antes de usarlo.
 
 ## Tipografía
 
@@ -99,7 +102,8 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-actions`, `rd-button`, `rd-button--quiet` | Botones píldora. | Un primario (negro) por pantalla. El resto, `--quiet`. |
 | `rd-stat`, `rd-stat__unit`, `rd-stat-row` | Número grande con unidad. | Siempre con una `rd-label` arriba. |
 | `rd-chip`, `rd-chip--status`, `rd-dot` | Chip de vidrio y píldora de estado. | Frases cortas, sin punto final. |
-| `rd-face` (`--small`, `--tiny`), `rd-person` | Cara y nombre con estado. | Siempre juntos. |
+| `rd-cara` (`--chica`, `__gota`, `__halo`, `__anillo`, `__onda`), `rd-person` | La cara de una persona: gota de vidrio con lava y ojos, con sus estados. La monta `faces/caras.js`; no se escribe el HTML a mano. | Cara y nombre siempre juntos. Estados y uso en «Caras». |
+| `rd-face` (`--small`, `--tiny`) | Imagen quieta de una cara (`faces/*.png`), para lo que no monta la cara viva. | Solo en el globo, el universo y la referencia. En pantallas nuevas va `rd-cara`. |
 | `rd-graph`, `rd-node`, `rd-edge*` | El grafo de agentes en 2D (referencia). | El grafo de la demo es el globo de `grafo/globo.html`, ver abajo. |
 | `rd-input`, `rd-row`, `rd-code` | Campo de texto, fila de lista con divisor y bloque de código. | Para pantallas de configuración. El código usa `--rd-font-mono`, nada más lo usa. |
 | `rd-mini`, `rd-mini-link` | Miniatura de una interacción sobre su conexión. | Un objeto, un gesto reconocible y su ejemplo ampliado. |
@@ -116,19 +120,84 @@ izquierda; solo se centran los nombres bajo una cara.
 
 ## Caras
 
-- Son **Vita Faces**, una por persona, ya compuestas en `faces/*.png` (fondo pastel incluido).
-- No se usan fotos reales, iniciales, emojis ni avatares generados de otro estilo.
-- Una persona nueva: se compone otra Vita Face con las partes de `vita-front`
-  (`public/vita-faces`, escala 1,32 y origen Y 74 %) y se agrega a `faces/`.
-- Las caras actuales no buscan parecerse a cada integrante.
-- **En revisión (21-nov):** Mati volvió a abrir la pregunta de las caras. Eligió seguir con **Aura**: cada
-  persona es una gota de vidrio con una lámpara de lava adentro, en sus propios colores. Las caras
-  dibujadas a mano sobre la gota quedaron descartadas («goofy and undone»). En `caras/sabores.html`
-  hay tres opciones sobre esa luz: **Ojos** (la gota solo tiene ojos; es la recomendada), **Vita de
-  luz** (el personaje de Vita con la cabeza hecha de luz) y la luz sola. Falta que Mati elija; hasta
-  entonces en el producto rigen las Vita Faces. Lo que se elija cambia la regla «no hay color por
-  persona» de la sección Color. Mati aprobó esa versión («i love it») y pidió más intentos con la misma
-  idea: están en `caras/intentos.html`, uno por pestaña, al lado de la actual.
+**Cada persona es una gota de luz con ojos** (decisión de Mati, 21-nov-2026). Una gota de vidrio
+con su propia lámpara de lava adentro, en cuatro tonos suyos, y solo ojos. La forma de los ojos,
+los anteojos, una ceja, un lunar y la manera de mirar y parpadear dicen quién es. No tiene boca,
+nariz ni pelo. Para verlas y probarlas: `caras/caras.html`.
+
+- No se usan fotos reales, iniciales, emojis, Vita Faces ni avatares de otro estilo.
+- **Una sola pieza.** `faces/caras.js` (carga antes `luz/luz.js`) y las clases `rd-cara` de
+  `ronda.css`. El HTML de la cara no se escribe a mano:
+
+      var cara = RondaCaras.mount(nodo, 'Camila Rojas', { size: 40 });
+      cara.set('activa');
+
+  En React la envuelve `frontend/src/Face.tsx`: `<Face name="Camila Rojas" state="activa" />`.
+- **El mismo nombre da siempre la misma cara y los mismos colores**, en cualquier pantalla y sin
+  guardar nada. Una persona nueva no requiere componer ni exportar nada.
+- **El equipo** (mati, ian, lian, andres, roberto) tiene ojos y tonos fijos, escritos en `TEAM` y
+  `TEAM_LIGHT` de `caras.js`. Se reconoce por el primer nombre, con o sin tilde.
+- Las caras no buscan parecerse a cada integrante.
+
+### Estados
+
+Hover y presionada no se fijan a mano: salen solas del puntero, del foco y del teclado. Los otros
+cuatro los fija el producto con `cara.set(estado)` según lo que le pasa a la persona.
+
+| Estado | Cuándo | Ojos | Gota |
+|---|---|---|---|
+| `reposo` | Siempre que no pasa otra cosa. | Miran alrededor y parpadean, cada cara a su ritmo. Si el puntero pasa cerca, lo siguen. Dos vecinas de un mismo grupo se miran cada tanto. | La lava fluye tranquila. |
+| hover | El puntero o el foco del teclado está encima. | Se abren un poco, la ceja sube y siguen al puntero. | Se levanta: crece 6 %, sombra más larga, halo de su color y la lava se acelera. |
+| presionada | Mientras dura el clic, el dedo o la tecla Espacio o Enter. | Se aprietan. | Se aplasta como gel y la lava se agita. Al soltar rebota, parpadea y sale una onda. |
+| `activa` | La persona está en la conversación que se muestra, o es la elegida. | Atentos: miran menos a los lados. | Aro con el degradado de Ronda que gira lento, halo y una respiración suave. |
+| `pensando` | Su agente está negociando por ella. | Miran hacia arriba y se pasean, con el párpado algo caído. | El aro es un cometa que gira rápido, el halo late y la lava se mueve más. |
+| `lista` | Hay acuerdo o la persona aceptó. | Sonríen: dos arcos, con un rubor de luz debajo. | Un salto corto, una onda y el halo encendido. |
+| `ausente` | No está disponible o pausó a su agente. | Cerrados, sin mirada ni parpadeo. | La lava casi se detiene y pierde color. |
+
+- `cara.pulse()` da un saltito con onda y parpadeo: avisa que llegó algo de esa persona, sin
+  cambiar su estado.
+- Al aparecer, la cara crece suave desde 88 %.
+- Con `prefers-reduced-motion` la cara queda quieta y los estados cambian sin transición. El
+  estado se sigue leyendo por el aro, el halo, los ojos y el color.
+- Con el teclado, la cara o su fila muestran además el contorno de foco.
+
+### Tamaños
+
+La cara decide qué muestra según su tamaño (`size`, en px). No se elige a mano.
+
+| Tamaño | Qué muestra |
+|---|---|
+| 120 px o más | Todo: ojos con párpado, brillo y sombra, cejas, anteojos con reflejo, lunar o pecas. |
+| 64 a 119 px | Lo mismo, con trazos algo más gruesos. |
+| 32 a 63 px | Ojos y anteojos. Sin cejas ni marcas. |
+| Menos de 32 px | Dos fichas de tinta y el color. El estado se lee por el aro, el halo y el color. |
+
+Tamaños en uso: 40 px en una fila de lista, 72 y 92 px en un nodo, 168 px o más en una portada.
+
+### Reglas de uso
+
+- Donde aparece un nombre aparece su cara (principio 7), con el nombre completo de la persona
+  como semilla. No se inventa otra semilla ni se elige la cara a mano.
+- Si la cara vive dentro de una fila, un enlace o un botón, ese elemento se pasa en `trigger`
+  para que la cara reaccione cuando se toca la fila entera. `Face.tsx` ya lo hace.
+- Varias caras que conversan se montan con el mismo `group` (`RondaCaras.group()`): así se miran.
+- El aro con degradado es solo para `activa` y `pensando`. No se le pone aro a una cara para
+  adornarla. `lista` y `ausente` no llevan aro.
+- El color de una persona no sale de su cara (ver «Color»).
+- Lava viva a la vez: 36 caras grandes, 64 medianas y 256 chicas. La que no cabe muestra su mezcla
+  quieta. Sin WebGL2 pasa lo mismo con todas, y los ojos siguen vivos.
+- Lo que no monta la cara viva (el globo, el universo, una lámina) usa las imágenes quietas de
+  `faces/`: `mati.png`, `ian.png`, `lian.png`, `roberto.png`, `andres.png` (320 px) y
+  `atlas/faces.png` con `atlas/faces-blur.png` (64 caras, 8 × 8 de 128 px). Se sacan del mismo
+  dibujo con `python3 design/caras/aplicar.py --out <carpeta>` y se copian a `faces/`. Hay que
+  volver a sacarlas cada vez que cambie el dibujo de las caras.
+
+### Historia
+
+Hasta el 21-nov las caras eran Vita Faces. Mati reabrió la pregunta, eligió «Aura» (la gota con
+lámpara de lava), descartó las caras dibujadas sobre la gota («goofy and undone») y entre Ojos,
+Vita de luz y la luz sola eligió los ojos («me gustaron los ojos»). Las alternativas quedan como
+archivo en `caras/sabores.html` y `caras/intentos.html`. No son producto.
 
 ## Grafo de agentes: el globo
 
@@ -144,10 +213,11 @@ Aprobado por Mati el 21-nov-2026 («ESTA INCREÍBLE»). Página de trabajo: `gra
 - **Profundidad gradual** (nunca «sí/no»): cada cara se desenfoca, se aclara con niebla y pierde
   sombra de forma continua según su profundidad (`smoothstep` sobre z); los nombres también se
   desvanecen. Encima del fondo va el brillo del vidrio, que se desplaza lento, y un borde blanco.
-- **Toda persona tiene cara.** El equipo usa sus Vita Faces (`faces/*.png`); el resto sale de un
-  atlas de 64 Vita Faces compuestas con las piezas de `vita-front` (`faces/atlas/faces.png`, 8 × 8
-  de 128 px) y su gemelo desenfocado para el fondo (`faces/atlas/faces-blur.png`). Cerca del borde
-  del globo las caras se achican para no amontonarse.
+- **Toda persona tiene cara.** El globo dibuja las imágenes quietas de las caras de Ronda (ver
+  «Caras»): el equipo usa `faces/*.png` y el resto sale del atlas de 64 caras
+  (`faces/atlas/faces.png`, 8 × 8 de 128 px) y su gemelo desenfocado para el fondo
+  (`faces/atlas/faces-blur.png`). Cerca del borde del globo las caras se achican para no
+  amontonarse.
 - **Luz dentro de la esfera** (Mati, 21-nov): con 10, 50 y 300 personas el interior del globo es una
   lámpara de lava calmada: masas de luz que se funden y se separan (`luz/luz.js`, un sombreador WebGL2
   sin librerías que marcha rayos sobre esferas de cera dentro del vidrio). Las conversaciones posibles
@@ -244,7 +314,8 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
 ## Movimiento
 
 En las pantallas generales, la animación continua es la luz que recorre las conexiones activas. La coreografía de las miniaturas está en rediseño. Lo demás aparece sin
-rebotes ni giros. Se respeta `prefers-reduced-motion`.
+rebotes ni giros. Las caras son la excepción: tienen vida propia (mirada, parpadeo, lava) y reaccionan
+al puntero y a su estado, como dice «Caras». Se respeta `prefers-reduced-motion`.
 
 ### Miniaturas de interacción · en rediseño
 
@@ -300,7 +371,7 @@ Cada punto es una dirección que Mati ya rechazó.
 - Tipografía serif (Instrument Serif u otra). Mayúsculas espaciadas tipo etiqueta.
 - Grillas tipo Mondrian, círculos de metro, sellos circulares, estética «retro».
 - Copiar Montu: tarjetas gris opaco `#f5f5f7` sobre blanco, avatares de arcilla 3D, un color por
-  persona. Ronda comparte con Montu solo el bento redondeado y los números tipo Apple Health.
+  persona (la luz de una cara es de esa persona, pero ese color no sale de la cara). Ronda comparte con Montu solo el bento redondeado y los números tipo Apple Health.
 - Degradado morado genérico de «app de IA» en botones o fondos.
 - Frases ingeniosas como titular o subtítulo («Conecta lo tuyo. Tu agente hace el resto.»). El
   titular es el nombre de la pantalla.
@@ -311,6 +382,7 @@ Cada punto es una dirección que Mati ya rechazó.
 
 | Fecha | Decisión | Quién |
 |---|---|---|
+| 21-nov-2026 | Caras: «me gustaron los ojos», esas son las caras de Ronda. Gota de vidrio con lámpara de lava y solo ojos, con estados (reposo, hover, presionada, activa, pensando, lista, ausente). Reemplazan a las Vita Faces en todo el producto. El único color por persona es la luz de su cara. | Mati |
 | 21-nov-2026 | Resumen de `contexto/`: la versión sin relieve «perdió todo el sabor». Vuelve el look chunky que gustó, con presupuesto: un canto por tarjeta, un número grande y un objeto o gráfico con relieve por tarjeta; relieve en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior ni en las pestañas; un tinte por tarjeta. Conexiones y Mapa quedan como están: ahí el relieve va solo en el ícono de cada app y el botón principal. | Mati |
 | 21-nov-2026 | Los datos y gráficos del producto muestran el efecto de red (tú frente a la mediana de tu equipo, conversaciones entre agentes, lo que llegó a ti). Un panel de seguimiento personal «no agrega valor». No toda superficie lleva relieve; el alcance quedó fijado en la fila de arriba. | Mati |
 | 21-nov-2026 | Mapa de contexto aprobado («I love it»): esfera de puntos de vidrio que se mueve sola, apps y personas derivando sobre ella, las de atrás muy desenfocadas. | Mati |
@@ -343,9 +415,9 @@ un punto, todavía no lo revisó Mati en grande).
 | `ronda.css` | Primitivas `rd-*`. |
 | `reference.html`, `reference.png` | La pantalla de referencia, hecha solo con primitivas, y su captura. |
 | `logo/ronda-mark.svg` | Isotipo. |
-| `faces/` | Caras del equipo. |
-| `caras/` | Página de prueba con alternativas de caras (`sabores.html`). Propuesta, no es producto. |
-| `luz/` | `luz.js`: la lámpara de lava del globo y de las caras Aura. |
+| `faces/` | Las caras de Ronda: `caras.js` (la cara viva, con sus estados) y sus imágenes quietas (`*.png` del equipo y `atlas/`). |
+| `caras/` | `caras.html`: página para ver y probar las caras, sus estados y tamaños. `atlas.html` y `aplicar.py`: sacan las imágenes quietas. `sabores.html`, `intentos.html`, `intentos/`, `ojos.js`, `vita-luz.js`: archivo de las alternativas que no se eligieron. |
+| `luz/` | `luz.js`: la lámpara de lava del globo y de las caras. |
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
 | `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (la semana del equipo como red, cinco tarjetas con relieve), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
