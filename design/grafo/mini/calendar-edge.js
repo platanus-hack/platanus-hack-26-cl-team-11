@@ -49,6 +49,10 @@ function paintCalendar(ctx, seconds) {
   for (const y of [21,28]) {
     for (const x of [9,24,39]) box(x,y,16,4.5,2,'rgba(71,102,109,.14)');
   }
+  if(match>0){
+    ctx.save();ctx.globalAlpha=.24*match;
+    box(23.5,19.5,17,14.5,3,'#7bd4c6');ctx.restore();
+  }
   const keys = [[9+15*first,21,'#6593a2'],[39-15*second,28,'#8791a9']];
   for (const [x,y,shade] of keys) {
     box(x,y+.8,16,4.8,2,shade);

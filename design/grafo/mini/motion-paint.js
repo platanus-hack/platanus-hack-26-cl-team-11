@@ -1,4 +1,4 @@
-// The five movements are drawn in a 64 × 44 coordinate space in both viewers.
+// The movements are drawn in a 64 × 44 coordinate space in both viewers.
 window.RondaMotion = (() => {
   const periods = {chat:5.8, calendars:9.8, health:6.7, permission:7.1, help:7.8};
   function ease(t,a,b) {
@@ -41,7 +41,7 @@ window.RondaMotion = (() => {
     c.save();c.translate(2*outgoing,-1.4*outgoing);
     c.fillStyle='#9385b7';c.fill(new Path2D('M5 14L2 23l12-4Z'));
     shell(c,3,2,43,18,7,'#fffaff','#ded4f1','#a69bbd');
-    const typed=Math.max(1,Math.ceil(5*ease(t,0,.16)));
+    const typed=Math.max(1,Math.ceil(5*outgoing));
     text(c,'¿Hoy?'.slice(0,typed),24,11,12,'#4b395f');c.restore();
     const replyWidth=28+11*reply;
     c.save();c.translate(5*(1-reply),2*(1-reply));
@@ -52,7 +52,8 @@ window.RondaMotion = (() => {
     c.globalAlpha=1-reply;
     for(let i=0;i<3;i++) disk(c,left+7+7*i,29.5-15*reply-1.5*Math.sin(Math.PI*2*(t*2.5-i*.18)),1.7,'#eafffa');
     c.globalAlpha=reply;const answerY=29.5+15*(1-reply);
-    text(c,'Sí',35,answerY,12,'#fff');tick(c,50,answerY,1.05,'#d2fff5');c.restore();c.restore();
+    text(c,'Sí',35,answerY,12,'#fff');
+    c.globalAlpha*=ease(t,.49,.57);tick(c,50,answerY,1.05,'#d2fff5');c.restore();c.restore();
   }
 
   function health(c,t) {
@@ -70,6 +71,10 @@ window.RondaMotion = (() => {
     for(let y=14;y<32;y+=5) box(c,21,y,36,.55,0,'#ffffff21');
     c.save();c.beginPath();c.rect(21,9,4+32*scan,24);c.clip();
     line(c,'M21 22h5l3-3 2 4 4-11 4 17 3-9 3 2h12','#ffc1cd',2);c.restore();
+    if(scan>0 && scan<1){
+      const traceX=21+4+32*scan;
+      box(c,traceX-1.3,11,1.4,18,.6,'#ffe6eb77');
+    }
     c.translate(0,23*(1-shut));
     box(c,20,9,38,23,5,gradient(c,9,23,'#e4d6df','#beabb9'));
     for(let x=23;x<57;x+=3.5) box(c,x,11,.65,17,.3,'#fff7');
@@ -94,9 +99,12 @@ window.RondaMotion = (() => {
     c.save();c.globalAlpha=move;box(c,10,17,44,16.5,8.2,gradient(c,17,16,'#276c61','#52a78d'));c.restore();
     c.save();c.globalAlpha=1-move;line(c,'M36 22l3 3-3 3m5-6 3 3-3 3','#fff4d9',1.5);c.restore();
     c.save();c.globalAlpha=move;tick(c,22,25,1.4,'#e2fff1');c.restore();
+    const press=ease(t,.12,.19)-ease(t,.49,.59);
     const x=11+24*move;
+    c.save();c.translate(0,1.25*press);
     shell(c,x,17.5,18,14.5,6,'#fffdf6','#e6dbcb','#a99e8e');
     for(let i=0;i<3;i++) box(c,x+6+i*2.6,21,1,6,.5,'#bcae99');
+    c.restore();
   }
 
   function portrait(c,x,y,img,checked,color) {
@@ -114,7 +122,8 @@ window.RondaMotion = (() => {
     shell(c,1,6,62,32,10,'#f6faff','#d9e5f1','#99acbe');
     box(c,5,9,54,25,8,gradient(c,9,25,'#b6c8d8','#e9f0f6'));
     box(c,15,19,34,5,2.5,'#a8bac9');
-    box(c,16,20,32*join,2.6,1.3,'#458779');
+    box(c,16,20,16*join,2.6,1.3,'#458779');
+    box(c,48-16*join,20,16*join,2.6,1.3,'#458779');
     portrait(c,13+4*join,21,faces[0],yesA*(1-join),'#aa94bd');
     portrait(c,51-4*join,21,faces[1],yesB*(1-join),'#b69983');
     if(join>0){c.save();c.globalAlpha=join;c.translate(32,21);c.scale(.7+.3*join,.7+.3*join);
