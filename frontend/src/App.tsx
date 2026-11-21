@@ -6,6 +6,7 @@ import { ContextPage } from './ContextPage';
 import { HomePage } from './HomePage';
 import { InvitePage } from './InvitePage';
 import { JoinPage } from './JoinPage';
+import { MontuSplash, MontuStage } from './MontuLoader';
 import { RoomPage } from './RoomPage';
 
 function Backdrop({ children }: { children: ReactNode }) {
@@ -38,7 +39,7 @@ function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean
   );
 }
 
-export function App() {
+function Screen() {
   const [, section, token] = window.location.pathname.split('/');
   if (section === 'duelos') return <Shell wide><DuelsPage /></Shell>;
   if (section === 'contexto' && token)
@@ -75,5 +76,16 @@ export function App() {
     <Shell>
       <HomePage />
     </Shell>
+  );
+}
+
+export function App() {
+  const [, section] = window.location.pathname.split('/');
+  if (section === 'montu') return <MontuStage />;
+  return (
+    <>
+      <Screen />
+      <MontuSplash />
+    </>
   );
 }
