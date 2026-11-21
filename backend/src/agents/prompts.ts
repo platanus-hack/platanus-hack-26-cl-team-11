@@ -11,8 +11,10 @@ export const ContactPlan = z.object({
   contacts: z.array(z.object({ teammate: z.string(), message: z.string() })),
 });
 
+export const isHelpAnswer = (value: string): value is HelpAnswer => (HELP_ANSWERS as readonly string[]).includes(value);
+
 export const HelpReply = z.object({
-  help: z.enum(HELP_ANSWERS),
+  help: z.string().describe('Exactamente uno de estos valores: si, parcial, no'),
   message: z.string(),
 });
 

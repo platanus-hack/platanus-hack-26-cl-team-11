@@ -8,6 +8,7 @@ import {
   ContactPlan,
   contactPrompt,
   HelpReply,
+  isHelpAnswer,
   MAX_CONTACTS,
   MAX_HELPERS,
   ProposalDraft,
@@ -28,6 +29,7 @@ const MAX_PROPOSAL_LENGTH = 500;
 
 export const TEAM_TOO_SMALL = 'El equipo necesita al menos dos personas para una ronda.';
 const UNEXPECTED_FAILURE = 'La ronda falló por un error interno.';
+const INCOMPLETE_REPLY = 'El modelo entregó una respuesta incompleta.';
 
 export interface RoundDeps {
   store: Store;
@@ -72,9 +74,11 @@ async function resolveNeed(deps: RoundDeps, round: Round, { requester, need }: O
       const threadId = deps.agents.addThread({ roundId: round.id, requesterToken: requester.token, helperToken: helper.token, topic: need.topic });
       deps.agents.addMessage(threadId, requester.token, message);
       const reply = await deps.model.decide({ system: systemFor(helper.name), prompt: replyPrompt(helper, requester.name, need, message), schema: HelpReply });
+      const help = reply.help.trim().toLowerCase();
+      if (!isHelpAnswer(help)) throw new AgentModelError(INCOMPLETE_REPLY);
       deps.agents.addMessage(threadId, helper.token, reply.message.trim());
-      deps.agents.setThreadHelp(threadId, reply.help);
-      return { id: teammateId, name: helper.name, help: reply.help, message: reply.message.trim() };
+      deps.agents.setThreadHelp(threadId, help);
+      return { id: teammateId, name: helper.name, help, message: reply.message.trim() };
     }),
   );
   const replies = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));

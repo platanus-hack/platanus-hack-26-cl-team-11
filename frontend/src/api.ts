@@ -219,3 +219,72 @@ export const replyToPost = (token: string, postId: string, text: string, tellabl
 export const voteOnPost = (token: string, postId: string, value: VoteValue) =>
   request<VoteTally & { myVote: VoteValue | null }>(`${boardPostPath(token, postId)}/votes`, post({ value }));
 export const closePost = (token: string, postId: string) => request<BoardPost>(`${boardPostPath(token, postId)}/close`, post());
+
+export type RoundStatus = 'en_curso' | 'lista' | 'fallida';
+export type HelpAnswer = 'si' | 'parcial' | 'no';
+export type PartyRole = 'pide' | 'ayuda';
+export type PartyAnswer = 'pendiente' | 'acepta' | 'rechaza';
+export type PartyDecision = 'acepta' | 'rechaza';
+export type ProposalStatus = 'por_aprobar' | 'acordada' | 'descartada';
+
+export interface AgentRound {
+  id: string;
+  status: RoundStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  problem: string | null;
+}
+
+export interface AgentAsk {
+  topic: string;
+  statement: string;
+}
+
+export interface AgentMessage {
+  fromName: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface AgentThread {
+  id: string;
+  topic: string;
+  requesterName: string;
+  helperName: string;
+  help: HelpAnswer | null;
+  mine: boolean;
+  messages: AgentMessage[] | null;
+}
+
+export interface ProposalParty {
+  name: string;
+  role: PartyRole;
+  answer: PartyAnswer;
+  me: boolean;
+}
+
+export interface AgentProposal {
+  id: string;
+  topic: string;
+  text: string;
+  createdAt: string;
+  status: ProposalStatus;
+  parties: ProposalParty[];
+  myAnswer: PartyAnswer | null;
+}
+
+export interface AgentsView {
+  configured: boolean;
+  round: AgentRound | null;
+  asks: AgentAsk[];
+  threads: AgentThread[];
+  proposals: AgentProposal[];
+}
+
+const agentsPath = (token: string) => `${personPath(token)}/agents`;
+
+export const fetchAgents = (token: string, teamId: string) => request<AgentsView>(`${teamPath(token, teamId)}/agents`);
+export const startRound = (token: string, teamId: string) => request<{ id: string }>(`${teamPath(token, teamId)}/agents/rounds`, post());
+export const decideAsk = (token: string, topic: string, allow: boolean) => request<{ topic: string; allow: boolean }>(`${agentsPath(token)}/asks`, post({ topic, allow }));
+export const answerProposal = (token: string, proposalId: string, answer: PartyDecision) =>
+  request<AgentProposal>(`${agentsPath(token)}/proposals/${encodeURIComponent(proposalId)}/answer`, post({ answer }));

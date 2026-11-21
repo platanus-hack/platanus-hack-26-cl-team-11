@@ -22,6 +22,7 @@ body { margin: 0; }
 .app-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .app-wrap { overflow-wrap: anywhere; }
 .app-body { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.rd-panel .app-body { font-size: 14px; line-height: 1.5; }
 .app-form { display: flex; flex-direction: column; gap: var(--rd-space-3); }
 .app-area { display: block; width: 100%; height: auto; min-height: 92px; padding: var(--rd-space-3) var(--rd-space-4); border-radius: var(--rd-radius-card); line-height: 1.4; resize: vertical; }
 .app-choice { padding: 0 var(--rd-space-3); }
