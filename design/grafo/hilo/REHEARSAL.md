@@ -1,5 +1,18 @@
 # Ensayo · tarjetas de herramienta y streaming
 
+## Estándar de `contexto/` (21-nov-2026, segunda pasada)
+
+- La tarjeta muestra solo ícono-tecla, etiqueta (hasta dos líneas), recibo y escena. El nombre técnico
+  va dentro del desplegable; se quitó la fila fija «Entrada y salida». Radios 28, 16, 12, 6 y píldora.
+- `herramientas.html` y `duplas.html` llevan `rd-top`, titular de una frase («Herramientas», «Arco e
+  hilo») y el tamaño de duplas es un `rd-seg`.
+- `film.mjs --gate` sobre `herramientas.html` (15 escenarios, 12 cuadros cada 700 ms):
+  1440 px `rehearsal passed`; 390 px `rehearsal passed` (cobertura `inconclusive` en ambas).
+- El recibo tiene capa propia y su entrada se desvanece durante todo el movimiento.
+- Dentro del Universo (tarjeta de unos 366 px) se revisó en capturas: nada cortado.
+
+## Primera pasada
+
 Filmado con `film.mjs --gate` sobre `herramientas.html` (21-nov-2026).
 
 - **Gold de partida:** `form-error` (el estado cambia en su lugar), `parts` (States, Stream, Check), `loading`.

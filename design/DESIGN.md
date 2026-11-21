@@ -4,16 +4,23 @@ Esta es la única dirección visual del proyecto. Mati la aprobó el 21-nov-2026
 cinco (están en `archive/`, no se usan). **Toda pantalla, slide o gráfico del proyecto sigue este
 documento.** Si algo no está acá, no se inventa: se pregunta a Mati o se agrega acá primero.
 
-![Pantalla de referencia](reference.png)
+![El estándar: la página Resumen](indice/resumen.jpg)
 
-## Antes de tocar UI: 4 pasos
+**El estándar es `contexto/`: Resumen, Conexiones y Mapa** (Mati, 21-nov: «these UIs are the ones
+that I love the most»). Toda pantalla nueva y toda demo se parece a esas tres. El mapa de todo lo
+que existe en `design/`, con su estado, está en [`index.html`](index.html).
 
-1. Abre `design/reference.html` en el navegador. Así se ve Ronda.
-2. Carga `design/tokens.css` y `design/ronda.css` en tu pantalla. Arma todo con las clases `rd-*`.
-3. Si te falta una pieza, agrégala a `ronda.css` (y un token a `tokens.css` si hace falta) en un
+## Antes de tocar UI: 5 pasos
+
+1. Abre `design/index.html`: dice qué existe, qué es estándar, qué es demo y qué es archivo.
+2. Abre `design/contexto/resumen.html`, `conexiones.html` y `mapa.html`. Así se ve Ronda.
+3. Carga `design/tokens.css` y `design/ronda.css` en tu pantalla. Arma todo con las clases `rd-*`,
+   empezando por el marco de «La página estándar».
+4. Si te falta una pieza, agrégala a `ronda.css` (y un token a `tokens.css` si hace falta) en un
    commit propio, y anótala en la tabla de primitivas de este documento.
-4. Antes de terminar: corre `design/lint.sh`, saca una captura de tu pantalla y ponla al lado de
-   `design/reference.png`. Tienen que parecer la misma app.
+5. Antes de terminar: corre `design/lint.sh`, saca una captura de tu pantalla y ponla al lado de una
+   captura de `contexto/resumen.html`. Tienen que parecer la misma app. Si tu página es nueva,
+   agrégala a `design/index.html` en la sección que le corresponde.
 
 ## Demos e ilustraciones de producto
 
@@ -39,13 +46,45 @@ cosa brillante al frente: tu decisión. Todo el diseño dice eso.
 | 6 | **Tipografía de sistema, un solo peso.** | SF Pro. Peso 600 para todo lo que no es texto corrido. Nunca 700, 800 ni cursiva. |
 | 7 | **Personas con cara.** | Donde aparece un nombre, aparece su cara. Nunca un nombre suelto ni una inicial. |
 
+## La página estándar
+
+Sale de `contexto/`. Lo que sigue vale para toda página de producto y de demo.
+
+| Pieza | Clase | Regla |
+|---|---|---|
+| Barra | `rd-top` | Marca a la izquierda (`rd-brand`, enlaza al Resumen), pestañas al centro y un aviso a la derecha. |
+| Pestañas | `rd-nav` | La activa es una píldora de tinta (`aria-current`). En una demo, las pestañas son sus pasos. |
+| Aviso | `rd-tag` | Una frase corta en gris: «Datos de prueba», «Banco de prueba». |
+| Titular | `rd-pagehead`, `rd-pagetitle`, `rd-pagesub` | **Una sola frase que nombra la pantalla** («Resumen»), en tinta. Sin segunda línea con degradado. El Universo no lleva titular (decisión de Mati). |
+| Selector | `rd-seg` | Hueco con una tecla levantada, para velocidad, tamaño o filtro (`aria-pressed`). |
+| Tarjeta | `rd-card rd-glass` | Vidrio, radio 28 px, sin canto. Título de tarjeta de 18 px en peso 600. |
+
+Reglas que salieron de las revisiones de Mati y que toda página cumple:
+
+- **Pocas cosas, grandes y legibles, sobre una superficie tranquila.** Ante la duda se quita un
+  elemento antes que cambiarle el estilo.
+- **Una sola escala de radios:** 28 (tarjeta), 16 (bloque), 12 (tecla), 6 (marca de dato) y píldora.
+- **Relieve solo en lo que se aprieta y en las marcas de los datos** (botón principal, tecla del
+  selector, barras, bloques, ícono de una app o de una herramienta). Las tarjetas son vidrio.
+- **Un tinte por tarjeta.** El degradado, solo en sus lugares.
+- **Ningún texto cortado con puntos suspensivos.** Se acorta el texto o se le da espacio.
+- **El grafo es el globo aprobado** (`grafo/globo.html`, incrustado con `?embed`). No se dibuja otro.
+- **Las personas llevan la cara de Ronda**, y quien no está en lo que se muestra retrocede: más
+  vidrio, menos color.
+- Una decisión por pantalla. Íconos reales de las apps. Datos que muestran el efecto de red.
+
+Estado de cada superficie frente a este estándar: `index.html`. Hoy cumplen `contexto/` (el origen)
+y la demo (`grafo/universo.html`, `grafo/hilo/`). **No cumple todavía la app real (`frontend/`)**:
+su portada usa un titular de dos tiempos y no tiene la barra con pestañas.
+
 ## El degradado: dónde sí y dónde no
 
 Azul → violeta → rosa → rojo → naranjo (`--rd-gradient`).
 
 **Sí, solo acá:**
 
-1. La segunda línea del titular de la pantalla (`rd-gradient-text`).
+1. La segunda línea del titular de la pantalla (`rd-gradient-text`). Solo queda en la referencia
+   anterior y en la app actual: en el estándar el titular es una frase en tinta.
 2. El borde de la tarjeta de decisión y su etiqueta.
 3. Las líneas del grafo que están negociando ahora, y el aro de la cara que está en esa
    negociación (`rd-cara` activa o pensando; es la misma señal, no un quinto lugar).
@@ -77,7 +116,9 @@ color. No hay rojo de error ni amarillo de alerta. Si una pantalla necesita un e
 
 | Uso | Clase | Tamaño | Peso |
 |---|---|---|---|
-| Titular de pantalla (uno) | `rd-hero` | 62 px | 600 |
+| Titular de pantalla (uno) | `rd-pagetitle` | 36 a 54 px según el ancho | 600 |
+| Titular de la referencia anterior | `rd-hero` | 62 px | 600 |
+| Título de tarjeta | (18 px) | 18 px | 600 |
 | Frase de la decisión | `rd-title` | 24 px | 600 |
 | Número grande | `rd-stat` | 40 px, SF Pro Rounded | 600 |
 | Texto corrido | (base de `rd-page`) | 17 px | 400 |
@@ -93,7 +134,10 @@ izquierda; solo se centran los nombres bajo una cara.
 |---|---|---|
 | `rd-page` + `rd-page__inner` | Contenedor de toda pantalla. | Siempre el elemento raíz. |
 | `rd-aura` | Las cuatro manchas de color del fondo (`<i>` × 4). | Una por pantalla, primer hijo de `rd-page`. |
-| `rd-bar`, `rd-brand`, `rd-mark` | Barra superior con isotipo y nombre. | Isotipo: `logo/ronda-mark.svg`, sin modificar. |
+| `rd-bar`, `rd-brand`, `rd-mark` | Barra superior con isotipo y nombre. | Isotipo: `logo/ronda-mark.svg`, sin modificar. En páginas nuevas la barra es `rd-top`. |
+| `rd-top`, `rd-nav`, `rd-tag` | El marco estándar: barra con marca, pestañas (la activa con `aria-current`) y aviso. | Ver «La página estándar». Los nombres `cx-top`, `cx-nav` y `cx-tag` de `contexto/` son los mismos estilos. |
+| `rd-pagehead`, `rd-pagetitle`, `rd-pagesub` | Encabezado de página: el titular de una frase y su línea gris. | Un titular por pantalla. Iguales a `cx-head`, `cx-title` y `cx-sub`. |
+| `rd-seg` | Selector con relieve: hueco y tecla levantada. | Botones con `aria-pressed`. Para velocidad, tamaño o filtro; no para navegar. |
 | `rd-hero`, `rd-title`, `rd-label`, `rd-note` | Texto. | Ver tabla de tipografía. |
 | `rd-gradient-text` | Texto con degradado. | Solo en los cuatro lugares permitidos. |
 | `rd-glass` | Superficie de vidrio. | Se combina con `rd-card` o `rd-chip`. |
@@ -298,15 +342,22 @@ Lo que se ve al abrir una conversación entre agentes (`grafo/hilo/`, integrado 
   barrita de avance del tinte. Termina: check del tinte que se encoge hasta un punto. Los demás arcos
   con hilo muestran solo un punto chico que se puede tocar. La tarjeta grande vive solo en el hilo.
 - Duplas para revisar cada herramienta con su miniatura: `grafo/hilo/duplas.html` (tamaño ajustable).
-- **Panel demo omnipotente:** `grafo/universo.html` muestra todo junto en una vuelta de tres pasos:
-  (1) **Uno a uno**: las 4.950 conversaciones entre pares destellan en el globo y el panel lista lo
-  que saca cada par; se forman los grupos. (2) **Grupos**: la cámara viaja por 6 grupos de 3 a 5 que
-  conversan en vivo, con el hilo a la derecha y la miniatura de la herramienta flotando fuera del
-  arco, atada con una línea punteada. (3) **Tu semana**: tarjeta de cierre con cifras y calendario
-  Lun–Vie de los acuerdos; el panel los lista con check. Globo grande con la luz de lava
-  (`luz/luz.js`, `?luz=0` la apaga). Sin titular ni contadores fijos. Los controles y el catálogo de
-  herramientas están ocultos por defecto (tecla H o `?ui=1`). Todo lo nuevo se agrega ahí
-  (AGENTS.md, regla 6).
+- **Panel demo omnipotente:** `grafo/universo.html` muestra todo junto en una vuelta de tres pasos,
+  con el marco estándar arriba (`rd-top`: la marca lleva al Resumen; los tres pasos son un `rd-nav`
+  con el activo en tinta; `rd-tag` «Datos de prueba»). (1) **Uno a uno**: las 4.950 conversaciones
+  entre pares destellan en el globo y el panel las lista como filas del Resumen (caras, título, una
+  línea gris); se forman los grupos. (2) **Grupos**: la cámara viaja por 6 grupos de 3 a 5 que
+  conversan en vivo. Quien no está en foco retrocede: más niebla, menos color, el hemisferio de
+  atrás casi desaparece. Los arcos del grupo son delgados (2,6 px) y se curvan hacia afuera, con
+  degradado y halo suave. El panel es una tarjeta del Resumen: tema, «N agentes, M conversaciones.
+  Nadie más se entera.» y cada miembro con cara, nombre y rol («Pide ayuda» / «Puede ayudar»);
+  el hilo queda anclado abajo y la miniatura de la herramienta flota fuera del arco, atada con una
+  línea punteada. (3) **Tu semana**: tarjeta «Tu semana» con cuatro números grandes y el
+  calendario Lun–Vie en un solo tono; solo tu evento lleva el borde con degradado. El panel lista
+  los acuerdos con check. La luz de lava va más suave y la esfera más chica que antes (`luz/luz.js`,
+  `?luz=0` la apaga). Los temas caben en 26 letras: nada se corta con «…». Sin titular ni
+  contadores fijos. Los controles y el catálogo de herramientas están ocultos por defecto (tecla H
+  o `?ui=1`). Todo lo nuevo se agrega ahí (AGENTS.md, regla 6). Ensayo: `grafo/REHEARSAL.md`.
 
 ## Texto de la interfaz
 
@@ -393,6 +444,8 @@ Cada punto es una dirección que Mati ya rechazó.
 
 | Fecha | Decisión | Quién |
 |---|---|---|
+| 21-nov-2026 | Universo e hilo pasan al estándar de `contexto/` (propuesto por Claude, a revisión de Mati). Universo: marco `rd-top` con los tres pasos como pestañas; las 100 personas siguen con cara, pero fuera de foco retroceden (niebla, menos color, el hemisferio de atrás casi desaparece); lava más suave y esfera más chica; arcos del grupo delgados y curvos; panel como tarjeta del Resumen con tema y miembros con rol; final «Tu semana» sin frase de dos tiempos, números grandes y calendario de un solo tono; temas de hasta 26 letras, sin texto cortado. Hilo: la tarjeta de herramienta muestra solo ícono, etiqueta, recibo y escena; el nombre técnico va en el desplegable; radios de la escala única; galería y duplas con `rd-top` y titular de una frase. | Claude |
+| 21-nov-2026 | **El estándar de todo el producto y de las demos es `contexto/`** (Resumen, Conexiones, Mapa): «these UIs are the ones that I love the most». Pidió estandarizar y documentar lo que hicieron las distintas sesiones. Queda así: el marco de esas páginas pasa a `ronda.css` (`rd-top`, `rd-nav`, `rd-tag`, `rd-pagetitle`, `rd-seg`); `index.html` es el mapa de todas las superficies con su estado; `reference.html` pasa a referencia anterior. El detalle de cómo se aplicó lo propuso Claude y queda a revisión de Mati. | Mati |
 | 21-nov-2026 | Caras: «me gustaron los ojos», esas son las caras de Ronda. Gota de vidrio con lámpara de lava y solo ojos, con estados (reposo, hover, presionada, activa, pensando, lista, ausente). Reemplazan a las Vita Faces en todo el producto. El único color por persona es la luz de su cara. | Mati |
 | 21-nov-2026 | Resumen de `contexto/`, sexta vuelta: bento con el globo al centro. El grafo del Resumen es el globo aprobado, incrustado (`grafo/globo.html?embed`), y no se detiene; la demo se puede pausar, adelantar y apurar. Las personas llevan la cara de Ronda (`RondaCaras`). Relieve solo en lo que se aprieta y en las marcas de los datos: las tarjetas son vidrio, sin canto. Una sola escala de radios (28, 16, 12, 6 y píldora). Una sola decisión por pantalla («no des tantas tareas»). Reemplaza el presupuesto de la fila de abajo. | Mati |
 | 21-nov-2026 | Resumen de `contexto/`: la versión sin relieve «perdió todo el sabor». Vuelve el look chunky que gustó, con presupuesto: un canto por tarjeta, un número grande y un objeto o gráfico con relieve por tarjeta; relieve en tarjetas, botones, selector y marcas de los gráficos, no en la barra superior ni en las pestañas; un tinte por tarjeta. Conexiones y Mapa quedan como están: ahí el relieve va solo en el ícono de cada app y el botón principal. | Mati |
@@ -426,7 +479,8 @@ un punto, todavía no lo revisó Mati en grande).
 | `DESIGN.md` | Este documento. La regla. |
 | `tokens.css` | Colores, tipografía, radios, sombras, espacios. |
 | `ronda.css` | Primitivas `rd-*`. |
-| `reference.html`, `reference.png` | La pantalla de referencia, hecha solo con primitivas, y su captura. |
+| `index.html`, `indice/` | El mapa de todas las superficies de `design/` con su estado (estándar, demo, pieza aprobada, grabación, producto, archivo) y sus miniaturas. Toda página nueva se agrega ahí. |
+| `reference.html`, `reference.png` | Referencia anterior: la primera pantalla, hecha solo con primitivas. Su titular de dos líneas ya no se usa. El estándar es `contexto/`. |
 | `logo/ronda-mark.svg` | Isotipo. |
 | `faces/` | Las caras de Ronda: `caras.js` (la cara viva, con sus estados) y sus imágenes quietas (`*.png` del equipo y `atlas/`). |
 | `caras/` | `caras.html`: página para ver y probar las caras, sus estados y tamaños. `atlas.html` y `aplicar.py`: sacan las imágenes quietas. `sabores.html`, `intentos.html`, `intentos/`, `ojos.js`, `vita-luz.js`: archivo de las alternativas que no se eligieron. |

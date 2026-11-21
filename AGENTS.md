@@ -51,7 +51,9 @@ Lo que no queda en un correo se pierde entre WhatsApp, Slack y lo que se habla e
 Hay una sola dirección visual, aprobada por Mati. Ningún agente inventa estilo.
 
 - **Antes de escribir cualquier UI** (pantalla, componente, slide, gráfico, página de la demo),
-  lee `design/DESIGN.md` completo y abre `design/reference.html`.
+  lee `design/DESIGN.md` completo y abre `design/index.html` (el mapa de todo lo que existe y su
+  estado) y `design/contexto/resumen.html`. **El estándar es `design/contexto/`** (Resumen,
+  Conexiones, Mapa): Mati, 21-nov-2026.
 - La UI se arma con las primitivas `rd-*` de `design/ronda.css` y los tokens `--rd-*` de
   `design/tokens.css`. Fuera de `design/` no se escribe ningún color, `font-family`, peso,
   degradado ni sombra a mano.
@@ -64,7 +66,8 @@ Hay una sola dirección visual, aprobada por Mati. Ningún agente inventa estilo
   se propone y se pregunta a Mati.
 - `design/archive/` son direcciones descartadas. No se usan como referencia.
 - Antes de terminar: `design/lint.sh` tiene que pasar, y una captura de tu pantalla tiene que
-  parecer la misma app que `design/reference.png`. Lo verifican dos cosas: en Claude Code, el hook
+  parecer la misma app que `design/contexto/resumen.html`. Una página nueva se agrega a
+  `design/index.html`. Lo verifican dos cosas: en Claude Code, el hook
   `.claude/hooks/design-lint.sh`; para todos (Codex y personas incluidos), el `pre-commit` de
   `.githooks/`, que se activa con `npm install`. Si tu clon no lo tiene activo, corre
   `git config core.hooksPath .githooks`.
