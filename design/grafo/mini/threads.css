@@ -35,7 +35,9 @@
   flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;
   display:flex;flex-direction:column;gap:14px;padding:18px 20px;
 }
-.thread-feed::before {content:'';margin-top:auto}
+.thread-viewport {flex:none;margin-top:auto;overflow:clip;overflow-clip-margin:8px}
+.thread-stack {display:flex;flex-direction:column;gap:14px}
+.thread-feed {overflow-anchor:none}
 .thread-feed.scrolled {mask-image:linear-gradient(to bottom,transparent,var(--rd-ink) 36px)}
 .thread-event {flex:none;display:flex;align-items:flex-start;gap:8px;transform-origin:left bottom}
 .thread-event.mine {flex-direction:row-reverse;transform-origin:right bottom}

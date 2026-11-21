@@ -70,9 +70,12 @@ function mountThreadInspector(graph,initialKind) {
   function agent(author) {
     return author===0?'Tu agente':'Agente de '+graph.people[author].name;
   }
+  const viewport=node('div','thread-viewport'), stack=node('div','thread-stack');
+  viewport.append(stack);feed.append(viewport);
+  let glide;
   feed.onscroll=()=>feed.classList.toggle('scrolled',feed.scrollTop>12);
   function reset() {
-    feed.replaceChildren();rows=[];previous=-1;
+    glide?.cancel();stack.replaceChildren();rows=[];previous=-1;
   }
   function decide(phrase) {
     thread.choice=phrase;
@@ -161,7 +164,7 @@ function mountThreadInspector(graph,initialKind) {
     const el=node('article','thread-event');
     if(animate) el.classList.add('entering');
     const item=event.type==='ask'?decision(event,el):event.type==='call'?tool(event,el):message(event,el);
-    feed.append(el);
+    stack.append(el);
     return item;
   }
   function render() {
@@ -175,7 +178,10 @@ function mountThreadInspector(graph,initialKind) {
     if(t<previous) reset();
     const playing=!graph.reduced && !DemoThreads.paused(thread.id) && t<DemoThreads.duration;
     const animate=playing && previous>=0 && t-previous<.2;
+    const boundary=thread.events.some(e=>(previous<e.at && e.at<=t) || (previous<e.end && e.end<=t));
     const follow=!feed.querySelector('details[open]') && feed.scrollHeight-feed.clientHeight-feed.scrollTop<36;
+    const moving=boundary && follow && previous>=0 && t-previous<.2 && !graph.reduced && stack.childElementCount;
+    const oldTop=moving ? stack.getBoundingClientRect().top : null;
     previous=t;
     let current='En curso',changed=false;
     thread.events.forEach((event,i)=>{
@@ -201,7 +207,16 @@ function mountThreadInspector(graph,initialKind) {
     toggle.hidden=graph.reduced;toggle.disabled=ended || Boolean(waiting);
     toggle.textContent=playing?'Ⅱ':'▶';toggle.setAttribute('aria-label',playing?'Pausar':'Continuar');
     replay.hidden=graph.reduced;
-    if(follow && changed) feed.scrollTop=feed.scrollHeight;
+    if(follow && (changed || boundary)) feed.scrollTop=feed.scrollHeight;
+    if(oldTop!==null){
+      // Continue from the visible position if another event arrives mid-glide.
+      glide?.cancel();
+      const shift=oldTop-stack.getBoundingClientRect().top;
+      if(Math.abs(shift)>.25){
+        glide=stack.animate([{transform:'translateY('+shift+'px)'},{transform:'none'}],
+          {duration:550,easing:'cubic-bezier(.25,1,.5,1)'});
+      }
+    }
     if(playing) frame=requestAnimationFrame(render);
   }
   function open(a,b,topic) {
