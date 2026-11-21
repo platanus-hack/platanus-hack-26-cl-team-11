@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resumen · Ronda</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FFB02E'/%3E%3Cstop offset='.4' stop-color='%23FF4D6D'/%3E%3Cstop offset='.7' stop-color='%23B766FF'/%3E%3Cstop offset='1' stop-color='%2334B6FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.7'%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(60 20 20)'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(120 20 20)'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='2.6' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<link rel="stylesheet" href="contexto.css">
+</head>
+<body style="margin: 0">
+<div class="rd-page cx">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner cx-wrap">
+    <header class="cx-top">
+      <a class="rd-brand" href="resumen.html"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="cx-nav" aria-label="Secciones">
+        <a href="resumen.html" aria-current="page">Resumen</a>
+        <a href="conexiones.html">Conexiones</a>
+        <a href="mapa.html">Mapa</a>
+      </nav>
+      <span class="cx-tag">Datos de prueba</span>
+    </header>
+
+    <div class="cx-head">
+      <div>
+        <h1 class="cx-title">Resumen</h1>
+        <p class="cx-sub">Semana del 16 al 22 de noviembre</p>
+      </div>
+      <a class="cx-btn" href="conexiones.html">Agregar una conexión</a>
+    </div>
+
+    <section class="cx-stats" id="stats" aria-label="Tu semana en cifras"></section>
+
+    <div class="cx-bento">
+      <section class="cx-slab cx-card cx-card--7" style="--tint: #5b5cf0">
+        <div class="cx-card__head"><h2>Código</h2><span id="code-tiles" style="display: inline-flex"></span></div>
+        <div class="cx-row">
+          <div class="cx-fig"><span class="cx-stat__label">Commits</span><span class="cx-num">23</span></div>
+          <div class="cx-fig"><span class="cx-stat__label">Líneas agregadas</span><span class="cx-num cx-num--mid">+1.840</span></div>
+          <div class="cx-fig"><span class="cx-stat__label">Líneas borradas</span><span class="cx-num cx-num--mid">−612</span></div>
+          <div class="cx-fig"><span class="cx-stat__label">Pull requests</span><span class="cx-num cx-num--mid">3</span></div>
+        </div>
+        <div class="cx-bars" id="bars" role="img" aria-label="Commits por día: lunes 3, martes 5, miércoles 2, jueves 6, viernes 4, sábado 2, domingo 1"></div>
+        <div class="cx-foot" id="code-foot"></div>
+      </section>
+
+      <section class="cx-slab cx-card cx-card--5" style="--tint: #ff3b6b">
+        <div class="cx-card__head"><h2>Salud</h2><span id="health-tiles" style="display: inline-flex"></span></div>
+        <div class="cx-row">
+          <div class="cx-fig"><span class="cx-stat__label">Pulso en reposo</span><span class="cx-num">58<small>lpm</small></span></div>
+          <div class="cx-fig"><span class="cx-stat__label">Sueño por noche</span><span class="cx-num cx-num--mid">6<small>h</small> 12<small>min</small></span></div>
+        </div>
+        <div>
+          <svg class="cx-spark" id="spark" role="img" aria-label="Pulso en reposo de lunes a domingo: 61, 60, 59, 60, 58, 57 y 58"></svg>
+          <div class="cx-spark__days" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+        </div>
+        <div class="cx-foot"><span><b>4</b> entrenamientos</span><span><b>8.412</b> pasos por día</span></div>
+      </section>
+
+      <section class="cx-slab cx-card cx-card--7">
+        <div class="cx-card__head"><h2>Tú y tu equipo</h2></div>
+        <div class="cx-vs" id="versus"></div>
+        <div class="cx-foot"><span id="team-note"></span></div>
+      </section>
+
+      <section class="cx-slab cx-card cx-card--5" style="--tint: #3f7fe8">
+        <div class="cx-card__head"><h2>Reuniones</h2><span id="meet-tiles" style="display: inline-flex"></span></div>
+        <div class="cx-row">
+          <div class="cx-fig"><span class="cx-stat__label">Tiempo en reuniones</span><span class="cx-num">9<small>h</small> 30<small>min</small></span></div>
+          <div class="cx-fig"><span class="cx-stat__label">Día más cargado</span><span class="cx-num cx-num--mid">Miércoles</span></div>
+        </div>
+        <div class="cx-week" id="week" role="img" aria-label="Reuniones por día: lunes 2, martes 3, miércoles 5, jueves 3, viernes 1"></div>
+        <div class="cx-legend"><span><i class="rec"></i>Transcrita por Granola</span><span><i></i>Sin transcribir</span></div>
+        <div class="cx-foot" style="margin-top: auto"><span><b>11</b> de 14 transcritas</span><span><b>40</b> min por reunión</span></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="apps.js"></script>
+<script>
+(function () {
+  const { find, tile, esc, ICON } = window.RONDA;
+  const $ = (id) => document.getElementById(id);
+  const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  const TODAY = 5;
+
+  const stats = [
+    ['gcal', 'Reuniones', '14', '', '9 h 30 min esta semana'],
+    ['granola', 'Reuniones transcritas', '11', 'de 14', '3 quedaron sin transcribir'],
+    ['whatsapp', 'WhatsApps respondidos', '86', '', 'Tardas 12 min en responder'],
+    ['gmail', 'Correos respondidos', '17', 'de 42', '6 esperan tu respuesta'],
+    ['health', 'Pulso en reposo', '58', 'lpm', '2 menos que la semana pasada'],
+    ['github', 'Commits', '23', '', '+1.840 y −612 líneas'],
+  ];
+  $('stats').innerHTML = stats.map(([id, label, value, unit, note]) => {
+    const app = find(id);
+    return '<div class="cx-stat" style="--tint:' + app.tint + '"><div class="cx-stat__head">' + tile(app) + '<span class="cx-stat__label">' + esc(label) + '</span></div>' +
+      '<span class="cx-num">' + value + (unit ? '<small>' + unit + '</small>' : '') + '</span><span class="cx-stat__note">' + esc(note) + '</span></div>';
+  }).join('');
+
+  $('code-tiles').innerHTML = ['github', 'codex', 'claude'].map((id) => tile(find(id))).join('');
+  $('health-tiles').innerHTML = tile(find('health'));
+  $('meet-tiles').innerHTML = ['gcal', 'granola'].map((id) => tile(find(id))).join('');
+
+  const commits = [3, 5, 2, 6, 4, 2, 1];
+  const top = Math.max.apply(null, commits);
+  $('bars').innerHTML = commits.map((count, day) =>
+    '<div class="cx-bars__col' + (day === TODAY ? ' cx-bars__col--now' : '') + '"><span class="cx-bars__n">' + count + '</span>' +
+    '<span class="cx-bars__bar" style="height:' + Math.round((count / top) * 78) + 'px"></span><span class="cx-bars__d">' + DAYS[day] + '</span></div>').join('');
+  $('code-foot').innerHTML = '<span>' + tile(find('claude')) + '<span>Claude terminó <b>12</b> tareas</span></span><span>' + tile(find('codex')) + '<span>Codex terminó <b>9</b></span></span>';
+
+  const versus = [
+    ['health', 'Duermes 10 % menos que tu equipo', '6 h 12 min por noche. Tu equipo, 6 h 54 min.', 90, 100],
+    ['strava', 'Entrenas el doble que tu equipo', '4 entrenamientos. Tu equipo, 2.', 100, 50],
+    ['gcal', 'Tienes 27 % más reuniones que tu equipo', '14 reuniones. Tu equipo, 11.', 100, 79],
+    ['whatsapp', 'Respondes WhatsApp el doble de rápido', '12 min. Tu equipo, 25 min.', 48, 100],
+  ];
+  $('versus').innerHTML = versus.map(([id, title, detail, mine, team]) => {
+    const app = find(id);
+    return '<div class="cx-vs__row" style="--tint:' + app.tint + '"><div class="cx-vs__say">' + tile(app) +
+      '<div class="cx-vs__text"><b>' + esc(title) + '</b><span>' + esc(detail) + '</span></div></div>' +
+      '<div class="cx-vs__bars"><span>Tú</span><span class="cx-vs__track"><span class="cx-vs__fill cx-vs__fill--me" style="width:' + mine + '%"></span></span>' +
+      '<span>Equipo</span><span class="cx-vs__track"><span class="cx-vs__fill" style="width:' + team + '%"></span></span></div></div>';
+  }).join('');
+  $('team-note').innerHTML = ICON.lock.replace('<svg', '<svg style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"') +
+    '<span>Tu equipo es el promedio de 5 personas. Nadie ve el dato de otra.</span>';
+
+  const meetings = [[2, 2], [3, 3], [5, 4], [3, 2], [1, 0]];
+  $('week').innerHTML = meetings.map(([total, recorded], day) => {
+    let blocks = '';
+    for (let i = 0; i < total; i += 1) blocks += '<span class="cx-week__block' + (i < recorded ? ' cx-week__block--rec' : '') + '"></span>';
+    return '<div class="cx-week__day"><div class="cx-week__stack">' + blocks + '</div><span class="cx-week__d">' + DAYS[day] + '</span></div>';
+  }).join('');
+
+  const pulse = [61, 60, 59, 60, 58, 57, 58];
+  function drawSpark() {
+    const svg = $('spark');
+    const width = svg.clientWidth || 300;
+    const height = 92;
+    const low = 55;
+    const high = 63;
+    const step = width / pulse.length;
+    const points = pulse.map((value, day) => [step * (day + 0.5), 10 + ((high - value) / (high - low)) * (height - 24)]);
+    const line = points.map((point, index) => (index ? 'L' : 'M') + point[0].toFixed(1) + ' ' + point[1].toFixed(1)).join(' ');
+    const area = line + ' L' + points[points.length - 1][0].toFixed(1) + ' ' + height + ' L' + points[0][0].toFixed(1) + ' ' + height + ' Z';
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svg.innerHTML = '<path class="cx-spark__area" d="' + area + '"/><path class="cx-spark__line" d="' + line + '"/>' +
+      points.map((point, day) => '<circle class="cx-spark__dot" cx="' + point[0].toFixed(1) + '" cy="' + point[1].toFixed(1) + '" r="' + (day === TODAY ? 6.5 : 4.5) + '"/>').join('');
+  }
+  drawSpark();
+  window.addEventListener('resize', drawSpark);
+})();
+</script>
+</body>
+</html>

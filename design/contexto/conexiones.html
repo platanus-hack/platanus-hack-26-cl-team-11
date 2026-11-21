@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conexiones · Ronda</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FFB02E'/%3E%3Cstop offset='.4' stop-color='%23FF4D6D'/%3E%3Cstop offset='.7' stop-color='%23B766FF'/%3E%3Cstop offset='1' stop-color='%2334B6FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.7'%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(60 20 20)'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(120 20 20)'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='2.6' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<link rel="stylesheet" href="contexto.css">
+</head>
+<body style="margin: 0">
+<div class="rd-page cx">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner cx-wrap">
+    <header class="cx-top">
+      <a class="rd-brand" href="resumen.html"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="cx-nav" aria-label="Secciones">
+        <a href="resumen.html">Resumen</a>
+        <a href="conexiones.html" aria-current="page">Conexiones</a>
+        <a href="mapa.html">Mapa</a>
+      </nav>
+      <span class="cx-tag">Datos de prueba</span>
+    </header>
+
+    <div class="cx-head">
+      <h1 class="cx-title">Conexiones</h1>
+      <label class="cx-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+        <input id="search" type="search" placeholder="Buscar una app" aria-label="Buscar una app">
+      </label>
+    </div>
+
+    <section class="cx-slab cx-dock" aria-label="Conectadas">
+      <div class="cx-dock__head">
+        <span class="rd-label">Conectadas</span>
+        <span class="rd-note" id="dock-note"></span>
+      </div>
+      <div class="cx-dock__row" id="dock"></div>
+    </section>
+
+    <div class="cx-chips" id="chips" role="group" aria-label="Filtrar"></div>
+    <div id="groups"></div>
+  </div>
+</div>
+
+<div class="cx cx-veil" id="veil" hidden>
+  <div class="cx-slab cx-sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Conectar una app"></div>
+</div>
+
+<script src="apps.js"></script>
+<script>
+(function () {
+  const { APPS, CATS, find, ago, tile, sheet, esc, ICON } = window.RONDA;
+  const connected = new Set(window.RONDA.CONNECTED);
+  const view = { filter: 'Todas', query: '' };
+  const $ = (id) => document.getElementById(id);
+  let timer = null;
+
+  function renderDock() {
+    const mine = APPS.filter((app) => connected.has(app.id)).sort((a, b) => a.ago - b.ago);
+    $('dock-note').textContent = mine.length
+      ? mine.length + ' de ' + APPS.length + ' · último dato ' + ago(mine[0].ago).toLowerCase()
+      : 'Todavía no conectas ninguna';
+    $('dock').innerHTML = mine.map((app) =>
+      '<button type="button" class="cx-dock__item" data-open="' + app.id + '">' + tile(app) +
+      '<span class="cx-dock__name">' + esc(app.name) + '</span>' +
+      '<span class="cx-dock__when"><span class="cx-dot"></span>' + ago(app.ago) + '</span></button>').join('');
+  }
+
+  function renderChips() {
+    const options = [['Todas', APPS.length], ['Conectadas', connected.size]].concat(CATS.map((cat) => [cat, APPS.filter((app) => app.cat === cat).length]));
+    $('chips').innerHTML = options.map(([name, count]) =>
+      '<button type="button" class="cx-chip" aria-pressed="' + (view.filter === name) + '" data-filter="' + esc(name) + '">' + esc(name) +
+      '<span class="cx-chip__n">' + count + '</span></button>').join('');
+  }
+
+  function renderGroups() {
+    const query = view.query.trim().toLowerCase();
+    const visible = APPS.filter((app) => {
+      if (query && !app.name.toLowerCase().includes(query)) return false;
+      if (view.filter === 'Conectadas') return connected.has(app.id);
+      return view.filter === 'Todas' || app.cat === view.filter;
+    });
+    if (!visible.length) {
+      $('groups').innerHTML = '<p class="cx-empty">No hay apps con ese nombre.</p>';
+      return;
+    }
+    $('groups').innerHTML = CATS.filter((cat) => visible.some((app) => app.cat === cat)).map((cat) =>
+      '<section class="cx-group"><span class="cx-group__name">' + esc(cat) + '</span><div class="cx-grid">' +
+      visible.filter((app) => app.cat === cat).map((app) => {
+        const on = connected.has(app.id);
+        const button = on
+          ? '<button type="button" class="cx-btn cx-btn--small cx-btn--on" data-open="' + app.id + '" aria-label="Administrar ' + esc(app.name) + '">' + ICON.check + 'Conectada</button>'
+          : '<button type="button" class="cx-btn cx-btn--small" data-open="' + app.id + '" aria-label="Conectar ' + esc(app.name) + '">Conectar</button>';
+        return '<div class="cx-app' + (on ? ' cx-app--on' : '') + '" style="--tint:' + app.tint + '">' + tile(app) +
+          '<div class="cx-app__text"><span class="cx-app__name">' + esc(app.name) + '</span><span class="cx-app__how">' + esc(app.how) + '</span></div>' + button + '</div>';
+      }).join('') + '</div></section>').join('');
+  }
+
+  function render() {
+    renderDock();
+    renderChips();
+    renderGroups();
+  }
+
+  function show(app, state) {
+    clearTimeout(timer);
+    $('sheet').innerHTML = sheet(app, state);
+    $('sheet').dataset.app = app.id;
+    $('veil').hidden = false;
+    if (state === 'conectando') {
+      timer = setTimeout(() => {
+        app.ago = 0;
+        connected.add(app.id);
+        render();
+        show(app, 'lista');
+      }, 1700);
+    }
+  }
+
+  function hide() {
+    clearTimeout(timer);
+    $('veil').hidden = true;
+  }
+
+  document.addEventListener('click', (event) => {
+    const open = event.target.closest('[data-open]');
+    if (open) {
+      const app = find(open.dataset.open);
+      show(app, connected.has(app.id) ? 'administrar' : 'permiso');
+      return;
+    }
+    const filter = event.target.closest('[data-filter]');
+    if (filter) {
+      view.filter = filter.dataset.filter;
+      renderChips();
+      renderGroups();
+      return;
+    }
+    const app = find($('sheet').dataset.app || '');
+    const go = event.target.closest('[data-go]');
+    if (go && app) return show(app, go.dataset.go);
+    if (event.target.closest('[data-disconnect]') && app) {
+      connected.delete(app.id);
+      render();
+      return hide();
+    }
+    const copy = event.target.closest('[data-copy]');
+    if (copy) {
+      copy.lastChild.textContent = 'Copiado';
+      return;
+    }
+    if (event.target.closest('[data-close]') || event.target === $('veil')) hide();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') hide();
+  });
+  $('search').addEventListener('input', (event) => {
+    view.query = event.target.value;
+    renderGroups();
+  });
+
+  render();
+  const params = new URLSearchParams(location.search);
+  const wanted = find(params.get('abrir') || '');
+  if (wanted) show(wanted, params.get('paso') || (connected.has(wanted.id) ? 'administrar' : 'permiso'));
+})();
+</script>
+</body>
+</html>

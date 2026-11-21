@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa · Ronda</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FFB02E'/%3E%3Cstop offset='.4' stop-color='%23FF4D6D'/%3E%3Cstop offset='.7' stop-color='%23B766FF'/%3E%3Cstop offset='1' stop-color='%2334B6FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.7'%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(60 20 20)'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(120 20 20)'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='2.6' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../ronda.css">
+<link rel="stylesheet" href="contexto.css">
+</head>
+<body style="margin: 0">
+<div class="rd-page cx">
+  <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="rd-page__inner cx-wrap">
+    <header class="cx-top">
+      <a class="rd-brand" href="resumen.html"><img class="rd-mark" src="../logo/ronda-mark.svg" alt="">Ronda</a>
+      <nav class="cx-nav" aria-label="Secciones">
+        <a href="resumen.html">Resumen</a>
+        <a href="conexiones.html">Conexiones</a>
+        <a href="mapa.html" aria-current="page">Mapa</a>
+      </nav>
+      <span class="cx-tag">Datos de prueba</span>
+    </header>
+
+    <div class="cx-head">
+      <h1 class="cx-title">Mapa</h1>
+      <div class="cx-people" id="people" role="group" aria-label="Persona"></div>
+    </div>
+
+    <div class="cx-map">
+      <div class="cx-globe" id="globe">
+        <canvas id="dots-back" aria-hidden="true"></canvas>
+        <canvas id="dots-front" class="cx-globe__front" aria-hidden="true"></canvas>
+        <div class="cx-globe__floor" aria-hidden="true"></div>
+        <button type="button" class="cx-me" id="me" aria-label="Ver todo el contexto"><img id="me-face" src="../faces/mati.png" alt=""></button>
+      </div>
+      <aside class="cx-slab cx-panel" id="panel" aria-live="polite"></aside>
+    </div>
+  </div>
+</div>
+
+<script src="apps.js"></script>
+<script>
+(function () {
+  const { find, ago, tile, esc } = window.RONDA;
+  const $ = (id) => document.getElementById(id);
+  const RAD = Math.PI / 180;
+  const TILT = 0.15;
+  const SPIN = 0.07;
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('still');
+
+  const FEED = {
+    health: ['Dormiste 5 h 40 min, una hora menos que tu promedio', 'Pulso en reposo 61 lpm, 4 sobre tu promedio', '8.412 pasos hasta las 18:00', 'Variabilidad cardíaca baja desde el jueves'],
+    granola: ['Mentoría Platanus: enfocar el pitch en una sola idea', 'Daily de la hack: quién presenta el domingo', 'Reunión con Ian: definir el globo de la demo', 'Ensayo corto del pitch con Andrés'],
+    gmail: ['Ian: ¿miramos el globo a las 11:00?', 'Render: despliegue listo en main', 'Platanus: instrucciones de la sala', 'Lian: te mandé el borrador del guion'],
+    gcal: ['Hoy 11:00: el globo con Ian', 'Mañana 10:30: ensayo de la demo', 'Domingo 16:00: cierre de la hack', 'Bloque sin reuniones de 15:00 a 18:00'],
+    whatsapp: ['Grupo del equipo: Robert confirma la grabación', 'Andrés: ¿a qué hora cerramos el domingo?', 'Lian: llego a las 10:00', 'Robert: grabamos a las 12:00'],
+    github: ['main: mapa de contexto', 'Render desplegó la última versión de main', 'main: tablero con votos', 'main: hilo de vidrio interactivo'],
+    codex: ['Agregó pruebas al tablero del equipo', 'Dejó el despliegue en cada commit', 'Corrigió el Atajo de Apple Health', 'Ordenó los conectores'],
+    claude: ['Armó el servidor de contexto y sus pruebas', 'Redactó el guion de 3 minutos', 'Te sugirió cortar el día a las 22:00', 'Revisó el mapa contra la guía de diseño'],
+  };
+  const AGO = { health: [410, 412, 1560], granola: [95, 340, 610], gmail: [12, 48, 200], gcal: [25, 180, 720], whatsapp: [8, 75, 210], github: [16, 44, 170], codex: [30, 150, 380], claude: [4, 130, 260] };
+  const IDS = ['health', 'granola', 'gmail', 'gcal', 'whatsapp', 'github', 'codex', 'claude'];
+  const PEOPLE = [
+    { id: 'me', name: 'Tú', face: 'mati', has: null },
+    { id: 'ian', name: 'Ian', face: 'ian', has: { github: [6, 'Subió el hilo de vidrio a main'], codex: [22, ''], gcal: [40, 'Libre de 15:00 a 18:00'], granola: [95, ''], claude: [3, ''] } },
+    { id: 'lian', name: 'Lian', face: 'lian', has: { health: [310, ''], gcal: [15, 'Ocupada hasta las 12:00'], gmail: [9, ''], github: [58, 'Dejó Render en verde'], whatsapp: [2, ''] } },
+    { id: 'andres', name: 'Andrés', face: 'andres', has: { granola: [120, ''], gmail: [33, ''], gcal: [64, 'Ensayo del pitch a las 10:30'], claude: [18, ''] } },
+    { id: 'roberto', name: 'Roberto', face: 'roberto', has: { gcal: [5, 'En reuniones hasta las 13:00'], whatsapp: [11, ''], gmail: [27, ''] } },
+  ];
+
+  const t0 = Date.now();
+  const state = { person: 'me', selected: null, off: { whatsapp: true, codex: true }, items: {}, pushed: {}, tick: 0 };
+  IDS.forEach((id) => {
+    state.items[id] = FEED[id].slice(0, 3).map((text, index) => ({ text, at: t0 - AGO[id][index] * 60000 }));
+  });
+  const since = (at) => ago((Date.now() - at) / 60000);
+  const person = () => PEOPLE.find((p) => p.id === state.person);
+
+  function sourceOf(id) {
+    const who = person();
+    if (who.id === 'me') {
+      const on = !state.off[id];
+      const items = on ? state.items[id] : [];
+      return { on, items, lastAt: items.length ? items[0].at : null, shared: '' };
+    }
+    const has = who.has[id];
+    return has ? { on: true, items: [], lastAt: t0 - has[0] * 60000, shared: has[1] } : { on: false, items: [], lastAt: null, shared: '' };
+  }
+
+  /* ---------- Esfera ---------- */
+  const globe = $('globe');
+  const layers = [$('dots-back'), $('dots-front')];
+  const back = layers[0].getContext('2d');
+  const front = layers[1].getContext('2d');
+  const spots = IDS.map((id, index) => {
+    const lat = (index % 2 ? -1 : 1) * 38 * RAD;
+    const lon = index * 45 * RAD;
+    return { id, app: find(id), lon, v: [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.cos(lat) * Math.cos(lon)], up: index % 2 === 0 };
+  });
+  const hex = (color) => [1, 3, 5].map((start) => parseInt(color.slice(start, start + 2), 16));
+  const COUNT = 1500;
+  const dots = [];
+  for (let i = 0; i < COUNT; i += 1) {
+    const y = 1 - (2 * (i + 0.5)) / COUNT;
+    const ring = Math.sqrt(1 - y * y);
+    const turn = i * Math.PI * (3 - Math.sqrt(5));
+    dots.push({ v: [Math.cos(turn) * ring, y, Math.sin(turn) * ring], spot: -1, w: 0 });
+  }
+
+  function paintPatches() {
+    dots.forEach((dot) => {
+      dot.spot = -1;
+      dot.w = 0;
+      spots.forEach((spot, index) => {
+        if (!sourceOf(spot.id).on) return;
+        const near = dot.v[0] * spot.v[0] + dot.v[1] * spot.v[1] + dot.v[2] * spot.v[2];
+        const weight = Math.min(1, Math.max(0, (near - 0.9) / 0.085));
+        if (weight > dot.w) {
+          dot.w = weight;
+          dot.spot = index;
+        }
+      });
+    });
+  }
+
+  const nodes = {};
+  spots.forEach((spot) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'cx-node';
+    el.innerHTML = tile(spot.app) + '<span class="cx-node__label"><span class="cx-node__name">' + esc(spot.app.name) + '</span><span class="cx-node__when"></span></span>';
+    if (spot.up) {
+      el.querySelector('.cx-node__label').style.top = 'auto';
+      el.querySelector('.cx-node__label').style.bottom = 'calc(100% + 12px)';
+    }
+    el.addEventListener('click', () => {
+      if (!moved) select(spot.id);
+    });
+    globe.appendChild(el);
+    nodes[spot.id] = { el, when: el.querySelector('.cx-node__when'), tile: el.querySelector('.cx-tile'), tint: hex(spot.app.tint) };
+  });
+
+  let yaw = -0.5;
+  let size = { w: 0, h: 0, r: 0 };
+  let pulse = null;
+  let dragging = false;
+  let moved = false;
+  let lastX = 0;
+  let glide = 0;
+
+  function fit() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = globe.clientWidth;
+    const h = globe.clientHeight;
+    layers.forEach((layer) => {
+      layer.width = Math.round(w * dpr);
+      layer.height = Math.round(h * dpr);
+      layer.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+    size = { w, h, r: Math.min(w * 0.4, h * 0.4) };
+  }
+
+  function project(v, radius) {
+    const cos = Math.cos(yaw);
+    const sin = Math.sin(yaw);
+    const x = v[0] * cos + v[2] * sin;
+    const z1 = -v[0] * sin + v[2] * cos;
+    const y = v[1] * Math.cos(TILT) - z1 * Math.sin(TILT);
+    const z = v[1] * Math.sin(TILT) + z1 * Math.cos(TILT);
+    const k = 1 / (1 - z * 0.16 * radius);
+    return { x: size.w / 2 + x * size.r * radius * k, y: size.h / 2 - y * size.r * radius * k, z: z * radius, k };
+  }
+
+  function disc(ctx, x, y, radius, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function glass() {
+    const cx = size.w / 2;
+    const cy = size.h / 2;
+    const r = size.r * 1.03;
+    back.clearRect(0, 0, size.w, size.h);
+    front.clearRect(0, 0, size.w, size.h);
+    const inner = back.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
+    inner.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+    inner.addColorStop(1, 'rgba(255, 255, 255, 0.16)');
+    disc(back, cx, cy, r, inner);
+    const veil = front.createRadialGradient(cx - r * 0.25, cy - r * 0.3, r * 0.05, cx, cy, r);
+    veil.addColorStop(0, 'rgba(255, 255, 255, 0.46)');
+    veil.addColorStop(0.6, 'rgba(255, 255, 255, 0.2)');
+    veil.addColorStop(1, 'rgba(255, 255, 255, 0.06)');
+    disc(front, cx, cy, r, veil);
+    back.lineWidth = 1.5;
+    back.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    back.beginPath();
+    back.arc(cx, cy, r, 0, Math.PI * 2);
+    back.stroke();
+    back.lineWidth = 1;
+    back.strokeStyle = 'rgba(110, 100, 160, 0.16)';
+    back.beginPath();
+    back.arc(cx, cy, r + 1.5, 0, Math.PI * 2);
+    back.stroke();
+  }
+
+  function draw(now) {
+    glass();
+    const beat = pulse ? Math.min(1, (now - pulse.start) / 1500) : 0;
+    for (let i = 0; i < COUNT; i += 1) {
+      const dot = dots[i];
+      const p = project(dot.v, 1);
+      const depth = (p.z + 1) / 2;
+      let radius = (0.7 + 1.7 * depth) * p.k;
+      let alpha = 0.1 + 0.55 * depth * depth;
+      let color = '96, 90, 140';
+      if (dot.spot >= 0) {
+        const node = nodes[spots[dot.spot].id];
+        const glow = pulse && pulse.id === spots[dot.spot].id ? Math.sin(beat * Math.PI) : 0;
+        const picked = state.selected === spots[dot.spot].id ? 0.35 : 0;
+        const w = dot.w;
+        color = Math.round(96 + (node.tint[0] - 96) * w) + ', ' + Math.round(90 + (node.tint[1] - 90) * w) + ', ' + Math.round(140 + (node.tint[2] - 140) * w);
+        radius *= 1 + w * (0.9 + glow * 0.9 + picked);
+        alpha = Math.min(1, alpha + w * (0.2 + 0.5 * depth + glow * 0.3));
+      }
+      disc(p.z < 0 ? back : front, p.x, p.y, radius, 'rgba(' + color + ', ' + alpha.toFixed(3) + ')');
+    }
+
+    spots.forEach((spot) => {
+      const node = nodes[spot.id];
+      const on = sourceOf(spot.id).on;
+      const p = project(spot.v, 1.04);
+      const depth = (p.z + 1.04) / 2.08;
+      const scale = (0.58 + 0.54 * depth) * Math.min(1, size.r / 250);
+      node.el.style.transform = 'translate(' + (p.x - 36).toFixed(1) + 'px, ' + (p.y - 36).toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+      node.el.style.zIndex = String(p.z > 0 ? 600 + Math.round(p.z * 100) : 100 + Math.round((p.z + 1.04) * 90));
+      node.el.style.filter = depth < 0.5 ? 'blur(' + ((0.5 - depth) * 4.5).toFixed(1) + 'px)' : 'none';
+      node.el.classList.toggle('cx-node--far', depth < 0.6);
+      if (!on) return;
+      const live = pulse && pulse.id === spot.id;
+      for (let step = 0; step < 9; step += 1) {
+        const q = project(spot.v, 0.9 - step * 0.068);
+        const near = (q.z + 1) / 2;
+        const fade = (1 - step / 9) * (0.2 + 0.5 * near);
+        disc(q.z < 0 ? back : front, q.x, q.y, (1.5 + 1.3 * near) * (1 - step * 0.05), 'rgba(' + node.tint.join(', ') + ', ' + fade.toFixed(3) + ')');
+      }
+      if (live && beat < 1) {
+        const q = project(spot.v, 0.94 - beat * 0.62);
+        const ctx = q.z < 0 ? back : front;
+        ctx.strokeStyle = 'rgb(' + node.tint.join(', ') + ')';
+        ctx.lineWidth = 3;
+        disc(ctx, q.x, q.y, 6, '#ffffff');
+        ctx.stroke();
+      }
+    });
+    if (pulse && beat >= 1) pulse = null;
+  }
+
+  let before = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - before) / 1000);
+    before = now;
+    if (state.selected) {
+      const spot = spots.find((item) => item.id === state.selected);
+      let gap = (-spot.lon - yaw) % (Math.PI * 2);
+      if (gap > Math.PI) gap -= Math.PI * 2;
+      if (gap < -Math.PI) gap += Math.PI * 2;
+      yaw += gap * (1 - Math.exp(-dt * 5));
+    } else if (!dragging) {
+      yaw += (still ? 0 : SPIN * dt) + glide * dt;
+      glide *= Math.exp(-dt * 3);
+    }
+    draw(now);
+    requestAnimationFrame(frame);
+  }
+
+  globe.addEventListener('pointerdown', (event) => {
+    dragging = true;
+    moved = false;
+    lastX = event.clientX;
+  });
+  window.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    const dx = event.clientX - lastX;
+    if (Math.abs(dx) > 3) moved = true;
+    if (!moved) return;
+    if (state.selected) select(null);
+    yaw += dx * 0.006;
+    glide = dx * 0.25;
+    lastX = event.clientX;
+  });
+  window.addEventListener('pointerup', () => {
+    dragging = false;
+    setTimeout(() => { moved = false; }, 0);
+  });
+  window.addEventListener('resize', fit);
+
+  /* ---------- Panel y personas ---------- */
+  function renderPeople() {
+    $('people').innerHTML = PEOPLE.map((p) =>
+      '<button type="button" class="cx-person" aria-pressed="' + (p.id === state.person) + '" data-person="' + p.id + '"><img src="../faces/' + p.face + '.png" alt="">' + esc(p.name) + '</button>').join('');
+  }
+
+  function renderNodes() {
+    spots.forEach((spot) => {
+      const source = sourceOf(spot.id);
+      const node = nodes[spot.id];
+      node.tile.classList.toggle('cx-tile--off', !source.on);
+      node.el.setAttribute('aria-pressed', String(state.selected === spot.id));
+      node.when.textContent = source.on ? (source.lastAt ? since(source.lastAt) : 'Sin datos') : 'Sin conectar';
+    });
+  }
+
+  function renderPanel() {
+    const who = person();
+    const mine = who.id === 'me';
+    const title = mine ? 'Tu contexto' : 'Contexto de ' + who.name;
+    if (!state.selected) {
+      const all = IDS.map((id) => ({ app: find(id), source: sourceOf(id) }));
+      const on = all.filter((entry) => entry.source.on);
+      const last = on.map((entry) => entry.source.lastAt).sort((a, b) => b - a)[0];
+      $('panel').innerHTML = '<div class="cx-panel__head"><img class="cx-panel__face" src="../faces/' + who.face + '.png" alt=""><div><h2>' + esc(title) + '</h2>' +
+        '<p>' + on.length + ' de ' + IDS.length + ' conexiones' + (last ? ' · último dato ' + since(last).toLowerCase() : '') + '</p></div></div>' +
+        all.map(({ app, source }) => {
+          let line = 'Sin conectar';
+          if (source.on) line = mine ? source.items[0].text : source.shared || 'Privado';
+          return '<button type="button" class="cx-line" data-select="' + app.id + '">' + tile(app, source.on ? '' : 'cx-tile--off') +
+            '<span class="cx-line__text"><b>' + esc(app.name) + '</b><span>' + esc(line) + '</span></span>' +
+            '<span class="cx-line__when">' + (source.on && source.lastAt ? since(source.lastAt) : '') + '</span></button>';
+        }).join('') +
+        (mine ? '' : '<p class="cx-panel__note">Ves cuándo llegó el último dato y lo que ' + esc(who.name) + ' comparte. Lo demás no sale de su agente.</p>');
+      return;
+    }
+    const app = find(state.selected);
+    const source = sourceOf(app.id);
+    let rows = source.items.slice(0, 3).map((item) => '<div class="cx-item">' + esc(item.text) + '<span>' + since(item.at) + '</span></div>').join('');
+    if (!mine && source.on) {
+      rows = '<div class="cx-item">' + esc(source.shared || 'Privado') + '<span>' + (source.shared ? 'Compartido con el equipo · ' + since(source.lastAt) : 'No sale del agente de ' + esc(who.name)) + '</span></div>';
+    }
+    let action = '';
+    if (mine && source.on) action = '<div class="cx-panel__actions"><button type="button" class="cx-btn" data-off="' + app.id + '">Desconectar</button></div>';
+    if (mine && !source.on) action = '<div class="cx-panel__actions"><a class="cx-btn cx-btn--primary" href="conexiones.html?abrir=' + app.id + '">Conectar ' + esc(app.name) + '</a></div>';
+    const status = source.on ? '<span class="cx-dot"></span>Conectada · ' + (source.lastAt ? since(source.lastAt).toLowerCase() : 'sin datos') : 'Sin conectar';
+    const how = source.on || mine ? app.how : who.name + ' todavía no conecta esta app.';
+    $('panel').innerHTML = '<button type="button" class="cx-back" data-select=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' + esc(title) + '</button>' +
+      '<div class="cx-panel__head">' + tile(app, source.on ? '' : 'cx-tile--off') + '<div><h2>' + esc(app.name) + '</h2><p>' + status + '</p></div></div>' +
+      '<p class="rd-note" style="margin: 0 0 14px; font-size: 14px">' + esc(how) + '</p>' +
+      (rows ? '<span class="rd-label" style="padding-bottom: 8px">Lo último</span>' + rows : '') + action;
+  }
+
+  function renderAll() {
+    renderPeople();
+    renderNodes();
+    renderPanel();
+    $('me-face').src = '../faces/' + person().face + '.png';
+  }
+
+  function select(id) {
+    state.selected = id || null;
+    renderNodes();
+    renderPanel();
+  }
+
+  document.addEventListener('click', (event) => {
+    const who = event.target.closest('[data-person]');
+    if (who) {
+      state.person = who.dataset.person;
+      state.selected = null;
+      paintPatches();
+      return renderAll();
+    }
+    const pick = event.target.closest('[data-select]');
+    if (pick) return select(pick.dataset.select);
+    const off = event.target.closest('[data-off]');
+    if (off) {
+      state.off[off.dataset.off] = true;
+      paintPatches();
+      renderNodes();
+      renderPanel();
+    }
+  });
+  $('me').addEventListener('click', () => {
+    if (!moved) select(null);
+  });
+
+  function arrive() {
+    if (state.person !== 'me') return;
+    const on = IDS.filter((id) => !state.off[id]);
+    if (!on.length) return;
+    const id = on[(state.tick * 3) % on.length];
+    state.tick += 1;
+    const count = state.pushed[id] || 0;
+    state.pushed[id] = count + 1;
+    state.items[id] = [{ text: FEED[id][(3 + count) % FEED[id].length], at: Date.now() }].concat(state.items[id]).slice(0, 12);
+    pulse = { id, start: performance.now() };
+    renderNodes();
+    renderPanel();
+  }
+
+  fit();
+  paintPatches();
+  renderAll();
+  const wanted = new URLSearchParams(location.search).get('fuente');
+  if (wanted && find(wanted)) select(wanted);
+  requestAnimationFrame(frame);
+  if (!still) setInterval(arrive, 6000);
+  setInterval(() => { renderNodes(); }, 30000);
+})();
+</script>
+</body>
+</html>
