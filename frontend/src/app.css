@@ -78,7 +78,7 @@ body { margin: 0; }
 .app-stage__agent .rd-composer__input { height: 44px; font-size: 18px; }
 .app-stage__agent .rd-composer__send { width: 44px; height: 44px; }
 @media (max-width: 859px) { .app-stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); } }
-@media (max-width: 859px) { .app-stage--inline { height: auto; grid-template-rows: 58vh auto; } .app-stage--inline .app-stage__globe { order: -1; } .app-stage--inline .app-stage__agent { max-height: 70vh; } }
+@media (max-width: 859px) { .app-stage--inline { height: auto; grid-template-rows: 72vh; } .app-stage--inline .app-stage__agent { display: none; } }
 @media (prefers-reduced-motion: reduce) { .app-stage__decision { animation: none; } }
 .app-globe__dock { position: absolute; left: var(--rd-space-6); bottom: var(--rd-space-6); width: min(440px, calc(100% - 2 * var(--rd-space-6))); display: flex; flex-direction: column; align-items: stretch; gap: var(--rd-space-2); }
 .app-globe__dock .rd-bubble { max-width: 100%; }
