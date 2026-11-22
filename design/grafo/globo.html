@@ -180,12 +180,15 @@ class Component extends DCLogic {
       cv.addEventListener('pointercancel', this.onUp);
       cv.addEventListener('pointerleave', this.onLeave);
     }
-    var loop = function (now) { self.frame(now); self.raf = requestAnimationFrame(loop); };
+    this.onScreen = true;
+    if (cv && window.IntersectionObserver) { this.watcher = new IntersectionObserver(function (entries) { self.onScreen = entries[entries.length - 1].isIntersecting; }); this.watcher.observe(cv); }
+    var loop = function (now) { if (self.onScreen && !document.hidden) self.frame(now); else self.last = now; self.raf = requestAnimationFrame(loop); };
     this.raf = requestAnimationFrame(loop);
   }
 
   componentWillUnmount() {
     cancelAnimationFrame(this.raf);
+    if (this.watcher) this.watcher.disconnect();
     var cv = this.canvasRef.current;
     if (cv && this.onDown) { cv.removeEventListener('pointerdown', this.onDown); cv.removeEventListener('pointermove', this.onMove); cv.removeEventListener('pointerup', this.onUp); cv.removeEventListener('pointercancel', this.onUp); cv.removeEventListener('pointerleave', this.onLeave); }
   }
@@ -340,8 +343,10 @@ class Component extends DCLogic {
       if (now - this.lastStep > hold) { var idx = this.SEQ.indexOf(n); this.setN(this.SEQ[(idx + 1) % this.SEQ.length], true); n = this.state.n; }
     }
 
-    var dpr = Math.min(2, window.devicePixelRatio || 1), W = 1440, H = 900;
-    if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+    var W = 1440, H = 900;
+    if (!this.fxAt || now - this.fxAt > 400) { this.fxAt = now; this.shrink = Math.max(0.25, Math.min(1, (cv.getBoundingClientRect().width || W) / W)); }
+    var dense = window.devicePixelRatio || 1, dpr = Math.min(2, Math.min(2.5, dense) * this.shrink), fx = this.fx = dpr / Math.min(2, dense);
+    if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
@@ -492,14 +497,14 @@ class Component extends DCLogic {
       var lift = 1 - fog;
       ctx.globalAlpha = a;
       if (r > 5 && lift > 0.05) {
-        ctx.save(); ctx.shadowColor = 'rgba(40,30,90,' + (0.16 * lift).toFixed(3) + ')'; ctx.shadowBlur = Math.min(24, r * 0.7) * lift; ctx.shadowOffsetY = Math.min(10, r * 0.28) * lift;
+        ctx.save(); ctx.shadowColor = 'rgba(40,30,90,' + (0.16 * lift).toFixed(3) + ')'; ctx.shadowBlur = Math.min(24, r * 0.7) * lift * fx; ctx.shadowOffsetY = Math.min(10, r * 0.28) * lift * fx;
         ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + (r > 14 ? 3 : 1.5), 0, 6.2832); ctx.fill(); ctx.restore();
       } else { ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(pp.x, pp.y, r + 1.2, 0, 6.2832); ctx.fill(); }
       ctx.save(); ctx.beginPath(); ctx.arc(pp.x, pp.y, r, 0, 6.2832); ctx.clip();
       var own = self.people[id].image || (id < 5 && self.people[id].tile === undefined ? self.team[id] : null);
       if (own) {
         var im = own;
-        if (im && im.complete && im.naturalWidth) { if (blur > 0.02) ctx.filter = 'blur(' + (blur * Math.max(1.2, r * 0.14)).toFixed(2) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
+        if (im && im.complete && im.naturalWidth) { if (blur > 0.02) ctx.filter = 'blur(' + (blur * Math.max(1.2, r * 0.14) * fx).toFixed(2) + 'px)'; ctx.drawImage(im, pp.x - r, pp.y - r, r * 2, r * 2); }
       } else {
         var tile = self.people[id].tile, sx0 = (tile % 8) * 128 + 4, sy0 = Math.floor(tile / 8) * 128 + 4;
         if (blur > 0.02 && self.atlasBlur.complete && self.atlasBlur.naturalWidth) ctx.drawImage(self.atlasBlur, sx0, sy0, 120, 120, pp.x - r, pp.y - r, r * 2, r * 2);
@@ -545,7 +550,7 @@ class Component extends DCLogic {
           ctx.lineCap = 'round';
           if (colK > 0.01) {
             var grd = self.grad(ctx, pa.x, pa.y, pb.x, pb.y);
-            ctx.save(); ctx.globalAlpha = 0.3 * gAlpha * depthK * colK; ctx.filter = 'blur(7px)'; ctx.strokeStyle = grd; ctx.lineWidth = 12; ctx.stroke(path); ctx.restore();
+            ctx.save(); ctx.globalAlpha = 0.3 * gAlpha * depthK * colK; ctx.filter = 'blur(' + (7 * fx).toFixed(2) + 'px)'; ctx.strokeStyle = grd; ctx.lineWidth = 12; ctx.stroke(path); ctx.restore();
             ctx.globalAlpha = gAlpha * depthK * colK; ctx.strokeStyle = grd; ctx.lineWidth = E[2] === 2 ? 2.6 : 3.5; ctx.stroke(path);
           }
           if (colK < 0.99) {
@@ -612,7 +617,7 @@ class Component extends DCLogic {
       if (!(n <= 10 || id2 <= 2 || focusSet[id2])) continue;
       var la = this.vis[id2] * (1 - fp.fog) * (this.dimK > 0.01 && !focusSet[id2] && id2 !== 0 ? 1 - 0.7 * this.dimK : 1);
       ctx.globalAlpha = la; ctx.fillStyle = '#1d1d1f'; ctx.textBaseline = 'alphabetic';
-      ctx.shadowColor = 'rgba(247,247,250,0.95)'; ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(247,247,250,0.95)'; ctx.shadowBlur = 8 * fx;
       var person = this.people[id2], R0 = fp.r;
       ctx.font = '600 ' + (n <= 5 || id2 <= 2 ? 16 : 13) + 'px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
       if (id2 === 0) {
@@ -648,7 +653,7 @@ class Component extends DCLogic {
   done(ctx) {
     ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
     var w = ctx.measureText('Listo').width + 46, h = 30;
-    ctx.save(); ctx.shadowColor = 'rgba(40,30,90,0.12)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 6;
+    ctx.save(); ctx.shadowColor = 'rgba(40,30,90,0.12)'; ctx.shadowBlur = 20 * this.fx; ctx.shadowOffsetY = 6 * this.fx;
     ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 15); ctx.fill(); ctx.restore();
     ctx.strokeStyle = '#1d1d1f'; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(-w / 2 + 13, 0.5); ctx.lineTo(-w / 2 + 17, 4.5); ctx.lineTo(-w / 2 + 25, -4); ctx.stroke();
@@ -660,7 +665,7 @@ class Component extends DCLogic {
     ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
     var w = ctx.measureText(text).width + 26, h = 30, a = ctx.globalAlpha;
     ctx.save();
-    ctx.shadowColor = 'rgba(40,30,90,0.10)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+    ctx.shadowColor = 'rgba(40,30,90,0.10)'; ctx.shadowBlur = 24 * this.fx; ctx.shadowOffsetY = 8 * this.fx;
     ctx.fillStyle = 'rgba(255,255,255,0.86)';
     ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 15); ctx.fill();
     ctx.restore();
