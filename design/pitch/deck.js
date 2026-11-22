@@ -7,7 +7,7 @@
   var pairsOf = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
-  var HOOK = 7408;
+  var HOOK = 10017;
   var BANANAS = 3454;
   var BANK_DRIFT = 0.04;
   var SIZES = [5, 10, 25, 100, 300];

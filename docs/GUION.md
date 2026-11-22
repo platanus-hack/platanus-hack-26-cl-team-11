@@ -10,9 +10,9 @@ Para la presentación de `montu.fun/deck`. Lo que va entre corchetes no se dice.
 
 **1 · El gancho (15 s)**
 
-En las últimas 36 horas, cada persona de esta hack tuvo en promedio [el número de la lámina] conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que ustedes no llegaron ni al 1% de esas conversaciones. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
+En las últimas 36 horas, cada equipo de esta hack tuvo en promedio diez mil diecisiete conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que ustedes no llegaron ni al 1% de esas conversaciones. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
 
-[El 7.408 es el promedio por equipo del ranking de tokens de la hack. Actualizarlo el domingo antes de presentar: está escrito en `design/pitch/index.html` y en `HOOK` de `design/pitch/deck.js`.]
+[El 10.017 es el promedio por equipo del ranking de tokens de la hack (22-nov: 400.664 requests ÷ 40 equipos; por persona serían 2.371, 169 personas). Actualizarlo el domingo antes de presentar: está escrito en `design/pitch/index.html` y en `HOOK` de `design/pitch/deck.js`.]
 
 **2 · Conversaciones (15 s)**
 
