@@ -163,6 +163,11 @@ const LAYOUTS = [
   { id: "company", name: "C◯MPANY", note: "la esfera es la O" },
   { id: "label", name: "Etiqueta de botica", note: "casa con sucursales" },
   { id: "stamp", name: "Estampilla", note: "sello de correo perforado" },
+  { id: "oStack", name: "C◯MPANY apilado", note: "Wellness y C◯mpany del mismo ancho" },
+  { id: "oLine", name: "C◯MPANY en una línea", note: "para encabezados y firmas" },
+  { id: "oLeft", name: "C◯MPANY editorial", note: "alineado a la izquierda, ciudad con filete" },
+  { id: "oCity", name: "C◯MPANY con sello", note: "la ciudad gira alrededor de la O" },
+  { id: "oMono", name: "C◯", note: "monograma para ícono y favicon" },
 ];
 const CASES = [["upper", "MAYÚS"], ["title", "Título"], ["lower", "minúsculas"], ["smallcaps", "Versalitas"]];
 
@@ -622,6 +627,30 @@ function text(ctx, str, x, y, size, o = {}) {
 function measureW(ctx, str, size, o = {}) { ctx.save(); setFont(ctx, size, o); const w = ctx.measureText(str).width; ctx.restore(); return w; }
 function fitSize(ctx, str, maxW, o = {}, start = 200) { return start * maxW / Math.max(1, measureW(ctx, str, start, o)); }
 
+function oWord(ctx, x0, base, width, shade, t, sp = Math.max(-0.05, 0.06 + dN()), measureOnly = false) {
+  const no = nameO(sp), word = cased("Company", state.textCase), a = word[0], rest = word.slice(2);
+  const measure = size => ({ a: measureW(ctx, a, size, no), b: measureW(ctx, rest, size, no), o: size * 0.78 });
+  let f = 100, m = measure(f);
+  f = f * width / (m.a + m.o + m.b + f * sp); m = measure(f);
+  const total = m.a + m.o + m.b + f * sp, ox = x0 + m.a + m.o / 2, oy = base - f * 0.35, oR = m.o / 2 * 1.02;
+  if (!measureOnly) {
+    text(ctx, a, x0, base, f, { ...no, align: "left" });
+    drawSphere(ctx, ox, oy, oR, shade, t, false);
+    text(ctx, rest, ox + m.o / 2 + f * sp, base, f, { ...no, align: "left" });
+  }
+  return { f, total, ox, oy, oR };
+}
+function arcText(ctx, str, cx, cy, r, mid, size, o, inside) {
+  ctx.save(); setFont(ctx, size, o); ctx.fillStyle = o.color ?? "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const ws = [...str].map(ch => ctx.measureText(ch).width + (o.spacing ?? 0) * size), tot = ws.reduce((x, y) => x + y, 0);
+  let a = mid - (inside ? -1 : 1) * tot / r / 2;
+  [...str].forEach((ch, i) => {
+    const da = ws[i] / r, c = a + (inside ? -1 : 1) * da / 2;
+    ctx.save(); ctx.translate(cx + Math.cos(c) * r, cy + Math.sin(c) * r); ctx.rotate(c + (inside ? -Math.PI / 2 : Math.PI / 2)); ctx.fillText(ch, 0, 0); ctx.restore();
+    a += (inside ? -1 : 1) * da;
+  });
+  ctx.restore();
+}
 const DRAW = {
   solo(ctx, W, H, shade, t) { drawSphere(ctx, W / 2, H / 2, W * 0.36, shade, t, false); },
   planet(ctx, W, H, shade, t) {
@@ -709,6 +738,60 @@ const DRAW = {
     const s = fitSize(ctx, branches, inner * 0.8, bo);
     text(ctx, branches, W / 2, H * 0.84, s, bo);
     text(ctx, "EST. MMXXVI", W / 2, H * 0.84 + s * 2, s, { ...bo, spacing: 0.3, caps: false, color: cityO().color });
+  },
+  oStack(ctx, W, H, shade, t) {
+    const width = W * 0.8 * Math.min(1.1, state.nameSize / 100), x0 = (W - width) / 2, no = nameO(0.03 + dN());
+    const w1 = cased("Wellness", state.textCase), s1 = fitSize(ctx, w1, width, no);
+    const m = oWord(ctx, 0, 0, width, shade, t, undefined, true);
+    const block = s1 * 0.74 + s1 * 0.25 + m.f * 0.74, top = H * 0.5 - block / 2 - m.f * 0.15;
+    if (state.showThe) text(ctx, cased("The", state.textCase), W / 2, top - s1 * 0.3, s1 * 0.32, nameO(0.4 + dN()));
+    text(ctx, w1, W / 2, top + s1 * 0.74, s1, no);
+    const base = top + s1 * 0.74 + s1 * 0.25 + m.f * 0.74;
+    oWord(ctx, x0, base, width, shade, t);
+    const co = cityO(0.06 + dC()), city = cityText();
+    const cs = Math.min(m.f * 0.32 * state.citySize / 80, fitSize(ctx, city, width, co));
+    text(ctx, city, W / 2, base + m.f * 0.5 * state.gap / 150, cs, co);
+  },
+  oLine(ctx, W, H, shade, t) {
+    const pre = cased(state.showThe ? "The Wellness" : "Wellness", state.textCase) + " ", no = nameO(Math.max(-0.05, 0.06 + dN()));
+    const width = W * 0.88 * Math.min(1, state.nameSize / 100);
+    const m1 = oWord(ctx, 0, 0, 1000, shade, t, undefined, true), p1 = measureW(ctx, pre, m1.f, no);
+    const k = width / (p1 + m1.total), f = m1.f * k, x0 = (W - width) / 2, base = H * 0.52;
+    text(ctx, pre, x0, base, f, { ...no, align: "left" });
+    oWord(ctx, x0 + p1 * k, base, m1.total * k, shade, t);
+    const co = cityO(0.08 + dC()), city = cityText();
+    const cs = Math.min(f * 0.55 * state.citySize / 80, fitSize(ctx, city, width, co));
+    text(ctx, city, W / 2, base + f * 0.9 * state.gap / 150, cs, co);
+  },
+  oLeft(ctx, W, H, shade, t) {
+    const x0 = W * 0.1, width = W * 0.8 * Math.min(1.1, state.nameSize / 100), base = H * 0.56;
+    const m = oWord(ctx, x0, base, width, shade, t);
+    const top = cased(state.showThe ? "The Wellness" : "Wellness", state.textCase), to = nameO(0.12 + dN());
+    const s = Math.min(m.f * 0.42, fitSize(ctx, top, width * 0.7, to));
+    text(ctx, top, x0 + m.f * 0.04, base - m.f * 0.9, s, { ...to, align: "left" });
+    const co = cityO(0.06 + dC()), city = cityText();
+    const cs = Math.min(m.f * 0.3 * state.citySize / 80, fitSize(ctx, city, width * 0.6, co));
+    const y = base + m.f * 0.45 * state.gap / 150, cw = measureW(ctx, city, cs, co), right = x0 + m.total;
+    text(ctx, city, right, y, cs, { ...co, align: "right" });
+    ctx.save(); ctx.strokeStyle = co.color; ctx.lineWidth = Math.max(1, W / 500);
+    ctx.beginPath(); ctx.moveTo(x0 + m.f * 0.04, y - cs * 0.3); ctx.lineTo(right - cw - cs * 0.8, y - cs * 0.3); ctx.stroke(); ctx.restore();
+  },
+  oCity(ctx, W, H, shade, t) {
+    const width = W * 0.84 * Math.min(1.1, state.nameSize / 100), x0 = (W - width) / 2, base = H * 0.6;
+    const m = oWord(ctx, x0, base, width, shade, t);
+    const top = cased(state.showThe ? "The Wellness" : "Wellness", state.textCase), to = nameO(0.22 + dN());
+    text(ctx, top, W / 2, base - m.f * 1.3, fitSize(ctx, top, m.total * 0.62, to), to);
+    const cc = state.cityCase === "title" ? "upper" : state.cityCase;
+    const co = { ...cityO(0.2 + dC()), caps: false }, cityStr = cased(CITY(), cc) + " · EST. MMXXVI";
+    const size = m.oR * 0.3 * state.citySize / 80, r = m.oR * 1.12 + size * 0.6;
+    arcText(ctx, cityStr, m.ox, m.oy, r, Math.PI / 2, size, co, true);
+  },
+  oMono(ctx, W, H, shade, t) {
+    const no = nameO(0), c = cased("C", state.textCase === "lower" ? "lower" : "upper");
+    let f = 100; const fit = W * 0.72 / (measureW(ctx, c, f, no) + f * 0.8); f = Math.min(H * 0.6, f * fit); const cw = measureW(ctx, c, f, no), o = f * 0.78, gap = f * 0.02;
+    const x0 = (W - (cw + gap + o)) / 2, base = H * 0.5 + f * 0.35;
+    text(ctx, c, x0, base, f, { ...no, align: "left" });
+    drawSphere(ctx, x0 + cw + gap + o / 2, base - f * 0.35, o / 2 * 1.02, shade, t, false);
   },
   stamp(ctx, W, H, shade, t) {
     const m = W * 0.1, x0 = m, y0 = m * 0.9, w = W - 2 * m, h = H - 1.8 * m;
