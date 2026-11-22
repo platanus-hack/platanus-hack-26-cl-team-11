@@ -20,6 +20,8 @@ services:
         - design/contexto/**
         - design/logo/**
         - design/luz/**
+        - design/montu/**
+        - design/pitch/**
         - package.json
         - package-lock.json
         - .nvmrc

@@ -5,7 +5,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz|contexto)\/|(?:tokens|ronda)\.css$)/;
+const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz|contexto|montu|pitch)\/|(?:tokens|ronda)\.css$)/;
 
 const ESCAPES_OR_CLIMBS = /%|\\|\.\./;
 const isServed = (path: string) => SERVED.test(path) && !ESCAPES_OR_CLIMBS.test(path);
@@ -22,6 +22,7 @@ const cached: MiddlewareHandler = async (c, next) => {
 export function designAssets() {
   const routes = new Hono();
   const serve = serveStatic({ root: relative(process.cwd(), REPO_ROOT) || '.' });
+  for (const path of ['/dec', '/deck']) routes.get(path, (c) => c.redirect('/design/pitch/index.html'));
   routes.use('/design/*', etag(), cached, (c, next) => (isServed(c.req.path) ? serve(c, next) : next()));
   return routes;
 }
