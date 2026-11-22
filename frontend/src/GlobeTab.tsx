@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchGlobeMode } from './api';
 import { GlobeChat } from './GlobeChat';
+import { GlobeScript } from './GlobeScript';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=16';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=18';
 
 const LIVE_PARAM = 'vivo';
 const STAGE_PARAM = 'escenario';
 const IDEA_PARAM = 'idea';
+const REAL_PARAM = 'real';
 const CHOICE_KEY = 'montu.globo';
 const MODES: Array<{ mode: Mode; label: string }> = [
   { mode: 'mesa', label: 'En vivo' },
@@ -31,7 +33,8 @@ export function GlobeTab({ token, name, active }: { token: string; name: string;
   const params = new URLSearchParams(window.location.search);
   const stage = params.has(STAGE_PARAM);
   const ideas = params.getAll(IDEA_PARAM);
-  const livePath = `${DEMO_PATH}&vivo=${encodeURIComponent(`/api/people/${encodeURIComponent(token)}/mesa/live`)}&limpio`;
+  const scripted = !params.has(REAL_PARAM);
+  const livePath = `${DEMO_PATH}&vivo=${encodeURIComponent(`/api/people/${encodeURIComponent(token)}/mesa/live`)}&limpio${scripted ? '&guion' : ''}`;
 
   useEffect(() => {
     if (active) setOpened(true);
@@ -81,7 +84,7 @@ export function GlobeTab({ token, name, active }: { token: string; name: string;
         </div>
         {mode === 'mesa' ? (
           <div className="app-stage app-stage--inline">
-            <GlobeChat token={token} name={name} stage onRound={wakeGlobe} />
+            {scripted ? <GlobeScript name={name} frame={frame} /> : <GlobeChat token={token} name={name} stage onRound={wakeGlobe} />}
             <iframe ref={frame} className="app-stage__globe" title="Globo de agentes" src={livePath} />
           </div>
         ) : (

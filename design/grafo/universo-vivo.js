@@ -10,6 +10,7 @@
   var query = new URLSearchParams(location.search);
   var source = query.get('vivo') || '';
   var CLEAN = query.has('limpio');
+  var SCRIPTED = query.has('guion');
   if (source.indexOf('/api/people/') !== 0 || !LIVE) return;
 
   var RUNNING_MS = 350, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
@@ -154,8 +155,8 @@
     push(pairRow([other], people[other].name, need.ask ? 'Su agente revisa si sabe algo' : 'Su agente revisa si puede ayudar'));
   }
 
-  function say(need, from, to, text) {
-    var at = Math.max(clock, need.next), end = at + 1 + text.length / TYPE_RATE, read = Math.min(LONGEST_READ, READ_BASE + text.length / READ_RATE);
+  function say(need, from, to, text, quick) {
+    var at = Math.max(clock, need.next), end = at + (quick ? 0.9 : 1 + text.length / TYPE_RATE), read = quick ? 0.5 : Math.min(LONGEST_READ, READ_BASE + text.length / READ_RATE);
     need.script.events.push({ type: 'message', from: from, to: to, at: at, end: end, text: text });
     need.lastEnd = end + read; need.next = end + read;
   }
@@ -190,6 +191,9 @@
       var others = [];
       slotOf.forEach(function (slot) { if (slot !== by) others.push(slot); });
       return { motion: 'calendars', does: ' cruza las agendas', label: 'Cruzar las agendas del equipo', receipt: 'Listo', input: { tema: need.g.topic }, output: { agendas: ev.agendas }, faces: others.slice(0, 5).map(faceUrlOf), to: need.g.members[1] === undefined ? by : need.g.members[1] };
+    },
+    'tablero.responder': function (need, by, ev) {
+      return { motion: 'guideline', does: ' arma la respuesta', label: 'Juntar lo que respondió cada agente', receipt: 'Lista', input: { respuestas: ev.answers }, output: { respuesta: true }, to: need.g.members[1] === undefined ? by : need.g.members[1] };
     },
     'checkin.consultar': function (need, by) {
       return { motion: 'health', does: ' lee a su persona', label: 'Revisar si ' + people[by].name + ' puede ayudar', receipt: 'Solo para su agente', privateResult: true, input: { tema: need.g.topic }, output: { compartir: false }, faces: [faceUrlOf(by)], to: need.from };
@@ -260,14 +264,15 @@
     if (ev.type === 'hilo_abre' && other !== undefined) {
       if (need.g.members.indexOf(other) < 0) { need.g.members.push(other); heading(need); turnTo(need.g.members); }
       need.threads += 1;
-      if (!settleLive(need, 'ask|' + ev.to, ev.text || 'Le escribe por este pedido. [[x]]')) say(need, need.from, other, ev.text || 'Le escribe por este pedido. [[x]]');
+      if (!settleLive(need, 'ask|' + ev.to, ev.text || 'Le escribe por este pedido. [[x]]')) say(need, need.from, other, ev.text || 'Le escribe por este pedido. [[x]]', need.ask);
     } else if (ev.type === 'hilo_responde' && other !== undefined) {
       need.answers[other] = ev.help || 'si'; heading(need);
-      if (!settleLive(need, 'reply|' + ev.to, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]')) say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]');
+      if (!settleLive(need, 'reply|' + ev.to, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]')) say(need, other, need.from, ev.text || (HELP[ev.help] || 'Respondió.') + ' [[x]]', need.ask && ev.help === 'no');
     } else if (ev.type === 'propuesta_nace') {
       need.helpers = ev.helpers || []; need.proposal = ev.text || null;
       var helpers = (ev.helpers || []).map(function (id) { return slotOf.get(id); }).filter(function (slot) { return slot !== undefined; });
       var names = helpers.map(function (slot) { return people[slot].name; }).join(' y ');
+      if (ev.scripted) ev.scripted();
       note(need, [need.from].concat(helpers), 'Propuesta', ev.text || names + (helpers.length === 1 ? ' ayuda a ' : ' ayudan a ') + people[need.from].name + '. Cada persona decide si acepta.', true);
     } else if (ev.type === 'pedido_cierra') {
       need.closed = true; need.outcome = ev.outcome;
@@ -340,6 +345,7 @@
     data.people.forEach(function (person) { if (person.id === data.me) seat(person, true); });
     data.people.forEach(function (person) { seat(person, false); });
     loaded = true;
+    if (SCRIPTED) { meId = data.me; data.people.forEach(function (person) { idByName[person.name] = person.id; if (person.id === data.me) meName = person.name.split(' ')[0]; }); running = false; if (first) lobby(); return; }
     if (cleaning && data.round && data.round.status === 'en_curso') cleaning = false;
     if (cleaning) {
       since = data.lastEventId || since;
@@ -357,6 +363,85 @@
     if (!start) lobby();
     else if (!running && Date.parse(data.now) - Date.parse(start.at) > RECENT_MS) { needs.forEach(settle); summary('Resumen'); }
   }
+
+  // Con ?guion la conversación sigue un libreto fijo: tres escenas en orden, con las mismas tarjetas y arcos que una ronda real.
+  var meId = null, meName = 'Tu persona', idByName = {}, sceneAt = 0, pending = null, round = 0;
+  function idOf(name) {
+    if (idByName[name]) return idByName[name];
+    var other = null;
+    slotOf.forEach(function (slot, id) { if (id !== meId && other === null) other = id; });
+    return other;
+  }
+  function later(ms, ev) { setTimeout(function () { handle(ev); }, ms); }
+  function askParent(decision) { parent.postMessage({ montu: 'guion-pide', decision: decision }, location.origin); }
+  function sceneOf(topic, id) { later(0, { type: 'ronda_empieza', round: id }); return { from: meId, topic: topic }; }
+  function closing(ms, base, id, outcome, extra) {
+    later(ms, Object.assign({ type: 'pedido_cierra', outcome: outcome }, base, extra || {}));
+    later(ms + 50, { type: 'ronda_termina', round: id });
+  }
+  function playQuestion(text) {
+    var id = 'g' + ++round, base = Object.assign(sceneOf(text, id), { ask: true }), t = 5200;
+    later(20, Object.assign({ type: 'pedido_busca' }, base));
+    ['Robert', 'AMG', 'natochi'].forEach(function (name) {
+      later(t, Object.assign({ type: 'hilo_abre', to: idOf(name), text: text }, base));
+      later(t + 100, Object.assign({ type: 'hilo_responde', to: idOf(name), help: 'no', text: 'No tiene nada sobre eso.' }, base));
+      t += 200;
+    });
+    later(t, Object.assign({ type: 'hilo_abre', to: idOf('Matías Berríos'), text: text }, base));
+    later(t + 100, Object.assign({ type: 'hilo_responde', to: idOf('Matías Berríos'), help: 'si', text: 'Sí, Matías está construyendo el login con Google de la app de Vita. Ya funciona el inicio de sesión y le falta el cierre de sesión, que termina esta semana.' }, base));
+    later(t + 200, Object.assign({ type: 'paso', tool: 'tablero.responder', by: meId, state: 'inicio', answers: 1 }, base));
+    later(t + 2600, Object.assign({ type: 'paso', tool: 'tablero.responder', by: meId, state: 'fin', answers: 1 }, base));
+    closing(t + 2700, base, id, 'respuesta', { helpers: [idOf('Matías Berríos')], text: 'Sí, Matías Berríos está construyendo el login con Google de la app de Vita. El inicio de sesión ya funciona y le falta el cierre de sesión, que termina esta semana.' });
+  }
+  function playNeed(plot) {
+    var id = 'g' + ++round, base = sceneOf(plot.topic, id), t = 4200;
+    later(20, Object.assign({ type: 'pedido_busca' }, base));
+    later(t, Object.assign({ type: 'paso', tool: 'equipo.consultar', by: meId, state: 'inicio', people: 4 }, base));
+    if (plot.agendas) later(t + 50, Object.assign({ type: 'paso', tool: 'agenda.cruzar', by: meId, state: 'inicio', agendas: 4 }, base));
+    t += 3200;
+    later(t, Object.assign({ type: 'paso', tool: 'equipo.consultar', by: meId, state: 'fin', people: 4, chosen: plot.contacts.length }, base));
+    if (plot.agendas) later(t + 50, Object.assign({ type: 'paso', tool: 'agenda.cruzar', by: meId, state: 'fin', agendas: 4 }, base));
+    plot.contacts.forEach(function (contact, position) {
+      var to = idOf(contact.name), start = t + 200 + position * 150;
+      later(start, Object.assign({ type: 'hilo_abre', to: to, text: contact.ask.split('{yo}').join(meName) }, base));
+      later(start + 60, Object.assign({ type: 'paso', tool: 'checkin.consultar', by: to, state: 'inicio' }, base));
+      later(start + 2600, Object.assign({ type: 'paso', tool: 'checkin.consultar', by: to, state: 'fin' }, base));
+      later(start + 2700, Object.assign({ type: 'hilo_responde', to: to, help: contact.help, text: contact.reply.split('{yo}').join(meName) }, base));
+    });
+    t += 3400 + plot.contacts.length * 150;
+    later(t, Object.assign({ type: 'paso', tool: 'propuesta.redactar', by: meId, state: 'inicio', willing: plot.helpers.length }, base));
+    later(t + 2400, Object.assign({ type: 'paso', tool: 'propuesta.redactar', by: meId, state: 'fin' }, base));
+    var proposal = plot.proposal.split('{yo}').join(meName);
+    later(t + 2500, Object.assign({ type: 'propuesta_nace', helpers: plot.helpers.map(idOf), text: proposal, scripted: function () { askParent({ id: 'acepta', text: 'Tu agente encontró ayuda.\n\n' + proposal, options: ['Aceptar', 'Ahora no'] }); } }, base));
+    closing(t + 2600, base, id, 'propuesta');
+  }
+  var PLOTS = [
+    null,
+    {
+      topic: 'Que alguien tome la reunión de ventas de mañana a las 11', agendas: true, helpers: ['AMG'],
+      contacts: [{ name: 'AMG', help: 'si', ask: '{yo} necesita a alguien que tome mañana a las 11 la reunión de ventas con un cliente nuevo. Te escribo a ti porque llevas las ventas y las demostraciones a clientes: ¿puedes tomarla?', reply: 'Mañana a las 11 lo tiene libre: solo está ocupado de 9 a 10 y de 15 a 16. Ventas con clientes nuevos es lo suyo, así que puede tomarla.' }],
+      proposal: 'AMG toma mañana a las 11 la reunión de ventas con el cliente nuevo. AMG todavía tiene que aceptarlo.'
+    },
+    {
+      topic: 'Migración de un cliente nuevo: traspaso de los planes activos', agendas: false, helpers: ['natochi'],
+      contacts: [
+        { name: 'natochi', help: 'si', ask: '{yo} está con un bloqueo en la migración de un cliente nuevo, en el traspaso de los planes activos. Te escribo a ti porque llevas las migraciones: ¿puedes ayudar a destrabarlo?', reply: 'Sí, natochi lleva las migraciones y el traspaso de planes, y hoy tiene disponibilidad. Que {yo} le cuente dónde se trabó.' },
+        { name: 'Robert', help: 'parcial', ask: '{yo} está con un bloqueo en el traspaso de los planes activos de un cliente que se migra. Te escribo porque conoces las migraciones de base de datos: ¿puedes ayudar con la parte de los datos?', reply: 'Robert puede orientar con la parte de los datos, pero esta semana no puede hacerse cargo del traspaso.' }
+      ],
+      proposal: 'natochi ayuda a {yo} con el traspaso de los planes activos. {yo} le cuenta dónde se trabó y lo ven hoy.'
+    }
+  ];
+  if (SCRIPTED) addEventListener('message', function (event) {
+    var data = event.data;
+    if (event.origin !== location.origin || !data || data.montu !== 'guion' || meId === null) return;
+    if (data.dice) {
+      var plot = PLOTS[sceneAt % PLOTS.length];
+      sceneAt += 1;
+      if (!plot) { pending = null; playQuestion(data.dice); return; }
+      pending = plot;
+      setTimeout(function () { askParent({ id: 'permiso', text: '¿Le pido ayuda a tu equipo con «' + plot.topic + '»? Si dices que sí, los agentes de tu equipo van a saber que tienes ese pedido.', options: ['Permitir', 'No contar'] }); }, 1400);
+    } else if (data.elige === 'permiso' && data.opcion === '0' && pending) { var chosen = pending; pending = null; playNeed(chosen); }
+  });
 
   var pace = function () { return running || Date.now() < urgentUntil ? RUNNING_MS : IDLE_MS; };
 

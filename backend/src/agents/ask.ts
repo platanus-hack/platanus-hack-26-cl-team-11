@@ -85,6 +85,9 @@ export const assemblePrompt = (question: string, contributions: Contribution[]) 
 
 const hasSomethingToTell = (responder: Omit<Responder, 'id'>) => responder.card.statements.length > 0 || responder.card.expertise.length > 0 || responder.files.length > 0;
 
+const NOTHING_TO_TELL = 'No tiene nada sobre eso.';
+const ASSEMBLE_STEP = 'tablero.responder';
+
 export function respondersOf(deps: CardDeps, post: BoardPost, now: Date): Responder[] {
   return deps.teams
     .membersOf(post.teamId)
@@ -118,6 +121,8 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
     deps.onEvent?.('pedido_busca', scene);
 
     const results = await inBatches(responders, RESPONDERS_IN_PARALLEL, async (responder) => {
+      const arc = { ...scene, thread: threadOf(responder), to: publicIdOf(responder.card.token) };
+      deps.onEvent?.('hilo_abre', { ...arc, text: post.text });
       const reply = await deps.model.decide({
         system: systemFor(responder.card.name),
         prompt: answerPrompt(responder, post.authorName, post.text),
@@ -127,10 +132,8 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
       if (!isKnowledgeLevel(knows)) throw new AgentModelError(MODEL_FAILURE.incomplete);
       const answer = reply.answer.trim().slice(0, MAX_TEXT_LENGTH);
       const told = knows === 'no' || !answer ? null : answer;
+      deps.onEvent?.('hilo_responde', { ...arc, help: told === null ? 'no' : knows, text: told ?? NOTHING_TO_TELL });
       if (told === null) return;
-      const arc = { ...scene, thread: threadOf(responder), to: publicIdOf(responder.card.token) };
-      deps.onEvent?.('hilo_abre', { ...arc, text: post.text });
-      deps.onEvent?.('hilo_responde', { ...arc, help: knows, text: told });
       deps.board.addReply({ postId: post.id, authorToken: responder.card.token, text: answer, tellable: true, byAgent: true });
       contributions.push({ id: responder.id, token: responder.card.token, name: responder.card.name, knows, answer });
     });
@@ -145,7 +148,9 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
     }
 
     const ordered = [...contributions].sort((a, b) => a.id.localeCompare(b.id, 'es', { numeric: true }));
+    deps.onEvent?.('paso', { ...scene, tool: ASSEMBLE_STEP, by: from, state: 'inicio', answers: ordered.length });
     const assembled = await deps.model.decide({ system: systemFor(post.authorName), prompt: assemblePrompt(post.text, ordered), schema: AssembledAnswer });
+    deps.onEvent?.('paso', { ...scene, tool: ASSEMBLE_STEP, by: from, state: 'fin', answers: ordered.length });
     const text = assembled.answer.trim().slice(0, MAX_ANSWER_LENGTH);
     if (!text) throw new AgentModelError(MODEL_FAILURE.incomplete);
     const byId = new Map(ordered.map((contribution) => [contribution.id, contribution.token]));
