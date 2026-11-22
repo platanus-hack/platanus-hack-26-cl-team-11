@@ -4,7 +4,11 @@ Para la presentación de `montu.fun/deck`. Lo que va entre corchetes no se dice.
 
 ## Láminas (0:00 a 1:00)
 
-**1 · Portada (15 s)**
+**0 · Montu**
+
+[El logo y el nombre, sin decir nada, mientras te presentan. Clic para partir.]
+
+**1 · El gancho (15 s)**
 
 En las últimas 36 horas, cada equipo de esta hack tuvo en promedio siete mil cuatrocientas ocho conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que entre ustedes, persona a persona, no llegaron ni a la mitad. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
 

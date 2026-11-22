@@ -169,6 +169,7 @@
 
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
   var flood = document.querySelector('.pb-flood');
+  var intro = document.querySelector('.pb-intro');
   var scale = slides.indexOf(document.querySelector('.pb-scale'));
   var current = -1;
   var stepAt = 1;
@@ -189,7 +190,7 @@
     stepAt = step;
     slides[index].dataset.k = String(step);
     faces.forEach(function (entry) { if (entry.slide === slides[index]) entry.face.set(step >= 2 ? entry.after : entry.before); });
-    if (index === 0 && entering && step === 1) {
+    if (slides[index] === intro && entering && step === 1) {
       byId('hook').dataset.value = '0';
       countTo(HOOK, still, byId('hook'));
     }
