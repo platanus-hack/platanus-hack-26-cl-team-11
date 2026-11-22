@@ -12,6 +12,7 @@ export function GlobeChat({ token }: { token: string }) {
   const seenBefore = useRef<Set<string> | null>(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [answered, setAnswered] = useState<ReadonlySet<string>>(new Set());
   const { busy, error, run } = useAction();
 
   const show = useCallback((next: ChatView) => {
@@ -22,7 +23,13 @@ export function GlobeChat({ token }: { token: string }) {
   usePolling(load, REFRESH_MS);
 
   const fresh = (view?.messages ?? []).filter((message) => message.role === 'agente' && !seenBefore.current?.has(message.key));
-  const heard = fresh.filter((message, position) => message.options.length > 0 || position === fresh.length - 1);
+  const promptOf = (message: ChatView['messages'][number]) => message.options[0]?.id.split(':')[0];
+  const latestOfPrompt = new Map(fresh.flatMap((message) => (promptOf(message) ? [[promptOf(message) as string, message.key] as const] : [])));
+  const waits = (message: ChatView['messages'][number]) => {
+    const prompt = promptOf(message);
+    return prompt !== undefined && !answered.has(prompt) && latestOfPrompt.get(prompt) === message.key;
+  };
+  const heard = fresh.filter((message, position) => waits(message) || (position === fresh.length - 1 && message.options.length === 0));
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -52,7 +59,10 @@ export function GlobeChat({ token }: { token: string }) {
                   type="button"
                   className={`rd-button rd-button--small${position === 0 ? '' : ' rd-button--quiet'}`}
                   disabled={busy}
-                  onClick={() => void run(async () => show(await answerChat(token, option.id)))}
+                  onClick={() => {
+                    setAnswered((before) => new Set([...before, option.id.split(':')[0] ?? '']));
+                    void run(async () => show(await answerChat(token, option.id)));
+                  }}
                 >
                   {option.label}
                 </button>

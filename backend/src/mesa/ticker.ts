@@ -18,13 +18,14 @@ export function mesaTokensLastDay(ctx: AppContext, now: Date): number {
   return spent.inputTokens + spent.outputTokens;
 }
 
-export function startMesaRound(ctx: AppContext, model: AgentModel, startedBy: string | null, now: Date = new Date()): { round: Round; done: Promise<void> } | null {
+export function startMesaRound(ctx: AppContext, model: AgentModel, startedBy: string | null, now: Date = new Date(), onlyRequester?: string): { round: Round; done: Promise<void> } | null {
   const fingerprint = activityFingerprint(ctx, now);
   const round = ctx.agents.startRound(MESA_TEAM_ID, startedBy);
   if (!round) return null;
   ctx.mesa.saveFingerprint(fingerprint);
   ctx.mesaLive.clear();
-  return { round, done: runRound(mesaRoundDeps(ctx, model), round, now) };
+  const deps = mesaRoundDeps(ctx, model);
+  return { round, done: runRound(onlyRequester === undefined ? deps : { ...deps, onlyRequester, chatter: undefined }, round, now) };
 }
 
 export function runMesaTick(ctx: AppContext, now: Date = new Date()): { outcome: MesaTick; done?: Promise<void> } {

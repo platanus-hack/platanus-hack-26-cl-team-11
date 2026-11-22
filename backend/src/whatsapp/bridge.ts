@@ -206,7 +206,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
   let waitingTimer: ReturnType<typeof setInterval> | null = null;
 
   const beginMesaRound = (model: AgentModel, personToken: string): boolean => {
-    const mesaRound = startMesaRound(ctx, model, personToken);
+    const mesaRound = startMesaRound(ctx, model, personToken, new Date(), personToken);
     if (mesaRound) void mesaRound.done.catch((failure: unknown) => console.error('La ronda de la mesa pública falló.', failure));
     return mesaRound !== null;
   };
@@ -231,6 +231,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     const { model } = ctx;
     if (!model) return false;
     if (inMesa(personToken)) {
+      if (!hasOpenNeed(personToken)) return false;
       if (beginMesaRound(model, personToken)) return true;
       waiting.add(personToken);
       if (!waitingTimer) {

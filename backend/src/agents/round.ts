@@ -49,6 +49,7 @@ export interface RoundDeps {
   onEvent?: (teamId: string, type: RoomEventType, payload: JsonObject) => void;
   onProposal?: (proposal: Proposal) => void;
   maxNeeds?: number;
+  onlyRequester?: string;
   cardFilter?: (card: AgentCard) => boolean;
   chatter?: number;
   onStream?: (teamId: string, text: LiveText) => void;
@@ -233,7 +234,7 @@ function chatterOf(cards: AgentCard[], limit: number): OpenNeed[] {
   });
 }
 
-export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter' | 'chatter'>, teamId: string, now: Date, firstRequester: string | null = null): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
+export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies' | 'agents' | 'repo' | 'digests' | 'maxNeeds' | 'cardFilter' | 'chatter' | 'onlyRequester'>, teamId: string, now: Date, firstRequester: string | null = null): { cards: AgentCard[]; openNeeds: OpenNeed[] } {
   const cards = deps.teams
     .membersOf(teamId)
     .map((member) => cardFor(deps, member, now))
@@ -244,7 +245,8 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
     return requester.needs.filter((need) => !active.has(topicKeyOf(need.topic))).map((need) => ({ requester, need }));
   });
   const goesFirst = (open: OpenNeed) => open.requester.token === firstRequester;
-  const openNeeds = [...everyNeed.filter(goesFirst), ...everyNeed.filter((open) => !goesFirst(open))].slice(0, deps.maxNeeds ?? MAX_NEEDS_PER_ROUND);
+  const wanted = deps.onlyRequester === undefined ? everyNeed : everyNeed.filter((open) => open.requester.token === deps.onlyRequester);
+  const openNeeds = [...wanted.filter(goesFirst), ...wanted.filter((open) => !goesFirst(open))].slice(0, deps.maxNeeds ?? MAX_NEEDS_PER_ROUND);
   if (openNeeds.length === 0 && deps.chatter && cards.length >= MIN_TEAM_SIZE) return { cards, openNeeds: chatterOf(cards, deps.chatter) };
   return { cards, openNeeds };
 }
