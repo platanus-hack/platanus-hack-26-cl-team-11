@@ -7,7 +7,6 @@
   var pairsOf = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
-  var IDEAS = ['¿Alguien del equipo ya está trabajando en el login con Google?', 'Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.'];
   var HOOK = 7408;
   var BANANAS = 3454;
   var SIZES = [5, 10, 25, 100, 300];
@@ -303,7 +302,7 @@
 
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
-  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario' + IDEAS.map(function (idea) { return '&idea=' + encodeURIComponent(idea); }).join('') + '#globo' : '/';
+  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);

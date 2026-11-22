@@ -13,7 +13,7 @@
   if (source.indexOf('/api/people/') !== 0 || !LIVE) return;
 
   var RUNNING_MS = 350, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
-  var GAP = 0.4, HOLD = 2.4, TILES = 64, MAX_STRIDE = 4, LOBBY_ROWS = 8, EXPECTED_STEP = 4, SHORTEST_STEP = 1.2, TILE_PX = 120;
+  var GAP = 0.4, HOLD = 2.4, TYPE_RATE = 40, READ_RATE = 55, READ_BASE = 1.6, LONGEST_READ = 8, SCAN_STEP = 2.6, TILES = 64, MAX_STRIDE = 4, LOBBY_ROWS = 8, EXPECTED_STEP = 4, SHORTEST_STEP = 1.2, TILE_PX = 120;
   var BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   var HELP = { si: 'Puede ayudar.', parcial: 'Puede orientar.', no: 'No puede esta vez.' };
   var ROLE = { si: 'Puede ayudar', parcial: 'Puede orientar', no: 'No puede' };
@@ -86,7 +86,7 @@
   }
 
   function reset() {
-    needs = []; byKey = new Map(); finished = null; summarized = false; showing = null;
+    needs = []; byKey = new Map(); finished = null; summarized = false; showing = null; LIVE.scan = null;
     SHOWN.length = 0; SCRIPTS.length = 0; SCENES.length = 1;
     idle(1, 'Conversando', 'Los agentes leen lo que cada persona publicó');
   }
@@ -135,17 +135,35 @@
     heading(need);
     push(need.ask ? pairRow([need.from], agentOf(need.from) + ' le pregunta a cada agente', 'Cada uno responde con lo que su persona comparte') : pairRow([need.from], agentOf(need.from) + ' busca a quién escribirle', 'Revisa lo que publicó cada persona'));
     need.lastEnd = clock + 0.8; need.next = clock + 1.1;
+    need.scanned = 0; need.scanAt = clock + 0.6;
+    LIVE.scan = { from: need.from, to: null, at: clock };
+  }
+
+  // Mientras el agente todavía no conversa con nadie, recorre la mesa: una persona a la vez y después todas.
+  function scan(need) {
+    if (need.started || need.closed) { LIVE.scan = null; return; }
+    if (clock < need.scanAt) return;
+    var others = [];
+    slotOf.forEach(function (slot) { if (slot !== need.from) others.push(slot); });
+    others.sort(function (a, b) { return a - b; });
+    need.scanAt = clock + SCAN_STEP;
+    if (need.scanned >= others.length) { if (LIVE.scan.to !== null) { LIVE.scan = { from: need.from, to: null, at: clock }; turnTo([need.from].concat(others)); } return; }
+    var other = others[need.scanned++];
+    LIVE.scan = { from: need.from, to: other, at: clock };
+    turnTo([need.from, other]);
+    push(pairRow([other], people[other].name, need.ask ? 'Su agente revisa si sabe algo' : 'Su agente revisa si puede ayudar'));
   }
 
   function say(need, from, to, text) {
-    var at = Math.max(clock, need.next), end = at + Math.min(4.5, 1.3 + text.length / 60);
+    var at = Math.max(clock, need.next), end = at + 1 + text.length / TYPE_RATE, read = Math.min(LONGEST_READ, READ_BASE + text.length / READ_RATE);
     need.script.events.push({ type: 'message', from: from, to: to, at: at, end: end, text: text });
-    need.lastEnd = end; need.next = end + GAP;
+    need.lastEnd = end + read; need.next = end + read;
   }
 
   function note(need, faces, title, sub, check) {
     push(pairRow(faces, title, sub, check));
-    need.lastEnd = clock + 0.7; need.next = clock + 0.9;
+    var read = Math.min(LONGEST_READ, READ_BASE + (sub || '').length / READ_RATE);
+    need.lastEnd = clock + read; need.next = clock + read;
   }
 
   // La cara de una persona real, recortada del atlas, para la ilustración de una tarjeta.
@@ -222,12 +240,14 @@
     if (!live) return false;
     live.text = text; live.done = true; live.ev.end = clock + 0.5;
     delete need.live[id];
-    need.lastEnd = clock + 1.2; need.next = clock + 0.3;
+    var read = Math.min(LONGEST_READ, READ_BASE + text.length / READ_RATE);
+    need.lastEnd = clock + read; need.next = clock + read;
     return true;
   }
 
   function play(need, ev) {
     var other = slotOf.get(ev.to);
+    need.started = true; LIVE.scan = null;
     if (ev.type === 'paso') return step(need, ev);
     if (ev.type === 'hilo_abre' && other !== undefined) {
       if (need.g.members.indexOf(other) < 0) { need.g.members.push(other); heading(need); turnTo(need.g.members); }
@@ -254,6 +274,7 @@
   // Un pedido a la vez: sus pasos entran al hilo en orden, cada uno cuando el anterior terminó de escribirse.
   LIVE.tick = function () {
     if (showing) {
+      scan(showing);
       // Un paso entra apenas llega, para que su tarjeta quede antes del mensaje que sale de él.
       while (showing.queue.length && (clock >= showing.next || showing.queue[0].type === 'paso')) play(showing, showing.queue.shift());
       // Un paso que sigue esperando al modelo se queda «consultando»: su final se corre mientras no llegue la respuesta.
@@ -262,7 +283,10 @@
       Object.keys(showing.live).forEach(function (id) { var live = showing.live[id]; if (clock > live.ev.end - 0.4) live.ev.end = clock + 1.2; });
       var over = (showing.closed || finished) && !showing.queue.length && clock > showing.lastEnd + HOLD;
       if (!over) return;
-      showing.done = true; showing = null;
+      showing.done = true; LIVE.scan = null;
+      // El último pedido de la ronda se queda en pantalla, con toda su conversación, hasta que empiece otra.
+      if (finished && !needs.some(function (need) { return !need.done; })) { showing = null; summarized = true; LIVE.step = 2; setSteps(); releaseAt = clock + SETTLE; return; }
+      showing = null;
     }
     var next = needs.filter(function (need) { return !need.done; })[0];
     if (next) show(next);

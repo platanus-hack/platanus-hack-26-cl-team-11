@@ -8,12 +8,14 @@ import { hasPublished, isMesaOperator, mesaCardDeps } from '../mesa/members.js';
 import { isGlobeMode, MESA_TEAM_ID } from '../mesa/store.js';
 import { mesaDailyCapOf, mesaTokensLastDay } from '../mesa/ticker.js';
 import { oncePerDatabase } from '../pg/database.js';
+import { clearTired, tiredDrafts } from '../tired.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_AN_OPERATOR = { error: 'Solo el equipo de Montu entra al panel.' } as const;
 const INVALID_MODE = { error: 'El globo va «mesa» (en vivo) o «demo».' } as const;
 const ROUND_NOT_FOUND = { error: 'Esa ronda no existe.' } as const;
 const INVALID_MEMBERSHIP = { error: 'Falta decir si la persona queda en la mesa.' } as const;
+const INVALID_TIRED = { error: 'Falta decir si el equipo queda cansado.' } as const;
 const RECENT_ROUNDS = 40;
 
 const loginsOf = oncePerDatabase(openLoginStore);
@@ -89,6 +91,19 @@ export function adminRoutes(ctx: AppContext) {
     if (!person) return c.json(NOT_FOUND, 404);
     mesa.setLeft(person.token, !member);
     return c.json({ id: publicIdOf(person.token), name: person.name, member: !mesa.hasLeft(person.token) });
+  });
+
+  routes.put('/admin/:token/tired', async (c) => {
+    const found = operatorOf(c.req.param('token'));
+    if ('error' in found) return c.json(found.error, found.status);
+    const tired = asObject(await c.req.text()).tired;
+    if (typeof tired !== 'boolean') return c.json(INVALID_TIRED, 400);
+    const cleared = clearTired(ctx.db);
+    if (!tired) return c.json({ tired, people: 0, cleared });
+    const now = new Date();
+    const people = store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token) && !mesa.hasLeft(person.token));
+    people.forEach((person, position) => tiredDrafts(position, now).forEach((draft) => store.saveEvent(person.token, draft)));
+    return c.json({ tired, people: people.length, cleared });
   });
 
   routes.get('/admin/:token/rounds/:roundId', (c) => {

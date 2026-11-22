@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
 import { createContext } from '../src/context.js';
 import { seedDemo } from '../src/seed.js';
+import { deriveSignals } from '../src/signals.js';
+import { deriveSummary } from '../src/summary.js';
 
 const send = (method: string, body: unknown) => ({ method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
@@ -62,4 +64,23 @@ test('an operator takes a person out of the mesa and brings them back', async ()
   assert.equal(((await back.json()) as { member: boolean }).member, true);
   assert.equal((await app.request(`/api/admin/${token}/people/nadie/membership`, send('PUT', { member: false }))).status, 404);
   assert.equal((await app.request(`/api/admin/${token}/people/${other.id}/membership`, send('PUT', {}))).status, 400);
+});
+
+test('an operator leaves the whole mesa tired for the demo and undoes it', async () => {
+  const { ctx, app, token } = setup();
+  const loaded = await app.request(`/api/admin/${token}/tired`, send('PUT', { tired: true }));
+  assert.equal(loaded.status, 200);
+  const now = new Date();
+  const events = ctx.store.listSignalEvents(token, now);
+  const signals = deriveSignals(events, now);
+  const summary = deriveSummary(events, signals, now);
+  assert.equal(signals.energy.level, 'baja');
+  assert.equal(signals.load.level, 'alta');
+  assert.ok((summary.sleep.lastHours ?? 9) < 5);
+  assert.ok((summary.move.steps ?? 9000) < 3000);
+
+  await app.request(`/api/admin/${token}/tired`, send('PUT', { tired: true }));
+  const undone = (await (await app.request(`/api/admin/${token}/tired`, send('PUT', { tired: false }))).json()) as { cleared: number };
+  assert.equal(undone.cleared, 9 * ctx.store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token)).length);
+  assert.equal((await app.request(`/api/admin/${token}/tired`, send('PUT', {}))).status, 400);
 });
