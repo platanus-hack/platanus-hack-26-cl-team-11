@@ -9,6 +9,7 @@
 
   var HOOK = 7408;
   var BANANAS = 3454;
+  var BANK_DRIFT = 0.04;
   var SIZES = [5, 10, 25, 100, 300];
   var SMALL = SIZES[0];
   var GOLDEN_ANGLE = 2.39996323;
@@ -114,17 +115,15 @@
       };
       requestAnimationFrame(frame);
     };
-    var jumps = 0;
-    var jump = function () {
+    var drift = function () {
       if (run !== banking) return;
-      var up = jumps++ === 0 || (shown < 60000 && Math.random() < 0.62);
-      var factor = jumps === 1 ? 40 + Math.random() * 40 : up ? (Math.random() < 0.18 ? 3 + Math.random() * 6 : 1.25 + Math.random()) : 0.45 + Math.random() * 0.4;
-      var to = Math.max(3, Math.round(shown * factor));
+      var pull = (BANANAS - shown) / BANANAS;
+      var change = (Math.random() - 0.5 + pull) * BANK_DRIFT;
+      var to = Math.max(1, Math.round(shown * (1 + change)));
       move.textContent = (to >= shown ? '▲ ' : '▼ ') + format(Math.abs(to - shown));
-      glide(to, 260 + Math.random() * 320, function () { setTimeout(jump, 350 + Math.random() * 900); });
+      glide(to, 700 + Math.random() * 500, function () { setTimeout(drift, 900 + Math.random() * 900); });
     };
-    move.textContent = '▼ ' + format(BANANAS - 41);
-    setTimeout(function () { glide(41, 1400, function () { setTimeout(jump, 900); }); }, 500);
+    setTimeout(drift, 700);
   }
 
   var counting = 0;
@@ -331,6 +330,9 @@
   slides.forEach(function (slide) { slide.dataset.k = '1'; });
   var flood = document.querySelector('.pb-flood');
   var closing = document.querySelector('.pb-try');
+  var logo = document.querySelector('.pb-logo');
+  var logoScene = null;
+  var LOGO_FACES = ['mati', 'ian', 'lian', 'andres'];
   var platformUrl = '/';
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
@@ -389,6 +391,8 @@
     }
     if (slides[index] === intro && step === 2 && !still) { if (!bankOn) { bankOn = true; startBank(); } } else if (bankOn) { bankOn = false; stopBank(); }
     if (slides[index] === flood && entering) startPile();
+    if (entering && slides[index] === logo && !logoScene) logoScene = window.RondaEntrada.mount(byId('logo-escena'), { names: LOGO_FACES, still: still });
+    if (entering && slides[index] !== logo && logoScene) { logoScene.destroy(); logoScene = null; byId('logo-escena').replaceChildren(); }
     if (entering && slides[index] !== closing) stopQr();
     if (entering && slides[index] === closing) {
       joinUrl = joinUrl || findJoinUrl();

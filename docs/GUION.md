@@ -10,7 +10,7 @@ Para la presentación de `montu.fun/deck`. Lo que va entre corchetes no se dice.
 
 **1 · El gancho (15 s)**
 
-En las últimas 36 horas, cada equipo de esta hack tuvo en promedio siete mil cuatrocientas ocho conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que entre ustedes, persona a persona, no llegaron ni a la mitad. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
+En las últimas 36 horas, cada persona de esta hack tuvo en promedio [el número de la lámina] conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que ustedes no llegaron ni al 1% de esas conversaciones. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
 
 [El 7.408 es el promedio por equipo del ranking de tokens de la hack. Actualizarlo el domingo antes de presentar: está escrito en `design/pitch/index.html` y en `HOOK` de `design/pitch/deck.js`.]
 
@@ -24,7 +24,7 @@ Y ahora trabajamos con agentes. Cada persona hace más cosas a la vez, y sus age
 
 **4 · El problema (5 s)**
 
-Tener todas esas conversaciones es inabordable. Y se nota en tres cosas.
+Tener todas esas conversaciones es inabordable. [clic: «es» se tacha y queda «era»] Era inabordable. Eso hace Montu. Y se nota en tres cosas.
 
 **5 · Eficiencia (9 s)**
 
