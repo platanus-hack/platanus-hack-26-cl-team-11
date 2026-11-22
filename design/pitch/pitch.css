@@ -1,0 +1,141 @@
+/*
+ * Montu · la presentación (design/pitch/). Página de prueba (AGENTS.md regla 5).
+ * Una idea por lámina, una frase en tinta de no más de siete palabras, legible desde el fondo.
+ * Se arma sobre ../tokens.css, ../ronda.css y ../contexto/contexto.css (marco cx-r: radios 28/16/12/6, tecla, decisión).
+ * Lo único propio es el tamaño de lámina: el titular crece hasta 104 px para leerse desde el fondo de la sala.
+ */
+.pt { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+.pt { --pt-gutter: 16px; }
+@media (min-width: 900px) { .pt { --pt-gutter: var(--rd-space-11); } }
+.pt .rd-page__inner { position: relative; height: 100%; padding-bottom: 0; display: flex; flex-direction: column; box-sizing: border-box; }
+.pt-deck { position: relative; flex: 1 1 auto; min-height: 0; }
+
+.pt-slide { position: absolute; inset: 0; display: flex; flex-direction: column; gap: clamp(20px, 3.4vh, 40px); padding: clamp(12px, 3vh, 36px) 0 96px; opacity: 0; visibility: hidden; transition: opacity 0.45s var(--ease), visibility 0s 0.45s; }
+.pt-slide { will-change: opacity; }
+.pt-slide[data-on] { opacity: 1; visibility: visible; transition: opacity 0.45s var(--ease), visibility 0s; }
+
+.pt-title { margin: 0; font-size: clamp(40px, 6.4vw, 104px); font-weight: var(--rd-weight); letter-spacing: -0.045em; line-height: 1.02; color: var(--rd-ink); }
+.pt-title .cx-roll__item { white-space: normal; }
+.pt-sub { margin: 0; font-size: clamp(17px, 1.6vw, 24px); color: var(--rd-muted); line-height: 1.35; max-width: 46ch; }
+.pt-body { flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; gap: var(--rd-space-6); }
+
+/* ---------- 1. Portada: la esfera de la entrada ---------- */
+.pt-cover { justify-content: center; }
+.pt-cover__grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--rd-space-6); }
+.pt-cover__text { display: flex; flex-direction: column; gap: 20px; }
+.pt-cover__brand { margin: 0; display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: var(--rd-weight); }
+.pt-cover__brand img { width: 48px; height: 48px; }
+.pt-cover__sphere.rd-entrada { --rd-entrada-cara: 112px; --rd-entrada-corte: 6px; width: min(46vw, 70vh, 720px); }
+.pt-face { display: block; width: var(--size, 120px); height: var(--size, 120px); }
+
+/* ---------- 2. Cada uno con su agente ---------- */
+.pt-silos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rd-space-4); flex: 1 1 auto; align-content: center; }
+.pt-silo { display: flex; flex-direction: row; align-items: center; gap: var(--rd-space-4); padding: 22px 24px; transition: opacity 0.5s var(--ease), filter 0.5s var(--ease); }
+.pt-silo .rd-person { flex: 1 1 auto; min-width: 0; }
+.pt-silo__agent { display: flex; align-items: center; gap: 10px; }
+.pt-dots { display: inline-flex; gap: 4px; width: 30px; justify-content: center; }
+.pt-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rd-muted); opacity: 0.35; animation: pt-dot 1.2s ease-in-out infinite; }
+.pt-dots i:nth-child(2) { animation-delay: 0.16s; }
+.pt-dots i:nth-child(3) { animation-delay: 0.32s; }
+@keyframes pt-dot { 40% { opacity: 1; transform: translateY(-3px); } }
+.pt-alone .pt-silo { filter: saturate(0.6); }
+.pt-hard .pt-silo__agent { opacity: 0; }
+.pt-silo__agent { transition: opacity 0.5s var(--ease); }
+.pt-alone .pt-dots i { animation-play-state: paused; }
+.pt-silos-foot { display: flex; align-items: baseline; gap: 14px; }
+.pt-silos-foot .rd-note { font-size: 17px; }
+
+/* ---------- Contexto ---------- */
+.pt-context { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--rd-space-6); align-items: center; flex: 1 1 auto; }
+.pt-context__apps { padding: 24px; overflow: hidden; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 20px; }
+.pt-src { will-change: transform; display: flex; flex-direction: column; align-items: center; gap: 12px; opacity: 0.28; filter: grayscale(1); transform: scale(0.94); transition: opacity 0.4s var(--ease), filter 0.4s var(--ease), transform 0.5s var(--ease); }
+.pt-src[data-sent] { opacity: 1; filter: none; transform: none; }
+.pt-context__agent { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 36px; }
+.pt-context__agent .pt-face { margin-bottom: 14px; }
+.pt-context__say { font-size: clamp(28px, 2.6vw, 40px); font-weight: var(--rd-weight); letter-spacing: -0.03em; line-height: 1.1; }
+
+/* ---------- 3. El número ---------- */
+.pt-growth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--rd-space-6); flex: 1 1 auto; }
+.pt-growth__nums { display: flex; flex-direction: column; justify-content: center; gap: 28px; padding: 32px 36px; }
+.pt-stat { display: flex; flex-direction: column; gap: 6px; }
+.pt-stat .cx-num { font-size: clamp(56px, 7vw, 112px); }
+.pt-stat--small .cx-num { font-size: clamp(40px, 4.2vw, 64px); }
+.pt-bars { --tint: var(--rd-g2); display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 36px; }
+.pt-bar { display: grid; grid-template-columns: 64px minmax(0, 1fr) 96px; align-items: center; gap: 14px; font-size: 17px; }
+.pt-bar__who { color: var(--rd-muted); text-align: right; font-variant-numeric: tabular-nums; }
+.pt-bar__track { height: 26px; border-radius: var(--mark); background: var(--soft); overflow: hidden; }
+.pt-bar__fill { display: block; height: 100%; width: 0; min-width: 4px; border-radius: var(--mark); background: var(--tint); box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--tint) 70%, var(--rd-ink)); transition: width 0.9s var(--ease), opacity 0.4s ease; opacity: 0.25; }
+.pt-bar[data-on] .pt-bar__fill { opacity: 1; }
+.pt-bar__n { font-family: var(--rd-font-num); font-weight: var(--rd-weight); font-variant-numeric: tabular-nums; opacity: 0.3; transition: opacity 0.4s ease; }
+.pt-bar[data-on] .pt-bar__n { opacity: 1; }
+
+/* ---------- 4. El globo ---------- */
+.pt-globe { position: relative; flex: 1 1 auto; padding: 0; overflow: hidden; }
+.pt-globe iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+.pt-globe__head { position: absolute; left: 32px; top: 28px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.pt-globe__head .cx-num { font-size: clamp(56px, 6vw, 88px); }
+
+/* ---------- 5. Permiso ---------- */
+.pt-ask { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--rd-space-6); flex: 1 1 auto; align-items: center; }
+.pt-ask__stage { padding: 24px; overflow: hidden; }
+.pt-ask .cx-decision { margin: 0; }
+.pt-ask .cx-decision__text { font-size: 24px; line-height: 1.3; }
+.pt-private { display: flex; flex-direction: column; gap: 4px; padding: 28px 32px; }
+.pt-private .rd-item__title { font-size: 19px; }
+
+/* ---------- 6. Avance ---------- */
+.pt-proof { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rd-space-4); flex: 1 1 auto; align-content: center; }
+.pt-proof .rd-card { gap: 14px; padding: 32px; justify-content: space-between; min-height: 240px; }
+.pt-proof .cx-num { font-size: clamp(64px, 7vw, 112px); }
+.pt-apps { display: flex; gap: 14px; }
+
+/* ---------- 7. QR ---------- */
+.pt-try { display: flex; gap: var(--rd-space-6); align-items: center; flex: 1 1 auto; }
+.pt-try__side { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--rd-space-6); }
+.pt-try .pt-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pt-try .pt-proof .rd-card { min-height: 0; padding: 24px 28px; }
+.pt-qr { padding: 24px; border-radius: var(--rd-radius-card); background: var(--rd-glass-solid); box-shadow: var(--rd-shadow-card); }
+.pt-qr img { display: block; width: clamp(200px, 26vh, 320px); height: auto; image-rendering: pixelated; }
+.pt-url { font-family: var(--rd-font-num); font-size: clamp(22px, 2.4vw, 34px); font-weight: var(--rd-weight); letter-spacing: -0.02em; }
+
+/* ---------- Controles ---------- */
+.pt-bar-bottom { position: absolute; left: var(--pt-gutter, 0); right: var(--pt-gutter, 0); bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: var(--rd-space-3); z-index: 3; }
+.pt-step { display: flex; align-items: center; gap: var(--rd-space-2); }
+.pt-step .rd-note { min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.pt-controls { display: flex; align-items: center; gap: var(--rd-space-2); }
+.rd-iconbutton svg { width: 18px; height: 18px; fill: currentColor; }
+.rd-iconbutton svg.pt-stroke { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.pt-notes { position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); padding: 18px 22px; border-radius: var(--block); font-size: 18px; line-height: 1.45; z-index: 5; }
+.pt-notes[hidden] { display: none; }
+.pt-video { position: fixed; inset: 0; display: grid; place-items: center; padding: 32px; background: var(--rd-glass); -webkit-backdrop-filter: blur(var(--rd-glass-blur)); backdrop-filter: blur(var(--rd-glass-blur)); z-index: 6; }
+.pt-video[hidden] { display: none; }
+.pt-video video { max-width: 100%; max-height: calc(100vh - 120px); border-radius: var(--rd-radius-card); box-shadow: var(--rd-shadow-card); }
+
+@media (max-width: 900px) {
+  .pt-silos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pt-growth, .pt-ask { grid-template-columns: minmax(0, 1fr); align-content: start; }
+  .pt-proof { grid-template-columns: minmax(0, 1fr); }
+  .pt-proof .rd-card { min-height: 0; padding: 22px; }
+  .pt .cx-nav { display: none; }
+}
+@media (max-width: 560px) {
+  .pt-slide { gap: 18px; overflow-y: auto; }
+  .pt-silos { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .pt-silo { padding: 12px 16px; }
+  .pt-growth__nums, .pt-bars, .pt-private { padding: 20px; }
+  .pt-bar { grid-template-columns: 40px minmax(0, 1fr) 72px; font-size: 14px; }
+  .pt-try { flex-direction: column; align-items: flex-start; }
+  .pt-globe__head { left: 20px; top: 18px; }
+  .pt-slide { padding-bottom: 88px; }
+  .pt-controls .cx-seg, #notes-toggle { display: none; }
+  .pt-silos-foot { display: none; }
+  .pt-silos-foot .cx-roll__item, .pt-globe__head .cx-roll__item { white-space: normal; }
+  .pt-silo .pt-dots { display: none; }
+  .pt-bar-bottom { bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-slide, .pt-slide[data-on] { transition: none; transform: none; }
+  .pt-dots i { animation: none; opacity: 0.6; }
+  .pt-bar__fill { transition: none; }
+}
