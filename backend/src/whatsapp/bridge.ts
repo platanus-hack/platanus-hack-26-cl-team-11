@@ -12,6 +12,7 @@ import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
 import { mesaCardDeps } from '../mesa/members.js';
 import { MESA_TEAM_ID } from '../mesa/store.js';
 import { startMesaRound } from '../mesa/ticker.js';
+import type { RoomEventType } from '../rooms/store.js';
 import type { JsonObject, Person } from '../types.js';
 import { digitsOf, type ReplyButton, type WhatsAppChannel } from './kapso.js';
 import { InboundReading, isIntent, readingPrompt, readingSystemFor } from './reading.js';
@@ -267,7 +268,17 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
       return null;
     }
     const post = board.createPost({ teamId: team.id, authorToken: person.token, kind: 'pregunta', text: question.slice(0, MAX_POST_LENGTH) });
-    const outcome = askTeam({ ...(team.id === MESA_TEAM_ID ? mesaCardDeps(ctx) : cardDepsFrom(ctx)), board, model: ctx.model }, post);
+    const onMesa = team.id === MESA_TEAM_ID;
+    const drawn = onMesa && ctx.agents.latestRound(MESA_TEAM_ID)?.status !== 'en_curso';
+    const outcome = askTeam(
+      {
+        ...(onMesa ? mesaCardDeps(ctx) : cardDepsFrom(ctx)),
+        board,
+        model: ctx.model,
+        ...(drawn ? { onEvent: (type: RoomEventType, payload: JsonObject) => void ctx.rooms.record(MESA_TEAM_ID, type, payload) } : {}),
+      },
+      post,
+    );
     if (outcome.state !== 'started') {
       sendTextThrough(person.token, `Tu pregunta quedó en el tablero de ${team.name}. Los agentes están ocupados; pídeles la respuesta desde tu página.`, door);
       return null;

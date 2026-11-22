@@ -1,5 +1,8 @@
 import * as z from 'zod/v4';
 import { MAX_ANSWER_LENGTH, MAX_TEXT_LENGTH, type BoardPost, type BoardStore } from '../board/store.js';
+import { publicIdOf } from '../codes.js';
+import type { RoomEventType } from '../rooms/store.js';
+import type { JsonObject } from '../types.js';
 import type { RepoFile } from '../repo/store.js';
 import type { AgentCard } from './cards.js';
 import type { CardDeps } from './deps.js';
@@ -29,7 +32,10 @@ export const AssembledAnswer = z.object({
 export interface AskDeps extends CardDeps {
   board: BoardStore;
   model: AgentModel;
+  onEvent?: (type: RoomEventType, payload: JsonObject) => void;
 }
+
+const MAX_TOPIC_LENGTH = 80;
 
 interface Responder {
   id: string;
@@ -91,10 +97,23 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
   const finish = (status: 'lista' | 'fallida', text: string | null, sourceTokens: string[], asked: number, problem: string | null) =>
     deps.board.finishAnswer(post.id, startedAt, { status, text, sourceTokens, asked, problem }, now());
   let asked = 0;
+  const from = publicIdOf(post.authorToken);
+  const topic = [...post.text].slice(0, MAX_TOPIC_LENGTH).join('');
+  const scene = { from, topic, ask: true };
+  const threadOf = (responder: Responder) => `q${post.id}-${responder.id}`;
+  let closed = false;
+  const close = (outcome: 'respuesta' | 'nadie' | 'falla', text: string | null, helpers: string[]) => {
+    if (closed) return;
+    closed = true;
+    deps.onEvent?.('pedido_cierra', { ...scene, outcome, text, helpers });
+    deps.onEvent?.('ronda_termina', { round: `q${post.id}`, status: outcome === 'falla' ? 'fallida' : 'lista', needs: 1 });
+  };
   try {
     const responders = respondersOf(deps, post, now());
     asked = responders.length;
     const contributions: Contribution[] = [];
+    deps.onEvent?.('ronda_empieza', { round: `q${post.id}` });
+    deps.onEvent?.('pedido_busca', scene);
 
     const results = await inBatches(responders, RESPONDERS_IN_PARALLEL, async (responder) => {
       const reply = await deps.model.decide({
@@ -105,7 +124,11 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
       const knows = reply.knows.trim().toLowerCase();
       if (!isKnowledgeLevel(knows)) throw new AgentModelError(MODEL_FAILURE.incomplete);
       const answer = reply.answer.trim().slice(0, MAX_TEXT_LENGTH);
-      if (knows === 'no' || !answer) return;
+      const told = knows === 'no' || !answer ? null : answer;
+      if (told === null) return;
+      const arc = { ...scene, thread: threadOf(responder), to: publicIdOf(responder.card.token) };
+      deps.onEvent?.('hilo_abre', { ...arc, text: post.text });
+      deps.onEvent?.('hilo_responde', { ...arc, help: knows, text: told });
       deps.board.addReply({ postId: post.id, authorToken: responder.card.token, text: answer, tellable: true, byAgent: true });
       contributions.push({ id: responder.id, token: responder.card.token, name: responder.card.name, knows, answer });
     });
@@ -113,7 +136,11 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
     for (const failure of failures) if (!(failure.reason instanceof AgentModelError)) console.error('An agent could not answer a question.', failure.reason);
     const problem = failures.length > 0 ? problemOf(failures[0]?.reason) : null;
 
-    if (contributions.length === 0) return finish(asked > 0 && failures.length === asked ? 'fallida' : 'lista', null, [], asked, problem);
+    if (contributions.length === 0) {
+      const failed = asked > 0 && failures.length === asked;
+      close(failed ? 'falla' : 'nadie', null, []);
+      return finish(failed ? 'fallida' : 'lista', null, [], asked, problem);
+    }
 
     const ordered = [...contributions].sort((a, b) => a.id.localeCompare(b.id, 'es', { numeric: true }));
     const assembled = await deps.model.decide({ system: systemFor(post.authorName), prompt: assemblePrompt(post.text, ordered), schema: AssembledAnswer });
@@ -121,16 +148,19 @@ export async function answerQuestion(deps: AskDeps, post: BoardPost, startedAt: 
     if (!text) throw new AgentModelError(MODEL_FAILURE.incomplete);
     const byId = new Map(ordered.map((contribution) => [contribution.id, contribution.token]));
     const cited = [...new Set(assembled.sources.flatMap((id) => byId.get(id) ?? []))];
-    finish('lista', text, cited.length > 0 ? cited : ordered.map((contribution) => contribution.token), asked, problem);
+    const sources = cited.length > 0 ? cited : ordered.map((contribution) => contribution.token);
+    close('respuesta', text, sources.map(publicIdOf));
+    finish('lista', text, sources, asked, problem);
   } catch (failure) {
     if (!(failure instanceof AgentModelError)) console.error('Answering a question failed.', failure);
+    close('falla', null, []);
     finish('fallida', null, [], asked, problemOf(failure));
   }
 }
 
 export type AskOutcome = { state: 'started'; done: Promise<void> } | { state: 'no_model' | 'answering' | 'busy' };
 
-export function askTeam(deps: CardDeps & { board: BoardStore; model: AgentModel | null }, post: BoardPost, now: Date = new Date()): AskOutcome {
+export function askTeam(deps: CardDeps & { board: BoardStore; model: AgentModel | null; onEvent?: AskDeps['onEvent'] }, post: BoardPost, now: Date = new Date()): AskOutcome {
   const { model } = deps;
   if (!model) return { state: 'no_model' };
   if (deps.board.answerOf(post.id, now)?.status === 'en_curso') return { state: 'answering' };

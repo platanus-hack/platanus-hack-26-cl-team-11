@@ -142,7 +142,8 @@ export function mesaRoutes(ctx: AppContext) {
         : event.type === 'hilo_responde' ? spoken?.[REPLY_MESSAGE]?.text ?? null
         : event.type === 'propuesta_nace' && typeof proposal === 'string' ? agents.findProposal(proposal)?.text ?? null
         : null;
-      return { ...event.payload, id: event.id, type: event.type, at: event.createdAt, text };
+      const carried = mine && typeof event.payload.text === 'string' ? event.payload.text : null;
+      return { ...event.payload, id: event.id, type: event.type, at: event.createdAt, text: text ?? carried };
     });
 
     return c.json({

@@ -7,6 +7,7 @@
   var pairsOf = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
+  var IDEAS = ['¿Alguien del equipo ya está trabajando en el login con Google?', 'Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.'];
   var HOOK = 7408;
   var BANANAS = 3454;
   var SIZES = [5, 10, 25, 100, 300];
@@ -270,6 +271,8 @@
     }
     if (slides[index] === intro && step === 2 && !still) { if (!bankOn) { bankOn = true; startBank(); } } else if (bankOn) { bankOn = false; stopBank(); }
     if (stageUrl && index >= live - STAGE_LEAD && !byId('stage').getAttribute('src')) byId('stage').src = stageUrl;
+    if (index !== live && document.activeElement === byId('stage')) { byId('stage').blur(); window.focus(); }
+    if (index === live && entering) setTimeout(function () { var stage = byId('stage'); stage.focus(); if (stage.contentWindow) stage.contentWindow.postMessage({ montu: 'escenario' }, window.location.origin); }, 600);
     if (slides[index] === flood && entering) startPile();
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
@@ -300,7 +303,7 @@
 
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
-  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
+  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario' + IDEAS.map(function (idea) { return '&idea=' + encodeURIComponent(idea); }).join('') + '#globo' : '/';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);

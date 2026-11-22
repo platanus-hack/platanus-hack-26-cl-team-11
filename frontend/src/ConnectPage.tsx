@@ -97,7 +97,7 @@ export function ConnectPage({ token }: { token: string }) {
   const content: Record<TabId, ReactNode> = {
     tu: <YouTab token={token} name={page.name} signals={signals} summary={summary} />,
     equipo: <TeamSection token={token} />,
-    globo: <GlobeTab token={token} active={tab === 'globo'} />,
+    globo: <GlobeTab token={token} name={page.name} active={tab === 'globo'} />,
     ajustes: (
       <SettingsTab
         token={token}

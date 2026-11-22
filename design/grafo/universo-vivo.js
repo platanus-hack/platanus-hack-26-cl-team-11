@@ -7,7 +7,9 @@
 // propuesta) abre su tarjeta de herramienta cuando empieza y la cierra cuando termina, con su miniatura en el arco.
 // Mientras el modelo escribe un mensaje, el servidor entrega lo que lleva escrito: la burbuja crece con ese texto.
 (function () {
-  var source = new URLSearchParams(location.search).get('vivo') || '';
+  var query = new URLSearchParams(location.search);
+  var source = query.get('vivo') || '';
+  var CLEAN = query.has('limpio');
   if (source.indexOf('/api/people/') !== 0 || !LIVE) return;
 
   var RUNNING_MS = 350, IDLE_MS = 4000, URGENT_MS = 90000, RECENT_MS = 120000;
@@ -15,6 +17,7 @@
   var BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   var HELP = { si: 'Puede ayudar.', parcial: 'Puede orientar.', no: 'No puede esta vez.' };
   var ROLE = { si: 'Puede ayudar', parcial: 'Puede orientar', no: 'No puede' };
+  var KNOWS = { si: 'Sabe', parcial: 'Sabe algo', no: 'No sabe' };
   var CLOSED = {
     nadie: ['Nadie más está en este tema', 'Lo vuelven a intentar la próxima vez'],
     sin_ayuda: ['Nadie puede ayudar por ahora', 'Lo vuelven a intentar la próxima vez'],
@@ -23,11 +26,13 @@
   // Cómo terminó cada conversación, en una frase que se entiende sola.
   var ENDED = {
     nadie: function (name) { return 'Nadie más estaba en algo parecido a lo de ' + name; },
+    sin_respuesta: function (name) { return 'Nadie tenía algo sobre la pregunta de ' + name; },
     sin_ayuda: function (name) { return 'Le escribieron a otros por lo de ' + name + ', pero nadie podía ahora'; },
     falla: function (name) { return 'El agente de ' + name + ' no alcanzó a conversar'; }
   };
 
   var slotOf = new Map(), needs = [], byKey = new Map();
+  var seen = 0, current = null, held = [], holding = false, releaseAt = Infinity, flying = false, cleaning = CLEAN, PAGE = 200, SETTLE = 3;
   var arriving = [], since = 0, running = false, finished = null, showing = null, summarized = true, loaded = false, stride = 1, urgentUntil = 0, timer = 0;
 
   // Tres estados: listos (nadie conversa), conversando (un hilo a la vez) y resumen (quién ayuda a quién).
@@ -64,7 +69,7 @@
     if (from === undefined) return null;
     var g = { members: [from], topic: ev.topic }, script = { events: [], duration: Infinity };
     SHOWN.push(g); SCRIPTS.push(script); SCENES.push({ kind: 'group', i: SHOWN.length - 1, dur: Infinity });
-    need = { from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {}, steps: {}, live: {}, said: {} };
+    need = { ask: !!ev.ask, from: from, g: g, script: script, scene: SCENES.length - 1, queue: [], closed: false, outcome: null, done: false, next: 0, lastEnd: 0, threads: 0, answers: {}, steps: {}, live: {}, said: {} };
     needs.push(need); byKey.set(key, need);
     return need;
   }
@@ -90,14 +95,16 @@
     summarized = true;
     var threads = needs.reduce(function (total, need) { return total + need.threads; }, 0);
     var proposals = needs.filter(function (need) { return need.outcome === 'propuesta'; }).length;
-    var parts = [count(threads, 'conversación', 'conversaciones'), count(proposals, 'propuesta', 'propuestas')];
+    var answers = needs.filter(function (need) { return need.outcome === 'respuesta'; }).length;
+    var parts = [count(threads, 'conversación', 'conversaciones'), answers && !proposals ? count(answers, 'respuesta', 'respuestas') : count(proposals, 'propuesta', 'propuestas')];
     idle(2, title, needs.length ? parts.join(' · ') : 'Nadie tenía un pedido abierto', needs.map(function (need) {
       var name = need.from === 0 ? 'ti' : people[need.from].name;
-      var agreed = need.outcome === 'propuesta';
+      var answered = need.outcome === 'respuesta';
+      var agreed = need.outcome === 'propuesta' || answered;
       var helpers = (need.helpers || []).map(function (id) { var slot = slotOf.get(id); return slot === undefined ? null : slot === 0 ? 'Tú' : people[slot].name; }).filter(Boolean);
       var who = helpers.length > 1 ? helpers.slice(0, -1).join(', ') + ' y ' + helpers[helpers.length - 1] : helpers[0];
-      var verb = helpers.length > 1 ? 'ayudan' : who === 'Tú' ? 'ayudas' : 'ayuda';
-      var title = agreed && who ? (name === 'ti' ? who + ' te ' + verb : who + ' ' + verb + ' a ' + name) : agreed ? 'Quedó una propuesta para ' + name : (ENDED[need.outcome] || ENDED.falla)(name);
+      var verb = answered ? (helpers.length > 1 ? 'respondieron' : who === 'Tú' ? 'respondiste' : 'respondió') : helpers.length > 1 ? 'ayudan' : who === 'Tú' ? 'ayudas' : 'ayuda';
+      var title = agreed && who ? (name === 'ti' ? who + ' te ' + verb : who + ' ' + verb + ' a ' + name) : agreed ? 'Quedó una propuesta para ' + name : (ENDED[need.ask && need.outcome === 'nadie' ? 'sin_respuesta' : need.outcome] || ENDED.falla)(name);
       return { faces: need.g.members, title: title, sub: agreed && need.proposal ? need.g.topic + ' · ' + need.proposal : need.g.topic, check: agreed };
     }));
   }
@@ -108,23 +115,25 @@
       var helper = slotOf.get(ev.to);
       if (ev.type === 'hilo_abre') { need.threads += 1; if (helper !== undefined && need.g.members.indexOf(helper) < 0) need.g.members.push(helper); }
       else if (ev.type === 'propuesta_nace') { need.helpers = ev.helpers || []; need.proposal = ev.text || null; }
-      else if (ev.type === 'pedido_cierra') need.outcome = ev.outcome;
+      else if (ev.type === 'pedido_cierra') { need.outcome = ev.outcome; if (ev.outcome === 'respuesta') { need.helpers = ev.helpers || []; need.proposal = ev.text || null; } }
     });
     need.queue = []; need.closed = true; need.done = true;
   }
 
   // Bajo cada cara del encabezado: quien pide, a quién ya le escribieron y qué respondió su agente.
   LIVE.roleOf = function (slot, position) {
-    if (position === 0) return 'Pide ayuda';
-    return showing && showing.answers[slot] ? ROLE[showing.answers[slot]] || 'Respondió' : 'Le escribieron';
+    if (position === 0) return showing && showing.ask ? 'Pregunta' : 'Pide ayuda';
+    var said = showing && showing.answers[slot];
+    if (showing && showing.ask) return said ? KNOWS[said] || 'Respondió' : 'Le preguntaron';
+    return said ? ROLE[said] || 'Respondió' : 'Le escribieron';
   };
-  function heading(need) { header(need.g.topic, agentOf(need.from) + ' pide ayuda', need.g.members); }
+  function heading(need) { header(need.g.topic, agentOf(need.from) + (need.ask ? ' pregunta' : ' pide ayuda'), need.g.members); }
 
   function show(need) {
     showing = need; LIVE.step = 1;
     startScene(need.scene);
     heading(need);
-    push(pairRow([need.from], agentOf(need.from) + ' busca a quién escribirle', 'Revisa lo que publicó cada persona'));
+    push(need.ask ? pairRow([need.from], agentOf(need.from) + ' le pregunta a cada agente', 'Cada uno responde con lo que su persona comparte') : pairRow([need.from], agentOf(need.from) + ' busca a quién escribirle', 'Revisa lo que publicó cada persona'));
     need.lastEnd = clock + 0.8; need.next = clock + 1.1;
   }
 
@@ -237,7 +246,8 @@
       Object.keys(need.steps).forEach(function (key) { closeStep(need.steps[key], 'Sin respuesta'); });
       need.steps = {};
       Object.keys(need.live).forEach(function (id) { settleLive(need, id, need.live[id].text || 'Sin respuesta.'); });
-      if (CLOSED[ev.outcome]) note(need, [need.from], CLOSED[ev.outcome][0], CLOSED[ev.outcome][1]);
+      if (ev.outcome === 'respuesta') { need.helpers = ev.helpers || []; need.proposal = ev.text || null; note(need, need.g.members, 'Respuesta', ev.text || 'Llegó la respuesta.', true); }
+      else if (CLOSED[ev.outcome]) note(need, [need.from], need.ask && ev.outcome === 'nadie' ? 'Nadie tenía algo que aportar' : CLOSED[ev.outcome][0], need.ask ? '' : CLOSED[ev.outcome][1]);
     }
   }
 
@@ -256,12 +266,37 @@
     }
     var next = needs.filter(function (need) { return !need.done; })[0];
     if (next) show(next);
-    else if (finished && !summarized) summary('Resumen');
+    else if (finished && !summarized) { summary('Resumen'); releaseAt = clock + SETTLE; }
+    else if (holding && (clock >= releaseAt || !finished)) release();
   };
 
+  function release() {
+    var waiting = held;
+    held = []; holding = false; releaseAt = Infinity;
+    waiting.forEach(handle);
+  }
+
   function take(ev) {
-    if (ev.type === 'ronda_empieza') { reset(); return; }
-    if (ev.type === 'ronda_termina') { finished = ev; return; }
+    if (typeof ev.id === 'number') {
+      if (ev.id <= seen) return;
+      seen = ev.id;
+    }
+    handle(ev);
+  }
+
+  function handle(ev) {
+    if (holding) { held.push(ev); return; }
+    if (ev.type === 'ronda_empieza') {
+      var playing = showing || needs.some(function (need) { return !need.done; }) || (needs.length > 0 && !summarized);
+      if (playing) { holding = true; held.push(ev); return; }
+      current = ev.round || null;
+      reset();
+      return;
+    }
+    if (ev.type === 'ronda_termina') {
+      if (current === null || !ev.round || ev.round === current) finished = ev;
+      return;
+    }
     if (!ev.from || !ev.topic) return;
     var need = needOf(ev);
     if (need && ev.type !== 'pedido_busca') need.queue.push(ev);
@@ -273,6 +308,14 @@
     data.people.forEach(function (person) { if (person.id === data.me) seat(person, true); });
     data.people.forEach(function (person) { seat(person, false); });
     loaded = true;
+    if (cleaning && data.round && data.round.status === 'en_curso') cleaning = false;
+    if (cleaning) {
+      since = data.lastEventId || since;
+      seen = Math.max(seen, since);
+      running = false;
+      if (data.events.length < PAGE) { cleaning = false; lobby(); }
+      return;
+    }
     data.events.forEach(take);
     arriving = data.streams || [];
     since = data.lastEventId || since;
@@ -286,12 +329,14 @@
   var pace = function () { return running || Date.now() < urgentUntil ? RUNNING_MS : IDLE_MS; };
 
   function poll() {
+    if (flying) return;
     if (loaded && W === 0) { timer = setTimeout(poll, pace()); return; }
+    flying = true;
     fetch(source + '?since=' + since, { credentials: 'same-origin' })
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (data) { if (data) apply(data); })
       .catch(function () {})
-      .then(function () { timer = setTimeout(poll, pace()); });
+      .then(function () { flying = false; clearTimeout(timer); timer = setTimeout(poll, pace()); });
   }
 
   // La página que incrusta el globo avisa cuando alguien inicia una ronda, para no esperar el próximo ciclo.
