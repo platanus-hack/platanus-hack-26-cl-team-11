@@ -84,3 +84,21 @@ test('an operator leaves the whole mesa tired for the demo and undoes it', async
   assert.equal(undone.cleared, 9 * ctx.store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token)).length);
   assert.equal((await app.request(`/api/admin/${token}/tired`, send('PUT', {}))).status, 400);
 });
+
+test('an operator copies what one person publishes into another for the demo and takes it back', async () => {
+  const { ctx, app, token } = setup();
+  const panel = (await (await app.request(`/api/admin/${token}`)).json()) as { people: Array<{ id: string; name: string }> };
+  const [source, target] = [panel.people[1]!, panel.people[2]!];
+  const people = ctx.store.listPeople();
+  const tokenOf = (name: string) => people.find((person) => person.name === name)!.token;
+  ctx.repo.commit(tokenOf(source.name), { by: 'asistente', message: 'Lo que sabe', topics: [], files: [{ path: 'sabe.md', content: `${source.name} sabe de pagos.`, share: 'siempre' }, { path: 'privado.md', content: 'No sale.', share: 'nunca' }], remove: [] });
+
+  const copied = await app.request(`/api/admin/${token}/people/${target.id}/demo`, send('PUT', { from: source.id }));
+  assert.deepEqual(await copied.json(), { id: target.id, name: target.name, files: 1 });
+  assert.equal(ctx.repo.read(tokenOf(target.name), 'demo/sabe.md')?.content, `${target.name} sabe de pagos.`);
+  assert.equal(ctx.repo.read(tokenOf(target.name), 'demo/privado.md'), undefined);
+
+  await app.request(`/api/admin/${token}/people/${target.id}/demo`, send('PUT', {}));
+  assert.equal(ctx.repo.read(tokenOf(target.name), 'demo/sabe.md'), undefined);
+  assert.equal((await app.request(`/api/admin/${token}/people/nadie/demo`, send('PUT', {}))).status, 404);
+});

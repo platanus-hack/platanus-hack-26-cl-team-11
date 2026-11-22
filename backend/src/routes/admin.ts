@@ -16,6 +16,9 @@ const INVALID_MODE = { error: 'El globo va «mesa» (en vivo) o «demo».' } as 
 const ROUND_NOT_FOUND = { error: 'Esa ronda no existe.' } as const;
 const INVALID_MEMBERSHIP = { error: 'Falta decir si la persona queda en la mesa.' } as const;
 const INVALID_TIRED = { error: 'Falta decir si el equipo queda cansado.' } as const;
+const DEMO_FOLDER = 'demo/';
+const DEMO_AUTHOR = 'demo';
+const DEMO_MESSAGE = 'Contexto para la demo';
 const RECENT_ROUNDS = 40;
 
 const loginsOf = oncePerDatabase(openLoginStore);
@@ -104,6 +107,24 @@ export function adminRoutes(ctx: AppContext) {
     const people = store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token) && !mesa.hasLeft(person.token));
     people.forEach((person, position) => tiredDrafts(position, now).forEach((draft) => store.saveEvent(person.token, draft)));
     return c.json({ tired, people: people.length, cleared });
+  });
+
+  routes.put('/admin/:token/people/:id/demo', async (c) => {
+    const found = operatorOf(c.req.param('token'));
+    if ('error' in found) return c.json(found.error, found.status);
+    const people = store.listPeople();
+    const person = people.find((candidate) => publicIdOf(candidate.token) === c.req.param('id'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    const from = asObject(await c.req.text()).from;
+    const source = typeof from === 'string' ? people.find((candidate) => publicIdOf(candidate.token) === from) : undefined;
+    if (typeof from === 'string' && !source) return c.json(NOT_FOUND, 404);
+    const remove = ctx.repo.tree(person.token).map((entry) => entry.path).filter((path) => path.startsWith(DEMO_FOLDER));
+    const files = source
+      ? ctx.repo.shared(source.token).map((file) => ({ path: `${DEMO_FOLDER}${file.path}`, content: file.content.replaceAll(source.name, person.name), share: 'siempre' as const }))
+      : [];
+    const kept = files.map((file) => file.path);
+    const result = ctx.repo.commit(person.token, { by: DEMO_AUTHOR, message: DEMO_MESSAGE, topics: [], files, remove: remove.filter((path) => !kept.includes(path)) });
+    return c.json({ id: publicIdOf(person.token), name: person.name, files: result.ok ? files.length : 0 });
   });
 
   routes.get('/admin/:token/rounds/:roundId', (c) => {
