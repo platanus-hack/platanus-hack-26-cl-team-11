@@ -4,9 +4,11 @@ import { publicIdOf } from '../codes.js';
 import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
 import { openDeliveryStore } from '../deliveries.js';
+import { rateLimit } from '../rateLimit.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const MAX_BODY_BYTES = 1_000_000;
+const DELIVERIES_PER_MINUTE = 30;
 const NOTHING_READABLE = 'No pudimos leer ningún dato de salud en el envío.';
 const RECEIVED_ONE = 'Listo. Llegaron tus datos.';
 const MOST_DAYS_FROM_CURRENT_SHORTCUT = 10;
@@ -24,8 +26,9 @@ const receivedMessage = (days: string[]) => {
 export function ingestRoutes({ db, store }: AppContext) {
   const routes = new Hono();
   const deliveries = openDeliveryStore(db);
+  const limitedDeliveries = rateLimit(DELIVERIES_PER_MINUTE);
 
-  routes.post('/ingest/:slug/:token', bodyLimit({ maxSize: MAX_BODY_BYTES }), async (c) => {
+  routes.post('/ingest/:slug/:token', limitedDeliveries, bodyLimit({ maxSize: MAX_BODY_BYTES }), async (c) => {
     const slug = c.req.param('slug');
     const connector = CONNECTORS.find((item) => item.kind === 'push' && item.ingestSlug === slug);
     const person = store.findPerson(c.req.param('token'));

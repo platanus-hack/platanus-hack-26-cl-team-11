@@ -3,16 +3,19 @@ import { CONNECTORS } from '../connectors/registry.js';
 import type { AppContext } from '../context.js';
 import { openDeliveryStore } from '../deliveries.js';
 import { openLoginStore } from '../logins.js';
+import { rateLimit } from '../rateLimit.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const RECENT_EVENTS = 12;
+const NEW_PEOPLE_PER_MINUTE = 20;
 
 export function peopleRoutes({ db, store, config }: AppContext) {
   const routes = new Hono();
   const deliveries = openDeliveryStore(db);
   const logins = openLoginStore(db);
+  const limitedCreation = rateLimit(NEW_PEOPLE_PER_MINUTE);
 
-  routes.post('/people', async (c) => {
+  routes.post('/people', limitedCreation, async (c) => {
     const body = asObject(await c.req.text());
     const name = typeof body.name === 'string' ? body.name.trim() : '';
     if (!name) return c.json({ error: 'Falta el nombre.' }, 400);

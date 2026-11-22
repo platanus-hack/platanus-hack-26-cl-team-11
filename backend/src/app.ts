@@ -26,6 +26,7 @@ import { simRoutes } from './routes/sim.js';
 import { teamRoutes } from './routes/teams.js';
 import { WHATSAPP_WEBHOOK_PATH, whatsappRoutes } from './routes/whatsapp.js';
 import { onboardingRoutes } from './routes/onboarding.js';
+import { securityHeaders } from './securityHeaders.js';
 import { ConnectorError } from './types.js';
 import { databaseStats } from './pg/database.js';
 
@@ -83,5 +84,5 @@ export function createApp(ctx: AppContext) {
   api.route('/', faceRoutes(ctx));
   api.route('/', chatRoutes(ctx));
 
-  return new Hono().route('/api', api).route('/', joinDocRoutes(ctx));
+  return new Hono().use('*', securityHeaders()).route('/api', api).route('/', joinDocRoutes(ctx));
 }
