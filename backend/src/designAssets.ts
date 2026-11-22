@@ -22,9 +22,8 @@ const cached: MiddlewareHandler = async (c, next) => {
 export function designAssets() {
   const routes = new Hono();
   const serve = serveStatic({ root: relative(process.cwd(), REPO_ROOT) || '.' });
-  for (const path of ['/dec', '/deck']) routes.get(path, (c) => c.redirect('/design/pitch/index.html'));
+  for (const path of ['/dec', '/deck', '/problema']) routes.get(path, (c) => c.redirect('/design/problema/index.html'));
   routes.get('/prep', (c) => c.redirect('/design/prep/index.html'));
-  routes.get('/problema', (c) => c.redirect('/design/problema/index.html'));
   routes.use('/design/*', etag(), cached, (c, next) => (isServed(c.req.path) ? serve(c, next) : next()));
   return routes;
 }

@@ -134,9 +134,19 @@
     else if (key === 'Home') go(0, 1);
     else if (key === 'End') go(slides.length - 1, 1);
   });
+  window.addEventListener('message', function (event) {
+    var data = event.data;
+    if (event.origin !== window.location.origin || !data || data.montu !== 'deck') return;
+    if (data.key === 'ArrowRight' || data.key === 'PageDown') forward();
+    else if (data.key === 'ArrowLeft' || data.key === 'PageUp') back();
+  });
   window.addEventListener('resize', function () { if (current === scale) drawNet(people || SMALL, true); });
 
   fetch('qr.svg').then(function (response) { return response.text(); }).then(function (svg) { document.querySelector('.pb-qr').innerHTML = svg; }).catch(function () {});
+
+  var presenter = null;
+  try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
+  byId('stage').src = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
 })();

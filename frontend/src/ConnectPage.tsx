@@ -22,6 +22,9 @@ import { Welcome, welcomeSeen } from './Welcome';
 const HEALTH_SOURCE = 'apple_health';
 const RETIRED_STEPS: OnboardingStepId[] = ['checkin', 'whatsapp'];
 const AFTER_WELCOME_TAB = 'globo';
+const STAGE_PARAM = 'escenario';
+const DECK_KEYS = ['PageDown', 'PageUp'];
+const DECK_KEYS_WHEN_IDLE = ['ArrowRight', 'ArrowLeft'];
 
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
@@ -59,6 +62,18 @@ export function ConnectPage({ token }: { token: string }) {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has(STAGE_PARAM) || window.parent === window) return;
+    const passOn = (event: KeyboardEvent) => {
+      const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
+      if (!DECK_KEYS.includes(event.key) && (typing || !DECK_KEYS_WHEN_IDLE.includes(event.key))) return;
+      event.preventDefault();
+      window.parent.postMessage({ montu: 'deck', key: event.key }, window.location.origin);
+    };
+    window.addEventListener('keydown', passOn);
+    return () => window.removeEventListener('keydown', passOn);
+  }, []);
+
   if (signInRequired) return <LoginPage />;
 
   if (!page) {
@@ -70,7 +85,9 @@ export function ConnectPage({ token }: { token: string }) {
     );
   }
 
-  const notice = new URLSearchParams(window.location.search).get('aviso');
+  const params = new URLSearchParams(window.location.search);
+  const notice = params.get('aviso');
+  const onStage = params.has(STAGE_PARAM);
   const reload = () => void refresh();
   const openStep = (step: OnboardingStepId) => {
     setFocusedSource(step === 'salud' ? HEALTH_SOURCE : step === 'agente' ? AGENT : null);
@@ -96,7 +113,7 @@ export function ConnectPage({ token }: { token: string }) {
   return (
     <>
       <div className="app-column rd-panel">
-        <TopBar signedIn={Boolean(page.login?.email)} />
+        {!onStage && <TopBar signedIn={Boolean(page.login?.email)} />}
         <main>
           {error && (
             <p className="rd-note app-alert" role="alert">
@@ -109,7 +126,7 @@ export function ConnectPage({ token }: { token: string }) {
             </section>
           ))}
         </main>
-        <TabBar active={tab} name={page.name} onSelect={select} />
+        {!onStage && <TabBar active={tab} name={page.name} onSelect={select} />}
       </div>
       {welcome && (
         <Welcome
