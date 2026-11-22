@@ -12,11 +12,11 @@ const STEP_NAME: Record<OnboardingStepId, string> = {
   salud: 'salud',
 };
 
-const RETIRED_STEP: OnboardingStepId = 'checkin';
+const RETIRED_STEPS: OnboardingStepId[] = ['checkin', 'whatsapp'];
 
 function statusOf(person: TeamPerson, shared: string | undefined) {
   const role = person.admin ? 'Administra' : null;
-  const pending = person.pending?.filter((step) => step !== RETIRED_STEP) ?? null;
+  const pending = person.pending?.filter((step) => !RETIRED_STEPS.includes(step)) ?? null;
   const setup = pending === null ? null : pending.length === 0 ? 'Todo conectado' : `Le falta: ${pending.map((step) => STEP_NAME[step]).join(', ')}`;
   return [role, shared, setup].filter(Boolean).join(' · ') || undefined;
 }

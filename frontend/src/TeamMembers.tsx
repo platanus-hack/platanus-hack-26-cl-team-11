@@ -63,9 +63,7 @@ export function TeamMembers({ token, team, first, onChange }: TeamMembersProps) 
           />
         )}
       </div>
-      <p className="rd-note">
-        {team.roomCode ? 'Es una sala abierta: entra quien escanea su QR.' : 'Comparte el código solo con quienes son parte del equipo. Cada ingreso lo aprueba todo el equipo.'}
-      </p>
+      {team.roomCode && <p className="rd-note">Es una sala abierta: entra quien escanea su QR.</p>}
     </div>
   );
 }

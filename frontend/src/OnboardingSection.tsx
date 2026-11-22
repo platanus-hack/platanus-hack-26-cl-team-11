@@ -8,19 +8,17 @@ import type { TabId } from './tabs';
 
 interface StepCopy {
   title: string;
-  pending: string;
-  done: string;
   verb: string;
   glyph: GlyphName;
   tab: TabId;
 }
 
 export const ONBOARDING_STEPS: Record<OnboardingStepId, StepCopy> = {
-  equipo: { title: 'Entra a tu equipo', pending: 'Con el código que te pasaron, o crea uno', done: 'Ya estás en un equipo', verb: 'Entrar', glyph: 'team', tab: 'equipo' },
-  agente: { title: 'Conecta tu agente', pending: 'Le cuenta a Montu en qué trabajas y qué necesitas', done: 'Tu agente ya está conectado', verb: 'Conectar', glyph: 'agent', tab: 'ajustes' },
-  checkin: { title: 'Cuenta cómo llegas hoy', pending: 'Tu check-in toma medio minuto', done: 'Ya hiciste tu check-in', verb: 'Contar', glyph: 'person', tab: 'ajustes' },
-  whatsapp: { title: 'Conecta WhatsApp', pending: 'Para hablar con tu agente desde el teléfono', done: 'Tu WhatsApp ya está conectado', verb: 'Conectar', glyph: 'chat', tab: 'tu' },
-  salud: { title: 'Manda tus datos de salud', pending: 'Sueño y pasos desde tu iPhone, con un toque', done: 'Ya llegaron tus datos de salud', verb: 'Enviar', glyph: 'energy', tab: 'ajustes' },
+  equipo: { title: 'Entra a tu equipo', verb: 'Entrar', glyph: 'team', tab: 'equipo' },
+  agente: { title: 'Conecta tu agente', verb: 'Conectar', glyph: 'agent', tab: 'ajustes' },
+  checkin: { title: 'Cuenta cómo llegas hoy', verb: 'Contar', glyph: 'person', tab: 'ajustes' },
+  whatsapp: { title: 'Conecta WhatsApp', verb: 'Conectar', glyph: 'chat', tab: 'tu' },
+  salud: { title: 'Manda tus datos de salud', verb: 'Enviar', glyph: 'energy', tab: 'ajustes' },
 };
 
 interface OnboardingSectionProps {
@@ -47,7 +45,6 @@ export function OnboardingSection({ steps, onOpen }: OnboardingSectionProps) {
                 </ItemIcon>
               }
               title={copy.title}
-              subtitle={step.done ? copy.done : copy.pending}
               off={step.done}
               end={step.done ? undefined : <RowButton label={copy.verb} name={copy.title} onClick={() => onOpen(step.id)} />}
             />
