@@ -7,6 +7,7 @@
   var pairsOf = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
+  var HOOK = 7408;
   var SIZES = [5, 10, 25, 100, 300];
   var SMALL = SIZES[0];
   var GOLDEN_ANGLE = 2.39996323;
@@ -84,9 +85,9 @@
   }
 
   var counting = 0;
-  function countTo(target, instant) {
+  function countTo(target, instant, node) {
     var run = ++counting;
-    var node = byId('count');
+    node = node || byId('count');
     var from = Number(node.dataset.value || target);
     node.dataset.value = String(target);
     if (instant || from === target) { node.textContent = format(target); return; }
@@ -149,6 +150,10 @@
     stepAt = step;
     slides[index].dataset.k = String(step);
     faces.forEach(function (entry) { if (entry.slide === slides[index]) entry.face.set(step >= 2 ? entry.after : entry.before); });
+    if (index === 0 && entering && step === 1) {
+      byId('hook').dataset.value = '0';
+      countTo(HOOK, still, byId('hook'));
+    }
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
   }

@@ -1,12 +1,14 @@
 # Guion de 3 minutos
 
-Para la presentación de `montu.fun/deck`. Lo que va entre corchetes no se dice. Reparto: cerca de 55 segundos de láminas, cerca de 2 minutos de demo y 5 segundos de cierre. Falta cronometrarlo en voz alta.
+Para la presentación de `montu.fun/deck`. Lo que va entre corchetes no se dice. Reparto: cerca de 1 minuto de láminas, cerca de 2 minutos de demo y 5 segundos de cierre. Falta cronometrarlo en voz alta.
 
-## Láminas (0:00 a 0:55)
+## Láminas (0:00 a 1:00)
 
-**1 · Portada (8 s)**
+**1 · Portada (15 s)**
 
-Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
+En las últimas 36 horas, cada equipo de esta hack tuvo en promedio siete mil cuatrocientas ocho conversaciones con sus agentes. [clic] Y apuesto todas mis bananas a que entre ustedes, persona a persona, no llegaron ni a la mitad. [pausa, clic] Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.
+
+[El 7.408 es el promedio por equipo del ranking de tokens de la hack. Actualizarlo el domingo antes de presentar: está escrito en `design/pitch/index.html` y en `HOOK` de `design/pitch/deck.js`.]
 
 **2 · Conversaciones (15 s)**
 
@@ -28,7 +30,7 @@ Alineamiento. Cada uno avanza rápido, pero hacia un lado distinto. [clic] Sus a
 
 Confianza. Alguien durmió cuatro horas, tiene entrega en dos días y no lo dice. [clic] Su agente lo sabe, y le busca ayuda.
 
-## Demo en vivo (0:55 a 2:50)
+## Demo en vivo (1:00 a 2:50)
 
 **7 · El Globo**
 
