@@ -86,6 +86,12 @@ export function SettingsTab({ token, name, login, firstSteps, onOpenStep, source
           </div>
         </div>
       )}
+
+      <div className="app-block">
+        <a className="rd-button rd-button--quiet app-link" href="/design/pitch/index.html?fin">
+          Cierre de la presentación
+        </a>
+      </div>
     </>
   );
 }

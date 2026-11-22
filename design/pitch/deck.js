@@ -272,7 +272,7 @@
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
   }
 
-  var forward = function () { if (stepAt < stepsOf(current)) go(current, stepAt + 1); else if (current === slides.length - 1) window.location.href = platformUrl; else go(current + 1, 1); };
+  var forward = function () { if (stepAt < stepsOf(current)) go(current, stepAt + 1); else if (current === slides.length - 2) window.location.href = platformUrl; else if (current < slides.length - 1) go(current + 1, 1); };
   var back = function () { if (stepAt > 1) go(current, stepAt - 1); else if (current > 0) go(current - 1, stepsOf(current - 1)); };
 
   byId('deck').addEventListener('click', forward);
@@ -293,6 +293,6 @@
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
   if (presenter && typeof presenter.token === 'string') platformUrl = '/conectar/' + encodeURIComponent(presenter.token) + '#globo';
 
-  go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
+  go(query.has('fin') ? slides.length - 1 : Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);
 })();
