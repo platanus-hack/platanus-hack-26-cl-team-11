@@ -7,7 +7,7 @@
 <link rel="icon" href="../logo/montu-mark.svg">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
-<link rel="stylesheet" href="problema.css?v=3">
+<link rel="stylesheet" href="problema.css?v=4">
 </head>
 <body style="margin: 0">
 <div class="rd-page pb">
@@ -15,13 +15,28 @@
   <main class="pb-deck" id="deck">
 
     <section class="pb-slide pb-intro">
-      <span class="rd-brand pb-brand"><img class="rd-mark" src="../logo/montu-mark.svg" alt="">Montu</span>
+      <div class="pb-team" aria-hidden="true">
+        <span class="pb-face" data-face="Mati" data-size="112"></span>
+        <span class="pb-face" data-face="Ian" data-size="112"></span>
+        <span class="pb-face" data-face="Lian" data-size="112"></span>
+        <span class="pb-face" data-face="Andrés" data-size="112"></span>
+        <span class="pb-face" data-face="Roberto" data-size="112"></span>
+      </div>
       <h1 class="pb-title">Hablamos más con nuestros agentes que con nuestro equipo.</h1>
       <p class="pb-then">Y esos agentes no se hablan entre ellos.</p>
+      <p class="pb-by"><img class="rd-mark" src="../logo/montu-mark.svg" alt=""><span class="pb-by__name">Montu</span><span class="pb-by__of">by The Wellness Company</span><img class="pb-by__vita" src="vita-logo.png" alt="Vita"></p>
     </section>
 
     <section class="pb-slide pb-scale" data-steps="2">
-      <canvas class="pb-net" id="net" role="img" aria-label="Una red donde cada persona está conectada con todas las demás"></canvas>
+      <div class="pb-ring">
+        <svg class="pb-ring__lines" id="ring-lines" viewBox="0 0 100 100" aria-hidden="true"></svg>
+        <span class="pb-face pb-ring__face" data-face="Mati" data-size="104"></span>
+        <span class="pb-face pb-ring__face" data-face="Ian" data-size="104"></span>
+        <span class="pb-face pb-ring__face" data-face="Lian" data-size="104"></span>
+        <span class="pb-face pb-ring__face" data-face="Andrés" data-size="104"></span>
+        <span class="pb-face pb-ring__face" data-face="Roberto" data-size="104"></span>
+        <canvas class="pb-net" id="net" role="img" aria-label="Trescientas personas, cada una conectada con todas las demás"></canvas>
+      </div>
       <div class="pb-count">
         <span class="pb-num" id="count">10</span>
         <span class="pb-unit">conversaciones</span>
@@ -29,13 +44,44 @@
       </div>
     </section>
 
-    <section class="pb-slide pb-three">
-      <div class="pb-cols">
-        <div class="pb-col"><h2 class="pb-name">Eficiencia</h2><p class="pb-say">Dos personas construyen lo mismo sin saberlo.</p></div>
-        <div class="pb-col"><h2 class="pb-name">Alineamiento</h2><p class="pb-say">Cada uno avanza hacia un lado distinto, y cada vez más rápido.</p></div>
-        <div class="pb-col"><h2 class="pb-name">Confianza</h2><p class="pb-say">Alguien está trabado o explotado, y no lo dice.</p></div>
+    <section class="pb-slide pb-turn">
+      <h1 class="pb-title">Tener todas esas conversaciones es inabordable.</h1>
+    </section>
+
+    <section class="pb-slide pb-case" data-steps="2">
+      <div class="pb-case__text">
+        <h1 class="pb-case__name">Eficiencia</h1>
+        <p class="pb-case__say"><span class="pb-swap pb-swap--before">Dos personas construyen lo mismo sin saberlo.</span><span class="pb-swap pb-swap--after">Sus agentes se avisan antes.</span></p>
       </div>
-      <p class="pb-close">Tener todas esas conversaciones es inabordable.</p>
+      <div class="pb-scene pb-scene--same" aria-hidden="true">
+        <span class="pb-who"><span class="pb-face" data-face="Mati" data-size="200" data-state="activa" data-after="lista"></span><span class="pb-chip">Login con Google</span></span>
+        <span class="pb-link"></span>
+        <span class="pb-who"><span class="pb-face" data-face="Ian" data-size="200" data-state="activa" data-after="lista"></span><span class="pb-chip pb-chip--twin">Login con Google</span></span>
+      </div>
+    </section>
+
+    <section class="pb-slide pb-case" data-steps="2">
+      <div class="pb-case__text">
+        <h1 class="pb-case__name">Alineamiento</h1>
+        <p class="pb-case__say"><span class="pb-swap pb-swap--before">Cada uno avanza hacia un lado distinto.</span><span class="pb-swap pb-swap--after">Sus agentes los ponen de acuerdo.</span></p>
+      </div>
+      <div class="pb-scene pb-scene--apart" aria-hidden="true">
+        <span class="pb-who"><span class="pb-arrow" style="--to: -140deg"><svg viewBox="0 0 60 24"><path d="M3 12h50M41 3l13 9-13 9"/></svg></span><span class="pb-face" data-face="Lian" data-size="168" data-state="activa" data-after="lista"></span></span>
+        <span class="pb-who"><span class="pb-arrow" style="--to: -90deg"><svg viewBox="0 0 60 24"><path d="M3 12h50M41 3l13 9-13 9"/></svg></span><span class="pb-face" data-face="Roberto" data-size="168" data-state="activa" data-after="lista"></span></span>
+        <span class="pb-who"><span class="pb-arrow" style="--to: -30deg"><svg viewBox="0 0 60 24"><path d="M3 12h50M41 3l13 9-13 9"/></svg></span><span class="pb-face" data-face="Andrés" data-size="168" data-state="activa" data-after="lista"></span></span>
+      </div>
+    </section>
+
+    <section class="pb-slide pb-case" data-steps="2">
+      <div class="pb-case__text">
+        <h1 class="pb-case__name">Confianza</h1>
+        <p class="pb-case__say"><span class="pb-swap pb-swap--before">Alguien está al tope y no lo dice.</span><span class="pb-swap pb-swap--after">Su agente le busca ayuda.</span></p>
+      </div>
+      <div class="pb-scene pb-scene--quiet" aria-hidden="true">
+        <span class="pb-who"><span class="pb-face" data-face="Lian" data-size="200" data-state="ausente" data-after="reposo"></span><span class="pb-chips"><span class="pb-chip">Durmió 4 horas</span><span class="pb-chip">Entrega en 2 días</span></span></span>
+        <span class="pb-link"></span>
+        <span class="pb-who pb-who--helper"><span class="pb-face" data-face="Mati" data-size="200" data-state="lista" data-after="lista"></span><span class="pb-chip">Tiene tiempo hoy</span></span>
+      </div>
     </section>
 
     <section class="pb-slide pb-turn">
@@ -51,10 +97,13 @@
       <div class="pb-count">
         <span class="pb-url">montu.fun</span>
       </div>
+      <p class="pb-by"><img class="rd-mark" src="../logo/montu-mark.svg" alt=""><span class="pb-by__name">Montu</span><span class="pb-by__of">by The Wellness Company</span><img class="pb-by__vita" src="vita-logo.png" alt="Vita"></p>
     </section>
 
   </main>
 </div>
-<script src="problema.js?v=3"></script>
+<script src="../luz/luz.js"></script>
+<script src="../faces/caras.js"></script>
+<script src="problema.js?v=4"></script>
 </body>
 </html>

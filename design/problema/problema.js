@@ -95,8 +95,28 @@
     var n = step >= 2 ? LARGE : SMALL;
     byId('people').textContent = format(n) + ' personas';
     countTo(pairsOf(n), instant);
-    if (n !== people) drawNet(n, instant);
+    if (n === LARGE && people !== LARGE) drawNet(LARGE, instant);
+    if (n === SMALL) { drawing += 1; people = 0; }
   }
+
+  var Caras = window.RondaCaras;
+  var faces = Array.from(document.querySelectorAll('.pb-face')).map(function (node) {
+    var size = Number(node.dataset.size);
+    node.style.setProperty('--size', size + 'px');
+    return { slide: node.closest('.pb-slide'), before: node.dataset.state || 'reposo', after: node.dataset.after || node.dataset.state || 'reposo', face: Caras.mount(node, node.dataset.face, { size: size, state: node.dataset.state || 'reposo' }) };
+  });
+
+  var ringFaces = Array.from(document.querySelectorAll('.pb-ring__face'));
+  var ringSpots = ringFaces.map(function (node, at) {
+    var angle = -Math.PI / 2 + (at / ringFaces.length) * Math.PI * 2;
+    var spot = [50 + 34 * Math.cos(angle), 50 + 34 * Math.sin(angle)];
+    node.style.setProperty('--x', spot[0] + '%');
+    node.style.setProperty('--y', spot[1] + '%');
+    return spot;
+  });
+  byId('ring-lines').innerHTML = ringSpots.map(function (from, at) {
+    return ringSpots.slice(at + 1).map(function (to) { return '<line x1="' + from[0] + '" y1="' + from[1] + '" x2="' + to[0] + '" y2="' + to[1] + '"/>'; }).join('');
+  }).join('');
 
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
   var scale = slides.indexOf(document.querySelector('.pb-scale'));
@@ -117,6 +137,8 @@
       current = index;
     }
     stepAt = step;
+    slides[index].dataset.k = String(step);
+    faces.forEach(function (entry) { if (entry.slide === slides[index]) entry.face.set(step >= 2 ? entry.after : entry.before); });
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
   }
@@ -140,7 +162,7 @@
     if (data.key === 'ArrowRight' || data.key === 'PageDown') forward();
     else if (data.key === 'ArrowLeft' || data.key === 'PageUp') back();
   });
-  window.addEventListener('resize', function () { if (current === scale) drawNet(people || SMALL, true); });
+  window.addEventListener('resize', function () { if (current === scale && people === LARGE) drawNet(LARGE, true); });
 
   fetch('qr.svg').then(function (response) { return response.text(); }).then(function (svg) { document.querySelector('.pb-qr').innerHTML = svg; }).catch(function () {});
 
@@ -149,4 +171,5 @@
   byId('stage').src = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
+  if (still) Caras.still(8);
 })();
