@@ -6,7 +6,11 @@ import type { Request, Response, Row, SqlValue, Target } from './protocol.js';
 interface Outcome {
   rows: Row[];
   affected: number;
+  changed?: boolean;
 }
+
+const ROW_CHANGES = /^\s*(?:INSERT|UPDATE|DELETE)\b/i;
+const KEEPS_DATA = /^\s*(?:BEGIN|COMMIT|SAVEPOINT|RELEASE)\b[^;]*;?\s*$/i;
 
 interface Backend {
   schema: string | null;
@@ -175,12 +179,14 @@ async function handle(request: Request): Promise<Outcome> {
   await within(backend, request.schema);
   if (request.action === 'script') {
     await backend.script(request.sql);
-    if (request.changes) backend.announce?.();
-    return { rows: [], affected: 0 };
+    const altered = request.changes && !KEEPS_DATA.test(request.sql);
+    if (altered) backend.announce?.();
+    return { rows: [], affected: 0, changed: altered };
   }
   const outcome = await backend.query(request.sql, request.params);
-  if (request.changes) backend.announce?.();
-  return outcome;
+  const changed = request.changes && (!ROW_CHANGES.test(request.sql) || outcome.affected > 0 || outcome.rows.length > 0);
+  if (changed) backend.announce?.();
+  return { ...outcome, changed };
 }
 
 function answer(response: Response) {
@@ -194,7 +200,7 @@ let queue: Promise<void> = Promise.resolve();
 parentPort?.on('message', (request: Request) => {
   queue = queue.then(() =>
     handle(request).then(
-      (outcome) => answer({ id: request.id, ...outcome }),
+      (outcome) => answer({ id: request.id, rows: outcome.rows, affected: outcome.affected, changed: outcome.changed ?? false }),
       (failure: unknown) => {
         const error = failure as { message?: string; code?: string };
         answer({ id: request.id, error: error.message ?? String(failure), code: typeof error.code === 'string' ? error.code : null });

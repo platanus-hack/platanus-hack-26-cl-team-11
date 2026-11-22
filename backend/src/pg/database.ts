@@ -65,9 +65,9 @@ function startBridge(): Bridge {
   return { worker, flag: new Int32Array(signal), changesElsewhere: new Int32Array(changesElsewhere), generation: (bridgesStarted += 1), receive: () => receiveMessageOnPort(port1)?.message as Response | undefined };
 }
 
-export const databaseStats = { queries: 0, ms: 0 };
+export const databaseStats = { queries: 0, ms: 0, changes: 0, lastChange: '' };
 
-function ask(request: Omit<Request, 'id'>): { rows: Row[]; affected: number } {
+function ask(request: Omit<Request, 'id'>): { rows: Row[]; affected: number; changed: boolean } {
   const started = performance.now();
   try {
     return send(request);
@@ -77,7 +77,7 @@ function ask(request: Omit<Request, 'id'>): { rows: Row[]; affected: number } {
   }
 }
 
-function send(request: Omit<Request, 'id'>): { rows: Row[]; affected: number } {
+function send(request: Omit<Request, 'id'>): { rows: Row[]; affected: number; changed: boolean } {
   const active = (bridge ??= startBridge());
   const id = (lastRequest += 1);
   const deadline = Date.now() + TIMEOUT_MS;
@@ -128,9 +128,14 @@ const keyable = (params: SqlValue[]) => params.every((value) => value === null |
 export function openDatabase(target: Target): DatabaseSync {
   const schema = target.kind === 'memory' ? `m${process.pid}_${(lastSchema += 1)}_${randomBytes(4).toString('hex')}` : null;
   const remembered = new Map<string, Remembered>();
+  const forget = (sql: string) => {
+    remembered.clear();
+    databaseStats.changes += 1;
+    databaseStats.lastChange = sql.slice(0, 60);
+  };
   const query = (sql: string, params: SqlValue[], changes: boolean) => {
     const outcome = ask({ target, schema, action: 'query', sql, params, changes });
-    if (changes) remembered.clear();
+    if (outcome.changed) forget(sql);
     return { rows: outcome.rows.map(asStored), affected: outcome.affected };
   };
   const read = (sql: string, params: SqlValue[]): Row[] => {
@@ -167,8 +172,7 @@ export function openDatabase(target: Target): DatabaseSync {
       remember(sql);
       const script = scriptToPostgres(sql);
       const changes = !script.split(';\n').every((statement) => ONLY_ENSURES.test(statement));
-      ask({ target, schema, action: 'script', sql: script, params: [], changes });
-      if (changes) remembered.clear();
+      if (ask({ target, schema, action: 'script', sql: script, params: [], changes }).changed) forget(script);
     },
     close() {
       remembered.clear();

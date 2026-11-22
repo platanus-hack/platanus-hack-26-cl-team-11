@@ -56,7 +56,7 @@ export function createApp(ctx: AppContext) {
     await next();
     const total = performance.now() - started;
     const asked = databaseStats.queries - queries;
-    c.res.headers.append('Server-Timing', `db;dur=${(databaseStats.ms - spent).toFixed(1)};desc="${asked} consultas", total;dur=${total.toFixed(1)}`);
+    c.res.headers.append('Server-Timing', `db;dur=${(databaseStats.ms - spent).toFixed(1)};desc="${asked} consultas", total;dur=${total.toFixed(1)}, cambios;desc="${databaseStats.changes}: ${databaseStats.lastChange.replace(/[^\w ().,=*]/g, ' ')}"`);
     if (total >= SLOW_REQUEST_MS) console.warn(`Pedido lento: ${c.req.method} ${c.req.routePath} tardó ${Math.round(total)} ms, ${Math.round(databaseStats.ms - spent)} ms en la base con ${asked} consultas.`);
   });
   api.use('*', (c, next) => (setsItsOwnLimit(c.req.path) ? next() : limitBody(c, next)));
