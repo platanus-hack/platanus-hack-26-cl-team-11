@@ -6,7 +6,7 @@ export const MESA_NAME = 'Mesa pública';
 export const MIN_INTERVAL_SECONDS = 10;
 export const MAX_INTERVAL_SECONDS = 86_400;
 export const DEFAULT_MESA_DAILY_TOKEN_CAP = 3_000_000;
-export const DEFAULT_MESA_OPERATORS: readonly string[] = ['mati@vita.lat', 'ian@vita.lat', 'lian@vita.lat', 'robert@getvita.ai', 'andres@getvita.ai'];
+export const DEFAULT_MESA_OPERATORS: readonly string[] = ['mati@vita.lat', 'ian@vita.lat', 'lian@vita.lat', 'robert@vita.lat', 'robert@getvita.ai', 'andres@getvita.ai'];
 
 export const GLOBE_MODES = ['mesa', 'demo'] as const;
 export type GlobeMode = (typeof GLOBE_MODES)[number];
