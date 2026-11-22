@@ -177,7 +177,7 @@
     return ringSpots.slice(at + 1).map(function (to) { return '<line x1="' + from[0] + '" y1="' + from[1] + '" x2="' + to[0] + '" y2="' + to[1] + '"/>'; }).join('');
   }).join('');
 
-  var KINDS = [['linear', 'Tarea', '--rd-g2'], ['github', 'Código', '--rd-g1'], ['gmail', 'Correo', '--rd-g4']];
+  var KINDS = [['linear', 'Tarea', '--rd-g2'], ['github', 'Código', '--rd-g1'], ['granola', 'Reunión', '--rd-g3'], ['gmail', 'Correo', '--rd-g4'], ['health', 'Sueño', '--rd-g5'], ['whoop', 'Rendimiento', '--rd-g2']];
   var PILE_ROWS = 6;
   var BRICK_MS = 110;
   var pile = byId('pile');
@@ -186,7 +186,7 @@
     var line = document.createElement('div');
     line.className = 'pb-pile__row';
     for (var place = 0; place < PILE_ROWS - row; place++) {
-      var kind = KINDS[(place + row * 2) % KINDS.length];
+      var kind = KINDS[(place + row * 5) % KINDS.length];
       var brick = document.createElement('span');
       brick.className = 'pb-brick';
       brick.style.setProperty('--tint', 'var(' + kind[2] + ')');
@@ -210,6 +210,12 @@
     });
   }
 
+  var resting = {};
+  function rest(index) {
+    clearTimeout(resting[index]);
+    resting[index] = setTimeout(function () { slides[index].dataset.k = '1'; }, FACE_LEAVE_MS);
+  }
+
   var FACE_LEAVE_MS = 600;
   function dropFace(entry, late) {
     if (!entry.face) return;
@@ -224,6 +230,7 @@
   }
 
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
+  slides.forEach(function (slide) { slide.dataset.k = '1'; });
   var flood = document.querySelector('.pb-flood');
   var live = slides.indexOf(document.querySelector('.pb-live'));
   var STAGE_LEAD = 2;
@@ -244,9 +251,11 @@
         slide.setAttribute('aria-hidden', String(at !== index));
       });
       if (current === scale) { drawing += 1; people = 0; }
+      if (current >= 0) rest(current);
       current = index;
     }
     stepAt = step;
+    clearTimeout(resting[index]);
     slides[index].dataset.k = String(step);
     faces.forEach(function (entry) {
       var wanted = entry.slide === slides[index] && !(entry.ring && step > 1);
