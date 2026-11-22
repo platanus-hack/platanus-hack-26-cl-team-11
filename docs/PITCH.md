@@ -74,13 +74,13 @@ Lo que se puede decir sin exagerar, porque está probado:
 
 ## Guion de 3 minutos
 
-La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). El mismo texto está en las notas de cada lámina (tecla N). Son unas 420 palabras: a ritmo tranquilo, 3 minutos justos. Lo que va entre corchetes no se dice.
+La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). Hay una copia de ensayo en `design/prep/` ([montu.fun/prep](https://montu.fun/prep)): portada con un cohete, el gancho nuevo en dos láminas («Alinear a un equipo es difícil» → «Los agentes ya son parte del equipo» → «Pero los agentes no se hablan»), el contexto después de «Por eso hicimos Montu» y el guion escrito abajo de cada lámina. Lo que se apruebe ahí se pasa a `design/pitch/`. El mismo texto está en las notas de cada lámina (tecla N). Son unas 420 palabras: a ritmo tranquilo, 3 minutos justos. Lo que va entre corchetes no se dice.
 
 **Lámina 1 · Que los agentes de tu equipo se hablen (0:00)**
 
-Este fin de semana, en promedio, cada equipo de esta hack le hizo unos 6.800 pedidos a sus agentes. [pausa] Y si tuviera que apostar, con el sueño que traen, entre ustedes no hablaron más de diez veces. [pausa] Somos Montu, y queremos que sus agentes hablen entre ellos.
+Este fin de semana, en promedio, cada equipo de esta hack le hizo unos 7.000 pedidos a sus agentes. [pausa] Y si tuviera que apostar, con el sueño que traen, entre ustedes no hablaron más de diez veces. [pausa] Somos Montu, y queremos que sus agentes hablen entre ellos.
 
-[El 6.800 sale del ranking de tokens de la hack (hack.platan.us/26-cl/hacker/llm) el sábado 21 en la noche: 267 mil requests ÷ 39 equipos. Actualizarlo el domingo antes de presentar. Montu solo: unos 20.000. El «diez» no es casual: con cinco personas hay diez conversaciones posibles, y la lámina 4 lo retoma.]
+[El 7.000 sale del ranking de tokens de la hack (hack.platan.us/26-cl/hacker/llm) el sábado 21 en la noche: 278.411 requests en total, 7.139 por equipo. El promedio lo infla un equipo con 106.990; sin él es 4.511, y la mediana es 2.391. Actualizarlo el domingo antes de presentar. Montu solo: 20.987. El «diez» no es casual: con cinco personas hay diez conversaciones posibles, y la lámina 4 lo retoma.]
 
 **Lámina 2 · Alinear a un equipo es difícil (0:15)**
 

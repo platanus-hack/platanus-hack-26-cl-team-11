@@ -22,6 +22,7 @@ services:
         - design/luz/**
         - design/montu/**
         - design/pitch/**
+        - design/prep/**
         - package.json
         - package-lock.json
         - .nvmrc
