@@ -3,6 +3,8 @@ import '../../design/luz/luz.js';
 import '../../design/faces/caras.js';
 import '../../design/montu/montu.js';
 import '../../design/montu/entrada.js';
+import googleLogo from '../../design/logo/google-g.svg';
+import { GOOGLE_LOGIN_PATH } from './api';
 
 interface MountedMontu {
   replay(): void;
@@ -41,6 +43,25 @@ function watchLoading(notify: () => void) {
 }
 
 const isLoading = () => pagesLoading > 0;
+
+let signInScreens = 0;
+
+function changeSignIn(by: number) {
+  signInScreens += by;
+  for (const notify of watchers) notify();
+}
+
+const isSigningIn = () => signInScreens > 0;
+
+const NOTICE_PARAM = 'aviso';
+const SIGN_IN_NOTE = 'Tu página se abre solo con tu cuenta.';
+
+export function useSignInScreen() {
+  useEffect(() => {
+    changeSignIn(1);
+    return () => changeSignIn(-1);
+  }, []);
+}
 
 function alreadySeen() {
   try {
@@ -125,11 +146,13 @@ export function MontuInline() {
 
 export function MontuSplash() {
   const loading = useSyncExternalStore(watchLoading, isLoading);
+  const signingIn = useSyncExternalStore(watchLoading, isSigningIn);
   const [stage, setStage] = useState<SplashStage>('shown');
+  const [entrance, setEntrance] = useState(0);
   const visit = useRef({ since: Date.now(), atLeast: alreadySeen() ? SHORTEST_VISIT_MS : window.RondaEntrada.introMs() + HOLD_MS });
 
   useEffect(() => {
-    if (stage === 'gone' || (stage === 'shown' && loading)) return;
+    if (signingIn || stage === 'gone' || (stage === 'shown' && loading)) return;
     const wait = stage === 'shown' ? Math.max(0, visit.current.since + visit.current.atLeast - Date.now()) : window.RondaEntrada.leaveMs() + 100;
     const timer = window.setTimeout(() => setStage(stage === 'shown' ? 'leaving' : 'gone'), wait);
     if (stage === 'leaving') {
@@ -137,7 +160,13 @@ export function MontuSplash() {
       document.documentElement.dataset.montuEntrada = '';
     }
     return () => window.clearTimeout(timer);
-  }, [stage, loading]);
+  }, [stage, loading, signingIn]);
+
+  useEffect(() => {
+    if (!signingIn || stage === 'shown') return;
+    setStage('shown');
+    setEntrance((count) => count + 1);
+  }, [signingIn, stage]);
 
   useEffect(() => {
     if (stage !== 'gone') return;
@@ -145,12 +174,28 @@ export function MontuSplash() {
     return () => window.clearTimeout(timer);
   }, [stage]);
 
-  if (stage === 'gone') return null;
+  if (stage === 'gone' && !signingIn) return null;
+  const leaving = stage === 'leaving' && !signingIn;
+  const notice = signingIn ? new URLSearchParams(window.location.search).get(NOTICE_PARAM) : null;
   return (
-    <div className={stage === 'leaving' ? 'rd-loader rd-loader--entrada rd-loader--out' : 'rd-loader rd-loader--entrada'} role="status" aria-label="Cargando Montu" onClick={() => (loading ? undefined : setStage('leaving'))}>
+    <div
+      className={leaving ? 'rd-loader rd-loader--entrada rd-loader--out' : 'rd-loader rd-loader--entrada'}
+      role={signingIn ? undefined : 'status'}
+      aria-label={signingIn ? undefined : 'Cargando Montu'}
+      onClick={() => (loading || signingIn ? undefined : setStage('leaving'))}
+    >
       <Aura />
-      <MontuEntrance run={0} leaving={stage === 'leaving'} />
+      <MontuEntrance key={entrance} run={0} leaving={leaving} />
       <p className="rd-loader__name">Montu</p>
+      {signingIn && (
+        <div className="rd-loader__actions">
+          <a className="rd-button" href={GOOGLE_LOGIN_PATH}>
+            <img src={googleLogo} alt="" />
+            Continuar con Google
+          </a>
+          <p className="rd-note">{notice ?? SIGN_IN_NOTE}</p>
+        </div>
+      )}
     </div>
   );
 }
