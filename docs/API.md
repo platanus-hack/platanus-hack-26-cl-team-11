@@ -103,7 +103,7 @@ De dónde sale cada señal está en [DATA_SOURCES.md](DATA_SOURCES.md).
 | `GET /api/people/<token>/policy` | — | `{ energy, load, blockers, expertise, includeInPulse }` |
 | `PUT /api/people/<token>/policy` | Cualquier subconjunto de esos campos | La política completa |
 
-Cada señal vale `siempre`, `preguntar` o `nunca`. `includeInPulse` es verdadero o falso. Por defecto: `energy` y `load` en `preguntar`, `blockers` y `expertise` en `siempre`, `includeInPulse` en verdadero. Un bloqueo dicho en un check-in parte en `preguntar` mientras la persona no elija otra cosa para `blockers`.
+Cada señal vale `siempre`, `preguntar` o `nunca`. `includeInPulse` es verdadero o falso. Por defecto: `energy`, `load`, `blockers` y `expertise` en `siempre`, `includeInPulse` en verdadero. Un bloqueo dicho en un check-in parte en `preguntar` mientras la persona no elija otra cosa para `blockers`.
 
 ## Equipos
 

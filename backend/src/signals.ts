@@ -41,7 +41,7 @@ export interface SignalOptions {
 }
 
 export const DEFAULT_TIME_ZONE = 'America/Santiago';
-export const DEFAULT_VISIBILITY: SignalVisibility = { energy: 'preguntar', load: 'preguntar', blockers: 'siempre', expertise: 'siempre' };
+export const DEFAULT_VISIBILITY: SignalVisibility = { energy: 'siempre', load: 'siempre', blockers: 'siempre', expertise: 'siempre' };
 export const FIXED_THRESHOLD_BASIS = 'umbral fijo por poco historial';
 
 export const DAY_MS = 86_400_000;

@@ -27,7 +27,7 @@ const member = (name: string, hours: number, steps: number, policy: Partial<Poli
 };
 
 test('de cada integrante se ve solo lo que comparte; lo propio se ve siempre', () => {
-  const overview = teamOverview([member('Ana', 5, 3000, {}, true), member('Tomás', 8, 9000, { energy: 'siempre' }), member('Sofía', 7, 7000)]);
+  const overview = teamOverview([member('Ana', 5, 3000, {}, true), member('Tomás', 8, 9000, { energy: 'siempre' }), member('Sofía', 7, 7000, { energy: 'preguntar', load: 'preguntar' })]);
   const [ana, tomas, sofia] = overview.members;
   assert.equal(ana?.sleepHours, 5);
   assert.equal(tomas?.steps, 9000);

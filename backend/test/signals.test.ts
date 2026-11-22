@@ -50,7 +50,7 @@ test('energy compares last night against the own average of the person', () => {
   assert.equal(longSleeper.energy.level, 'baja');
   assert.ok(['media', 'alta'].includes(shortSleeper.energy.level));
   assert.deepEqual(longSleeper.energy.basis, ['apple_health']);
-  assert.equal(longSleeper.energy.visibility, 'preguntar');
+  assert.equal(longSleeper.energy.visibility, 'siempre');
 });
 
 test('energy reads sleep sent as text with a decimal comma', () => {
@@ -113,7 +113,7 @@ test('no data gives sin_datos everywhere and empty lists', () => {
   assert.deepEqual(signals.blockers, []);
   assert.deepEqual(signals.expertise, []);
   assert.equal(signals.asOf, NOW.toISOString());
-  assert.deepEqual(signals.visibility, { energy: 'preguntar', load: 'preguntar', blockers: 'siempre', expertise: 'siempre' });
+  assert.deepEqual(signals.visibility, { energy: 'siempre', load: 'siempre', blockers: 'siempre', expertise: 'siempre' });
 });
 
 test('load counts the meetings of today and the open tasks', () => {
@@ -124,7 +124,7 @@ test('load counts the meetings of today and the open tasks', () => {
   assert.equal(signalsOf(yesterday).load.level, 'baja');
   assert.equal(signalsOf([meeting('2026-11-21T13:00:00.000Z', 150)]).load.level, 'media');
   assert.deepEqual(signalsOf(sixToday).load.basis, ['google_calendar']);
-  assert.equal(signalsOf(sixToday).load.visibility, 'preguntar');
+  assert.equal(signalsOf(sixToday).load.visibility, 'siempre');
   assert.doesNotMatch(signalsOf(sixToday).load.statement, ANY_DIGIT);
 });
 

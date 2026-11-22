@@ -116,7 +116,11 @@ test('a blocker that asks first stays with its owner until they allow it, then t
 
 test('nothing private reaches the model: no energy, load, sleep or check-in note, only what each person lets out', async () => {
   const { model, prompts } = fakeModel();
-  const { startRound, settled, allow } = setup(model);
+  const { ctx, app, startRound, settled, allow } = setup(model);
+  for (const person of ctx.store.listPeople()) {
+    const saved = await app.request(`/api/people/${person.token}/policy`, { ...json({ energy: 'preguntar', load: 'preguntar' }), method: 'PUT' });
+    assert.equal(saved.status, 200);
+  }
   await allow('Ana', TOPIC);
   await startRound('Ana');
   await settled('Ana');
@@ -125,6 +129,16 @@ test('nothing private reaches the model: no energy, load, sleep or check-in note
   const sent = prompts.join('\n');
   assert.ok(sent.includes(TOPIC));
   for (const leak of ['Energía', 'Carga', 'sueño', 'sleep', 'reuniones', 'cansada']) assert.ok(!sent.includes(leak), `leaked ${leak}`);
+});
+
+test('by default energy and load are shared, so the agents get them until the person changes the permission', async () => {
+  const { model, prompts } = fakeModel();
+  const { startRound, settled, allow } = setup(model);
+  await allow('Ana', TOPIC);
+  await startRound('Ana');
+  await settled('Ana');
+
+  assert.ok(prompts.join('\n').includes('Energía'));
 });
 
 test('a topic the owner refuses never opens a conversation, and an open proposal is not asked twice', async () => {

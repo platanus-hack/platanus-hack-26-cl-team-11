@@ -37,9 +37,9 @@ test('signals carry the permission the person stored, in the signals route and i
 
   for (const signals of [await checkin(app, token), await signalsOf(app, token)]) {
     assert.equal(signals.energy.visibility, 'nunca');
-    assert.equal(signals.load.visibility, 'preguntar');
+    assert.equal(signals.load.visibility, 'siempre');
     assert.deepEqual(visibilityBySource(signals), { checkin: 'nunca', linear: 'nunca' });
-    assert.deepEqual(signals.visibility, { energy: 'nunca', load: 'preguntar', blockers: 'nunca', expertise: 'nunca' });
+    assert.deepEqual(signals.visibility, { energy: 'nunca', load: 'siempre', blockers: 'nunca', expertise: 'nunca' });
   }
 });
 
@@ -47,12 +47,12 @@ test('a permission the person never chose keeps the default of each signal', asy
   const { app, token } = setup();
   const untouched = await checkin(app, token);
   assert.deepEqual(visibilityBySource(untouched), { checkin: 'preguntar', linear: 'siempre' });
-  assert.deepEqual(untouched.visibility, { energy: 'preguntar', load: 'preguntar', blockers: 'siempre', expertise: 'siempre' });
+  assert.deepEqual(untouched.visibility, { energy: 'siempre', load: 'siempre', blockers: 'siempre', expertise: 'siempre' });
 
-  await app.request(`/api/people/${token}/policy`, send('PUT', { load: 'siempre', includeInPulse: false }));
+  await app.request(`/api/people/${token}/policy`, send('PUT', { load: 'nunca', includeInPulse: false }));
   const partial = await signalsOf(app, token);
-  assert.equal(partial.load.visibility, 'siempre');
-  assert.equal(partial.energy.visibility, 'preguntar');
+  assert.equal(partial.load.visibility, 'nunca');
+  assert.equal(partial.energy.visibility, 'siempre');
   assert.deepEqual(visibilityBySource(partial), { checkin: 'preguntar', linear: 'siempre' });
-  assert.deepEqual(partial.visibility, { energy: 'preguntar', load: 'siempre', blockers: 'siempre', expertise: 'siempre' });
+  assert.deepEqual(partial.visibility, { energy: 'siempre', load: 'nunca', blockers: 'siempre', expertise: 'siempre' });
 });
