@@ -1,3 +1,4 @@
+import { publicIdOf } from '../codes.js';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { Hono, type Context } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
@@ -26,6 +27,8 @@ interface OAuthState {
   nonce: string;
   login?: boolean;
   origin?: string;
+  invite?: string;
+  room?: string;
 }
 
 const LOGIN_PROVIDER = 'google';
@@ -114,7 +117,7 @@ export function oauthRoutes(ctx: AppContext) {
     }
   };
 
-  const startLogin = (c: Context, personToken: string) => {
+  const startLogin = (c: Context, personToken: string, door: { invite?: string; room?: string } = {}) => {
     const provider = findProvider(LOGIN_PROVIDER);
     const credentials = credentialsOf(LOGIN_PROVIDER);
     if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
@@ -123,7 +126,7 @@ export function oauthRoutes(ctx: AppContext) {
       credentials,
       redirectUri: redirectUriFor(c.req.url, LOGIN_PROVIDER),
       scopes: LOGIN_SCOPES,
-      state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true, origin: requestOriginOf(c) } satisfies OAuthState)),
+      state: vault.seal(JSON.stringify({ token: personToken, provider: LOGIN_PROVIDER, at: Date.now(), nonce: hashOf(nonce), login: true, origin: requestOriginOf(c), ...door } satisfies OAuthState)),
       codeChallenge: challengeOf(nonce),
       login: true,
     });
@@ -174,7 +177,14 @@ export function oauthRoutes(ctx: AppContext) {
       store.addPerson((profile.name ?? profile.email.split('@')[0] ?? profile.email).slice(0, MAX_NAME_LENGTH));
     logins.assign(profile.email, person.token, profile.name);
     openSession(c, person.token);
-    return c.redirect(`/conectar/${person.token}`, 302);
+    const invited = state.invite ? ctx.teams.findInvite(state.invite, new Date())?.teamId : undefined;
+    const roomTeam = state.room ? ctx.rooms.findRoom(state.room)?.teamId : undefined;
+    const teamId = invited ?? roomTeam;
+    if (teamId && ctx.teams.findTeam(teamId) && !ctx.teams.isMember(teamId, person.token)) {
+      ctx.teams.addMember(teamId, person.token);
+      if (roomTeam === teamId) ctx.rooms.record(teamId, 'persona_entra', { person: publicIdOf(person.token), name: person.name });
+    }
+    return c.redirect(`/conectar/${person.token}${teamId ? '#equipo' : ''}`, 302);
   };
 
   routes.get('/session', (c) => {
@@ -189,7 +199,11 @@ export function oauthRoutes(ctx: AppContext) {
 
   routes.get('/login', (c) => c.json({ google: credentialsOf(LOGIN_PROVIDER) !== undefined }));
 
-  routes.get('/login/google/start', limitedLogins, (c) => startLogin(c, ''));
+  routes.get('/login/google/start', limitedLogins, (c) => {
+    const invite = c.req.query('invitacion');
+    const room = c.req.query('sala');
+    return startLogin(c, '', { ...(invite && ctx.teams.findInvite(invite, new Date()) ? { invite } : {}), ...(room && ctx.rooms.findRoom(room) ? { room } : {}) });
+  });
 
   routes.get('/people/:token/login/google/start', (c) => {
     if (!startedFromOwnPage(c)) return c.json(NOT_FROM_OWN_PAGE, 403);

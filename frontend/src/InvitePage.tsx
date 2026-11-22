@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { fetchInvite, joinInvite, type InviteSummary } from './api';
+import { fetchInvite, fetchLoginOptions, GOOGLE_LOGIN_PATH, joinInvite, type InviteSummary } from './api';
 import { countOf, messageOf } from './format';
 import { readSavedPerson, savePerson } from './savedPerson';
 import { useAction } from './useAction';
@@ -12,6 +12,14 @@ export function InvitePage({ code }: { code: string }) {
   const [name, setName] = useState('');
   const saved = useMemo(readSavedPerson, []);
   const { busy, error, run } = useAction();
+  const [google, setGoogle] = useState(false);
+
+  useEffect(() => {
+    fetchLoginOptions().then(
+      (options) => setGoogle(options.google),
+      () => undefined,
+    );
+  }, []);
 
   useEffect(() => {
     fetchInvite(code).then(setInvite, (failure: unknown) => setProblem(messageOf(failure, 'No se pudo abrir la invitación.')));
@@ -42,6 +50,13 @@ export function InvitePage({ code }: { code: string }) {
           <span className="rd-label">
             {invite.team} · {countOf(invite.people, 'persona', 'personas')}
           </span>
+          {google && (
+            <div className="rd-actions">
+              <a className="rd-button app-link" href={`${GOOGLE_LOGIN_PATH}?invitacion=${encodeURIComponent(code)}`}>
+                Entrar con Google
+              </a>
+            </div>
+          )}
           <form className="rd-actions" onSubmit={submit}>
             <input
               className="rd-input app-grow"
@@ -52,7 +67,7 @@ export function InvitePage({ code }: { code: string }) {
               maxLength={MAX_NAME_LENGTH}
               autoComplete="name"
             />
-            <button className="rd-button" type="submit" disabled={busy || !name.trim()}>
+            <button className={`rd-button${google ? ' rd-button--quiet' : ''}`} type="submit" disabled={busy || !name.trim()}>
               {busy ? 'Entrando…' : 'Entrar'}
             </button>
           </form>
