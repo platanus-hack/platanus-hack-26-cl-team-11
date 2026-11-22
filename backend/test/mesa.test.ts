@@ -54,10 +54,14 @@ function setup(options: { config?: Config; model?: AgentModel | null } = {}) {
   const app = createApp(ctx);
   const people = seedDemo(ctx);
   const tokenOf = (name: string) => people.find((person) => person.name === name)?.token ?? '';
-  const view = async (name: string) => (await (await app.request(`/api/people/${tokenOf(name)}/mesa`)).json()) as MesaView;
-  const startRound = (name: string) => app.request(`/api/people/${tokenOf(name)}/mesa/rounds`, send('POST', {}));
-  const setInterval = (name: string, seconds: unknown) => app.request(`/api/people/${tokenOf(name)}/mesa/interval`, send('PUT', { seconds }));
-  const setMember = (name: string, member: unknown) => app.request(`/api/people/${tokenOf(name)}/mesa/membership`, send('PUT', { member }));
+  const signedIn = (name: string, init: RequestInit = {}): RequestInit => ({
+    ...init,
+    headers: { ...(init.headers as Record<string, string> | undefined), cookie: `montu_sesion=${encodeURIComponent(ctx.vault.seal(JSON.stringify({ token: tokenOf(name) })))}` },
+  });
+  const view = async (name: string) => (await (await app.request(`/api/people/${tokenOf(name)}/mesa`, signedIn(name))).json()) as MesaView;
+  const startRound = (name: string) => app.request(`/api/people/${tokenOf(name)}/mesa/rounds`, signedIn(name, send('POST', {})));
+  const setInterval = (name: string, seconds: unknown) => app.request(`/api/people/${tokenOf(name)}/mesa/interval`, signedIn(name, send('PUT', { seconds })));
+  const setMember = (name: string, member: unknown) => app.request(`/api/people/${tokenOf(name)}/mesa/membership`, signedIn(name, send('PUT', { member })));
   const settled = async (name: string) => {
     for (let attempt = 0; attempt < 100; attempt += 1) {
       const current = await view(name);

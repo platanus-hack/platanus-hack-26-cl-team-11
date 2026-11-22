@@ -27,11 +27,13 @@ import { teamRoutes } from './routes/teams.js';
 import { WHATSAPP_WEBHOOK_PATH, whatsappRoutes } from './routes/whatsapp.js';
 import { onboardingRoutes } from './routes/onboarding.js';
 import { securityHeaders } from './securityHeaders.js';
+import { pageGuard } from './session.js';
 import { ConnectorError } from './types.js';
 import { databaseStats } from './pg/database.js';
 
 const DEFAULT_MAX_BODY_BYTES = 10_000;
 const INGEST_PATH_PREFIX = '/api/ingest/';
+const PERSONAL_ROUTES = ['/people/:token', '/people/:token/*', '/context/:token', '/context/:token/*', '/admin/:token', '/admin/:token/*'];
 
 const setsItsOwnLimit = (path: string) => path.startsWith(INGEST_PATH_PREFIX) || path === REPO_COMMIT_PATH || path === WHATSAPP_WEBHOOK_PATH || path.endsWith(REPO_PASTE_SUFFIX);
 
@@ -59,6 +61,8 @@ export function createApp(ctx: AppContext) {
   });
   api.use('*', (c, next) => (setsItsOwnLimit(c.req.path) ? next() : limitBody(c, next)));
   api.get('/health', (c) => c.json({ ok: true }));
+  const { ownerOnly } = pageGuard(ctx);
+  for (const path of PERSONAL_ROUTES) api.use(path, ownerOnly);
   api.route('/duelos', duelRoutes(ctx));
   api.route('/', peopleRoutes(ctx));
   api.route('/', connectionRoutes(ctx));

@@ -6,7 +6,9 @@ En producción: `https://ronda-n8if.onrender.com/api`. En local: `http://localho
 
 ## Reglas comunes
 
-- **Identidad.** El `<token>` de la persona va en la ruta. No hay cuentas ni cabeceras de autenticación. Con un token que no existe, toda ruta responde 404 `{ "error": "Link no válido." }`.
+- **Identidad.** El `<token>` de la persona va en la ruta. Con un token que no existe, toda ruta responde 404 `{ "error": "Link no válido." }`.
+- **Sesión.** Si la persona asoció una cuenta de Google, el link solo ya no alcanza: toda ruta `/api/people/<token>/…`, `/api/context/<token>/…` y `/api/admin/<token>/…` exige la sesión de esa persona (la cookie `montu_sesion`, que deja el ingreso con Google) y sin ella responde 401 `{ "error", "signIn": "google" }`. Lo mismo al crear una sala o entrar a una sala o a un equipo a nombre de esa persona. Una página sin cuenta de Google sigue abriendo con su link. El envío de datos de salud (`/api/ingest/…`) nunca pide sesión, porque sale del Atajo del teléfono. Si el servidor no tiene Google configurado, nada exige sesión.
+- **Límites.** Crear personas: 20 por minuto por origen. Enviar datos de salud: 30 por minuto por origen. Pasado el límite, 429.
 - **Errores.** Siempre `{ "error": "<frase corta en español>" }`. La frase se le puede mostrar a la persona.
 - **Cuerpo.** JSON. Máximo 10.000 bytes; si se pasa, responde 413. La única excepción es `/api/ingest/…`, que acepta hasta 1 MB.
 - **Equipo.** Toda ruta con `<equipo>` verifica que la persona sea integrante. Si no, responde 403 `{ "error": "No perteneces a ese equipo." }`.

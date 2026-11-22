@@ -79,11 +79,16 @@ async function fetchThroughRestart(path: string, init?: RequestInit): Promise<Re
   return last;
 }
 
+const SIGN_IN_REQUIRED_STATUS = 401;
+
+export class SignInRequired extends Error {}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetchThroughRestart(path, init);
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const message = body && typeof body === 'object' && 'error' in body ? String(body.error) : `Error ${response.status}`;
+    if (response.status === SIGN_IN_REQUIRED_STATUS) throw new SignInRequired(message);
     throw new Error(message);
   }
   return body as T;

@@ -10,6 +10,7 @@ import { rateLimit } from '../rateLimit.js';
 import { syncSource } from '../sync.js';
 import { ConnectorError, type OAuthConnector, type OAuthProvider } from '../types.js';
 import { NOT_FOUND } from './shared.js';
+import { SESSION_COOKIE, sessionTokenOf } from '../session.js';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const OWN_PAGE_SITE = 'same-origin';
@@ -32,7 +33,6 @@ const LOGIN_SCOPES = ['profile'];
 const LOGINS_PER_MINUTE = 30;
 const MAX_NAME_LENGTH = 80;
 const ACCOUNT_TAKEN = 'Esa cuenta de Google ya abre otra página tuya de Montu que tiene datos. Entra con Google para volver a ella.';
-const SESSION_COOKIE = 'montu_sesion';
 const SESSION_DAYS = 60;
 const DAY_SECONDS = 86_400;
 
@@ -137,14 +137,8 @@ export function oauthRoutes(ctx: AppContext) {
     setCookie(c, SESSION_COOKIE, vault.seal(JSON.stringify({ token: personToken })), { ...sessionPlace(c.req.url), httpOnly: true, sameSite: 'Lax', maxAge: SESSION_DAYS * DAY_SECONDS });
 
   const sessionPerson = (c: Context) => {
-    const sealed = getCookie(c, SESSION_COOKIE);
-    if (!sealed) return undefined;
-    try {
-      const session = JSON.parse(vault.open(sealed)) as { token?: unknown } | null;
-      return typeof session?.token === 'string' ? store.findPerson(session.token) : undefined;
-    } catch {
-      return undefined;
-    }
+    const personToken = sessionTokenOf(c, vault);
+    return personToken ? store.findPerson(personToken) : undefined;
   };
 
   const hasNothing = (personToken: string) =>
@@ -262,7 +256,7 @@ export function oauthRoutes(ctx: AppContext) {
       const account = await provider.identify(tokens.accessToken, ctx.fetch);
       for (const connector of connectorsOf(providerId)) {
         store.saveConnection(person.token, connector.id, account, JSON.stringify(tokens));
-        if (providerId === LOGIN_PROVIDER) logins.link(account, person.token);
+        if (providerId === LOGIN_PROVIDER && logins.link(account, person.token) !== 'de_otra_persona') openSession(c, person.token);
         await syncSource(ctx, person.token, connector.id).catch(() => undefined);
       }
       return c.redirect(personPage, 302);

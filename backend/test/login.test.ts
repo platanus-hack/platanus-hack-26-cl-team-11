@@ -24,8 +24,9 @@ function setup(options: { config?: Config } = {}) {
     const cookie = (started.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
     return app.request(`/api/oauth/google/callback?${new URLSearchParams({ code: 'codigo', state: location.searchParams.get('state') ?? '' })}`, { headers: { cookie } });
   };
-  const loginOf = async (token: string) => ((await (await app.request(`/api/people/${token}`)).json()) as { name: string; login: { email: string | null; name: string | null; available: boolean } });
-  return { ctx, app, through, loginOf, signInAs: (email: string, name: string) => (account = { email, name }) };
+  const sessionOf = (token: string) => ({ cookie: `montu_sesion=${encodeURIComponent(ctx.vault.seal(JSON.stringify({ token })))}` });
+  const loginOf = async (token: string) => ((await (await app.request(`/api/people/${token}`, { headers: sessionOf(token) })).json()) as { name: string; login: { email: string | null; name: string | null; available: boolean } });
+  return { ctx, app, through, loginOf, sessionOf, signInAs: (email: string, name: string) => (account = { email, name }) };
 }
 
 test('entering with Google creates your page the first time and brings you back to the same one afterwards', async () => {
@@ -107,4 +108,43 @@ test('without Google configured there is no login to offer', async () => {
   const { app, through } = setup({ config: { publicBaseUrl: 'https://ronda.test', oauth: {} } });
   assert.deepEqual(await (await app.request('/api/login')).json(), { google: false });
   assert.equal((await through('/api/login/google/start')).status, 500);
+});
+
+test('una página con cuenta de Google solo se abre con esa sesión; el link solo ya no alcanza', async () => {
+  const { ctx, app, through, sessionOf } = setup();
+  const entered = await through('/api/login/google/start');
+  const token = (entered.headers.get('location') ?? '').split('/').at(-1) ?? '';
+  const other = ctx.store.addPerson('Sin cuenta');
+
+  for (const path of [`/api/people/${token}`, `/api/people/${token}/signals`, `/api/people/${token}/events`, `/api/context/${token}`]) {
+    const refused = await app.request(path);
+    assert.equal(refused.status, 401);
+    assert.deepEqual(await refused.json(), { error: 'Esta página tiene cuenta de Google. Entra con Google para abrirla.', signIn: 'google' });
+    assert.equal((await app.request(path, { headers: sessionOf(other.token) })).status, 401);
+    assert.equal((await app.request(path, { headers: { cookie: 'montu_sesion=falsa' } })).status, 401);
+    assert.equal((await app.request(path, { headers: sessionOf(token) })).status, 200);
+  }
+
+  const change = { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Otro nombre' }) };
+  assert.equal((await app.request(`/api/people/${token}/profile`, change)).status, 401);
+  const join = (headers: Record<string, string>) => app.request('/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify({ name: 'Sala', token }) });
+  assert.equal((await join({})).status, 401);
+  assert.equal((await join(sessionOf(token))).status, 201);
+});
+
+test('una página sin cuenta de Google sigue abriendo con su link, y los datos de salud entran sin sesión', async () => {
+  const { ctx, app, through } = setup();
+  const plain = ctx.store.addPerson('Sin cuenta');
+  assert.equal((await app.request(`/api/people/${plain.token}`)).status, 200);
+  const entered = await through('/api/login/google/start');
+  const token = (entered.headers.get('location') ?? '').split('/').at(-1) ?? '';
+  const delivery = await app.request(`/api/ingest/health/${token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ date: '2026-11-21', steps: 1200 }) });
+  assert.equal(delivery.status, 201);
+});
+
+test('sin Google configurado en el servidor nadie queda afuera de su página', async () => {
+  const { ctx, app } = setup({ config: { publicBaseUrl: 'https://ronda.test', oauth: {} } });
+  const person = ctx.store.addPerson('Ian');
+  ctx.db.prepare('INSERT INTO logins (email, person_token, linked_at, name) VALUES (?, ?, ?, ?)').run('ian@vita.lat', person.token, new Date().toISOString(), 'Ian');
+  assert.equal((await app.request(`/api/people/${person.token}`)).status, 200);
 });

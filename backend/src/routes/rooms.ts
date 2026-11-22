@@ -4,6 +4,7 @@ import type { AppContext } from '../context.js';
 import { openFaceStore } from '../faces.js';
 import { rateLimit } from '../rateLimit.js';
 import type { Room } from '../rooms/store.js';
+import { pageGuard, SIGN_IN_REQUIRED } from '../session.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const ROOM_NOT_FOUND = { error: 'Esa sala no existe.' } as const;
@@ -14,8 +15,9 @@ const MAX_ROOM_PEOPLE = 400;
 const MAX_EVENTS_PER_READ = 200;
 const JOINS_PER_MINUTE = 120;
 
-export function roomRoutes({ db, store, teams, rooms, assistants, agents, sim }: AppContext) {
+export function roomRoutes({ db, store, teams, rooms, assistants, agents, sim, vault, config }: AppContext) {
   const routes = new Hono();
+  const { mayActAs } = pageGuard({ db, vault, config });
   const faces = openFaceStore(db);
   const limited = rateLimit(JOINS_PER_MINUTE);
 
@@ -66,6 +68,7 @@ export function roomRoutes({ db, store, teams, rooms, assistants, agents, sim }:
     if (!name) return c.json(MISSING_NAME, 400);
     const creator = typeof body.token === 'string' ? store.findPerson(body.token) : undefined;
     if (typeof body.token === 'string' && !creator) return c.json(NOT_FOUND, 404);
+    if (creator && !mayActAs(c, creator.token)) return c.json(SIGN_IN_REQUIRED, 401);
     const team = teams.createTeam(name);
     const room = rooms.createRoom(team.id);
     if (creator) {
@@ -88,6 +91,7 @@ export function roomRoutes({ db, store, teams, rooms, assistants, agents, sim }:
     const body = asObject(await c.req.text());
     const known = typeof body.token === 'string' ? store.findPerson(body.token) : undefined;
     if (typeof body.token === 'string' && !known) return c.json(NOT_FOUND, 404);
+    if (known && !mayActAs(c, known.token)) return c.json(SIGN_IN_REQUIRED, 401);
     const name = nameFrom(body.name);
     if (!known && !name) return c.json(MISSING_NAME, 400);
     if (known && teams.isMember(room.teamId, known.token)) return c.json({ token: known.token, name: known.name, room: { code: room.code, name: room.name } });

@@ -5,6 +5,7 @@ import { rateLimit } from '../rateLimit.js';
 import type { TeamInvite } from '../teams/store.js';
 import { onboardingStepsOf } from './onboarding.js';
 import { asObject, NOT_FOUND } from './shared.js';
+import { pageGuard, SIGN_IN_REQUIRED } from '../session.js';
 
 const NOT_A_MEMBER = { error: 'No perteneces a ese equipo.' } as const;
 const NOT_AN_ADMIN = { error: 'Solo quien administra el equipo puede hacer eso.' } as const;
@@ -17,6 +18,7 @@ const MAX_NAME_LENGTH = 80;
 const INVITE_JOINS_PER_MINUTE = 60;
 
 export function teamRoutes(ctx: AppContext) {
+  const { mayActAs } = pageGuard(ctx);
   const { store, teams, rooms } = ctx;
   const routes = new Hono();
   const limitedJoins = rateLimit(INVITE_JOINS_PER_MINUTE);
@@ -159,6 +161,7 @@ export function teamRoutes(ctx: AppContext) {
     const body = asObject(await c.req.text());
     const known = typeof body.token === 'string' ? store.findPerson(body.token) : undefined;
     if (typeof body.token === 'string' && !known) return c.json(NOT_FOUND, 404);
+    if (known && !mayActAs(c, known.token)) return c.json(SIGN_IN_REQUIRED, 401);
     const name = typeof body.name === 'string' ? body.name.trim().slice(0, MAX_NAME_LENGTH) : '';
     if (!known && !name) return c.json(MISSING_NAME, 400);
     const person = known ?? store.addPerson(name);

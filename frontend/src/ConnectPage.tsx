@@ -16,6 +16,7 @@ import { savePerson } from './savedPerson';
 import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
 import { MontuLoading } from './MontuLoader';
+import { LoginPage } from './LoginPage';
 
 const HEALTH_SOURCE = 'apple_health';
 const RETIRED_STEP = 'checkin';
@@ -35,7 +36,7 @@ export function ConnectPage({ token }: { token: string }) {
     setSummary(derived.summary);
     setFirstSteps((onboarding?.steps ?? []).filter((step) => step.id !== RETIRED_STEP));
   }, [token]);
-  const { error, refresh } = usePolling(load);
+  const { error, refresh, signInRequired } = usePolling(load);
   const name = page?.name;
 
   useEffect(() => {
@@ -53,6 +54,8 @@ export function ConnectPage({ token }: { token: string }) {
       alive = false;
     };
   }, [token]);
+
+  if (signInRequired) return <LoginPage />;
 
   if (!page) {
     return (
