@@ -5,6 +5,7 @@ import type { AgentModel } from '../agents/model.js';
 import { cardFor, type RoundDeps } from '../agents/round.js';
 import type { AppContext } from '../context.js';
 import { openLoginStore } from '../logins.js';
+import { oncePerDatabase } from '../pg/database.js';
 import type { TeamMember, TeamStore } from '../teams/store.js';
 import { MESA_TEAM_ID } from './store.js';
 
@@ -30,6 +31,8 @@ export const mesaRoundDeps = (ctx: AppContext, model: AgentModel): RoundDeps => 
   onStream: (_teamId, text) => ctx.mesaLive.put(text),
 });
 
+const loginsOf = oncePerDatabase(openLoginStore);
+
 export function activityFingerprint(ctx: AppContext, now: Date): string {
   const deps: CardDeps = { ...mesaCardDeps(ctx), repo: undefined, digests: undefined };
   const published = mesaMembersOf(ctx).map((member) => {
@@ -41,6 +44,6 @@ export function activityFingerprint(ctx: AppContext, now: Date): string {
 
 export function isMesaOperator(ctx: AppContext, personToken: string): boolean {
   if (!ctx.config.oauth[LOGIN_PROVIDER]) return true;
-  const email = openLoginStore(ctx.db).loginOf(personToken)?.email.toLowerCase();
+  const email = loginsOf(ctx.db).loginOf(personToken)?.email.toLowerCase();
   return email !== undefined && (ctx.config.mesaOperators ?? []).includes(email);
 }

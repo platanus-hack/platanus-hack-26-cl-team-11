@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { createApp } from '../src/app.js';
 import { createContext, SQLITE_FILE } from '../src/context.js';
-import { openDatabase } from '../src/pg/database.js';
+import { databaseStats, openDatabase } from '../src/pg/database.js';
 import { scriptToPostgres, toPostgres } from '../src/pg/dialect.js';
 import { describeImport, importFromSqlite } from '../src/pg/importSqlite.js';
 
@@ -43,6 +43,33 @@ test('a Postgres database answers like the SQLite one did', () => {
   db.exec('ROLLBACK');
   assert.deepEqual(db.prepare('SELECT COUNT(*) AS total FROM notes').get(), { total: 1 });
   assert.throws(() => db.prepare('INSERT INTO tags (name) VALUES (?)').run('a'), /duplicate key/);
+  db.close();
+});
+
+test('a repeated read is answered from memory until something changes', () => {
+  const db = openDatabase({ kind: 'memory' });
+  db.exec('CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL)');
+  db.prepare('INSERT INTO notes (text) VALUES (?)').run('primera');
+  const texts = () => (db.prepare('SELECT text FROM notes ORDER BY id').all() as Array<{ text: string }>).map((note) => note.text);
+
+  assert.deepEqual(texts(), ['primera']);
+  const asked = databaseStats.queries;
+  const first = db.prepare('SELECT text FROM notes ORDER BY id').all();
+  (first[0] as { text: string }).text = 'alterada por quien la leyó';
+  assert.deepEqual(texts(), ['primera']);
+  assert.equal(databaseStats.queries, asked);
+
+  db.prepare('INSERT INTO notes (text) VALUES (?)').run('segunda');
+  assert.deepEqual(texts(), ['primera', 'segunda']);
+  db.exec('BEGIN');
+  db.prepare('DELETE FROM notes').run();
+  assert.deepEqual(texts(), []);
+  db.exec('ROLLBACK');
+  assert.deepEqual(texts(), ['primera', 'segunda']);
+  db.exec('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL)');
+  const afterEnsuring = databaseStats.queries;
+  assert.deepEqual(texts(), ['primera', 'segunda']);
+  assert.equal(databaseStats.queries, afterEnsuring);
   db.close();
 });
 

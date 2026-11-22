@@ -1,14 +1,17 @@
 import type { AppContext } from '../context.js';
+import { oncePerDatabase } from '../pg/database.js';
 import { openPolicyStore } from '../policy/store.js';
 import type { AgentModel } from './model.js';
 import type { RoundDeps } from './round.js';
 
 export type CardDeps = Omit<RoundDeps, 'model' | 'onEvent' | 'onProposal'>;
 
+const policiesOf = oncePerDatabase(openPolicyStore);
+
 export const cardDepsFrom = (ctx: AppContext): CardDeps => ({
   store: ctx.store,
   teams: ctx.teams,
-  policies: openPolicyStore(ctx.db),
+  policies: policiesOf(ctx.db),
   agents: ctx.agents,
   repo: ctx.repo,
   digests: ctx.digests,

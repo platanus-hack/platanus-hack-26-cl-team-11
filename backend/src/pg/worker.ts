@@ -10,6 +10,7 @@ interface Outcome {
 
 interface Backend {
   schema: string | null;
+  announce?(): void;
   query(sql: string, params: SqlValue[]): Promise<Outcome>;
   script(sql: string): Promise<void>;
   close(): Promise<void>;
@@ -28,8 +29,10 @@ const TRANSACTION_END = /^\s*(COMMIT|ROLLBACK)\s*;?\s*$/i;
 pg.types.setTypeParser(INT8, Number);
 pg.types.setTypeParser(NUMERIC, Number);
 
-const { signal, port } = workerData as { signal: SharedArrayBuffer; port: MessagePort };
+const { signal, changesElsewhere, port } = workerData as { signal: SharedArrayBuffer; changesElsewhere: SharedArrayBuffer; port: MessagePort };
 const flag = new Int32Array(signal);
+const elsewhere = new Int32Array(changesElsewhere);
+const CHANGES_CHANNEL = 'montu_cambios';
 const backends = new Map<string, Promise<Backend>>();
 
 function needsEncryption(url: string): boolean {
@@ -59,6 +62,12 @@ function postgresBackend(url: string): Backend {
     fresh.on('error', lost);
     fresh.on('end', lost);
     await fresh.connect();
+    const own = (fresh as unknown as { processID: number }).processID;
+    fresh.on('notification', (message) => {
+      if (message.processId !== own) Atomics.add(elsewhere, 0, 1);
+    });
+    await fresh.query(`LISTEN ${CHANGES_CHANNEL}`);
+    Atomics.add(elsewhere, 0, 1);
     client = fresh;
     return fresh;
   };
@@ -101,6 +110,9 @@ function postgresBackend(url: string): Backend {
     },
     async script(sql) {
       await run(sql);
+    },
+    announce() {
+      client?.query(`NOTIFY ${CHANGES_CHANNEL}`).catch(() => undefined);
     },
     async close() {
       const open = client;
@@ -163,9 +175,12 @@ async function handle(request: Request): Promise<Outcome> {
   await within(backend, request.schema);
   if (request.action === 'script') {
     await backend.script(request.sql);
+    if (request.changes) backend.announce?.();
     return { rows: [], affected: 0 };
   }
-  return backend.query(request.sql, request.params);
+  const outcome = await backend.query(request.sql, request.params);
+  if (request.changes) backend.announce?.();
+  return outcome;
 }
 
 function answer(response: Response) {
