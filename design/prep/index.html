@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
 <link rel="stylesheet" href="../contexto/contexto.css">
-<link rel="stylesheet" href="pitch.css?v=3">
+<link rel="stylesheet" href="pitch.css?v=5">
 </head>
 <body style="margin: 0">
 <div class="rd-page cx cx-r pt">
@@ -22,38 +22,37 @@
 
     <main class="pt-deck" id="deck">
 
-      <section class="pt-slide pt-hook" data-tab="Montu" data-steps="2" data-time="0:00 · 12 s" data-script="El equipo promedio de esta hack tuvo siete mil cuatrocientas ocho conversaciones con su agente este fin de semana. | Les apuesto todas mis bananas a que entre ustedes no hablaron ni diez veces. [pausa] Hablamos más con nuestros agentes que con nuestro equipo. [7.408 es el promedio por equipo del ranking de tokens. Actualizarlo el domingo antes de presentar.]">
-        <h1 class="pt-hook__say">
-          <span class="pt-hook__lead">El equipo promedio de esta hack tuvo</span>
-          <span class="pt-hook__num cx-num cx-count" id="hook-n" role="img" aria-label="7.408"></span>
-          <span class="pt-hook__lead">conversaciones con su agente.</span>
-        </h1>
-        <p class="pt-hook__bet"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 8c-3 1-4 4-3 7 4 22 20 37 41 37 6 0 10-2 12-6 1-2-1-4-3-3-5 2-11 1-16-1C27 37 17 26 15 12c-1-3-3-5-5-4z"/></svg><span>Les apuesto todas mis bananas a que entre ustedes no hablaron ni diez veces.</span></p>
+      <section class="pt-slide pt-hook" data-tab="Montu" data-steps="3" data-time="0:00 · 15 s" data-script="En las últimas 36 horas, cada equipo de esta hack tuvo en promedio siete mil cuatrocientas ocho conversaciones con sus agentes. [El número es el promedio por equipo del ranking de tokens. Actualizarlo el domingo antes de presentar.] | Y apuesto todas mis bananas a que entre ustedes, persona a persona, no llegaron ni a la mitad. [pausa] | Hablamos más con nuestros agentes que con nuestro equipo. Y esos agentes no se hablan entre ellos.">
+        <div class="pt-hook__count">
+          <p class="pt-hook__say">
+            <span class="pt-hook__lead">En las últimas 36 horas, cada equipo de esta hack tuvo en promedio</span>
+            <span class="pt-hook__num cx-num cx-count" id="hook-n" role="img" aria-label="7.408"></span>
+            <span class="pt-hook__lead">conversaciones con sus agentes.</span>
+          </p>
+          <p class="pt-hook__bet"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 8c-3 1-4 4-3 7 4 22 20 37 41 37 6 0 10-2 12-6 1-2-1-4-3-3-5 2-11 1-16-1C27 37 17 26 15 12c-1-3-3-5-5-4z"/></svg><span>Apuesto todas mis bananas a que entre ustedes no llegaron ni a la mitad.</span></p>
+        </div>
+        <div class="pt-hook__claim">
+          <h1 class="pt-title">Hablamos más con nuestros agentes que con nuestro equipo.</h1>
+          <p class="pt-hook__then">Y esos agentes no se hablan entre ellos.</p>
+        </div>
       </section>
 
-      <section class="pt-slide" data-tab="No escala" data-steps="2" data-time="0:12 · 10 s" data-script="Coordinar un equipo no escala. Con cinco personas hay diez conversaciones posibles. | Con trescientas, cuarenta y cuatro mil ochocientas cincuenta.">
-        <h1 class="pt-title">Coordinar un equipo no escala.</h1>
-        <div class="pt-net ss-stage"><canvas id="net" role="img" aria-label="Una red donde cada persona está conectada con todas las demás"></canvas></div>
+      <section class="pt-slide pt-problem" data-tab="El problema" data-steps="3" data-time="0:15 · 20 s" data-script="Coordinar un equipo no escala. Con cinco personas hay diez conversaciones posibles. | Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. | Y ahora trabajamos con agentes. Cada persona hace más cosas a la vez, y sus agentes generan más tareas, más código y más correos que nunca. El equipo produce información más rápido de lo que alcanza a leerla. [Esta parte entra sola a los 5 segundos del clic anterior; un clic la adelanta.]">
+        <h1 class="pt-title pt-title--close cx-roll" id="net-title"><span class="cx-roll__item" data-first>Coordinar un equipo no escala.</span></h1>
+        <div class="pt-net ss-stage" id="flood"><canvas id="net" role="img" aria-label="Una red donde cada persona está conectada con todas las demás; encima se acumulan tareas, código y correos"></canvas></div>
         <p class="pt-caption cx-roll" id="net-caption"><span class="cx-roll__item" data-first>5 personas · 10 conversaciones</span></p>
       </section>
 
-      <section class="pt-slide" data-tab="Con agentes" data-time="0:22 · 10 s" data-script="Y ahora trabajamos con agentes. Cada persona hace más cosas a la vez, y sus agentes generan más tareas, más código y más correos que nunca. El equipo produce información más rápido de lo que alcanza a leerla.">
-        <div class="pt-flood ss-stage" id="flood" role="img" aria-label="Una persona con su agente, rodeada de tareas, código y correos que se acumulan">
-          <div class="pt-flood__who"><span class="pt-face" id="flood-face" style="--size: 128px"></span><span class="cx-tile" style="--s: 64px"><img src="../sources/apps/claude.png" alt=""></span></div>
-        </div>
-        <h1 class="pt-title pt-title--close">El equipo produce información más rápido de lo que alcanza a leerla.</h1>
-      </section>
-
-      <section class="pt-slide pt-pillars" id="pillars" data-tab="Tres pilares" data-steps="2" data-time="0:32 · 20 s" data-script="Eso se nota en tres cosas. Eficiencia: dos personas construyen lo mismo sin saberlo. Alineamiento: cada uno avanza, pero hacia un lado distinto y cada vez más rápido. Confianza: alguien está trabado y no lo dice por falta de confianza, o está explotado y no lo comunica. | Nadie lo hace mal a propósito. Simplemente, tener todas esas conversaciones es inabordable.">
+      <section class="pt-slide pt-pillars" id="pillars" data-tab="Tres pilares" data-steps="2" data-time="0:35 · 15 s" data-script="Eso se nota en tres cosas. Eficiencia: dos personas construyen lo mismo sin saberlo. Alineamiento: cada uno avanza rápido, pero hacia un lado distinto. Confianza: alguien está trabado o al tope y no lo dice. | Nadie lo hace mal a propósito. Simplemente, tener todas esas conversaciones es inabordable.">
         <div class="pt-three">
           <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g1)"><h2 class="pt-three__name">Eficiencia</h2><p class="pt-three__say">Dos personas construyen lo mismo sin saberlo.</p></div>
-          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g3)"><h2 class="pt-three__name">Alineamiento</h2><p class="pt-three__say">Cada uno avanza, pero hacia un lado distinto y cada vez más rápido.</p></div>
-          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g5)"><h2 class="pt-three__name">Confianza</h2><p class="pt-three__say">Alguien está trabado o explotado, y no lo dice.</p></div>
+          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g3)"><h2 class="pt-three__name">Alineamiento</h2><p class="pt-three__say">Cada uno avanza rápido, pero hacia un lado distinto.</p></div>
+          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g5)"><h2 class="pt-three__name">Confianza</h2><p class="pt-three__say">Alguien está trabado o al tope y no lo dice.</p></div>
         </div>
         <h1 class="pt-title pt-pillars__close">Tener todas esas conversaciones es inabordable.</h1>
       </section>
 
-      <section class="pt-slide" data-tab="Los agentes" data-time="0:52" data-draft data-script="Por eso hicimos Montu. Los agentes sí pueden tener esas conversaciones: no se cansan y conversan con cientos de pares en segundos. Montu no es otro agente: es lo que hace que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás.">
+      <section class="pt-slide" data-tab="Los agentes" data-time="0:50" data-draft data-script="Por eso hicimos Montu. Los agentes sí pueden tener esas conversaciones: no se cansan y conversan con cientos de pares en segundos. Montu no es otro agente: es lo que hace que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás.">
         <h1 class="pt-title">Por eso hicimos Montu.</h1>
         <div class="rd-card rd-glass pt-globe ss-stage" id="globe-card">
           <iframe id="globe" title="El globo del equipo: los agentes conversan entre sí. Arrástralo para girarlo."></iframe>
@@ -124,7 +123,7 @@
     <div class="pt-bar-bottom">
       <div class="pt-step">
         <button type="button" class="rd-iconbutton" id="prev" aria-label="Lámina anterior"><svg class="pt-stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 4L6 9l5 5"/></svg></button>
-        <span class="rd-note" id="where">1 / 8</span>
+        <span class="rd-note" id="where">1 / 7</span>
         <button type="button" class="rd-iconbutton" id="next" aria-label="Lámina siguiente"><svg class="pt-stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg></button>
       </div>
       <div class="pt-controls" role="group" aria-label="Controles de la animación">
@@ -141,6 +140,6 @@
 
 <script src="../luz/luz.js"></script>
 <script src="../faces/caras.js"></script>
-<script src="pitch.js?v=2"></script>
+<script src="pitch.js?v=4"></script>
 </body>
 </html>

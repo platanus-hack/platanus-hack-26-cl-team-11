@@ -1,7 +1,7 @@
 /*
  * Montu · la presentación de ensayo (design/prep/, se abre en /prep). Copia de design/pitch/ para probar el guion nuevo:
  * la portada es un solo número y abajo de cada lámina va lo que se dice, paso a paso (N lo esconde).
- * Ocho láminas, una idea cada una.
+ * Siete láminas, una idea cada una.
  *   ← → espacio y clic avanzan · N notas · F pantalla completa · V grabación de la demo · ?s=<n> abre una lámina (&k=2 su segundo paso)
  *   Las animaciones no se detienen solas: los controles de abajo pausan, adelantan y apuran la de la lámina abierta.
  */
@@ -76,7 +76,7 @@
   var showHook = counter($('hook-n'), 0), hookSlide = document.querySelector('.pt-hook');
   var coverScene = {
     enter: function () { setTimeout(function () { showHook(HOOK); }, still ? 0 : 350); },
-    step: function (k) { hookSlide.toggleAttribute('data-bet', k >= 2); },
+    step: function (k) { hookSlide.toggleAttribute('data-bet', k >= 2); hookSlide.toggleAttribute('data-claim', k >= 3); },
   };
 
   /* ---------- Contexto: todo lo de tu vida ya llega a tu agente ---------- */
@@ -115,7 +115,7 @@
     net.width = box.width * dpr;
     net.height = box.height * dpr;
     pen.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var few = n <= 12, radius = Math.min(box.width, box.height) / 2 - 32, points = [];
+    var few = n <= 12, radius = Math.min(box.width, box.height) * 0.31, points = [];
     for (var k = 0; k < n; k++) {
       var r = few ? radius * 0.86 : radius * Math.sqrt((k + 0.5) / n);
       var angle = few ? -Math.PI / 2 + (k / n) * Math.PI * 2 : k * 2.39996323;
@@ -148,45 +148,41 @@
     if (few) dots();
     frame();
   }
-  var growth = {
-    step: function (k) {
-      var n = k >= 2 ? 300 : 5;
-      roll($('net-caption'), fmt(n) + ' personas · ' + fmt(pairs(n)) + ' conversaciones');
-      drawNet(n, still);
-    },
-    leave: function () { netRun += 1; },
-    skip: function () { go(current, 2); },
-  };
-  window.addEventListener('resize', function () { if (scenes[current] === growth) drawNet(netSize, true); });
-
-  /* ---------- Con agentes: una persona, su agente y todo lo que se acumula alrededor ---------- */
+  // Encima de la red se acumula lo que generan los agentes: tareas, código y correos, cada vez más rápido.
   var KINDS = [['linear', 'Tarea'], ['github', 'Código'], ['gmail', 'Correo']];
-  var flood = $('flood'), floodFace = Caras.mount($('flood-face'), 'Lian', { size: 128, interactive: true, trigger: flood }), chips = [], seed = 7;
+  var flood = $('flood'), chips = [], seed = 7, CHIPS = 90;
   var chance = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
   function addChip() {
-    var x, y;
-    do { x = 1 + chance() * 86; y = 2 + chance() * 86; } while (x > 30 && x < 62 && y > 22 && y < 70);
     var kind = KINDS[chips.length % KINDS.length], chip = document.createElement('span');
     chip.className = 'pt-chip rd-glass';
-    chip.style.left = x + '%';
-    chip.style.top = y + '%';
+    chip.style.left = (2 + chance() * 86) + '%';
+    chip.style.top = (17 + chance() * 56) + '%';
     chip.style.setProperty('--turn', (chance() * 14 - 7).toFixed(1) + 'deg');
     chip.innerHTML = '<img src="../sources/apps/' + kind[0] + '.png" alt="">' + kind[1];
     flood.append(chip);
     chips.push(chip);
-    if (chips.length % 4 === 0) floodFace.pulse();
   }
   var clearChips = function () { chips.forEach(function (chip) { chip.remove(); }); chips = []; seed = 7; };
   var floodTick = ticker(function () {
-    if (chips.length >= 72) { clearChips(); return 500; }
+    if (chips.length >= CHIPS) return 60000;
     addChip();
-    return chips.length >= 72 ? 5000 : Math.max(70, 360 - chips.length * 6);
-  }, 400);
-  var floodScene = {
-    enter: function () { clearChips(); if (still) { for (var c = 0; c < 60; c++) addChip(); } floodTick.start(); },
-    leave: function () { floodTick.stop(); },
-    skip: function () { while (chips.length < 72) addChip(); },
+    return Math.max(60, 340 - chips.length * 6);
+  }, 300);
+  var soon = ticker(function () { soon.stop(); if (scenes[current] === growth && stepAt === 2) go(current, 3); return 60000; }, 5000);
+  var growth = {
+    step: function (k) {
+      var n = k >= 2 ? 300 : 5, agents = k >= 3;
+      soon.stop();
+      roll($('net-title'), agents ? 'Y ahora trabajamos con agentes.' : 'Coordinar un equipo no escala.');
+      roll($('net-caption'), agents ? 'El equipo produce información más rápido de lo que alcanza a leerla.' : fmt(n) + ' personas · ' + fmt(pairs(n)) + ' conversaciones');
+      if (n !== netSize || !agents) drawNet(n, still);
+      if (agents) { if (still) while (chips.length < CHIPS) addChip(); floodTick.start(); }
+      else { floodTick.stop(); clearChips(); if (k === 2) soon.start(); }
+    },
+    leave: function () { netRun += 1; soon.stop(); floodTick.stop(); clearChips(); netSize = 0; },
+    skip: function () { if (stepAt < 3) go(current, stepAt + 1); else while (chips.length < CHIPS) addChip(); },
   };
+  window.addEventListener('resize', function () { if (scenes[current] === growth) drawNet(netSize, true); });
 
   /* ---------- Tres pilares: con el clic final se apagan y queda la frase ---------- */
   var pillars = { step: function (k) { $('pillars').toggleAttribute('data-close', k >= 2); } };
@@ -222,7 +218,7 @@
 
   /* ---------- La presentación ---------- */
   var slides = Array.from(document.querySelectorAll('.pt-slide'));
-  var scenes = [coverScene, growth, floodScene, pillars, globeScene, context, ask, null];
+  var scenes = [coverScene, growth, pillars, globeScene, context, ask, null];
   var current = -1, stepAt = 1;
   slides.forEach(function (slide, i) {
     var tab = document.createElement('a');
