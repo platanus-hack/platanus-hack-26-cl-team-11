@@ -2,6 +2,7 @@ const CACHE = 'montu-app-v1';
 const SHELL = '/__shell';
 const RESTARTING = [502, 503, 504];
 const NOT_THE_APP = ['/api/', '/a/', '/design/'];
+const SERVER_PAGES = ['/dec', '/deck'];
 const NEVER_CHANGES = '/assets/';
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -47,7 +48,7 @@ async function networkFirst(request) {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin || NOT_THE_APP.some((prefix) => url.pathname.startsWith(prefix))) return;
+  if (request.method !== 'GET' || url.origin !== self.location.origin || NOT_THE_APP.some((prefix) => url.pathname.startsWith(prefix)) || SERVER_PAGES.includes(url.pathname)) return;
   if (request.mode === 'navigate') event.respondWith(shellNow(event));
   else if (url.pathname.startsWith(NEVER_CHANGES)) event.respondWith(keptFirst(request));
   else event.respondWith(networkFirst(request));
