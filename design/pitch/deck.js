@@ -13,7 +13,8 @@
   var SMALL = SIZES[0];
   var GOLDEN_ANGLE = 2.39996323;
   var COUNT_MS = 600;
-  var DRAW_FRAMES = 14;
+  var DRAW_FRAMES = 6;
+  var MAX_LINES = 7000;
   var RING_UP_TO = 10;
 
   var net = byId('net');
@@ -25,13 +26,13 @@
     if (n <= 10) return { dot: 11, line: 2.2, alpha: 0.5 };
     if (n <= 25) return { dot: 7, line: 1.4, alpha: 0.28 };
     if (n <= 100) return { dot: 3.6, line: 0.7, alpha: 0.1 };
-    return { dot: 2.4, line: 0.5, alpha: 0.045 };
+    return { dot: 2.4, line: 0.6, alpha: 0.11 };
   }
 
   function drawNet(n, instant) {
     var run = ++drawing;
     var box = net.getBoundingClientRect();
-    var ratio = Math.min(window.devicePixelRatio || 1, 2);
+    var ratio = n > RING_UP_TO ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     people = n;
     if (!box.width || !box.height || !pen) return;
     net.width = box.width * ratio;
@@ -49,6 +50,7 @@
     var ink = token('--rd-ink');
     var tint = token('--rd-g3');
     var total = pairsOf(n);
+    var skip = Math.max(1, Math.ceil(total / MAX_LINES));
     var batch = Math.ceil(total / DRAW_FRAMES);
     var done = 0;
     var i = 0;
@@ -70,8 +72,10 @@
       pen.lineWidth = look.line;
       pen.beginPath();
       while (done < upto) {
-        pen.moveTo(points[i][0], points[i][1]);
-        pen.lineTo(points[j][0], points[j][1]);
+        if (done % skip === 0) {
+          pen.moveTo(points[i][0], points[i][1]);
+          pen.lineTo(points[j][0], points[j][1]);
+        }
         done += 1;
         j += 1;
         if (j === n) { i += 1; j = i + 1; }
@@ -158,7 +162,7 @@
   var faces = Array.from(document.querySelectorAll('.pb-face')).map(function (node) {
     var size = Number(node.dataset.size);
     node.style.setProperty('--size', size + 'px');
-    return { slide: node.closest('.pb-slide'), before: node.dataset.state || 'reposo', after: node.dataset.after || node.dataset.state || 'reposo', face: Caras.mount(node, node.dataset.face, { size: size, state: node.dataset.state || 'reposo' }) };
+    return { node: node, size: size, slide: node.closest('.pb-slide'), ring: node.classList.contains('pb-ring__face'), before: node.dataset.state || 'reposo', after: node.dataset.after || node.dataset.state || 'reposo', face: null };
   });
 
   var ringFaces = Array.from(document.querySelectorAll('.pb-ring__face'));
@@ -201,13 +205,29 @@
       setTimeout(function () {
         if (run !== piling) return;
         brick.setAttribute('data-in', '');
-        if (at === bricks.length - 1) faces.forEach(function (entry) { if (entry.slide === flood) entry.face.set('ausente'); });
+        if (at === bricks.length - 1) faces.forEach(function (entry) { if (entry.slide === flood && entry.face) entry.face.set('ausente'); });
       }, 500 + at * BRICK_MS);
     });
   }
 
+  var FACE_LEAVE_MS = 600;
+  function dropFace(entry, late) {
+    if (!entry.face) return;
+    clearTimeout(entry.leaving);
+    var drop = function () {
+      if (!entry.face) return;
+      entry.face.destroy();
+      entry.face = null;
+      entry.node.replaceChildren();
+    };
+    if (late && !still) entry.leaving = setTimeout(drop, FACE_LEAVE_MS); else drop();
+  }
+
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
   var flood = document.querySelector('.pb-flood');
+  var live = slides.indexOf(document.querySelector('.pb-live'));
+  var STAGE_LEAD = 2;
+  var stageUrl = null;
   var intro = document.querySelector('.pb-intro');
   var scale = slides.indexOf(document.querySelector('.pb-scale'));
   var current = -1;
@@ -228,12 +248,19 @@
     }
     stepAt = step;
     slides[index].dataset.k = String(step);
-    faces.forEach(function (entry) { if (entry.slide === slides[index]) entry.face.set(step >= 2 ? entry.after : entry.before); });
+    faces.forEach(function (entry) {
+      var wanted = entry.slide === slides[index] && !(entry.ring && step > 1);
+      if (!wanted) return dropFace(entry, entry.slide === slides[index]);
+      clearTimeout(entry.leaving);
+      if (!entry.face) entry.face = Caras.mount(entry.node, entry.node.dataset.face, { size: entry.size, state: entry.before });
+      entry.face.set(step >= 2 ? entry.after : entry.before);
+    });
     if (slides[index] === intro && entering && step === 1) {
       byId('hook').dataset.value = '0';
       countTo(HOOK, still, byId('hook'));
     }
     if (slides[index] === intro && step === 2 && !still) { if (!bankOn) { bankOn = true; startBank(); } } else if (bankOn) { bankOn = false; stopBank(); }
+    if (stageUrl && index >= live - STAGE_LEAD && !byId('stage').getAttribute('src')) byId('stage').src = stageUrl;
     if (slides[index] === flood && entering) startPile();
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
@@ -264,7 +291,7 @@
 
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
-  byId('stage').src = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
+  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);
