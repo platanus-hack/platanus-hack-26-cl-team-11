@@ -33,6 +33,7 @@
 .ld-quote--big { max-width: 16ch; font-size: clamp(30px, 3.4vw, 46px); line-height: 1.08; letter-spacing: var(--rd-track-hero); }
 .ld-quote--big small { max-width: 44ch; line-height: 1.4; }
 .ld-text--after { margin-top: 32px; }
+.ld-quote--thanks { max-width: 22ch; margin: 72px 0 0; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.1; letter-spacing: var(--rd-track-hero); }
 .ld-split--top { margin-top: 40px; align-items: center; }
 .ld-split--top .ld-quote { margin: 0; }
 .ld-subtitle { margin: 40px 0 16px; font-size: 24px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); }
