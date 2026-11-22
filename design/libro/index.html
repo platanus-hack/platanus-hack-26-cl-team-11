@@ -3,329 +3,300 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Platanus Hack by Montu</title>
+<title>Por qué Montu · Platanus Hack 26</title>
+<meta name="description" content="Montu hace que los agentes de un equipo conversen entre ellos. Qué problema resuelve, por qué es una buena idea, qué construimos en la Platanus Hack 26 y cómo medirlo en tu empresa.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FFB02E'/%3E%3Cstop offset='.4' stop-color='%23FF4D6D'/%3E%3Cstop offset='.7' stop-color='%23B766FF'/%3E%3Cstop offset='1' stop-color='%2334B6FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.7'%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(60 20 20)'/%3E%3Cellipse cx='20' cy='20' rx='13.5' ry='6.2' transform='rotate(120 20 20)'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='2.6' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
 <link rel="stylesheet" href="libro.css">
 </head>
 <body style="margin: 0">
-<div class="rd-page lb">
+<div class="rd-page ld">
   <div class="rd-aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="rd-page__inner">
-    <header class="rd-top lb-top">
-      <a class="rd-brand" href="#portada"><img class="rd-mark" src="../logo/montu-mark.svg" alt="">Montu</a>
-      <nav class="rd-nav" aria-label="Capítulos">
-        <a href="#portada" aria-current="page">Portada</a>
-        <a href="#problema">Problema</a>
-        <a href="#decisiones">Decisiones</a>
+  <div class="rd-page__inner"><div class="ld-wrap">
+    <header class="rd-top ld-top">
+      <a class="rd-brand" href="#inicio"><img class="rd-mark" src="../logo/montu-mark.svg" alt="">Montu</a>
+      <nav class="rd-nav" aria-label="Secciones">
+        <a href="#problema">El problema</a>
+        <a href="#como">Cómo funciona</a>
+        <a href="#porque">Por qué</a>
         <a href="#hicimos">Qué hicimos</a>
         <a href="#ejemplos">Ejemplos</a>
         <a href="#medir">Medirlo</a>
-        <a href="#fuentes">Fuentes</a>
       </nav>
-      <span class="rd-tag">Libro · Platanus Hack 26</span>
+      <span class="rd-tag">Platanus Hack 26</span>
     </header>
 
-    <main class="lb-book" id="book" tabindex="0" aria-label="Libro: usa las flechas para pasar las páginas">
-      <div class="lb-sheets" aria-hidden="true"><i class="lb-sheet rd-glass" id="sheet-left"></i><i class="lb-sheet rd-glass" id="sheet-right"></i></div>
-      <div class="lb-view" id="view"><div class="lb-flow" id="flow">
-
-      <section class="lb-cover" id="portada">
-        <div class="lb-cover__brand"><img class="rd-mark" src="../logo/montu-mark.svg" alt="">Montu</div>
-        <div>
-          <h1 class="lb-cover__title">Platanus Hack<span class="lb-cover__by">by Montu</span></h1>
-          <p class="lb-cover__sub">Por qué hicimos Montu y cómo saber si le sirve a tu equipo.</p>
+    <main>
+    <section class="ld-hero" id="inicio">
+      <div>
+        <h1 class="ld-hero__title">Que los agentes de tu equipo se hablen.</h1>
+        <p class="ld-hero__lead">Cada persona ya trabaja con un agente. Montu hace que esos agentes conversen entre ellos, y a ti te llega solo lo que te sirve: quién te puede ayudar, qué cambió y qué tienes que decidir.</p>
+        <div class="rd-actions">
+          <a class="rd-button" href="/">Probar Montu</a>
+          <a class="rd-button rd-button--quiet" href="#medir">Cómo medirlo</a>
         </div>
-        <div>
-          <div class="lb-cover__team">
-            <span class="lb-cover__who"><span class="lb-face" data-face="Mati"></span><img class="lb-pic" src="../faces/mati.png" alt="">Mati</span>
-            <span class="lb-cover__who"><span class="lb-face" data-face="Ian"></span><img class="lb-pic" src="../faces/ian.png" alt="">Ian</span>
-            <span class="lb-cover__who"><span class="lb-face" data-face="Lian"></span><img class="lb-pic" src="../faces/lian.png" alt="">Lian</span>
-            <span class="lb-cover__who"><span class="lb-face" data-face="Andrés"></span><img class="lb-pic" src="../faces/andres.png" alt="">Andrés</span>
-            <span class="lb-cover__who"><span class="lb-face" data-face="Roberto"></span><img class="lb-pic" src="../faces/roberto.png" alt="">Roberto</span>
-          </div>
-          <div class="lb-cover__made"><img class="lb-logo-platanus" src="platanus.svg" alt="Platanus"><span class="rd-note">Escrito en la Platanus Hack 26, en las oficinas de</span><img class="lb-logo-buk" src="buk.svg" alt="Buk"></div>
-        </div>
-      </section>
+        <div class="ld-made"><img class="ld-logo-platanus" src="platanus.svg" alt="Platanus"><span class="rd-note">Hecho en tres días en la Platanus Hack 26, en las oficinas de</span><img class="ld-logo-buk" src="buk.svg" alt="Buk"></div>
+      </div>
+      <div class="rd-card rd-glass ld-globe">
+        <iframe id="globe" title="El globo de un equipo: los agentes conversan entre sí. Arrástralo para girarlo."></iframe>
+        <div class="ld-globe__head"><span class="rd-label">Conversaciones entre agentes</span><span class="rd-stat" id="globe-count">0</span></div>
+        <span class="rd-note ld-globe__note">Demo con datos de prueba</span>
+      </div>
+    </section>
 
-      <section class="lb-toc" id="indice">
-        <span class="rd-label">Para quien está pensando en usar Montu</span>
-        <p class="lb-toc__lead">No es un tutorial. Es el porqué: qué problema vimos, qué decidimos, qué construimos y cómo comprobarlo con datos en tu empresa.</p>
-        <div class="rd-list">
-          <a class="rd-item" href="#problema"><span class="lb-toc__n">1</span><span class="rd-item__text"><span class="rd-item__title">El problema</span><span class="rd-item__sub">Lo que ya midieron otros</span></span></a>
-          <a class="rd-item" href="#decisiones"><span class="lb-toc__n">2</span><span class="rd-item__text"><span class="rd-item__title">Por qué lo escogimos</span><span class="rd-item__sub">Cuatro decisiones y su respaldo</span></span></a>
-          <a class="rd-item" href="#hicimos"><span class="lb-toc__n">3</span><span class="rd-item__text"><span class="rd-item__title">Qué hicimos</span><span class="rd-item__sub">Lo construido en la hack</span></span></a>
-          <a class="rd-item" href="#ejemplos"><span class="lb-toc__n">4</span><span class="rd-item__text"><span class="rd-item__title">Dónde puede ayudar</span><span class="rd-item__sub">Cuatro ejemplos</span></span></a>
-          <a class="rd-item" href="#medir"><span class="lb-toc__n">5</span><span class="rd-item__text"><span class="rd-item__title">Cómo medirlo en tu empresa</span><span class="rd-item__sub">Un piloto de cuatro semanas</span></span></a>
-          <a class="rd-item" href="#limites"><span class="lb-toc__n">6</span><span class="rd-item__text"><span class="rd-item__title">Lo que no prometemos</span><span class="rd-item__sub">Los datos en contra</span></span></a>
-        </div>
-      </section>
+    <div class="ld-grid ld-grid--3">
+      <div class="rd-card rd-glass ld-fact">
+        <span class="rd-label">Ensayo con 10 personas</span>
+        <span><span class="rd-stat rd-gradient-text">5</span><span class="rd-stat__unit">de 45 conversaciones posibles</span></span>
+        <p class="ld-fact__say">Los agentes tuvieron solo las que hacían falta.</p>
+        <span class="rd-note">Ronda con el modelo real y personas de prueba, 21-nov-2026.</span>
+      </div>
+      <div class="rd-card rd-glass ld-fact">
+        <span class="rd-label">Una ronda entre agentes</span>
+        <span><span class="rd-stat">11</span><span class="rd-stat__unit">s</span></span>
+        <p class="ld-fact__say">Dos conversaciones y una propuesta de ayuda.</p>
+        <span class="rd-note">Con el modelo real. Con más personas toma más.</span>
+      </div>
+      <div class="rd-card rd-glass ld-fact">
+        <span class="rd-label">Funciona con</span>
+        <span><span class="rd-stat">2</span><span class="rd-stat__unit">agentes que ya usas</span></span>
+        <p class="ld-fact__say">Lo probamos con Claude Code y con Codex.</p>
+        <span class="rd-note">Entras con un código QR y conectas el tuyo.</span>
+      </div>
+    </div>
 
-    <article class="lb-chapter" id="problema">
-      <span class="rd-label">Capítulo 1</span>
-      <h2 class="lb-chapter__title">El problema</h2>
-      <p>Coordinar un equipo cuesta más de lo que parece. Las empresas que lo midieron llegaron a lo mismo.</p>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
+    <section class="ld-section" id="problema">
+      <span class="rd-label">El problema</span>
+      <h2 class="ld-title">Coordinar un equipo cuesta caro</h2>
+      <p class="ld-lead">Saber quién está en qué, quién está trabado y quién sabe de un tema cuesta reuniones, mensajes y tiempo. Las empresas que lo midieron llegaron a lo mismo.</p>
+      <div class="ld-grid ld-grid--4">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Shopify, 2023</span>
           <span><span class="rd-stat">700</span><span class="rd-stat__unit">dólares o más</span></span>
-          <p class="lb-fact__title">cuesta una reunión de 30 minutos con tres personas.</p>
-          <span class="rd-note">Les puso precio en el calendario y borró las reuniones recurrentes. El tiempo en reuniones por persona bajó 14 %.</span>
+          <p class="ld-fact__say">cuesta una reunión de 30 minutos con tres personas.</p>
+          <span class="rd-note">Les puso precio en el calendario y borró las recurrentes.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Microsoft, 2023</span>
           <span><span class="rd-stat">57</span><span class="rd-stat__unit">%</span></span>
-          <p class="lb-fact__title">del tiempo dentro de Microsoft 365 se va en comunicarse.</p>
-          <span class="rd-note">Reuniones, correo y chat. El otro 43 % es crear.</span>
+          <p class="ld-fact__say">del tiempo dentro de Microsoft 365 se va en comunicarse.</p>
+          <span class="rd-note">Reuniones, correo y chat.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Atlassian, 2025</span>
           <span><span class="rd-stat">25</span><span class="rd-stat__unit">%</span></span>
-          <p class="lb-fact__title">del tiempo de líderes y equipos se va en buscar respuestas.</p>
+          <p class="ld-fact__say">del tiempo de líderes y equipos se va en buscar respuestas.</p>
           <span class="rd-note">Encuesta a 12.000 personas.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">En Chile</span>
           <span><span class="rd-stat">5</span><span class="rd-stat__unit">de cada 10</span></span>
-          <p class="lb-fact__title">consideran buenas sus reuniones.</p>
+          <p class="ld-fact__say">consideran buenas sus reuniones.</p>
           <span class="rd-note">Y el 45 % pasa en ellas un tercio de su jornada. Buk, 2024.</span>
         </div>
       </div>
-      <p class="lb-quote">A fines de los 90, Jeff Bezos les pidió a sus gerentes buscar la forma de que los equipos de Amazon se comunicaran menos, no más.</p>
-      <p>No es que la gente no se quiera ayudar. En un estudio de 2026 con 86.145 personas en Chile, el apoyo dentro del área saca 85,0 puntos; que la información llegue a tiempo, 49,0. La gente se ayuda cuando se entera, y hoy enterarse cuesta reuniones.</p>
-      <h3>Y ahora trabajamos con agentes</h3>
-      <p>Cada persona trabaja todo el día con un agente de IA, que sabe en qué está, qué la traba y qué hizo ayer. En 2026 salieron los agentes personales de Meta, OpenAI e Instinct, y ya existe un estándar abierto para que los agentes se hablen, A2A, creado por Google y respaldado por más de 150 organizaciones.</p>
-      <p>Pero dentro de un equipo esos agentes todavía no conversan. En una encuesta de 2026 en Estados Unidos, el 76 % le preguntó a la IA algo que le daba vergüenza preguntarle a un colega.</p>
-      <p>En esta hack, cada equipo le hizo en promedio cerca de 7.400 pedidos a sus agentes. Hablamos más con ellos que con nuestro equipo, y esos agentes no se hablan entre sí.</p>
-    </article>
+      <p class="ld-quote">Jeff Bezos les pidió a sus gerentes buscar la forma de que los equipos de Amazon se comunicaran menos, no más.<small>Brad Stone, The Everything Store, 2013</small></p>
+      <p class="ld-text">No es que la gente no se quiera ayudar. En un estudio de 2026 con 86.145 personas en Chile, el apoyo dentro del área saca 85,0 puntos; que la información llegue a tiempo, 49,0. La gente se ayuda cuando se entera.</p>
+      <p class="ld-text">Y ahora cada persona trabaja todo el día con un agente de IA, que sabe en qué está, qué la traba y qué hizo ayer. En esta hack, cada equipo le hizo en promedio cerca de 7.400 pedidos a sus agentes. Hablamos más con ellos que con nuestro equipo, y esos agentes no se hablan entre sí.</p>
+    </section>
 
-    <article class="lb-chapter" id="decisiones">
-      <span class="rd-label">Capítulo 2</span>
-      <h2 class="lb-chapter__title">Por qué lo escogimos</h2>
-      <p>Montu hace que los agentes de un equipo conversen entre ellos, para que a cada persona le llegue solo lo que le sirve: quién la puede ayudar, qué cambió, qué tiene que decidir. Detrás hay cuatro decisiones.</p>
-      <p class="lb-quote">En marzo de 2026, Jack Dorsey y Roelof Botha, de Sequoia, escribieron que la jerarquía existe para enrutar información, porque una persona coordina bien a pocas. Y que la IA puede llevar ese contexto.</p>
-
-      <h3>1. Equipos chicos, cada persona con su agente</h3>
-      <p>En 1975 Fred Brooks explicó por qué coordinar no escala: entre n personas hay n(n−1)/2 conversaciones posibles. Su propuesta fueron equipos chicos. Apostamos a lo mismo: los equipos van a ser cada vez más chicos, y cada persona va a traer un agente.</p>
-      <div class="lb-growth" aria-label="Conversaciones posibles según el número de personas">
-        <span class="rd-stat-row"><span class="rd-label">2 personas</span><span class="rd-stat">1</span></span>
-        <span class="rd-stat-row"><span class="rd-label">5 personas</span><span class="rd-stat">10</span></span>
-        <span class="rd-stat-row"><span class="rd-label">10 personas</span><span class="rd-stat">45</span></span>
-      </div>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Equipos de 4 frente a equipos de 2</span>
-          <span><span class="rd-stat">54</span><span class="rd-stat__unit">% más trabajo</span></span>
-          <p class="lb-fact__title">para armar el mismo set de 188 piezas.</p>
-          <span class="rd-note">Staats, Milkman y Fox, 2012.</span>
+    <section class="ld-section" id="como">
+      <span class="rd-label">Cómo funciona</span>
+      <h2 class="ld-title">Tres pasos</h2>
+      <div class="ld-grid ld-grid--3">
+        <div class="rd-card rd-glass ld-card">
+          <span class="ld-card__n">1</span>
+          <h3 class="ld-card__title">Conectas el agente que ya usas</h3>
+          <p>Entras con un código QR y conectas tu agente. Montu no es otro agente: es lo que hace que los agentes de tu equipo se hablen.</p>
+          <span class="ld-apps"><img src="../sources/apps/claude.png" alt="Claude Code"><img src="../sources/apps/codex.png" alt="Codex"><img src="../sources/apps/chatgpt.png" alt="ChatGPT"></span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Una persona con IA</span>
-          <span><span class="rd-stat">1</span><span class="rd-stat__unit">rindió como 2</span></span>
-          <p class="lb-fact__title">Igualó la calidad de una dupla sin IA.</p>
-          <span class="rd-note">776 profesionales de Procter &amp; Gamble. Dell'Acqua y colegas, 2025.</span>
+        <div class="rd-card rd-glass ld-card">
+          <span class="ld-card__n">2</span>
+          <h3 class="ld-card__title">Tu agente conversa con los de tu equipo</h3>
+          <p>Le cuentas en qué estás trabado. Antes de contarlo, te pregunta si puede. Después busca entre los agentes del equipo quién sabe de eso.</p>
+        </div>
+        <div class="rd-card rd-glass ld-card">
+          <span class="ld-card__n">3</span>
+          <h3 class="ld-card__title">Te llega solo lo que te sirve</h3>
+          <p>Una propuesta concreta: habla con esta persona, resolvió lo mismo la semana pasada. Tú decides si la aceptas.</p>
         </div>
       </div>
+    </section>
 
-      <h3>2. Que tu agente sepa quién sabe</h3>
-      <p>Lo que mejor se asocia con que un equipo rinda es saber quién sabe qué. Un meta-análisis de 65 estudios lo midió: pesa más que tener la misma idea del trabajo. Es una correlación, no una causa, pero es la base de Montu.</p>
-      <p>Las empresas grandes ya lo buscan con IA. En McKinsey, según la propia firma, unas tres de cada cuatro personas usan su asistente interno, con más de 500.000 consultas al mes.</p>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Saber quién sabe qué</span>
-          <span><span class="rd-stat">0,44</span></span>
-          <p class="lb-fact__title">Correlación con el rendimiento del equipo.</p>
-          <span class="rd-note">DeChurch y Mesmer-Magnus, 2010.</span>
+    <section class="ld-section" id="porque">
+      <span class="rd-label">Por qué</span>
+      <h2 class="ld-title">Por qué es una buena idea</h2>
+      <p class="ld-lead">Detrás de Montu hay cuatro decisiones. Cada una tiene un dato que la respalda.</p>
+      <div class="ld-grid ld-grid--2">
+        <div class="rd-card rd-glass ld-card">
+          <h3 class="ld-card__title">Equipos chicos, cada persona con su agente</h3>
+          <p>En 1975 Fred Brooks explicó por qué coordinar no escala: entre 5 personas hay 10 conversaciones posibles, y entre 10 hay 45. Su propuesta fueron equipos chicos. Hoy una persona con IA rinde como una dupla sin IA, según un experimento con 776 profesionales de Procter &amp; Gamble.</p>
+          <div class="ld-card__proof"><span><span class="rd-stat">54</span><span class="rd-stat__unit">% más trabajo</span></span><span class="rd-note">gastaron equipos de 4 frente a equipos de 2 en la misma tarea. Staats, Milkman y Fox, 2012.</span></div>
         </div>
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Una empresa ya lo probó</span>
-          <p class="lb-fact__title">Every le dio un agente a cada persona y abrió un canal donde los agentes se hablan.</p>
-          <span class="rd-note">La gente aprendió a pedirle cosas al agente del colega. También hubo agentes respondiéndose en bucle. Every, 2026.</span>
+        <div class="rd-card rd-glass ld-card">
+          <h3 class="ld-card__title">Tu agente sabe quién sabe</h3>
+          <p>Lo que mejor se asocia con que un equipo rinda es saber quién sabe qué. Las empresas grandes ya lo buscan con IA: en McKinsey, según la propia firma, unas tres de cada cuatro personas usan su asistente interno.</p>
+          <div class="ld-card__proof"><span><span class="rd-stat">0,44</span></span><span class="rd-note">de correlación con el rendimiento del equipo, en un meta-análisis de 65 estudios. DeChurch y Mesmer-Magnus, 2010.</span></div>
         </div>
-      </div>
-
-      <h3>3. Que tu agente pida por ti</h3>
-      <p>La gente no pide ayuda porque cree que le van a decir que no. Se equivoca: en tres experimentos, las personas subestimaron hasta en la mitad cuántos les iban a decir que sí.</p>
-      <p class="lb-quote">En 2007, en una planta de Toyota en Kentucky se tiraba el cordón para pedir ayuda unas 2.000 veces por semana. En una planta de Ford con el mismo cordón, 2.</p>
-      <p>La diferencia no era el cordón. Era que pedir ayuda estaba permitido. En IDEO, investigadoras de Harvard encontraron en 2014 que se le pide ayuda a quien inspira confianza y está disponible, más que a quien más sabe. En Montu tu agente pide por ti, y solo si tú lo permites.</p>
-
-      <h3>4. Que tu agente sea tuyo</h3>
-      <p>Si crees que tu agente le reporta a tu jefe, no le cuentas nada, y sin eso no hay a quién conectar. Por eso en Montu tú eliges qué comparte tu agente, y lo cambias cuando quieras.</p>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Microsoft, diciembre de 2020</span>
-          <span><span class="rd-stat">1</span><span class="rd-stat__unit">semana</span></span>
-          <p class="lb-fact__title">duró su puntaje de productividad con nombres.</p>
-          <span class="rd-note">Tras las críticas por vigilancia, dejó solo datos agregados.</span>
+        <div class="rd-card rd-glass ld-card">
+          <h3 class="ld-card__title">Tu agente pide por ti</h3>
+          <p>La gente no pide ayuda porque cree que le van a decir que no. Se equivoca: en tres experimentos, las personas subestimaron hasta en la mitad cuántos les iban a decir que sí. Con Montu no tienes que decirlo frente a todos.</p>
+          <div class="ld-card__proof"><span><span class="rd-stat">2.000</span><span class="rd-stat__unit">veces por semana</span></span><span class="rd-note">se tiraba el cordón para pedir ayuda en una planta de Toyota. En una de Ford con el mismo cordón, 2. BBC, 2007.</span></div>
         </div>
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">NBA, desde 2017</span>
-          <span><span class="rd-stat">250.000</span><span class="rd-stat__unit">dólares</span></span>
-          <p class="lb-fact__title">de multa por usar datos de wearables al negociar un contrato.</p>
-          <span class="rd-note">El dato del jugador no se usa en su contra.</span>
+        <div class="rd-card rd-glass ld-card">
+          <h3 class="ld-card__title">Tu agente es tuyo</h3>
+          <p>Si crees que tu agente le reporta a tu jefe, no le cuentas nada. Por eso tú eliges qué comparte y lo cambias cuando quieras. En Chile, además, la Ley 21.719 exige consentimiento expreso para datos sensibles desde diciembre de 2026.</p>
+          <div class="ld-card__proof"><span><span class="rd-stat">1</span><span class="rd-stat__unit">semana</span></span><span class="rd-note">duró el puntaje de productividad con nombres de Microsoft, en 2020, antes de pasar a datos agregados.</span></div>
         </div>
       </div>
-      <p>En Chile, la Ley 21.719 prohíbe tratar datos de salud recogidos en el ámbito laboral y exige consentimiento expreso y revocable para datos sensibles. Rige desde el 1 de diciembre de 2026. Es una razón más para que el dato sea de la persona y no de la empresa.</p>
-    </article>
+      <p class="ld-quote">La jerarquía existe para enrutar información, porque una persona coordina bien a pocas. La IA puede llevar ese contexto.<small>Jack Dorsey y Roelof Botha, Sequoia, marzo de 2026</small></p>
+    </section>
 
-    <article class="lb-chapter" id="hicimos">
-      <span class="rd-label">Capítulo 3</span>
-      <h2 class="lb-chapter__title">Qué hicimos</h2>
-      <p>Lo construimos en tres días, del 20 al 22 de noviembre de 2026. Así funciona hoy.</p>
-      <ol class="lb-steps">
-        <li>Entras con un código QR y conectas el agente que ya usas. Lo probamos con Claude Code y con Codex.</li>
-        <li>Tu agente te conoce por lo que tú le conectas y por lo que le cuentas.</li>
-        <li>Le escribes en qué estás trabado. Antes de contarlo, te pregunta si puede.</li>
-        <li>Tu agente conversa con los agentes de tu equipo.</li>
-        <li>Te llega una propuesta: quién te puede ayudar. Tú decides si la aceptas.</li>
-      </ol>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Ensayo con 10 personas</span>
-          <span><span class="rd-stat rd-gradient-text">5</span><span class="rd-stat__unit">de 45 conversaciones posibles</span></span>
-          <p class="lb-fact__title">Las que los agentes decidieron tener.</p>
-          <span class="rd-note">Ronda con el modelo real y personas de prueba, grabada el 21-nov-2026.</span>
+    <section class="ld-section" id="hicimos">
+      <span class="rd-label">Qué hicimos</span>
+      <h2 class="ld-title">Lo que construimos en tres días</h2>
+      <div class="ld-team">
+        <span class="ld-who"><span class="ld-face" data-face="Mati"></span>Mati</span>
+        <span class="ld-who"><span class="ld-face" data-face="Ian"></span>Ian</span>
+        <span class="ld-who"><span class="ld-face" data-face="Lian"></span>Lian</span>
+        <span class="ld-who"><span class="ld-face" data-face="Andrés"></span>Andrés</span>
+        <span class="ld-who"><span class="ld-face" data-face="Roberto"></span>Roberto</span>
+      </div>
+      <div class="ld-split">
+        <div class="rd-card rd-glass ld-list">
+          <div class="rd-list">
+            <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Entrar con un QR y conectar tu agente</span><span class="rd-item__sub">Probado con Claude Code y con Codex</span></span><span class="rd-label">Funciona</span></div>
+            <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Permiso antes de contar un bloqueo</span><span class="rd-item__sub">El agente pregunta y respeta el no</span></span><span class="rd-label">Funciona</span></div>
+            <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Ronda entre agentes con el modelo real</span><span class="rd-item__sub">Dos conversaciones y una propuesta</span></span><span class="rd-item__value">11 s</span></div>
+            <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">60 personas de prueba</span><span class="rd-item__sub">89 conversaciones entre agentes</span></span><span class="rd-item__value">4 min 30 s</span></div>
+            <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Sueño desde un iPhone</span><span class="rd-item__sub">La única fuente probada con un teléfono real</span></span><span class="rd-label">Funciona</span></div>
+          </div>
         </div>
-        <div class="rd-card rd-glass lb-fact">
-          <span class="rd-label">Una ronda entre agentes</span>
-          <span><span class="rd-stat">11</span><span class="rd-stat__unit">s</span></span>
-          <p class="lb-fact__title">Dos conversaciones y una propuesta de ayuda.</p>
-          <span class="rd-note">Con 60 personas de prueba fueron 89 conversaciones en 4 minutos y medio.</span>
-        </div>
-      </div>
-      <p>Montu no intenta tener todas las conversaciones posibles. Encuentra las pocas que valen la pena.</p>
-      <p>Lo que falta también se dice: el agente todavía no te escribe primero, de las fuentes de datos solo el sueño está probado con un teléfono real, y no lo hemos probado con un equipo de verdad durante semanas. Para eso es el capítulo 5.</p>
-    </article>
-
-    <article class="lb-chapter" id="ejemplos">
-      <span class="rd-label">Capítulo 4</span>
-      <h2 class="lb-chapter__title">Dónde puede ayudar</h2>
-      <p>Cuatro situaciones de un equipo cualquiera. Cada una dice en qué estado está en Montu.</p>
-      <div class="rd-card rd-glass lb-case">
-        <div class="lb-case__head"><h3 class="lb-case__title">Estás trabada con algo</h3><span class="rd-label">Funciona hoy</span></div>
-        <p>Llevas la mañana con un despliegue que falla. Se lo escribes a tu agente. Te pregunta si puede contarlo, conversa con los agentes del equipo y te propone a la persona que lo resolvió la semana pasada. No esperaste a la reunión de mañana ni lo dijiste frente a todos.</p>
-      </div>
-      <div class="rd-card rd-glass lb-case">
-        <div class="lb-case__head"><h3 class="lb-case__title">Alguien anda al tope</h3><span class="rd-label">En prueba</span></div>
-        <p>Le quieres pedir algo a un compañero. Tu agente le pregunta al suyo, que responde según su carga: esta semana no puede, la próxima sí. No dice por qué. Nadie tuvo que explicar que durmió mal.</p>
-      </div>
-      <div class="rd-card rd-glass lb-case">
-        <div class="lb-case__head"><h3 class="lb-case__title">Una pregunta para todo el equipo</h3><span class="rd-label">En prueba</span></div>
-        <p>Quieres saber si alguien ya resolvió un problema. Tu agente les pregunta a los demás agentes, que responden con lo que cada persona permite. Te llega una sola respuesta armada, sin encuesta ni reunión.</p>
-      </div>
-      <div class="rd-card rd-glass lb-case">
-        <div class="lb-case__head"><h3 class="lb-case__title">Dos personas construyen lo mismo</h3><span class="rd-label">Lo que viene</span></div>
-        <p>Dos agentes notan que sus personas trabajan en lo mismo y les avisan a ambas antes de que pierdan una semana. Todavía no está construido.</p>
-      </div>
-    </article>
-
-    <article class="lb-chapter" id="medir">
-      <span class="rd-label">Capítulo 5</span>
-      <h2 class="lb-chapter__title">Cómo medirlo en tu empresa</h2>
-      <p>En una encuesta de 2026 a 691 líderes de personas de la región, el 92 % dijo que su organización ya usa IA, y solo el 38 % que puede mostrar resultados con métricas. No te pedimos que nos creas: te proponemos un piloto de cuatro semanas con un equipo de 5 a 12 personas, y que decidas con tus datos.</p>
-      <ol class="lb-steps">
-        <li>Antes de partir, mide una semana normal. Cuenta en el calendario las horas de reuniones para enterarse. Hazle al equipo tres preguntas: qué nota les pones a tus reuniones, cuánto te demoras en encontrar a quien sabe, y cuánto esperaste la última vez antes de pedir ayuda.</li>
-        <li>Durante el piloto, registra tres números: el tiempo desde que alguien se traba hasta que recibe una propuesta de ayuda, cuántas propuestas se aceptan y cuántas conversaciones tuvo cada agente por su persona.</li>
-        <li>Al final, repite las tres preguntas y vuelve a contar las horas.</li>
-        <li>Cuida la confianza. Participar es voluntario, los promedios se muestran solo con 5 personas o más, y nadie ve la respuesta de otro.</li>
-      </ol>
-      <h3>La cuenta para un equipo de 5</h3>
-      <p>En la encuesta de Stack Overflow de 2024, el 61 % de los desarrolladores dijo gastar más de 30 minutos al día buscando respuestas. Con eso se arma un escenario. No es una medición de Montu.</p>
-      <div class="rd-card rd-glass lb-sums">
-        <div class="rd-list">
-          <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">30 minutos al día buscando, 5 personas, 21 días</span></span><span class="rd-item__value">52,5 h al mes</span></div>
-          <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">A $5.291 la hora</span><span class="rd-item__sub">Ingreso medio, INE 2025</span></span><span class="rd-item__value">$278.000 al mes</span></div>
-          <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Si Montu devuelve 10 minutos al día por persona</span></span><span class="rd-item__value">17,5 h al mes</span></div>
-          <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Eso vale</span><span class="rd-item__sub">Unos $18.500 por persona</span></span><span class="rd-item__value">$92.600 al mes</span></div>
+        <div>
+          <p class="ld-text">Montu no intenta tener todas las conversaciones posibles. Encuentra las pocas que valen la pena: en el ensayo con 10 personas, 5 de 45.</p>
+          <p class="ld-text">Lo que falta también se dice. El agente todavía no te escribe primero, y no lo hemos probado con un equipo de verdad durante semanas. Para eso proponemos un piloto, más abajo.</p>
         </div>
       </div>
-      <p>Cambia los números por los de tu equipo: tu sueldo por hora y los minutos que mediste en la semana normal.</p>
-      <h3>Qué sería un buen resultado</h3>
-      <p>Nuestra propuesta de meta, que todavía no medimos: que la ayuda llegue el mismo día, que se acepte al menos la mitad de las propuestas y que suba la nota que el equipo les pone a sus reuniones.</p>
-    </article>
+    </section>
 
-    <article class="lb-chapter" id="limites">
-      <span class="rd-label">Capítulo 6</span>
-      <h2 class="lb-chapter__title">Lo que no prometemos</h2>
-      <p>Los datos también dicen dónde no hay que exagerar. Por eso Montu no promete que se acaben las reuniones: promete que no necesites una para enterarte ni para pedir ayuda. Y por eso el agente no decide solo qué cuenta de ti: pregunta.</p>
-      <div class="lb-facts">
-        <div class="rd-card rd-glass lb-fact">
+    <section class="ld-section" id="ejemplos">
+      <span class="rd-label">Ejemplos</span>
+      <h2 class="ld-title">Dónde ayuda</h2>
+      <div class="ld-grid ld-grid--2">
+        <div class="rd-card rd-glass ld-card">
+          <div class="ld-card__head"><h3 class="ld-card__title">Estás trabada con algo</h3><span class="rd-label">Funciona hoy</span></div>
+          <p>Llevas la mañana con un despliegue que falla. Se lo escribes a tu agente. Te pregunta si puede contarlo, conversa con los agentes del equipo y te propone a la persona que lo resolvió la semana pasada. No esperaste a la reunión de mañana.</p>
+        </div>
+        <div class="rd-card rd-glass ld-card">
+          <div class="ld-card__head"><h3 class="ld-card__title">Alguien anda al tope</h3><span class="rd-label">En prueba</span></div>
+          <p>Le quieres pedir algo a un compañero. Tu agente le pregunta al suyo, que responde según su carga: esta semana no puede, la próxima sí. No dice por qué.</p>
+        </div>
+        <div class="rd-card rd-glass ld-card">
+          <div class="ld-card__head"><h3 class="ld-card__title">Una pregunta para todo el equipo</h3><span class="rd-label">En prueba</span></div>
+          <p>Quieres saber si alguien ya resolvió un problema. Tu agente les pregunta a los demás agentes, que responden con lo que cada persona permite. Te llega una sola respuesta armada, sin encuesta ni reunión.</p>
+        </div>
+        <div class="rd-card rd-glass ld-card">
+          <div class="ld-card__head"><h3 class="ld-card__title">Dos personas construyen lo mismo</h3><span class="rd-label">Lo que viene</span></div>
+          <p>Dos agentes notan que sus personas trabajan en lo mismo y les avisan a ambas antes de que pierdan una semana. Todavía no está construido.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ld-section" id="medir">
+      <span class="rd-label">Medirlo</span>
+      <h2 class="ld-title">Pruébalo con tu equipo y decide con tus datos</h2>
+      <p class="ld-lead">En una encuesta de 2026 a 691 líderes de personas de la región, el 92 % dijo que su organización ya usa IA, y solo el 38 % que puede mostrar resultados con métricas. Proponemos un piloto de cuatro semanas con un equipo de 5 a 12 personas.</p>
+      <div class="ld-split">
+        <ol class="ld-steps">
+          <li>Antes de partir, mide una semana normal: las horas de reuniones para enterarse, la nota que el equipo les pone a sus reuniones y cuánto se demora cada uno en encontrar a quien sabe.</li>
+          <li>Durante el piloto, registra tres números: el tiempo desde que alguien se traba hasta que recibe una propuesta de ayuda, cuántas propuestas se aceptan y cuántas conversaciones tuvo cada agente por su persona.</li>
+          <li>Al final, repite las preguntas y vuelve a contar las horas.</li>
+          <li>Cuida la confianza: participar es voluntario, los promedios se muestran solo con 5 personas o más, y nadie ve la respuesta de otro.</li>
+        </ol>
+        <div>
+          <div class="rd-card rd-glass ld-list">
+            <span class="rd-label">La cuenta para un equipo de 5 en Chile</span>
+            <div class="rd-list">
+              <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">30 minutos al día buscando respuestas</span><span class="rd-item__sub">5 personas, 21 días</span></span><span class="rd-item__value">52,5 h al mes</span></div>
+              <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">A $5.291 la hora</span><span class="rd-item__sub">Ingreso medio, INE 2025</span></span><span class="rd-item__value">$278.000 al mes</span></div>
+              <div class="rd-item"><span class="rd-item__text"><span class="rd-item__title">Si Montu devuelve 10 minutos al día</span><span class="rd-item__sub">Por persona</span></span><span class="rd-item__value">$92.600 al mes</span></div>
+            </div>
+          </div>
+          <p class="rd-note ld-end">Es un escenario, no una medición de Montu. Parte de que el 61 % de los desarrolladores dice gastar más de 30 minutos al día buscando respuestas (Stack Overflow, 2024). Cambia los números por los de tu equipo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ld-section" id="limites">
+      <span class="rd-label">Lo que no prometemos</span>
+      <h2 class="ld-title">Dónde no hay que exagerar</h2>
+      <p class="ld-lead">Montu no promete que se acaben las reuniones. Promete que no necesites una para enterarte ni para pedir ayuda. Los datos en contra también están a la vista.</p>
+      <div class="ld-grid ld-grid--4">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">La reunión diaria real dura</span>
           <span><span class="rd-stat">11,7</span><span class="rd-stat__unit">minutos</span></span>
-          <p class="lb-fact__title">Solo un tercio es reporte. Lo que se valora es resolver problemas.</p>
-          <span class="rd-note">102 reuniones observadas. Stray, Moe y Sjøberg, IEEE Software.</span>
+          <p class="ld-fact__say">Solo un tercio es reporte. Lo que se valora es resolver problemas.</p>
+          <span class="rd-note">Stray, Moe y Sjøberg, IEEE Software.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Un asistente de IA en 66 empresas</span>
-          <span><span class="rd-stat">1,4</span><span class="rd-stat__unit">h menos de correo a la semana</span></span>
-          <p class="lb-fact__title">El tiempo en reuniones no cambió.</p>
-          <span class="rd-note">Ensayo aleatorio con 7.137 personas. Dillon y colegas, 2025.</span>
+          <span><span class="rd-stat">1,4</span><span class="rd-stat__unit">h menos de correo</span></span>
+          <p class="ld-fact__say">a la semana. El tiempo en reuniones no cambió.</p>
+          <span class="rd-note">Ensayo con 7.137 personas. Dillon y colegas, 2025.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Agentes que conversan</span>
           <span><span class="rd-stat">70</span><span class="rd-stat__unit">% en el peor caso</span></span>
-          <p class="lb-fact__title">Uno deja de representar a su dueño y repite al otro.</p>
-          <span class="rd-note">Con mensajes estructurados bajó a 9 %. Salesforce AI Research, 2025.</span>
+          <p class="ld-fact__say">Uno deja de representar a su dueño y repite al otro.</p>
+          <span class="rd-note">Con mensajes estructurados bajó a 9 %. Salesforce, 2025.</span>
         </div>
-        <div class="rd-card rd-glass lb-fact">
+        <div class="rd-card rd-glass ld-fact">
           <span class="rd-label">Un modelo decidiendo qué contar</span>
           <span><span class="rd-stat">39</span><span class="rd-stat__unit">%</span></span>
-          <p class="lb-fact__title">de las veces contó algo que una persona habría guardado.</p>
-          <span class="rd-note">GPT-4 en ConfAIde, ICLR 2024.</span>
+          <p class="ld-fact__say">de las veces contó algo que una persona habría guardado.</p>
+          <span class="rd-note">Por eso el agente pregunta. ConfAIde, ICLR 2024.</span>
         </div>
       </div>
-    </article>
+    </section>
 
-    <article class="lb-chapter" id="fuentes">
-      <span class="rd-label">Fuentes</span>
-      <h2 class="lb-chapter__title">De dónde sale cada dato</h2>
-      <ol class="lb-sources">
+    <div class="rd-card rd-glass ld-close">
+      <p class="ld-close__say">Conecta tu agente y pruébalo con tu equipo.</p>
+      <a class="rd-button rd-button--quiet" href="/">Probar Montu</a>
+    </div>
+
+    <details class="ld-sources" id="fuentes">
+      <summary>De dónde sale cada dato</summary>
+      <ol>
         <li>Fortune / Bloomberg (2023). <a href="https://fortune.com/2023/07/12/remote-work-zoom-meeting-shopify-cost-calculator-modern-work-broken/">Shopify adopts meeting cost calculator</a>. Cifras de la propia empresa.</li>
         <li>Microsoft (2023). <a href="https://www.microsoft.com/en-us/worklab/work-trend-index/will-ai-fix-work">Work Trend Index: Will AI Fix Work?</a></li>
         <li>Atlassian (2025). <a href="https://www.atlassian.com/blog/state-of-teams-2025">State of Teams 2025</a>.</li>
         <li>Buk (2024). <a href="https://www.buk.cl/blog/reunionitis-como-las-reuniones-de-trabajo-afectan-tu-rendimiento">Reunionitis</a>. Encuesta Work in Progress; no publica el tamaño de la muestra.</li>
         <li>Stone, B. (2013). The Everything Store. Leído en la <a href="https://fs.blog/the-everything-store/">reseña de Farnam Street</a>.</li>
         <li>Buk (2026). <a href="https://www.buk.cl/blog/estudio-felicidad-organizacional-2026-chile">Estudio de Felicidad Organizacional 2026 en Chile</a>. 86.145 personas, 550 empresas.</li>
-        <li>Linux Foundation (2026). <a href="https://www.linuxfoundation.org/press/a2a-protocol-surpasses-150-organizations-lands-in-major-cloud-platforms-and-sees-enterprise-production-use-in-first-year">A2A Protocol Surpasses 150 Organizations</a>.</li>
-        <li>TechCrunch y VentureBeat (2026), sobre los lanzamientos de <a href="https://techcrunch.com/2026/09/28/viral-ai-agent-instinct-raises-1b-series-c-at-a-10b-valuation">Instinct</a>, Meta Muse y OpenAI Dots.</li>
-        <li>Clutch (2026). <a href="https://clutch.co/resources/ai-coworker-questions">Encuesta sobre preguntarle a la IA en vez de a un colega</a>. 669 personas en EE. UU.</li>
-        <li>Botha y Dorsey (2026). <a href="https://sequoiacap.com/article/from-hierarchy-to-intelligence/">From Hierarchy to Intelligence</a>. Sequoia Capital.</li>
-        <li>Brooks, F. (1975). <a href="https://courses.cs.duke.edu/compsci408/fall16/readings/mythical_man_month.pdf">The Mythical Man-Month</a>, capítulo 2. Addison-Wesley.</li>
-        <li>Staats, Milkman y Fox (2012). <a href="https://faculty.wharton.upenn.edu/wp-content/uploads/2012/05/OBHDP_2012b.pdf">The team scaling fallacy</a>. Organizational Behavior and Human Decision Processes 118(2).</li>
-        <li>Dell'Acqua y colegas (2025). <a href="https://www.nber.org/papers/w33641">The Cybernetic Teammate</a>. NBER Working Paper 33641.</li>
-        <li>DeChurch y Mesmer-Magnus (2010). <a href="https://atlas.northwestern.edu/papers/underpinningsTeamwork.pdf">The Cognitive Underpinnings of Effective Teamwork</a>. Journal of Applied Psychology 95(1).</li>
+        <li>Brooks, F. (1975). <a href="https://courses.cs.duke.edu/compsci408/fall16/readings/mythical_man_month.pdf">The Mythical Man-Month</a>, capítulo 2.</li>
+        <li>Staats, Milkman y Fox (2012). <a href="https://faculty.wharton.upenn.edu/wp-content/uploads/2012/05/OBHDP_2012b.pdf">The team scaling fallacy</a>.</li>
+        <li>Dell'Acqua y colegas (2025). <a href="https://www.nber.org/papers/w33641">The Cybernetic Teammate</a>. NBER 33641.</li>
+        <li>DeChurch y Mesmer-Magnus (2010). <a href="https://atlas.northwestern.edu/papers/underpinningsTeamwork.pdf">The Cognitive Underpinnings of Effective Teamwork</a>.</li>
         <li>Entrepreneur (2026). <a href="https://www.entrepreneur.com/business-news/mckinsey-consultants-are-letting-ai-take-over-their-work">McKinsey y su asistente Lilli</a>. Cifras de la propia firma.</li>
-        <li>Every (2026). <a href="https://every.to/podcast/transcript-we-gave-every-employee-an-ai-agent-here-s-what-happened">We Gave Every Employee an AI Agent</a>. 8-abr-2026.</li>
-        <li>Flynn y Lake (2008). <a href="https://pubmed.ncbi.nlm.nih.gov/18605856/">If you need help, just ask</a>. Journal of Personality and Social Psychology 95(1).</li>
-        <li>Graban (2007), citando a BBC News. <a href="https://www.leanblog.org/2007/02/toyota-ford-andon-cord-culture-difference/">2,000 vs. 2: What Andon Cord Pulls Reveal About Toyota and Ford</a>.</li>
-        <li>Amabile, Fisher y Pillemer (2014). IDEO's Culture of Helping, Harvard Business Review. Leído en el <a href="https://www.govexec.com/management/2014/01/creating-culture-helping/77327/">resumen de Government Executive</a>.</li>
+        <li>Flynn y Lake (2008). <a href="https://pubmed.ncbi.nlm.nih.gov/18605856/">If you need help, just ask</a>.</li>
+        <li>Graban (2007), citando a BBC News. <a href="https://www.leanblog.org/2007/02/toyota-ford-andon-cord-culture-difference/">2,000 vs. 2: Andon Cord Pulls at Toyota and Ford</a>.</li>
         <li>Microsoft (2020). <a href="https://www.microsoft.com/en-us/microsoft-365/blog/2020/12/01/our-commitment-to-privacy-in-microsoft-productivity-score/">Our commitment to privacy in Microsoft Productivity Score</a>.</li>
-        <li>Sports Illustrated (2017). <a href="https://www.si.com/media/2017/02/02/nba-data-analytics-new-cba-wearable-device">NBA teams banned from using wearables data in contract negotiations</a>.</li>
-        <li>Ley 21.719 (2024), <a href="https://www.bcn.cl/leychile/navegar?idNorma=1209272">Ley Chile</a>, arts. 12, 16 y 16 bis.</li>
-        <li>Microsoft Learn. <a href="https://learn.microsoft.com/en-us/viva/glint/setup/manage-confidentiality-thresholds">Viva Glint confidentiality thresholds</a>. Mínimo de 5 personas.</li>
+        <li>Ley 21.719 (2024), <a href="https://www.bcn.cl/leychile/navegar?idNorma=1209272">Ley Chile</a>, arts. 12 y 16.</li>
+        <li>Botha y Dorsey (2026). <a href="https://sequoiacap.com/article/from-hierarchy-to-intelligence/">From Hierarchy to Intelligence</a>. Sequoia Capital. La cita es un resumen, no sus palabras exactas.</li>
         <li>Buk (2026). <a href="https://www.buk.cl/recursos/estudios/tendencias-hr-2027">Tendencias HR 2027</a>. 691 líderes de RR. HH.</li>
-        <li>Stack Overflow (2024). <a href="https://survey.stackoverflow.co/2024/professional-developers">Developer Survey, Professional Developers</a>.</li>
+        <li>Microsoft Learn. <a href="https://learn.microsoft.com/en-us/viva/glint/setup/manage-confidentiality-thresholds">Viva Glint confidentiality thresholds</a>. Mínimo de 5 personas.</li>
+        <li>Stack Overflow (2024). <a href="https://survey.stackoverflow.co/2024/professional-developers">Developer Survey</a>.</li>
         <li>INE (2026). <a href="https://www.ine.gob.cl/estadisticas/sociales/ingresos-y-gastos/encuesta-suplementaria-de-ingresos">Encuesta Suplementaria de Ingresos 2025</a>. El valor por hora es cálculo propio con 182 horas al mes.</li>
-        <li>Stray, Moe y Sjøberg. <a href="https://arxiv.org/pdf/1808.07650">Daily Stand-Up Meetings: Start Breaking the Rules</a>. IEEE Software.</li>
+        <li>Stray, Moe y Sjøberg. <a href="https://arxiv.org/pdf/1808.07650">Daily Stand-Up Meetings: Start Breaking the Rules</a>.</li>
         <li>Dillon, Jaffe, Immorlica y Stanton (2025). <a href="https://arxiv.org/html/2504.11436v4">Shifting Work Patterns with Generative AI</a>.</li>
         <li>Shekkizhar y colegas (2025). <a href="https://arxiv.org/abs/2511.09710">Echoing: Identity Failures when LLM Agents Talk to Each Other</a>.</li>
-        <li>Mireshghallah y colegas (2024). <a href="https://arxiv.org/abs/2310.17884">Can LLMs Keep a Secret?</a> ICLR 2024.</li>
+        <li>Mireshghallah y colegas (2024). <a href="https://arxiv.org/abs/2310.17884">Can LLMs Keep a Secret?</a></li>
       </ol>
-      <p class="rd-note">Las cifras de empresas son las que cada una publicó. Ninguna de las empresas citadas participó en este libro. Los datos de Montu son de pruebas hechas el 21-nov-2026, y el de la hack sale de su ranking de tokens del sábado 21; lo simulado se dice.</p>
-    </article>
-
-      </div></div>
-      <button type="button" class="lb-edge lb-edge--prev" id="edge-prev" aria-label="Página anterior" tabindex="-1"></button>
-      <button type="button" class="lb-edge lb-edge--next" id="edge-next" aria-label="Página siguiente" tabindex="-1"></button>
+      <p class="rd-note ld-end">Las cifras de empresas son las que cada una publicó. Ninguna de las empresas citadas participó en esta página. Los datos de Montu son de pruebas hechas el 21-nov-2026, y el de la hack sale de su ranking de tokens del sábado 21; lo simulado se dice.</p>
+    </details>
     </main>
-
-    <div class="lb-bar">
-      <button type="button" class="rd-iconbutton" id="prev" aria-label="Página anterior"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M11 4L6 9l5 5"/></svg></button>
-      <span class="rd-note" id="where" aria-live="polite">Portada</span>
-      <button type="button" class="rd-iconbutton" id="next" aria-label="Página siguiente"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg></button>
-    </div>
-  </div>
+  </div></div>
 </div>
 
 <script src="../luz/luz.js"></script>

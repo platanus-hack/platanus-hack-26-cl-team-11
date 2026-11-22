@@ -1,120 +1,102 @@
-/* Libro «Platanus Hack by Montu». Solo tokens --rd-* y primitivas rd-*.
-   En pantalla se lee como un libro: tapa, páginas que se pasan y número de página.
-   El texto se reparte solo en páginas (columnas de alto fijo); libro.js las pasa. En papel sale en A5. */
-.lb {
-  --pages: 2;
-  --ph: clamp(500px, calc(100vh - 196px), 740px);
-  --pw: min(calc(var(--ph) * 0.72), calc((100vw - 96px) / 2));
-  --pad: 36px;
-}
-.lb .rd-aura { position: fixed; }
-.lb-top { margin-bottom: 28px; }
+/* «Por qué Montu»: la landing que resume qué hicimos y por qué (se abre en /libro).
+   Solo tokens --rd-* y primitivas rd-*. Se recorre bajando, como cualquier página. */
+.ld { --ld-max: 1180px; }
+.ld .rd-aura { position: fixed; }
+.ld-wrap { max-width: var(--ld-max); margin: 0 auto; }
+.ld-top { margin-bottom: 8px; }
 
-/* El libro */
-.lb-book { position: relative; width: calc(var(--pw) * var(--pages)); margin: 0 auto; outline: none; }
-.lb-sheets { position: absolute; inset: 0; display: flex; pointer-events: none; }
-.lb-sheet { flex: 1 1 0; border-radius: 16px 6px 6px 16px; box-shadow: var(--rd-shadow-card); transition: opacity 0.3s ease; }
-.lb-sheet + .lb-sheet { border-radius: 6px 16px 16px 6px; border-left: 1px solid var(--rd-hairline); }
-.lb-sheet[hidden] { display: block; opacity: 0; }
-.lb-book[data-cover] .lb-sheet + .lb-sheet { box-shadow: var(--rd-shadow-glow); border-left: 0; }
-.lb-view { position: relative; box-sizing: border-box; width: 100%; height: var(--ph); padding: var(--pad); overflow: hidden; }
-.lb-flow { height: 100%; column-width: calc(var(--pw) - var(--pad) * 2); column-gap: calc(var(--pad) * 2); column-fill: auto; transition: transform 0.45s cubic-bezier(0.3, 0, 0.2, 1); font-size: 16px; line-height: 1.5; }
+/* Portada: el titular, una acción y el globo */
+.ld-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 56px 0 40px; }
+.ld-hero__title { margin: 0; font-size: clamp(44px, 5.6vw, 76px); font-weight: var(--rd-weight); letter-spacing: var(--rd-track-hero); line-height: 0.98; }
+.ld-hero__lead { margin: 24px 0 0; max-width: 34ch; font-size: clamp(19px, 1.7vw, 23px); line-height: 1.38; letter-spacing: -0.01em; }
+.ld-hero .rd-actions { margin-top: 32px; max-width: 420px; }
+.ld-hero .rd-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.ld-made { display: flex; align-items: center; gap: 10px; margin-top: 36px; }
+.ld-made img { display: block; flex: none; }
+.ld-logo-platanus { width: 28px; height: 28px; }
+.ld-logo-buk { height: 16px; width: auto; }
 
-/* Pasar página: los bordes del libro y la barra de abajo */
-.lb-edge { position: absolute; top: 0; bottom: 0; width: var(--pad); padding: 0; border: 0; background: none; cursor: pointer; }
-.lb-edge--prev { left: 0; }
-.lb-edge--next { right: 0; }
-.lb-edge:focus-visible { outline: 2px solid var(--rd-g2); outline-offset: -4px; border-radius: 12px; }
-.lb-bar { display: flex; align-items: center; justify-content: center; gap: var(--rd-space-4); margin: 18px 0 28px; }
-.lb-bar .rd-note { min-width: 150px; text-align: center; font-size: 14px; }
-.lb-bar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.lb-bar button[disabled] { opacity: 0.35; cursor: default; }
+.ld-globe { position: relative; min-height: 520px; padding: 0; overflow: hidden; }
+.ld-globe iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: none; }
+.ld-globe__head { position: absolute; left: var(--rd-space-6); top: 22px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.ld-globe__head .rd-stat { font-size: 48px; }
+.ld-globe__note { position: absolute; left: var(--rd-space-6); bottom: 18px; pointer-events: none; }
 
-/* Tapa */
-.lb-cover { height: 100%; display: flex; flex-direction: column; justify-content: space-between; break-after: column; }
-.lb-cover__brand { display: flex; align-items: center; gap: var(--rd-space-3); font-size: var(--rd-text-brand); font-weight: var(--rd-weight); letter-spacing: -0.02em; }
-.lb-cover__title { margin: 0; font-size: clamp(40px, calc(var(--pw) * 0.125), 64px); font-weight: var(--rd-weight); letter-spacing: var(--rd-track-hero); line-height: 0.98; }
-.lb-cover__by { display: block; color: var(--rd-muted); }
-.lb-cover__sub { margin: 18px 0 0; max-width: 24ch; font-size: 19px; line-height: 1.3; letter-spacing: var(--rd-track-title); }
-.lb-cover__team { display: flex; gap: 10px; }
-.lb-cover__who { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: var(--rd-weight); }
-.lb-face { width: 56px; height: 56px; }
-/* La imagen quieta de cada cara: solo para el papel, donde la cara viva no se imprime bien. */
-.lb-pic { display: none; width: 56px; height: 56px; border-radius: var(--rd-radius-pill); }
-.lb-cover__made { display: flex; align-items: center; gap: 10px; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rd-hairline); }
-.lb-cover__made img { display: block; flex: none; }
-.lb-logo-platanus { width: 30px; height: 30px; }
-.lb-logo-buk { height: 17px; width: auto; }
-.lb-cover__made .rd-note { margin-right: auto; }
+/* Secciones */
+.ld-section { padding: 72px 0 0; scroll-margin-top: 16px; }
+.ld-title { margin: 6px 0 16px; font-size: clamp(32px, 3.6vw, 48px); font-weight: var(--rd-weight); letter-spacing: var(--rd-track-hero); line-height: 1.04; }
+.ld-lead { margin: 0 0 28px; max-width: 62ch; font-size: 19px; line-height: 1.5; }
+.ld-text { margin: 0 0 16px; max-width: 62ch; font-size: 17px; line-height: 1.55; }
+.ld-quote { margin: 32px 0; max-width: 34ch; padding-left: 22px; border-left: 3px solid var(--rd-hairline); font-size: clamp(22px, 2.2vw, 30px); font-weight: var(--rd-weight); line-height: 1.25; letter-spacing: var(--rd-track-title); }
+.ld-quote small { display: block; margin-top: 12px; font-size: var(--rd-text-small); font-weight: var(--rd-weight-body); letter-spacing: 0; color: var(--rd-muted); }
 
-/* Índice */
-.lb-toc { display: flex; flex-direction: column; gap: var(--rd-space-3); break-after: column; }
-.lb-toc__lead { margin: 0; font-size: 21px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); line-height: 1.25; }
-.lb-toc .rd-item { min-height: 54px; text-decoration: none; color: inherit; }
-.lb-toc__n { width: 24px; flex: none; font-family: var(--rd-font-num); font-weight: var(--rd-weight); color: var(--rd-muted); }
+.ld-grid { display: grid; gap: var(--rd-space-4); }
+.ld-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ld-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ld-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ld-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 
-/* Capítulos */
-.lb-chapter { break-before: column; }
-.lb-chapter__title { margin: 4px 0 18px; font-size: 32px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-hero); line-height: 1.05; }
-.lb-chapter p { margin: 0 0 14px; orphans: 2; widows: 2; }
-.lb-chapter h3 { margin: 26px 0 10px; font-size: 19px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); line-height: 1.2; break-after: avoid; }
-.lb-quote { margin: 18px 0; padding-left: 16px; border-left: 3px solid var(--rd-hairline); font-size: 18px; line-height: 1.4; letter-spacing: -0.01em; break-inside: avoid; }
+/* Tarjeta con un dato: etiqueta, número grande, qué significa y de dónde sale */
+.ld-fact { gap: 6px; }
+.ld-fact__say { margin: 0; font-size: 18px; font-weight: var(--rd-weight); letter-spacing: -0.01em; line-height: 1.3; }
+.ld-fact .rd-stat { font-size: 44px; }
+.ld-fact .rd-note { margin-top: auto; padding-top: 10px; }
 
-.lb-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rd-space-3); margin: 16px 0 20px; break-inside: avoid; }
-.lb-fact { gap: 4px; padding: 14px 16px 16px; border-radius: 16px; break-inside: avoid; }
-.lb-fact__title { margin: 0; font-size: 15px; font-weight: var(--rd-weight); letter-spacing: -0.01em; line-height: 1.3; }
-.lb-fact .rd-stat { font-size: 32px; }
-.lb-fact .rd-stat__unit { font-size: 13px; }
-.lb-fact .rd-note { font-size: 12px; }
+/* Tarjeta con una idea: título de 18 px, un párrafo y, si aplica, un dato al pie */
+.ld-card { gap: 10px; }
+.ld-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ld-card__title { margin: 0; font-size: 18px; font-weight: var(--rd-weight); letter-spacing: -0.01em; line-height: 1.3; }
+.ld-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.ld-card__n { font-family: var(--rd-font-num); font-size: 28px; font-weight: var(--rd-weight); color: var(--rd-muted); line-height: 1; }
+.ld-card__proof { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rd-hairline); }
+.ld-card__proof .rd-stat { font-size: 32px; }
+.ld-card__proof .rd-note { flex: 1 1 180px; }
+.ld-apps { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; }
+.ld-apps img { width: 36px; height: 36px; border-radius: var(--rd-radius-mark); display: block; }
 
-.lb-growth { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0 16px; break-inside: avoid; }
-.lb-growth .rd-stat { font-size: 30px; }
+.ld-team { display: flex; gap: 18px; flex-wrap: wrap; margin: 24px 0 32px; }
+.ld-who { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: var(--rd-text-small); font-weight: var(--rd-weight); }
+.ld-face { width: 64px; height: 64px; }
 
-/* Un ejemplo de uso, con su estado a la derecha */
-.lb-case { gap: 8px; margin: 0 0 var(--rd-space-3); padding: 16px 18px 18px; border-radius: 16px; break-inside: avoid; }
-.lb-case__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.lb-chapter .lb-case__title { margin: 0; font-size: 17px; }
-.lb-chapter .lb-case p { margin: 0; font-size: 15px; line-height: 1.45; }
+.ld-list .rd-item { min-height: 60px; }
+.ld-list .rd-item__sub { white-space: normal; }
+.ld-list .rd-item__value { font-family: var(--rd-font-num); font-weight: var(--rd-weight); white-space: nowrap; }
 
-.lb-steps { margin: 12px 0 18px; padding-left: 22px; }
-.lb-steps li { margin: 0 0 10px; padding-left: 2px; break-inside: avoid; }
-.lb-steps li::marker { font-family: var(--rd-font-num); font-weight: var(--rd-weight); color: var(--rd-muted); }
+.ld-steps { margin: 0; padding-left: 24px; }
+.ld-steps li { margin: 0 0 14px; padding-left: 4px; font-size: 17px; line-height: 1.5; }
+.ld-steps li::marker { font-family: var(--rd-font-num); font-weight: var(--rd-weight); color: var(--rd-muted); }
 
-.lb-sums { margin: 16px 0; padding: 6px 16px; border-radius: 16px; break-inside: avoid; }
-.lb-sums .rd-item { min-height: 50px; gap: var(--rd-space-3); }
-.lb-sums .rd-item__title { font-size: 14px; white-space: normal; }
-.lb-sums .rd-item__sub { white-space: normal; }
-.lb-sums .rd-item__value { font-family: var(--rd-font-num); font-size: 14px; font-weight: var(--rd-weight); white-space: nowrap; }
+.ld-close { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px 32px; flex-wrap: wrap; margin-top: 72px; padding: 32px 36px; }
+.ld-close__say { margin: 0; max-width: 34ch; font-size: clamp(24px, 2.6vw, 34px); font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); line-height: 1.15; }
+.ld-close .rd-button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 
-.lb-sources { padding-left: 20px; margin: 0; }
-.lb-sources li { margin: 0 0 9px; font-size: 12.5px; line-height: 1.4; color: var(--rd-muted); break-inside: avoid; }
-.lb-sources a { color: var(--rd-ink); overflow-wrap: anywhere; }
+.ld-sources { margin-top: 56px; }
+.ld-sources summary { cursor: pointer; font-size: var(--rd-text-name); font-weight: var(--rd-weight); }
+.ld-sources ol { columns: 2; column-gap: 40px; padding-left: 22px; margin: 16px 0 0; }
+.ld-sources li { margin: 0 0 10px; font-size: 14px; line-height: 1.45; color: var(--rd-muted); break-inside: avoid; }
+.ld-sources a { color: var(--rd-ink); overflow-wrap: anywhere; }
+.ld-end { margin: 24px 0 0; max-width: 80ch; }
 
-/* Una sola página a la vez en pantallas angostas */
 @media (max-width: 900px) {
-  .lb { --pages: 1; --ph: clamp(460px, calc(100svh - 212px), 720px); --pw: min(calc(100vw - 32px), 480px); --pad: 24px; }
-  .lb-top .rd-nav { display: none; }
-  .lb-sheet:first-child { display: none; }
-  .lb-sheet + .lb-sheet { border-radius: 16px; border-left: 0; }
-  .lb-facts { grid-template-columns: minmax(0, 1fr); }
-  .lb-face, .lb-pic { width: 48px; height: 48px; }
-  .lb-cover__team { gap: 8px; }
+  .ld-top .rd-nav { display: none; }
+  .ld-hero { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 28px 0 16px; }
+  .ld-globe { min-height: 460px; }
+  .ld-globe iframe { top: 44px; height: calc(100% - 76px); }
+  .ld-section { padding-top: 56px; }
+  .ld-grid--4, .ld-grid--3, .ld-grid--2, .ld-split { grid-template-columns: minmax(0, 1fr); }
+  .ld-split { gap: 28px; }
+  .ld-face { width: 52px; height: 52px; }
+  .ld-team { gap: 10px; }
+  .ld-close { padding: 24px; }
+  .ld-sources ol { columns: 1; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  .ld-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (prefers-reduced-motion: reduce) { .lb-flow, .lb-sheet { transition: none; } }
-
-/* En papel: A5 a sangre, la tapa, el índice y cada capítulo en página nueva. */
-@page { size: A5; margin: 0; }
 @media print {
-  .rd-aura, .lb-top, .lb-bar, .lb-edge, .lb-sheets, .lb-face { display: none; }
-  .lb-pic { display: block; }
-  .lb.rd-page { min-height: 0; }
-  .lb .rd-page__inner { padding: 14mm 12mm; }
-  .lb-book { width: auto; }
-  .lb-view { height: auto; padding: 0; overflow: visible; }
-  .lb-flow { height: auto; columns: auto; transform: none !important; font-size: 15px; }
-  .lb-cover { height: auto; min-height: 176mm; break-after: page; }
-  .lb-toc { break-after: page; }
-  .lb-chapter { break-before: page; }
-  .lb-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rd-aura, .ld-top, .ld-globe, .ld-hero .rd-actions, .ld-close .rd-button { display: none; }
+  .ld-hero { grid-template-columns: minmax(0, 1fr); }
+  .ld-fact, .ld-card, .ld-list, .ld-quote { break-inside: avoid; }
+  .ld-sources ol { columns: 1; }
 }
