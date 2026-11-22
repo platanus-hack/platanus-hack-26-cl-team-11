@@ -76,7 +76,8 @@
 .pt-three__col { display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 32px 36px; }
 .pt-three__col::before { content: ""; width: 56px; height: 10px; border-radius: var(--mark); background: var(--tint); }
 .pt-three__name { margin: 0; font-size: clamp(30px, 3.3vw, 52px); font-weight: var(--rd-weight); letter-spacing: -0.035em; line-height: 1.05; }
-.pt-three__say { margin: 0; font-size: clamp(20px, 2vw, 32px); line-height: 1.22; letter-spacing: -0.015em; }
+/* Tres líneas reservadas: así la marca y el título de las tres tarjetas quedan a la misma altura aunque una frase sea más larga. */
+.pt-three__say { margin: 0; min-height: calc(3 * 1.22em); font-size: clamp(20px, 2vw, 32px); line-height: 1.22; letter-spacing: -0.015em; }
 .pt-title--close { font-size: clamp(28px, 3.9vw, 64px); }
 .pt-pillars { position: absolute; }
 .pt-three__col { transition: opacity 0.6s var(--ease), filter 0.6s var(--ease); }
