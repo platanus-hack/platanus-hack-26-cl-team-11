@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchGlobeMode } from './api';
 import { GlobeChat } from './GlobeChat';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=13';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=14';
 
 const LIVE_PARAM = 'vivo';
 const STAGE_PARAM = 'escenario';

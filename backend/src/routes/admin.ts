@@ -102,13 +102,15 @@ export function adminRoutes(ctx: AppContext) {
   routes.put('/admin/:token/tired', async (c) => {
     const found = operatorOf(c.req.param('token'));
     if ('error' in found) return c.json(found.error, found.status);
-    const tired = asObject(await c.req.text()).tired;
+    const body = asObject(await c.req.text());
+    const tired = body.tired;
+    const rested = new Set(Array.isArray(body.rested) ? body.rested.filter((id): id is string => typeof id === 'string') : []);
     if (typeof tired !== 'boolean') return c.json(INVALID_TIRED, 400);
     const cleared = clearTired(ctx.db);
     if (!tired) return c.json({ tired, people: 0, cleared });
     const now = new Date();
     const people = store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token) && !mesa.hasLeft(person.token));
-    people.forEach((person, position) => tiredDrafts(position, now).forEach((draft) => store.saveEvent(person.token, draft)));
+    people.forEach((person, position) => tiredDrafts(position, now, rested.has(publicIdOf(person.token))).forEach((draft) => store.saveEvent(person.token, draft)));
     return c.json({ tired, people: people.length, cleared });
   });
 

@@ -82,10 +82,13 @@
   .uv-member b { font-size: 15px; font-weight: var(--rd-weight); letter-spacing: -0.01em; }
   .uv-member span { font-size: 13px; color: var(--rd-muted); }
 
-  .uv-feed { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 18px 0 22px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px); mask-image: linear-gradient(to bottom, transparent 0, #000 22px); }
+  .uv-feed > :first-child { margin-top: auto; }
+  .uv[data-scene="semana"] .uv-feed > :first-child { margin-top: 0; }
+  .uv-feed::-webkit-scrollbar { display: none; }
+  .uv-feed { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden auto; scrollbar-width: none; overscroll-behavior: contain; display: flex; flex-direction: column; justify-content: flex-start; gap: 14px; padding: 18px 0 22px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px); mask-image: linear-gradient(to bottom, transparent 0, #000 22px); }
   .uv[data-scene="ronda"] .uv-feed, .uv[data-scene="semana"] .uv-feed { gap: 0; }
   .uv[data-scene="semana"] .uv-feed { justify-content: flex-start; -webkit-mask-image: none; mask-image: none; padding-top: 6px; }
-  .uv-feed > * { will-change: transform; }
+  .uv-feed > * { will-change: transform; flex-shrink: 0; }
   .uv-item { display: flex; gap: 9px; align-items: flex-end; }
   .uv-item.mine { flex-direction: row-reverse; }
   .uv-face { width: 28px; height: 28px; border-radius: 50%; background-size: cover; box-shadow: var(--rd-shadow-face-small); flex: 0 0 auto; }
@@ -274,7 +277,9 @@ function header(title, sub, members) {
 function clearFeed() { items = []; const old = [...feed.children], fr = feed.getBoundingClientRect(), rects = old.map(c => c.getBoundingClientRect());
   old.forEach((c, k) => Object.assign(c.style, { position: 'absolute', left: (rects[k].left - fr.left) + 'px', top: (rects[k].top - fr.top) + 'px', width: rects[k].width + 'px', margin: 0 }));
   old.forEach(c => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(4px)' }], { duration: 360, easing: 'ease-in', fill: 'forwards' }).onfinish = () => c.remove()); }
-function push(node) { RondaStream.append(feed, node); while (feed.children.length > 16) feed.firstElementChild.remove(); }
+let stuck = true;
+feed.addEventListener('scroll', () => { stuck = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60; });
+function push(node) { RondaStream.append(feed, node); while (feed.children.length > (LIVE ? 60 : 16)) feed.firstElementChild.remove(); }
 // Fila de lista, como las del Resumen: caras, título, una línea gris y el check al final.
 function pairRow(list, title, sub, check) {
   const n = el('div', 'uv-li'), copy = el('div', 'uv-li-text'); copy.append(el('b', '', title), el('span', '', sub));
@@ -394,7 +399,9 @@ const lc = document.getElementById('luz');
 const luz = new URLSearchParams(location.search).get('luz') !== '0' && window.RondaLuz ? RondaLuz.sphere(lc, { palette: [0, 9, 7, 5] }) : null;
 let gc = null, W = 0, H = 0, yaw = 0, pitch = 0.15, tYaw = 0, tPitch = 0.15, luzK = 0, calm = 0;
 const HITS = [], HOV = [], POINT = { over: -1, picked: -1, drag: null, moved: 0 };
-function resize() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); if (luz) { lc.width = Math.round(W / 2); lc.height = Math.round(H / 2); } }
+const LITE = matchMedia('(pointer: coarse)').matches || innerWidth < 700;
+let drawn = 0;
+function resize() { const r = cv.getBoundingClientRect(), d = Math.min(LITE ? 1.25 : 2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); if (luz) { lc.width = Math.round(W / 2); lc.height = Math.round(H / 2); } }
 new ResizeObserver(resize).observe(cv); resize();
 function turnTo(members) {
   const c = [0, 0, 0]; members.forEach(m => { c[0] += POS[m][0]; c[1] += POS[m][1]; c[2] += POS[m][2]; });
@@ -473,7 +480,7 @@ function draw(T) {
     const talked = new Map();
     current.events.forEach(e => { if (clock >= e.at) talked.set(Math.min(e.from, e.to) + '-' + Math.max(e.from, e.to), [e.from, e.to]); if (clock >= e.at && clock < e.end + (e.type === 'call' ? 2.2 : 0.3)) activeEv = e; });
     talked.forEach(([a, b]) => { const pa = P[a], pb = P[b], g = grad(pa.x, pa.y, pb.x, pb.y);
-      ctx.save(); ctx.globalAlpha = 0.2; ctx.filter = 'blur(6px)'; ctx.strokeStyle = g; ctx.lineWidth = 8; curve(a, b, 0, 1, ARC_LIFT); ctx.stroke(); ctx.restore();
+      if (!LITE) { ctx.save(); ctx.globalAlpha = 0.2; ctx.filter = 'blur(6px)'; ctx.strokeStyle = g; ctx.lineWidth = 8; curve(a, b, 0, 1, ARC_LIFT); ctx.stroke(); ctx.restore(); }
       ctx.strokeStyle = g; ctx.lineWidth = 2.6; curve(a, b, 0, 1, ARC_LIFT); ctx.stroke(); });
   }
   // En vivo, mientras un agente busca: un pulso viaja por el arco hacia cada persona que revisa y una onda sale de quien pide.
@@ -603,7 +610,8 @@ function frame(now) {
     items.forEach(it => it.upd(clock));
   }
   if (LIVE) LIVE.tick(); else if (clock > scene.dur) startScene(si + 1);
-  draw(T);
+  if (!LITE || (drawn++ & 1) === 0) draw(T);
+  if (stuck) feed.scrollTop = feed.scrollHeight;
   requestAnimationFrame(frame);
 }
 document.getElementById('pause').onclick = e => { paused = !paused; e.currentTarget.textContent = paused ? 'Seguir' : 'Pausar'; };
@@ -625,7 +633,7 @@ if ((q.get('vivo') || '').startsWith('/api/people/')) {
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=13'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=14'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }

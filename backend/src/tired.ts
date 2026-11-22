@@ -8,6 +8,8 @@ const SHORT_NIGHTS = [5.2, 4.4];
 const LAST_NIGHTS = [3.4, 2.9, 3.8, 3.1, 4.2, 2.6, 3.6, 3.9, 3.2];
 const STEPS_TODAY = [1840, 1210, 2460, 960, 2120, 1530, 2790, 1380, 1990];
 const USUAL_STEPS = 7200;
+const RESTED_NIGHT = 8 + 32 / 60;
+const RESTED_STEPS = 6400;
 const HACK_TITLE = 'Platanus Hack';
 const HACK_START_UTC_HOUR = 12;
 const HACK_MINUTES = 420;
@@ -23,7 +25,7 @@ const healthDay = (date: string, sleepHours: number, steps: number): EventDraft 
   raw: { date, sleep_hours: sleepHours, steps, demo: MARK },
 });
 
-export function tiredDrafts(position: number, now: Date): EventDraft[] {
+export function tiredDrafts(position: number, now: Date, rested = false): EventDraft[] {
   const today = dayKeyOf(now);
   const pick = (values: number[]) => values[position % values.length] ?? values[0] ?? 0;
   const start = new Date(Date.parse(`${today}T00:00:00Z`) + HACK_START_UTC_HOUR * 60 * MINUTE_MS);
@@ -32,7 +34,7 @@ export function tiredDrafts(position: number, now: Date): EventDraft[] {
   return [
     ...usual,
     ...short,
-    healthDay(today, pick(LAST_NIGHTS), pick(STEPS_TODAY)),
+    rested ? healthDay(today, RESTED_NIGHT, RESTED_STEPS) : healthDay(today, pick(LAST_NIGHTS), pick(STEPS_TODAY)),
     {
       source: 'google_calendar',
       type: 'reunion',
