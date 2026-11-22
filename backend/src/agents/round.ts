@@ -6,7 +6,7 @@ import type { RepoStore } from '../repo/store.js';
 import type { RoomEventType } from '../rooms/store.js';
 import type { TeamStore } from '../teams/store.js';
 import type { JsonObject, StoredEvent } from '../types.js';
-import { buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
+import { agendaOf, buildCard, topicKeyOf, type AgentCard, type Need } from './cards.js';
 import { currentDigest, refreshDigests, type DigestStore } from './digest.js';
 import { AgentModelError, approximateTokens, type AgentModel, type ModelUsage } from './model.js';
 import { partialContacts, partialString } from './partial.js';
@@ -101,7 +101,7 @@ export function cardFor(deps: Pick<RoundDeps, 'store' | 'policies' | 'agents' | 
   const events = deps.store.listSignalEvents(member.token, now);
   const signals = withChosenVisibility(deriveSignals(events, now), deps.policies.chosen(member.token));
   const repo = deps.repo && deps.digests ? currentDigest({ repo: deps.repo, digests: deps.digests }, member.token) : undefined;
-  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo, recent: recentWorkOf(deps.store.listEvents(member.token, RECENT_EVENTS_READ)) });
+  return buildCard({ token: member.token, name: member.name, signals, decisions: deps.agents.decisionsOf(member.token), repo, recent: recentWorkOf(deps.store.listEvents(member.token, RECENT_EVENTS_READ)), agenda: agendaOf(events, now) });
 }
 
 export async function inBatches<Item>(items: Item[], size: number, work: (item: Item) => Promise<void>): Promise<PromiseSettledResult<void>[]> {
@@ -144,6 +144,8 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
   };
 
   step('equipo.consultar', from, 'inicio', { people: teammates.length });
+  const agendas = teammates.filter((teammate) => (teammate.card.agenda ?? []).length > 0).length;
+  if (agendas > 0) step('agenda.cruzar', from, 'inicio', { agendas });
   const plan = await deps.model.decide({ system: systemFor(requester.name), prompt: contactPrompt(need, teammates), schema: ContactPlan, ...(stream ? { onText: writtenPlan } : {}) });
   const contacts = new Map<string, string>();
   for (const contact of plan.contacts) {
@@ -151,6 +153,7 @@ async function talkAbout(deps: RoundDeps, round: Round, { requester, need }: Ope
     if (byId.has(contact.teammate) && message && !contacts.has(contact.teammate) && contacts.size < MAX_CONTACTS) contacts.set(contact.teammate, message);
   }
   step('equipo.consultar', from, 'fin', { people: teammates.length, chosen: contacts.size });
+  if (agendas > 0) step('agenda.cruzar', from, 'fin', { agendas });
   if (contacts.size === 0) return 'nadie';
 
   const settled = await Promise.allSettled(

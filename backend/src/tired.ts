@@ -25,7 +25,27 @@ const healthDay = (date: string, sleepHours: number, steps: number): EventDraft 
   raw: { date, sleep_hours: sleepHours, steps, demo: MARK },
 });
 
-export function tiredDrafts(position: number, now: Date, rested = false): EventDraft[] {
+export interface DemoMeeting {
+  title: string;
+  hour: number;
+  minute: number;
+  minutes: number;
+}
+
+const SANTIAGO_UTC_OFFSET_HOURS = 3;
+
+const meetingDraft = (day: string, meeting: DemoMeeting): EventDraft => {
+  const start = new Date(Date.parse(`${day}T00:00:00Z`) + ((meeting.hour + SANTIAGO_UTC_OFFSET_HOURS) * 60 + meeting.minute) * MINUTE_MS);
+  return {
+    source: 'google_calendar',
+    type: 'reunion',
+    occurredAt: start.toISOString(),
+    summary: `${meeting.title} · ${meeting.minutes} min`,
+    raw: { title: meeting.title, start: start.toISOString(), end: new Date(start.getTime() + meeting.minutes * MINUTE_MS).toISOString(), durationMinutes: meeting.minutes, attendees: 0, declined: false, demo: MARK },
+  };
+};
+
+export function tiredDrafts(position: number, now: Date, rested = false, tomorrow: DemoMeeting[] = []): EventDraft[] {
   const today = dayKeyOf(now);
   const pick = (values: number[]) => values[position % values.length] ?? values[0] ?? 0;
   const start = new Date(Date.parse(`${today}T00:00:00Z`) + HACK_START_UTC_HOUR * 60 * MINUTE_MS);
@@ -35,6 +55,7 @@ export function tiredDrafts(position: number, now: Date, rested = false): EventD
     ...usual,
     ...short,
     rested ? healthDay(today, RESTED_NIGHT, RESTED_STEPS) : healthDay(today, pick(LAST_NIGHTS), pick(STEPS_TODAY)),
+    ...tomorrow.map((meeting) => meetingDraft(dayBefore(today, -1), meeting)),
     {
       source: 'google_calendar',
       type: 'reunion',

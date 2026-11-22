@@ -184,6 +184,11 @@
       slotOf.forEach(function (slot) { if (slot !== by) others.push(slot); });
       return { motion: 'help', does: ' revisa la mesa', label: 'Revisar lo que publicó cada persona', receipt: 'Listo', input: { tema: need.g.topic }, output: { personas: ev.people }, faces: others.slice(0, 5).map(faceUrlOf), to: need.g.members[1] === undefined ? by : need.g.members[1] };
     },
+    'agenda.cruzar': function (need, by, ev) {
+      var others = [];
+      slotOf.forEach(function (slot) { if (slot !== by) others.push(slot); });
+      return { motion: 'calendars', does: ' cruza las agendas', label: 'Cruzar las agendas del equipo', receipt: 'Listo', input: { tema: need.g.topic }, output: { agendas: ev.agendas }, faces: others.slice(0, 5).map(faceUrlOf), to: need.g.members[1] === undefined ? by : need.g.members[1] };
+    },
     'checkin.consultar': function (need, by) {
       return { motion: 'health', does: ' lee a su persona', label: 'Revisar si ' + people[by].name + ' puede ayudar', receipt: 'Solo para su agente', privateResult: true, input: { tema: need.g.topic }, output: { compartir: false }, faces: [faceUrlOf(by)], to: need.from };
     },
@@ -192,6 +197,7 @@
     }
   };
   var RECEIPT = {
+    'agenda.cruzar': function (ev) { return count(ev.agendas || 0, 'agenda revisada', 'agendas revisadas'); },
     'equipo.consultar': function (ev) { return ev.chosen ? count(ev.chosen, 'persona elegida', 'personas elegidas') : 'Nadie con relación'; }
   };
 

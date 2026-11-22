@@ -53,6 +53,7 @@ const publicView = (teammate: Teammate) => ({
   nombre: teammate.card.name,
   frases: teammate.card.statements,
   temas: teammate.card.expertise,
+  agenda: teammate.card.agenda ?? [],
 });
 
 export const contactPrompt = (need: Need, teammates: Teammate[]) =>
@@ -62,6 +63,7 @@ export const contactPrompt = (need: Need, teammates: Teammate[]) =>
     'Esto es lo que los agentes de su equipo permiten saber de cada persona:',
     asData(teammates.map(publicView)),
     `Elige hasta ${MAX_CONTACTS} personas a quienes vale la pena escribirles por este pedido, empezando por quien más relación tiene con el tema.`,
+    'Si el pedido tiene día y hora, cruza las agendas: elige primero a quien sabe del tema y tiene ese bloque libre, y deja fuera a quien lo tiene ocupado. Una agenda vacía es una agenda que no conoces.',
     'Para cada una, escribe el mensaje que le mandas a su agente: una o dos frases que digan qué necesita tu persona y por qué le escribes a esa persona.',
     'En «teammate» devuelve el id exacto de la lista. Si nadie tiene relación razonable con el tema, devuelve la lista vacía.',
   ].join('\n\n');
@@ -71,9 +73,10 @@ export const replyPrompt = (helper: AgentCard, requesterName: string, need: Need
     `El agente de ${requesterName} te escribió este mensaje:`,
     asData({ tema: need.topic, mensaje: incoming }),
     'Esta es la ficha de tu persona:',
-    asData({ frases: helper.statements, temas: helper.expertise, disponibilidad: helper.availability }),
+    asData({ frases: helper.statements, temas: helper.expertise, disponibilidad: helper.availability, agenda: helper.agenda ?? [] }),
     'Decide si tu persona puede ayudar: «si» si conoce el tema y tiene disponibilidad, «parcial» si puede orientar pero no hacerse cargo, «no» si no conoce el tema o no tiene disponibilidad.',
     'Si la disponibilidad es «desconocida», decide solo por el tema.',
+    'Si el pedido tiene día y hora, manda la agenda: con ese bloque libre tu persona puede tomarlo aunque su disponibilidad general sea baja, y con ese bloque ocupado no puede. Di en tu respuesta si lo tiene libre.',
     'Responde al otro agente en una o dos frases. Tu persona todavía no aceptó nada: no comprometas horas ni fechas.',
   ].join('\n\n');
 
@@ -85,5 +88,5 @@ export const proposalPrompt = (requester: AgentCard, need: Need, replies: Collec
     asData(replies.map((reply) => ({ id: reply.id, nombre: reply.name, ayuda: reply.help, respuesta: reply.message }))),
     `Elige hasta ${MAX_HELPERS} personas para ayudar. Prefiere a quienes respondieron «si»; usa «parcial» solo si nadie respondió «si». Nunca elijas a quien respondió «no».`,
     'En «helpers» devuelve sus ids exactos. Si nadie puede ayudar, devuelve la lista vacía y deja «text» vacío.',
-    'En «text» redacta la propuesta para las personas involucradas, en una o dos frases: quién ayuda a quién y con qué. Usa los nombres. Es una propuesta que cada persona todavía tiene que aceptar.',
+    'En «text» redacta la propuesta para las personas involucradas, en una o dos frases: quién ayuda a quién y con qué. Usa los nombres. Si el pedido tiene día y hora, di quién lo toma y cuándo. Es una propuesta que cada persona todavía tiene que aceptar.',
   ].join('\n\n');

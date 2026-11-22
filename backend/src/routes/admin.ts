@@ -9,7 +9,7 @@ import { hasPublished, isMesaOperator, mesaCardDeps } from '../mesa/members.js';
 import { isGlobeMode, MESA_TEAM_ID } from '../mesa/store.js';
 import { mesaDailyCapOf, mesaTokensLastDay } from '../mesa/ticker.js';
 import { oncePerDatabase } from '../pg/database.js';
-import { clearTired, tiredDrafts } from '../tired.js';
+import { clearTired, tiredDrafts, type DemoMeeting } from '../tired.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_AN_OPERATOR = { error: 'Solo el equipo de Montu entra al panel.' } as const;
@@ -104,13 +104,19 @@ export function adminRoutes(ctx: AppContext) {
     if ('error' in found) return c.json(found.error, found.status);
     const body = asObject(await c.req.text());
     const tired = body.tired;
+    const isMeeting = (value: unknown): value is DemoMeeting => {
+      const meeting = asObject(JSON.stringify(value ?? null));
+      return typeof meeting.title === 'string' && [meeting.hour, meeting.minute, meeting.minutes].every((part) => typeof part === 'number' && Number.isFinite(part));
+    };
+    const agendas = asObject(JSON.stringify(body.meetings ?? null));
+    const meetingsOf = (id: string) => (Array.isArray(agendas[id]) ? (agendas[id] as unknown[]).filter(isMeeting) : []);
     const rested = new Set(Array.isArray(body.rested) ? body.rested.filter((id): id is string => typeof id === 'string') : []);
     if (typeof tired !== 'boolean') return c.json(INVALID_TIRED, 400);
     const cleared = clearTired(ctx.db);
     if (!tired) return c.json({ tired, people: 0, cleared });
     const now = new Date();
     const people = store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token) && !mesa.hasLeft(person.token));
-    people.forEach((person, position) => tiredDrafts(position, now, rested.has(publicIdOf(person.token))).forEach((draft) => store.saveEvent(person.token, draft)));
+    people.forEach((person, position) => tiredDrafts(position, now, rested.has(publicIdOf(person.token)), meetingsOf(publicIdOf(person.token))).forEach((draft) => store.saveEvent(person.token, draft)));
     return c.json({ tired, people: people.length, cleared });
   });
 

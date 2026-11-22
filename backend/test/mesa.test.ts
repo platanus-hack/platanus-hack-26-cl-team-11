@@ -248,10 +248,10 @@ test('the live view streams each step of the round, with the words only for the 
   const mine = await live('Ana');
   assert.deepEqual(
     mine.events.map((event) => (event.type === 'paso' ? `${event.tool}:${event.state}` : event.type)),
-    ['ronda_empieza', 'pedido_busca', 'equipo.consultar:inicio', 'equipo.consultar:fin', 'hilo_abre', 'checkin.consultar:inicio', 'checkin.consultar:fin', 'hilo_responde', 'propuesta.redactar:inicio', 'propuesta.redactar:fin', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'],
+    ['ronda_empieza', 'pedido_busca', 'equipo.consultar:inicio', 'agenda.cruzar:inicio', 'equipo.consultar:fin', 'agenda.cruzar:fin', 'hilo_abre', 'checkin.consultar:inicio', 'checkin.consultar:fin', 'hilo_responde', 'propuesta.redactar:inicio', 'propuesta.redactar:fin', 'propuesta_nace', 'pedido_cierra', 'ronda_termina'],
   );
   const steps = mine.events.filter((event) => event.type === 'paso');
-  assert.deepEqual(steps.map((event) => event.by === mine.me), [true, true, false, false, true, true]);
+  assert.deepEqual(steps.map((event) => event.by === mine.me), [true, true, true, true, false, false, true, true]);
   const [, search, ask, reply, proposal, close, end] = mine.events.filter((event) => event.type !== 'paso');
   assert.equal(search?.from, mine.me);
   assert.equal(search?.topic, TOPIC);
@@ -285,7 +285,7 @@ test('a need nobody relates to closes saying so, and a second round only streams
   assert.equal((await startRound('Ana')).status, 202);
   await settled('Ana');
   const first = await live();
-  assert.deepEqual(first.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'paso', 'paso', 'pedido_cierra', 'ronda_termina']);
+  assert.deepEqual(first.events.map((event) => event.type), ['ronda_empieza', 'pedido_busca', 'paso', 'paso', 'paso', 'paso', 'pedido_cierra', 'ronda_termina']);
   assert.equal(first.events.find((event) => event.type === 'pedido_cierra')?.outcome, 'nadie');
 
   assert.equal((await startRound('Ana')).status, 202);
