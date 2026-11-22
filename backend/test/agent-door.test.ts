@@ -109,7 +109,7 @@ test('a question asked through the assistant comes back answered in the same cal
   const { post } = setup(() => ({ intent: 'pregunta', question: '¿Alguien ya integró pagos con Toku?' }), { whatsapp: false });
   const said = await post<{ replies: Message[] }>('/agent/say', { text: 'alguien ya integró pagos con toku?' });
   assert.deepEqual(said.replies.map((reply) => reply.text), [
-    'Le pregunto a los agentes de Producto. Te aviso cuando respondan.',
+    'Le pregunto a los agentes de tu equipo. Te aviso cuando respondan.',
     'Tomás ya integró pagos con Toku.\n\nArmada con lo que comparte Tomás.',
   ]);
 });

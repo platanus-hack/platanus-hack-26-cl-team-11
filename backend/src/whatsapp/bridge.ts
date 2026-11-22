@@ -10,7 +10,7 @@ import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
 import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
 import { mesaCardDeps } from '../mesa/members.js';
-import { MESA_NAME, MESA_TEAM_ID } from '../mesa/store.js';
+import { MESA_TEAM_ID } from '../mesa/store.js';
 import { startMesaRound } from '../mesa/ticker.js';
 import type { JsonObject, Person } from '../types.js';
 import { digitsOf, type ReplyButton, type WhatsAppChannel } from './kapso.js';
@@ -260,7 +260,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
   };
 
   const askQuestion = (person: Person, question: string, door: Door): Promise<void> | null => {
-    const team = ctx.teams.teamsOf(person.token).at(-1) ?? (inMesa(person.token) ? { id: MESA_TEAM_ID, name: MESA_NAME } : undefined);
+    const team = inMesa(person.token) ? { id: MESA_TEAM_ID, name: 'tu equipo' } : ctx.teams.teamsOf(person.token).at(-1);
     if (!team) {
       sendTextThrough(person.token, COPY.noTeam, door);
       return null;

@@ -232,7 +232,7 @@ test('a question by WhatsApp goes to the board and the assembled answer comes ba
   await say(ANA_PHONE, 'alguien ya integró pagos con toku?');
   await until(() => sent.length === before + 2);
   assert.deepEqual(sent.slice(before).map((message) => message.body), [
-    'Le pregunto a los agentes de Producto. Te aviso cuando respondan.',
+    'Le pregunto a los agentes de tu equipo. Te aviso cuando respondan.',
     'Tomás ya integró pagos con Toku.\n\nArmada con lo que comparte Tomás.',
   ]);
 });
