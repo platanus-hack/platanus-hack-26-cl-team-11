@@ -70,19 +70,35 @@ Lo que se puede decir sin exagerar, porque está probado:
 | 60 personas simuladas, con el modelo real | 89 conversaciones entre agentes en 4 minutos y medio |
 | Pruebas automáticas | 205 pasando |
 
-## Guion de dos minutos y medio
+## Guion de 3 minutos
 
-Dos minutos y medio es lo que dura un pitch en el Demo Day de YC. El guion largo, con el grafo de 5 a 300 personas, está en [DEMO.md](DEMO.md) y dura cerca de cuatro minutos y medio.
+La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). Las notas de cada lámina están en la tecla N. No es un texto para leer: es la dirección de cada momento y la frase que no puede faltar. Con tus palabras, más lento de lo que parece natural.
 
-| Tiempo | Qué se dice | Qué se ve |
-|---|---|---|
-| 0:00 | «Somos Montu. Le damos a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.» | El nombre |
-| 0:15 | «Con 5 personas hay 10 conversaciones posibles. Con 300 hay 44.850. Nadie puede tenerlas, así que las empresas pierden información.» | El grafo llenándose |
-| 0:35 | «Un agente sí puede. Miren.» Una persona le escribe a su agente por WhatsApp que está trabada con algo. El agente pregunta si puede contarlo. Ella toca «Permitir». | El teléfono en pantalla |
-| 1:05 | «Ahora su agente conversa con los de su equipo.» En segundos llega la propuesta: quién la ayuda. Toca «Aceptar». | El globo con los arcos; el teléfono |
-| 1:35 | «Lo que durmió, cómo se siente y qué le escribió a su agente no salió nunca. El agente es de ella, no de la empresa.» | Sus permisos en Ajustes |
-| 1:55 | «Esto lo construimos este fin de semana. Una ronda toma 15 segundos. Funciona con el agente que ya usas.» | Tres números |
-| 2:15 | «Montu: un agente por persona, los agentes conversan, tú recibes solo las conversaciones que necesitas tener. Escaneen el QR y pruébenlo.» | El QR |
+**El arco en una línea:** todos ya le damos nuestra vida a un agente; pero los agentes no se hablan; un equipo no puede tener todas las conversaciones que necesita; los agentes sí; y el tuyo es tuyo.
+
+### Acto 1 · El problema (0:00 a 1:35)
+
+| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
+|---|---|---|---|
+| 0:00 | 1 · «Un agente por persona.» | Presentarse y decir qué hacemos, sin preámbulo. La esfera con las caras ya dice «equipo». | «Somos Montu. Le damos a cada persona un agente que la conoce, y hacemos que esos agentes conversen entre sí.» |
+| 0:15 | 2 · «Alinear a un equipo es difícil.» (tres clics) | Partir de algo que todos vivieron: no saber quién está trabado ni quién sabe de qué. Clic: todos ya trabajan con un agente. Clic: cada agente está solo. | «Entre esos agentes hay cero conversaciones.» |
+| 0:45 | 3 · «Tu agente ya sabe todo de ti.» | El giro de contexto: WhatsApp, calendario, correo, salud, código, reuniones ya llegan a tu agente. Dejar que se enciendan los íconos. | «Ese conocimiento ya existe. Falta usarlo para alinear al equipo.» |
+| 1:10 | 4 · «300 personas, 44.850 conversaciones.» | Por qué las personas no pueden: cada persona nueva suma una conversación con cada una de las demás. Dejar rodar el número. | «Ningún humano puede tener 44.850 conversaciones. Por eso existen las reuniones y las jerarquías, y por eso se pierde información.» |
+
+### Acto 2 · La solución (1:35 a 2:35)
+
+| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
+|---|---|---|---|
+| 1:35 | 5 · «Los agentes sí pueden tenerlas.» | El globo en vivo, y la demo por WhatsApp: «estoy trabada con…», Permitir, llega la propuesta. Si falla la red, tecla V (grabación) y se dice que es grabada. | «Los agentes no se cansan. Una ronda toma 15 segundos, y a ti te llega una sola cosa: quién te puede ayudar.» |
+| 2:15 | 6 · «Tu agente es tuyo.» | Adelantarse a la pregunta de vigilancia. Tocar «Permitir» en la tarjeta. | «Si crees que tu agente te reporta, no le cuentas nada. Por eso pregunta antes de contar, y lo que duermes o sientes no sale nunca.» |
+
+### Acto 3 · El cierre (2:35 a 3:00)
+
+| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
+|---|---|---|---|
+| 2:35 | 7 · «Pruébalo ahora.» | Repetir la idea en una línea y pedir algo concreto. Quedarse callado con el QR en pantalla. | «Un agente por persona. Los agentes conversan. Tú recibes solo las conversaciones que necesitas tener. Escaneen y pruébenlo.» |
+
+Si falta tiempo, se acorta la demo de la lámina 5, nunca las láminas 2 y 4: son el porqué.
 
 Cómo presentarlo, según Ralston y Hale:
 
@@ -101,16 +117,17 @@ YC desaconseja las demos y los videos en un Demo Day, porque fallan y nadie alca
 
 ## Las láminas
 
-Kevin Hale: entre cinco y siete láminas, una idea por lámina. La audiencia recuerda una o dos.
+Kevin Hale: entre cinco y siete láminas, una idea por lámina. Están en `design/pitch/index.html`.
 
 | # | Texto de la lámina | Idea |
 |---|---|---|
-| 1 | Montu: un agente por persona | Qué hacemos |
-| 2 | 300 personas, 44.850 conversaciones | El problema |
-| 3 | Los agentes sí pueden tenerlas | El giro; después va la demo |
-| 4 | Tu agente es tuyo | Privacidad |
-| 5 | Una ronda: 15 segundos | Avance |
-| 6 | Pruébalo ahora | El QR |
+| 1 | Un agente por persona. | Qué hacemos (la esfera de la entrada con el equipo) |
+| 2 | Alinear a un equipo es difícil. → Hoy todos trabajan con su agente. → Pero los agentes no se hablan. | El problema, en tres clics |
+| 3 | Tu agente ya sabe todo de ti. | El contexto ya existe |
+| 4 | 300 personas, 44.850 conversaciones. | Por qué las personas no pueden |
+| 5 | Los agentes sí pueden tenerlas. | El giro; después va la demo |
+| 6 | Tu agente es tuyo. | Privacidad |
+| 7 | Pruébalo ahora. | El QR, una ronda en 15 s y los agentes que ya usas |
 
 Reglas de Hale y Ralston:
 
