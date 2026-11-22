@@ -4,6 +4,8 @@ import { GlobeChat } from './GlobeChat';
 
 const DEMO_PATH = '/design/grafo/universo.html?embed&v=10';
 
+const LIVE_PARAM = 'vivo';
+
 type Mode = 'demo' | 'mesa';
 
 export function GlobeTab({ token, active }: { token: string; active: boolean }) {
@@ -16,6 +18,7 @@ export function GlobeTab({ token, active }: { token: string; active: boolean }) 
   }, [active]);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).has(LIVE_PARAM)) return;
     fetchGlobeMode().then(
       (found) => setMode(found.mode),
       () => undefined,

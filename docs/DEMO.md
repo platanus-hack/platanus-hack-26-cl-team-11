@@ -18,12 +18,13 @@ Segundo momento, solo si sobra tiempo: escribir una pregunta al equipo («¿Algu
 
 Antes de subir:
 
-1. Entrar a montu.fun con Google en el computador que se proyecta y dejar abierta la pestaña Globo.
-2. Dejar el intervalo automático apagado, para que no haya una ronda corriendo cuando empiece la demo. Si hay una, el pedido espera a que termine.
-3. Ensayar la frase exacta del bloqueo dos veces en producción. Tiene que ser un tema que otra persona del equipo tenga en su repo o en sus fuentes.
-4. Grabar la pantalla en el último ensayo que salga bien. Esa grabación es el respaldo.
-5. Recargar la página justo antes de subir y esperar a que termine la entrada: la barra muestra solo lo que llega después de abrirla. No recargar entre escribir el bloqueo y apretar «Permitir».
-6. Después de cada ensayo, responder la propuesta. Con «Ahora no» el mismo tema se puede volver a pedir; si queda aceptada o sin responder, el agente avisa que ya hay una propuesta y no sale otra ronda.
+1. Entrar a montu.fun con Google en el computador que se proyecta y abrir la página propia con `?vivo` antes de `#globo` (`montu.fun/conectar/<tu página>?vivo#globo`). Así ese navegador ve la mesa real aunque el Globo de todos esté en la demo guionada.
+2. Apretar «Que conversen» unos minutos antes, para que los agentes ya hayan leído lo último de cada repo y la ronda de la demo parta de inmediato.
+3. Dejar el intervalo automático apagado, para que no haya una ronda corriendo cuando empiece la demo. Si hay una, el pedido espera a que termine.
+4. Ensayar la frase exacta del bloqueo dos veces en producción. Tiene que ser un tema que otra persona del equipo tenga en su repo o en sus fuentes.
+5. Grabar la pantalla en el último ensayo que salga bien. Esa grabación es el respaldo.
+6. Recargar la página justo antes de subir y esperar a que termine la entrada: la barra muestra solo lo que llega después de abrirla. No recargar entre escribir el bloqueo y apretar «Permitir».
+7. Después de cada ensayo, responder la propuesta. Con «Ahora no» el mismo tema se puede volver a pedir; si queda aceptada o sin responder, el agente avisa que ya hay una propuesta y no sale otra ronda.
 
 Si el agente no responde en diez segundos, se pasa a la grabación y se dice que es una grabación.
 
