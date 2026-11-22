@@ -7,13 +7,14 @@ import { DEFAULT_MESA_DAILY_TOKEN_CAP, MESA_TEAM_ID } from './store.js';
 
 const DEFAULT_TICK_MS = 5000;
 const DAY_MS = 86_400_000;
+const WINDOW_STEP_MS = 60_000;
 
 export type MesaTick = 'sin_modelo' | 'manual' | 'en_curso' | 'esperando' | 'tope' | 'sin_novedad' | 'iniciada';
 
 export const mesaDailyCapOf = (ctx: AppContext): number => ctx.config.mesaDailyTokenCap ?? DEFAULT_MESA_DAILY_TOKEN_CAP;
 
 export function mesaTokensLastDay(ctx: AppContext, now: Date): number {
-  const spent = ctx.agents.usageSince(MESA_TEAM_ID, new Date(now.getTime() - DAY_MS).toISOString());
+  const spent = ctx.agents.usageSince(MESA_TEAM_ID, new Date(Math.floor(now.getTime() / WINDOW_STEP_MS) * WINDOW_STEP_MS - DAY_MS).toISOString());
   return spent.inputTokens + spent.outputTokens;
 }
 

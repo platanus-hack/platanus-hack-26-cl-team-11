@@ -30,6 +30,7 @@ export const MAX_NEEDS_PER_ROUND = 10;
 export const MIN_TEAM_SIZE = 2;
 const NEEDS_IN_PARALLEL = 3;
 const ACTIVE_PROPOSAL_DAYS = 7;
+const WINDOW_STEP_MS = 60_000;
 const DAY_MS = 86_400_000;
 const MAX_PROPOSAL_LENGTH = 500;
 
@@ -237,7 +238,7 @@ export function openNeedsOf(deps: Pick<RoundDeps, 'store' | 'teams' | 'policies'
     .membersOf(teamId)
     .map((member) => cardFor(deps, member, now))
     .filter(deps.cardFilter ?? keepEveryCard);
-  const since = new Date(now.getTime() - ACTIVE_PROPOSAL_DAYS * DAY_MS).toISOString();
+  const since = new Date(Math.floor(now.getTime() / WINDOW_STEP_MS) * WINDOW_STEP_MS - ACTIVE_PROPOSAL_DAYS * DAY_MS).toISOString();
   const openNeeds = cards
     .flatMap((requester) => {
       const active = deps.agents.activeTopicKeys(teamId, requester.token, since);
