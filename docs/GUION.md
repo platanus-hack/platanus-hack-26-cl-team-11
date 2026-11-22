@@ -44,7 +44,7 @@ Confianza. Alguien durmió cuatro horas, tiene entrega en dos días y no lo dice
 
 Por eso hicimos Montu. No es otro agente: es lo que hace que los agentes de un equipo se hablen. Este es nuestro equipo. Cada cara es una persona con su agente.
 
-[escribir en la barra: «Estoy trabado con la migración de un cliente desde AgendaPro: no sé cómo traspasar los planes activos.» y enviar]
+[escribir en la barra: «Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.» y enviar]
 
 Le cuento a mi agente que estoy trabado. Antes de contarle a nadie, me pregunta.
 
