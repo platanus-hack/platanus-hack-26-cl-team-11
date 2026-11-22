@@ -76,7 +76,12 @@
   var showHook = counter($('hook-n'), 0), hookSlide = document.querySelector('.pt-hook');
   var coverScene = {
     enter: function () { setTimeout(function () { showHook(HOOK); }, still ? 0 : 350); },
-    step: function (k) { hookSlide.toggleAttribute('data-bet', k >= 2); hookSlide.toggleAttribute('data-claim', k >= 3); },
+    step: function (k) {
+      hookSlide.toggleAttribute('data-bet', k >= 2);
+      hookSlide.toggleAttribute('data-claim', k >= 3);
+      var seven = $('hook-n').firstElementChild;
+      if (seven) roll(seven, k >= 2 ? '🍌' : '7');
+    },
   };
 
   /* ---------- Contexto: todo lo de tu vida ya llega a tu agente ---------- */
@@ -148,43 +153,83 @@
     if (few) dots();
     frame();
   }
-  // Encima de la red se acumula lo que generan los agentes: tareas, código y correos, cada vez más rápido.
-  var KINDS = [['linear', 'Tarea'], ['github', 'Código'], ['gmail', 'Correo']];
-  var flood = $('flood'), chips = [], seed = 7, CHIPS = 90;
-  var chance = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-  function addChip() {
-    var kind = KINDS[chips.length % KINDS.length], chip = document.createElement('span');
-    chip.className = 'pt-chip rd-glass';
-    chip.style.left = (2 + chance() * 86) + '%';
-    chip.style.top = (17 + chance() * 56) + '%';
-    chip.style.setProperty('--turn', (chance() * 14 - 7).toFixed(1) + 'deg');
-    chip.innerHTML = '<img src="../sources/apps/' + kind[0] + '.png" alt="">' + kind[1];
-    flood.append(chip);
-    chips.push(chip);
+  // Lo que generan los agentes cae como ladrillos y arma una pirámide encima de la red: tareas, código y correos.
+  var KINDS = [['linear', 'Tarea', '--rd-g2'], ['github', 'Código', '--rd-g1'], ['gmail', 'Correo', '--rd-g4']];
+  var flood = $('flood'), ROWS = 8, plan = [], bricks = [];
+  var watchers = Array.from(flood.querySelectorAll('[data-watch]')).map(function (node) { return Caras.mount(node, node.dataset.watch, { size: 84, state: 'pensando' }); });
+  function planPyramid() {
+    var box = flood.getBoundingClientRect(), top = 122, bottom = box.height - Math.max(150, box.height * 0.3);
+    var h = Math.min((bottom - top) / ROWS, 58), w = Math.min(h * 2.6, (box.width * 0.9) / ROWS);
+    plan = [];
+    for (var r = 0; r < ROWS; r++) {
+      var count = ROWS - r, x0 = box.width / 2 - (count * w) / 2;
+      for (var c = 0; c < count; c++) plan.push({ x: x0 + c * w, y: bottom - (r + 1) * h, w: w, h: h, kind: KINDS[(c + r * 2) % KINDS.length] });
+    }
+    flood.querySelectorAll('.pt-watch').forEach(function (node, side) {
+      node.style.left = (side ? box.width / 2 + (ROWS * w) / 2 + 28 : box.width / 2 - (ROWS * w) / 2 - 28 - 84) + 'px';
+      node.style.top = (bottom - 84) + 'px';
+    });
   }
-  var clearChips = function () { chips.forEach(function (chip) { chip.remove(); }); chips = []; seed = 7; };
+  function addBrick() {
+    var spot = plan[bricks.length], brick = document.createElement('span');
+    brick.className = 'pt-brick';
+    brick.style.cssText = 'left:' + (spot.x + 2) + 'px;top:' + (spot.y + 2) + 'px;width:' + (spot.w - 4) + 'px;height:' + (spot.h - 4) + 'px;--tint:var(' + spot.kind[2] + ')';
+    brick.innerHTML = '<img src="../sources/apps/' + spot.kind[0] + '.png" alt=""><span>' + spot.kind[1] + '</span>';
+    flood.append(brick);
+    bricks.push(brick);
+    if (bricks.length % 5 === 0) watchers[(bricks.length / 5) % 2].pulse();
+    if (bricks.length === plan.length) watchers.forEach(function (face) { face.set('ausente'); });
+  }
+  var clearChips = function () { bricks.forEach(function (brick) { brick.remove(); }); bricks = []; watchers.forEach(function (face) { face.set('pensando'); }); };
+  var fillAll = function () { while (bricks.length < plan.length) addBrick(); };
   var floodTick = ticker(function () {
-    if (chips.length >= CHIPS) return 60000;
-    addChip();
-    return Math.max(60, 340 - chips.length * 6);
-  }, 300);
+    if (bricks.length >= plan.length) return 60000;
+    addBrick();
+    return Math.max(70, 300 - bricks.length * 9);
+  }, 350);
   var soon = ticker(function () { soon.stop(); if (scenes[current] === growth && stepAt === 2) go(current, 3); return 60000; }, 5000);
   var growth = {
     step: function (k) {
       var n = k >= 2 ? 300 : 5, agents = k >= 3;
       soon.stop();
+      flood.toggleAttribute('data-agents', agents);
       roll($('net-title'), agents ? 'Y ahora trabajamos con agentes.' : 'Coordinar un equipo no escala.');
       roll($('net-caption'), agents ? 'El equipo produce información más rápido de lo que alcanza a leerla.' : fmt(n) + ' personas · ' + fmt(pairs(n)) + ' conversaciones');
       if (n !== netSize || !agents) drawNet(n, still);
-      if (agents) { if (still) while (chips.length < CHIPS) addChip(); floodTick.start(); }
+      if (agents) { planPyramid(); if (still) fillAll(); floodTick.start(); }
       else { floodTick.stop(); clearChips(); if (k === 2) soon.start(); }
     },
     leave: function () { netRun += 1; soon.stop(); floodTick.stop(); clearChips(); netSize = 0; },
-    skip: function () { if (stepAt < 3) go(current, stepAt + 1); else while (chips.length < CHIPS) addChip(); },
+    skip: function () { if (stepAt < 3) go(current, stepAt + 1); else fillAll(); },
   };
   window.addEventListener('resize', function () { if (scenes[current] === growth) drawNet(netSize, true); });
 
   /* ---------- Tres pilares: con el clic final se apagan y queda la frase ---------- */
+  var ARROW = '<svg viewBox="0 0 40 16"><path d="M2 8h32M27 2l8 6-8 6"/></svg>';
+  var stillBrick = function (kind) { return '<span class="pt-brick pt-brick--still" style="--tint:var(' + kind[2] + ')"><img src="../sources/apps/' + kind[0] + '.png" alt=""><span>' + kind[1] + '</span></span>'; };
+  var artFaces = [];
+  var actor = function (name, state) { var node = document.createElement('span'); node.className = 'pt-face'; node.style.setProperty('--size', '76px'); artFaces.push(Caras.mount(node, name, { size: 76, state: state || 'reposo' })); return node; };
+  document.querySelectorAll('.pt-art').forEach(function (art) {
+    var kind = art.dataset.art;
+    if (kind === 'same') ['Mati', 'Ian'].forEach(function (name) {
+      var who = document.createElement('span');
+      who.className = 'pt-art__who';
+      who.append(actor(name, 'activa'));
+      who.insertAdjacentHTML('beforeend', stillBrick(KINDS[1]));
+      art.append(who);
+    });
+    if (kind === 'apart') [['Lian', -150], ['Roberto', -70], ['Andrés', 20]].forEach(function (pair) {
+      var who = document.createElement('span');
+      who.className = 'pt-art__who';
+      who.append(actor(pair[0], 'activa'));
+      who.insertAdjacentHTML('beforeend', '<span class="pt-arrow" style="--to:' + pair[1] + 'deg">' + ARROW + '</span>');
+      art.append(who);
+    });
+    if (kind === 'quiet') {
+      art.append(actor('Sofía', 'ausente'));
+      art.insertAdjacentHTML('beforeend', '<span class="pt-unsaid rd-glass"><span class="pt-dots"><i></i><i></i><i></i></span></span>');
+    }
+  });
   var pillars = { step: function (k) { $('pillars').toggleAttribute('data-close', k >= 2); } };
 
   /* ---------- 6. El globo ---------- */

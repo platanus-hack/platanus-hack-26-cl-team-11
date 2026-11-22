@@ -28,7 +28,11 @@
 .pt-hook__num.cx-num { font-size: clamp(120px, 22vw, 360px); line-height: 0.95; letter-spacing: -0.06em; }
 .pt-hook__bet { margin: 0; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: clamp(20px, 2.5vw, 40px); letter-spacing: -0.025em; color: var(--rd-muted); opacity: 0; transition: opacity 0.6s var(--ease); }
 .pt-hook[data-bet] .pt-hook__bet { opacity: 1; }
-.pt-hook__bet svg { width: 1.5em; height: 1.5em; flex: none; fill: var(--rd-g5); }
+.pt-banana { font-size: 1.25em; line-height: 1; }
+.cx-tag .pt-banana { font-size: 16px; }
+.pt-hook__num .cx-roll { padding-inline: 0.05em; margin-inline: -0.075em; }
+.pt-hook__num .cx-roll__item { overflow: visible; text-overflow: clip; letter-spacing: 0; }
+.pt .cx-nav, .pt .pt-bar-bottom { display: none !important; }
 .pt-hook__claim { position: absolute; left: 0; right: 0; top: 46%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: clamp(16px, 3vh, 32px); opacity: 0; transition: opacity 0.7s var(--ease) 0.2s; pointer-events: none; }
 .pt-hook__claim .pt-title { max-width: 16ch; }
 .pt-hook__then { margin: 0; font-size: clamp(24px, 3.2vw, 52px); font-weight: var(--rd-weight); letter-spacing: -0.035em; color: var(--rd-muted); }
@@ -70,19 +74,35 @@
 .pt-problem { justify-content: space-between; }
 .pt-problem .pt-title, .pt-problem .pt-caption { position: relative; z-index: 1; }
 .pt-net { position: absolute; inset: 0 0 20px; }
-.pt[data-clean] .pt-net { inset: 0 0 96px; }
+.pt[data-clean] .pt-net { inset: 0 0 28px; }
 .pt-net canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .pt-caption { margin: 0; align-self: center; text-align: center; font-family: var(--rd-font-num); font-size: clamp(24px, 3.2vw, 54px); font-weight: var(--rd-weight); letter-spacing: -0.04em; line-height: 1.1; }
 .pt-caption .cx-roll__item { white-space: normal; }
 
 /* ---------- Con agentes ---------- */
-.pt-chip { position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: var(--key); font-size: clamp(13px, 1.1vw, 17px); font-weight: var(--rd-weight); box-shadow: var(--rd-shadow-card); transform: rotate(var(--turn, 0deg)); animation: pt-arrive 0.35s var(--ease) both; }
-.pt-chip img { width: 26px; height: 26px; border-radius: var(--mark); }
+.pt-net canvas { transition: opacity 0.8s var(--ease); }
+.pt-net[data-agents] canvas { opacity: 0.14; }
+.pt-brick { position: absolute; display: inline-flex; align-items: center; justify-content: center; gap: 7px; box-sizing: border-box; border-radius: var(--mark); background: var(--tint); color: var(--rd-on-ink, white); font-size: clamp(12px, 1.05vw, 16px); font-weight: var(--rd-weight); box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--tint) 72%, var(--rd-ink)), inset 0 2px 0 color-mix(in srgb, var(--tint) 70%, white); animation: pt-drop 0.6s cubic-bezier(0.3, 1.25, 0.5, 1) both; }
+.pt-brick img { width: 22px; height: 22px; padding: 2px; box-sizing: border-box; border-radius: var(--mark); background: var(--rd-glass-solid); }
+.pt-brick--still { position: static; padding: 7px 12px 10px 8px; animation: none; }
+@keyframes pt-drop { from { transform: translateY(-90vh) rotate(-8deg); } 70% { transform: translateY(0) rotate(0); } 82% { transform: translateY(-6px); } }
+.pt-watch { position: absolute; width: 84px; height: 84px; opacity: 0; transition: opacity 0.6s var(--ease); z-index: 1; }
+.pt-net[data-agents] .pt-watch { opacity: 1; }
 
 /* ---------- Tres problemas ---------- */
 .pt-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rd-space-4); flex: 1 1 auto; min-height: 0; }
 .pt-three__col { display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 32px 36px; }
-.pt-three__col::before { content: ""; width: 56px; height: 10px; border-radius: var(--mark); background: var(--tint); }
+.pt-art { display: flex; align-items: flex-end; gap: 18px; height: 132px; margin-bottom: 6px; }
+.pt-art__who { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pt-art .pt-brick--still { font-size: 13px; }
+.pt-art[data-art="same"] .pt-art__who:nth-child(2) .pt-brick--still { animation: pt-twin 2.4s ease-in-out infinite; }
+@keyframes pt-twin { 50% { transform: translateY(-5px); } }
+.pt-arrow { display: block; width: 44px; height: 18px; transform: rotate(var(--to)); }
+.pt-arrow svg { display: block; width: 100%; height: 100%; fill: none; stroke: var(--tint); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; animation: pt-go 0.9s ease-in-out infinite alternate; }
+@keyframes pt-go { to { transform: translateX(9px); } }
+.pt-art[data-art="quiet"] { align-items: center; }
+.pt-unsaid { display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border-radius: var(--block); box-shadow: var(--rd-shadow-card); animation: pt-swallow 3.2s ease-in-out infinite; }
+@keyframes pt-swallow { 0%, 12% { opacity: 0; transform: scale(0.8); } 30%, 62% { opacity: 1; transform: none; } 80%, 100% { opacity: 0; transform: scale(0.8); } }
 .pt-three__name { margin: 0; font-size: clamp(30px, 3.3vw, 52px); font-weight: var(--rd-weight); letter-spacing: -0.035em; line-height: 1.05; }
 /* Tres líneas reservadas: así la marca y el título de las tres tarjetas quedan a la misma altura aunque una frase sea más larga. */
 .pt-three__say { margin: 0; min-height: calc(3 * 1.22em); font-size: clamp(20px, 2vw, 32px); line-height: 1.22; letter-spacing: -0.015em; }
@@ -136,9 +156,9 @@
 
 /* ---------- El guion, abajo de cada lámina (solo en el ensayo) ---------- */
 .pt-slide { padding-bottom: 20px; }
-.pt-script { flex: none; margin-bottom: 72px; padding: 16px 22px 18px; gap: 8px; max-height: 26vh; overflow-y: auto; }
+.pt-script { flex: none; margin-bottom: 22px; padding: 16px 22px 18px; gap: 8px; max-height: 26vh; overflow-y: auto; }
 .pt-script[hidden] { display: none; }
-.pt[data-clean] .pt-slide { padding-bottom: 96px; }
+.pt[data-clean] .pt-slide { padding-bottom: 28px; }
 .pt-script__head { display: flex; align-items: center; gap: 12px; }
 .pt-script__text { margin: 0; font-size: clamp(16px, 1.35vw, 20px); line-height: 1.42; }
 .pt-script__line { opacity: 0.32; transition: opacity 0.35s var(--ease); }
@@ -172,6 +192,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pt-slide, .pt-slide[data-on] { transition: none; transform: none; }
   .pt-dots i { animation: none; opacity: 0.6; }
-  .pt-chip { animation: none; }
+  .pt-brick, .pt-arrow svg, .pt-unsaid { animation: none; }
   .pt-three__col { animation: none !important; }
 }
