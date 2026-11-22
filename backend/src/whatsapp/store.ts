@@ -43,6 +43,7 @@ export interface WhatsAppStore {
   personOf(phone: string): string | undefined;
   openPrompt(personToken: string, kind: PromptKind, ref: string, now: Date): string | null;
   unansweredPrompt(personToken: string, kind: PromptKind, ref: string): string | undefined;
+  reopenPrompt(personToken: string, kind: PromptKind, ref: string): void;
   findPrompt(id: string): WhatsAppPrompt | undefined;
   closePrompt(id: string, choice: string, now: Date): boolean;
   firstDelivery(key: string, now: Date): boolean;
@@ -159,6 +160,10 @@ export function openWhatsAppStore(db: DatabaseSync): WhatsAppStore {
         .prepare('INSERT INTO whatsapp_prompts (id, person_token, kind, ref, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (person_token, kind, ref) DO NOTHING')
         .run(id, personToken, kind, ref, now.toISOString());
       return opened.changes > 0 ? id : null;
+    },
+
+    reopenPrompt(personToken, kind, ref) {
+      db.prepare('UPDATE whatsapp_prompts SET choice = NULL, answered_at = NULL WHERE person_token = ? AND kind = ? AND ref = ?').run(personToken, kind, ref);
     },
 
     unansweredPrompt(personToken, kind, ref) {

@@ -315,6 +315,18 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     recordCheckin(ctx.store, person.token, { mood: isMood(statedMood) ? statedMood : (earlier ?? UNSTATED_MOOD), blocker: within(reading.blocker), note: within(reading.note) }, now);
     sendText(person.token, [reply || COPY.noted, earlier === null ? todayOf(person, now) : null].filter(Boolean).join('\n'));
     const stated = within(reading.blocker);
+    if (stated !== null) {
+      const decided = ctx.agents.decisionsOf(person.token);
+      const key = topicKeyOf(stated);
+      if (decided.released.has(key) || decided.denied.has(key)) {
+        ctx.agents.forgetTopic(person.token, stated);
+        links.reopenPrompt(person.token, 'permiso', stated);
+      }
+      for (const proposal of ctx.agents.proposalsOf(MESA_TEAM_ID)) {
+        const asksForIt = proposal.parties.some((party) => party.role === 'pide' && party.token === person.token);
+        if (asksForIt && proposal.status !== 'descartada' && topicKeyOf(proposal.topic) === key) ctx.agents.answerProposal(proposal.id, person.token, REJECT);
+      }
+    }
     const waitsForPermission = stated !== null && cardFor(cardDepsFrom(ctx), person, new Date()).pendingAsks.some((need) => topicKeyOf(need.topic) === topicKeyOf(stated));
     askPermissions(person.token, door, stated);
     if (stated === null || waitsForPermission || !inMesa(person.token)) return;

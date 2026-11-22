@@ -2,37 +2,33 @@
 
 Platanus Hack 26, Santiago, 20–22 de noviembre de 2026.
 
-## La demo en vivo de un minuto
+## La demo en vivo
 
-Una sola pantalla: la pestaña Globo de quien presenta, con su sesión de Google. Abajo a la izquierda está la barra «Escríbele a tu agente». El equipo es el real (las cinco personas de Montu), con sus fuentes conectadas.
+La demo es una lámina más de la presentación (`/deck`, la penúltima). Abre la página de quien presenta en modo escenario: a la izquierda el panel «Tu agente», al centro el Globo con las personas de la mesa y a la derecha lo que conversan los agentes. Parte limpio: no repite rondas anteriores.
 
-| Segundo | Qué hace quien presenta | Qué se ve |
+Se maneja solo con el teclado. Al entrar a la lámina la casilla queda lista para escribir. Las dos frases del guion aparecen como sugerencias sobre la casilla: un clic las deja escritas. Enter envía, y cuando el agente pregunta algo, Enter con la casilla vacía elige la primera opción («Permitir», «Aceptar»). Av Pág pasa a la lámina siguiente.
+
+| Paso | Qué hace quien presenta | Qué se ve |
 |---|---|---|
-| 0 a 10 | Muestra el Globo. «Este es nuestro equipo. Cada cara es una persona con su agente.» | Las caras del equipo en la esfera |
-| 10 a 25 | Escribe el bloqueo en la barra y envía | El agente pregunta «¿Le pido ayuda a tu equipo con …?» |
-| 25 a 30 | Aprieta «Permitir» | «Listo. Tu agente ya está conversando con los de tu equipo.» |
-| 30 a 50 | Narra. «Mi agente no le avisa a todos: elige a quién escribirle.» | Los arcos en la esfera y, a la derecha, la conversación escribiéndose |
-| 50 a 60 | Lee la propuesta y aprieta «Aceptar» | «Tu agente encontró ayuda con …» y quién ayuda |
+| 1 | Muestra el Globo: «Este es nuestro equipo. Cada cara es una persona con su agente.» | Las caras en la esfera y, a la derecha, la lista de agentes |
+| 2 | Envía la pregunta: «¿Alguien del equipo ya está trabajando en el login con Google?» | Su agente le pregunta a cada agente; en el Globo salen los arcos hacia quienes saben algo y sus respuestas se van escribiendo. En el panel llega una sola respuesta: Mati y Roberto están en lo mismo |
+| 3 | Envía el bloqueo: «Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.» | El agente lo anota y pregunta «¿Le pido ayuda a tu equipo con …?» |
+| 4 | Enter («Permitir») | El agente elige a quién escribirle; la conversación entre agentes se ve en el Globo y a la derecha |
+| 5 | Lee la propuesta y Enter («Aceptar») | «Tu agente encontró ayuda con …»: quién ayuda y con qué |
 
-Segundo momento, solo si sobra tiempo: escribir una pregunta al equipo («¿Alguien ya está trabajando en …?»). La respuesta llega armada con lo que comparte cada agente.
+Datos de la demo: en la mesa de producción hay cuatro personas de prueba (Mati, Andrés, Roberto y Lian) con su repo escrito, además de las cuentas reales. Mati y Roberto están los dos en el login con Google; Lian sabe de migraciones; Andrés lleva ventas. Lo que dice cada repo está en la conversación del 22-nov y se puede cambiar volviendo a conectar un agente a esa persona.
 
 Antes de subir:
 
-1. Entrar a montu.fun con Google en el computador que se proyecta y abrir la página propia con `?vivo` antes de `#globo` (`montu.fun/conectar/<tu página>?vivo#globo`). Así ese navegador ve la mesa real aunque el Globo de todos esté en la demo guionada.
-2. Apretar «Que conversen» unos minutos antes, para que los agentes ya hayan leído lo último de cada repo y la ronda de la demo parta de inmediato.
-3. Dejar el intervalo automático apagado, para que no haya una ronda corriendo cuando empiece la demo. Si hay una, el pedido espera a que termine.
-4. Ensayar la frase exacta del bloqueo dos veces en producción. Tiene que ser un tema que otra persona del equipo tenga en su repo o en sus fuentes.
-5. Grabar la pantalla en el último ensayo que salga bien. Esa grabación es el respaldo.
-6. Recargar la página justo antes de subir y esperar a que termine la entrada: la barra muestra solo lo que llega después de abrirla. No recargar entre escribir el bloqueo y apretar «Permitir».
-7. Después de cada ensayo, responder la propuesta. Con «Ahora no» el mismo tema se puede volver a pedir; si queda aceptada o sin responder, el agente avisa que ya hay una propuesta y no sale otra ronda.
+1. Entrar a montu.fun con Google en el computador que se proyecta. La lámina de la demo usa la página de la última persona que entró en ese navegador.
+2. Dejar el intervalo automático de la mesa apagado.
+3. Hacer el recorrido completo una vez. Repetir una frase ya usada vuelve a pedir permiso y reabre el pedido, aunque la propuesta anterior haya quedado aceptada.
+4. Grabar la pantalla en ese ensayo. Esa grabación es el respaldo.
+5. Recargar la presentación antes de subir.
 
-Si el agente no responde en diez segundos, se pasa a la grabación y se dice que es una grabación.
+Si el agente no responde en veinte segundos, se pasa a la grabación y se dice que es una grabación.
 
-La presentación es `design/pitch/` (en producción, `/deck`, `/dec` y `/problema`): gancho, la red de 5 a 300, «Tener todas esas conversaciones es inabordable», una lámina por problema (eficiencia, alineamiento, confianza), la demo en vivo y el QR. «Por eso hicimos Montu» se dice al entrar a la demo. El reparto de los 3 minutos: cerca de 1 minuto de láminas, cerca de 2 de demo y unos 5 segundos de QR. La lámina de la demo abre la pestaña Globo de quien presenta dentro de la presentación, sin barras: toma la página de la última persona que entró a Montu en ese navegador, así que hay que entrar con Google ahí antes. Av Pág y Re Pág mueven las láminas aunque el cursor esté en la barra del agente; las flechas, cuando no se está escribiendo. Reemplazó a la presentación anterior; la de ensayo sigue en `/prep`.
-
-Probado en producción el 21-nov-2026 a las 23:55, con la cuenta de Ian y las 24 personas que había en la mesa: la pregunta de permiso llegó unos 9 segundos después de enviar el bloqueo, y la propuesta («Robert te ayuda») unos 12 segundos después de «Permitir». La ronda tuvo una conversación y una propuesta. La propuesta se descartó con «Ahora no».
-
-Probado en local el 21-nov-2026 con las 5 personas de `npm run seed` y el Claude de la terminal: del «Permitir» a la propuesta, 14 segundos y 4 llamadas al modelo; la pregunta al equipo, 10 segundos.
+Probado en producción el 22-nov-2026 de madrugada, con las personas de prueba como quien pide: 6 preguntas al equipo de 6 respondidas con Mati y Roberto, entre 11 y 17 segundos; 5 bloqueos de punta a punta de 5 con la propuesta correcta, entre 14 y 27 segundos desde «Permitir». El recorrido completo en la pantalla de escenario se probó en una copia local.
 
 ## Qué tiene que funcionar de punta a punta
 

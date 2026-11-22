@@ -285,3 +285,25 @@ test('the Kapso channel sends text and buttons in its format, retries a busy con
   assert.equal(channel.isSigned(`${rawBody} `, signature), false);
   assert.equal(channel.isSigned(rawBody, undefined), false);
 });
+
+test('saying the same blocker again asks for permission again and reopens it even after an agreed proposal', async () => {
+  const { ctx, ana, tomas, sent, link, say, press, until, buttonOf } = setup(() => ({ intent: 'checkin', mood: 'normal', blocker: TOPIC, note: '', reply: 'Anotado.' }));
+  await link(ana.token, ANA_PHONE);
+  await link(tomas.token, TOMAS_PHONE);
+  const asksOf = () => sent.filter((message) => message.to === ANA_PHONE && message.buttons.some((button) => button.title === 'Permitir'));
+  const offersOf = (phone: string) => sent.filter((message) => message.to === phone && message.buttons.some((button) => button.title === 'Aceptar'));
+
+  await say(ANA_PHONE, 'estoy pegada con la integración de pagos');
+  await until(() => asksOf().length === 1);
+  await press(ANA_PHONE, buttonOf(asksOf()[0], 'Permitir'));
+  await until(() => offersOf(ANA_PHONE).length === 1 && offersOf(TOMAS_PHONE).length === 1);
+  await press(ANA_PHONE, buttonOf(offersOf(ANA_PHONE)[0], 'Aceptar'));
+  await press(TOMAS_PHONE, buttonOf(offersOf(TOMAS_PHONE)[0], 'Aceptar'));
+  await until(() => ctx.agents.proposalsOf(MESA_TEAM_ID)[0]?.status === 'acordada');
+
+  await say(ANA_PHONE, 'sigo pegada con la integración de pagos');
+  await until(() => asksOf().length === 2);
+  assert.equal(ctx.agents.proposalsOf(MESA_TEAM_ID).filter((proposal) => proposal.status === 'acordada').length, 0);
+  await press(ANA_PHONE, buttonOf(asksOf()[1], 'Permitir'));
+  await until(() => offersOf(ANA_PHONE).length === 2);
+});

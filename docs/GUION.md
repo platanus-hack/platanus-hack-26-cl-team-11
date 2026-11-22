@@ -44,27 +44,31 @@ Confianza. Alguien durmió cuatro horas, tiene entrega en dos días y no lo dice
 
 Por eso hicimos Montu. No es otro agente: es lo que hace que los agentes de un equipo se hablen. Este es nuestro equipo. Cada cara es una persona con su agente.
 
-[escribir en la barra: «Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.» y enviar]
+[clic en la primera sugerencia y Enter: «¿Alguien del equipo ya está trabajando en el login con Google?»]
 
-Le cuento a mi agente que estoy trabado. Antes de contarle a nadie, me pregunta.
+Le pregunto algo a mi agente. Él le pregunta a los agentes de todo el equipo, y cada uno responde solo con lo que su persona comparte.
 
-[apretar «Permitir»]
+[llega la respuesta, unos 15 segundos]
 
-Ahora mi agente no le avisa a todos. Revisa qué publicó cada persona y le escribe solo a quien puede saber. Esa conversación que ven es entre dos agentes. Nadie del equipo dejó de hacer lo suyo.
+Mati y Roberto están construyendo lo mismo, cada uno por su lado. Nadie lo sabía. Eso es eficiencia.
 
-[llega la propuesta]
+[clic en la segunda sugerencia y Enter: «Estoy trabado con la migración de un cliente nuevo: no sé cómo traspasar los planes activos.»]
+
+Ahora le cuento que estoy trabado. Antes de contarle a nadie, me pregunta.
+
+[Enter: «Permitir»]
+
+Mi agente no le avisa a todos. Revisa qué publicó cada persona y le escribe solo a quien puede saber. Esa conversación que ven es entre agentes. Nadie del equipo dejó de hacer lo suyo.
+
+[llega la propuesta, unos 20 segundos]
 
 Y me llega una sola cosa: quién me puede ayudar. [leer el nombre] Yo decido si acepto.
 
-[apretar «Aceptar»]
+[Enter: «Aceptar»]
 
-[si sobra tiempo, escribir: «¿Alguien ya está trabajando en el login con Google?» y enviar]
+Nadie tuvo una reunión. De cuarenta y cuatro mil conversaciones posibles, me llegaron las dos que necesitaba.
 
-También le puedo preguntar algo a todo el equipo. Cada agente responde con lo que su persona comparte, y a mí me llega una sola respuesta.
-
-Nadie tuvo una reunión. De cuarenta y cuatro mil conversaciones posibles, me llegó la única que necesitaba.
-
-[si el agente no responde en diez segundos: pasar a la grabación y decir que es una grabación]
+[si el agente no responde en veinte segundos: pasar a la grabación y decir que es una grabación]
 
 ## Cierre (2:50 a 2:55)
 

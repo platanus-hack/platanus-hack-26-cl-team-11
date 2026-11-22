@@ -111,6 +111,7 @@ export interface AgentStore {
   activeTopicKeys(teamId: string, requesterToken: string, since: string): Set<string>;
   decisionsOf(personToken: string): TopicDecisions;
   decideTopic(personToken: string, topic: string, allowed: boolean): void;
+  forgetTopic(personToken: string, topic: string): void;
   saveRoundUsage(roundId: string, usage: RoundUsage): void;
   usageOfRound(roundId: string): RoundUsage | undefined;
   usageSince(teamId: string, since: string): UsageTotals;
@@ -500,6 +501,10 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
         released: new Set(rows.filter((row) => row.allowed === 1).map((row) => row.topic_key)),
         denied: new Set(rows.filter((row) => row.allowed !== 1).map((row) => row.topic_key)),
       };
+    },
+
+    forgetTopic(personToken, topic) {
+      db.prepare('DELETE FROM agent_topic_decisions WHERE person_token = ? AND topic_key = ?').run(personToken, topicKeyOf(topic));
     },
 
     decideTopic(personToken, topic, allowed) {
