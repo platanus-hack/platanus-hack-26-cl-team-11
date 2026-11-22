@@ -3,7 +3,7 @@ import { fetchGlobeMode } from './api';
 import { GlobeChat } from './GlobeChat';
 import { GlobeScript } from './GlobeScript';
 
-const DEMO_PATH = '/design/grafo/universo.html?embed&v=18';
+const DEMO_PATH = '/design/grafo/universo.html?embed&v=19';
 
 const LIVE_PARAM = 'vivo';
 const STAGE_PARAM = 'escenario';

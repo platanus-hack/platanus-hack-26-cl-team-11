@@ -340,12 +340,12 @@
   }
 
   function apply(data) {
+    if (SCRIPTED) { var cast = castFrom(data); try { localStorage.setItem(CAST_KEY, JSON.stringify(cast)); } catch (failure) { cast = castFrom(data); } enter(cast); return; }
     var first = !loaded;
     if (first) stride = Math.max(1, Math.min(MAX_STRIDE, Math.floor(U.N / Math.max(1, data.people.length))));
     data.people.forEach(function (person) { if (person.id === data.me) seat(person, true); });
     data.people.forEach(function (person) { seat(person, false); });
     loaded = true;
-    if (SCRIPTED) { meId = data.me; data.people.forEach(function (person) { idByName[person.name] = person.id; if (person.id === data.me) meName = person.name.split(' ')[0]; }); running = false; if (first) lobby(); return; }
     if (cleaning && data.round && data.round.status === 'en_curso') cleaning = false;
     if (cleaning) {
       since = data.lastEventId || since;
@@ -371,6 +371,34 @@
     var other = null;
     slotOf.forEach(function (slot, id) { if (id !== meId && other === null) other = id; });
     return other;
+  }
+  // El elenco del libreto son siempre las mismas cinco personas. Sale del servidor, queda guardado en el navegador y,
+  // si el servidor no responde, entra igual con lo guardado o con los nombres del libreto.
+  var CAST = ['Matías Berríos', 'Robert', 'AMG', 'natochi'], CAST_KEY = 'montu.guion.elenco', CAST_WAIT_MS = 2500;
+  function castFrom(data) {
+    var people = data && data.people ? data.people : [];
+    var me = people.filter(function (person) { return person.id === data.me; })[0];
+    return {
+      me: me ? { id: me.id, name: me.name } : { id: 'guion-yo', name: '' },
+      others: CAST.map(function (name) {
+        var found = people.filter(function (person) { return person.name === name && (!me || person.id !== me.id); })[0];
+        return { id: found ? found.id : 'guion-' + name, name: name };
+      })
+    };
+  }
+  function enter(cast) {
+    if (meId !== null) return;
+    stride = Math.max(1, Math.min(MAX_STRIDE, Math.floor(U.N / (cast.others.length + 1))));
+    seat({ id: cast.me.id, name: cast.me.name || 'Tú' }, true);
+    cast.others.forEach(function (person) { seat(person, false); idByName[person.name] = person.id; });
+    meId = cast.me.id;
+    if (cast.me.name) meName = cast.me.name.split(' ')[0];
+    loaded = true; running = false;
+    lobby();
+  }
+  if (SCRIPTED) {
+    try { var kept = JSON.parse(localStorage.getItem(CAST_KEY) || 'null'); if (kept && kept.me && kept.others && kept.others.length === CAST.length) enter(kept); } catch (failure) { kept = null; }
+    setTimeout(function () { enter(castFrom(null)); }, CAST_WAIT_MS);
   }
   function later(ms, ev) { setTimeout(function () { handle(ev); }, ms); }
   function askParent(decision) { parent.postMessage({ montu: 'guion-pide', decision: decision }, location.origin); }
@@ -433,7 +461,8 @@
   ];
   if (SCRIPTED) addEventListener('message', function (event) {
     var data = event.data;
-    if (event.origin !== location.origin || !data || data.montu !== 'guion' || meId === null) return;
+    if (event.origin !== location.origin || !data || data.montu !== 'guion') return;
+    enter(castFrom(null));
     if (data.dice) {
       var plot = PLOTS[sceneAt % PLOTS.length];
       sceneAt += 1;
