@@ -160,7 +160,8 @@
     var frame = function () {
       if (run !== netRun) return;
       if (paused && !instant) { requestAnimationFrame(frame); return; }
-      var upto = instant ? total : Math.min(total, done + Math.ceil(total / (few ? 24 : 70)) * speed);
+      // Sin animación (cambio de tamaño, ?still) dibuja las mismas tandas de una vez: cada tanda es un trazo y la neblina de 300 sale de trazos que se suman.
+      var upto = Math.min(total, done + Math.ceil(total / (few ? 24 : 70)) * (instant ? 1 : speed));
       pen.globalAlpha = few ? 0.6 : 0.045;
       pen.strokeStyle = few ? ink : tint;
       pen.lineWidth = few ? 2.5 : 0.5;
@@ -172,7 +173,7 @@
         if (j === n) { i += 1; j = i + 1; }
       }
       pen.stroke();
-      if (done < total) requestAnimationFrame(frame); else dots();
+      if (done >= total) dots(); else if (instant) frame(); else requestAnimationFrame(frame);
     };
     if (few) dots();
     frame();
