@@ -103,7 +103,9 @@ Producción guarda todo en Postgres desde el 21-nov-2026: la base `montu-db` de 
 ## Límites
 
 - **Falta quitar el disco para que los despliegues no corten.** El servicio todavía tiene conectado el disco `ronda-data`, que ya no usa, y por eso cada despliegue sigue dejando unos 25 segundos sin respuesta. `render.yaml` ya no lo declara, pero Render no lo quita solo: se borra en el panel, en **Disks → Delete disk**. Sin disco, Render prende el servidor nuevo, espera que `/api/health` responda y recién ahí le pasa el tráfico; durante ese cambio hay dos servidores a la vez por unos segundos y los dos escriben en la misma base.
-- **Si igual hay un corte**, la página abre desde una copia guardada en el navegador (`frontend/public/sw.js`) y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`).
+- **La página abre siempre desde una copia guardada en el navegador** (`frontend/public/sw.js`) y la actualiza por detrás, así un refresco pinta al instante. Después de un despliegue, la primera carga muestra la versión anterior y la siguiente ya trae la nueva. **Si hay un corte**, esa misma copia abre igual y cada pedido a la API se reintenta solo por unos 40 segundos (`fetchThroughRestart` en `frontend/src/api.ts`).
+- **Las lecturas repetidas se responden de memoria.** `backend/src/pg/database.ts` recuerda cada lectura hasta que algo cambia: cualquier escritura la borra, también la de otro servidor, que avisa por Postgres (`NOTIFY`). Un cambio hecho por fuera de la aplicación, con `psql`, tarda hasta 30 segundos en verse.
+- **Cada respuesta de la API trae la cabecera `Server-Timing`** con el tiempo total, el tiempo en la base y el número de consultas. Los pedidos de más de 150 ms quedan en el registro como «Pedido lento».
 - **Cada consulta bloquea el servidor mientras Postgres responde**, uno o dos milisegundos dentro de Render. Alcanza para la hack; con mucho tráfico habría que pasar las tiendas a consultas asíncronas.
 - **Si Postgres corta la conexión**, el servidor se reconecta y repite la consulta, salvo en medio de una transacción.
 

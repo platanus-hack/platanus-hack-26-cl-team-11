@@ -23,7 +23,7 @@ const SEEN_KEY = 'montu-carga-vista';
 const REPLAY_AFTER_MS = 20 * 60 * 1000;
 const HOLD_MS = 700;
 const PAGE_ENTER_MS = 1100;
-const SHORTEST_VISIT_MS = 900;
+const SHORTEST_VISIT_MS = 400;
 
 let pagesLoading = 0;
 const watchers = new Set<() => void>();

@@ -1,43 +1,45 @@
-const CACHE = 'montu-app-v2';
-const ASSETS = '/assets/';
-const NOT_FOUND = 404;
+const CACHE = 'montu-app-v1';
 const SHELL = '/__shell';
 const RESTARTING = [502, 503, 504];
 const NOT_THE_APP = ['/api/', '/a/', '/design/'];
+const NEVER_CHANGES = '/assets/';
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) =>
-  event.waitUntil(
-    caches
-      .keys()
-      .then((names) => Promise.all(names.filter((name) => name !== CACHE).map((name) => caches.delete(name))))
-      .then(() => self.clients.claim()),
-  ),
-);
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
-const isAsset = (request) => new URL(request.url).pathname.startsWith(ASSETS);
-const isPageInsteadOfAsset = (request, response) => isAsset(request) && (response.headers.get('content-type') ?? '').includes('text/html');
+async function keptFirst(request) {
+  const cache = await caches.open(CACHE);
+  const kept = await cache.match(request);
+  if (kept) return kept;
+  const response = await fetch(request);
+  if (response.ok) await cache.put(request, response.clone());
+  return response;
+}
 
-async function saved(cache, request) {
-  return (await cache.match(request)) ?? (request.mode === 'navigate' ? cache.match(SHELL) : undefined);
+async function shellNow(event) {
+  const cache = await caches.open(CACHE);
+  const kept = await cache.match(SHELL);
+  const fresh = fetch(event.request).then(async (response) => {
+    if (response.ok) await cache.put(SHELL, response.clone());
+    return response;
+  });
+  if (!kept) return fresh;
+  event.waitUntil(fresh.catch(() => undefined));
+  return kept;
 }
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
   try {
     const response = await fetch(request);
-    const replaced = isPageInsteadOfAsset(request, response);
-    if (response.ok && !replaced) {
+    if (response.ok) {
       await cache.put(request, response.clone());
-      if (request.mode === 'navigate') await cache.put(SHELL, response.clone());
       return response;
     }
-    const gone = replaced || (isAsset(request) && response.status === NOT_FOUND);
-    const fallback = RESTARTING.includes(response.status) || gone ? await saved(cache, request) : undefined;
-    return fallback ?? (replaced ? new Response('', { status: NOT_FOUND }) : response);
+    return (RESTARTING.includes(response.status) && (await cache.match(request))) || response;
   } catch (failure) {
-    const fallback = await saved(cache, request);
-    if (fallback) return fallback;
+    const kept = await cache.match(request);
+    if (kept) return kept;
     throw failure;
   }
 }
@@ -46,5 +48,7 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin || NOT_THE_APP.some((prefix) => url.pathname.startsWith(prefix))) return;
-  event.respondWith(networkFirst(request));
+  if (request.mode === 'navigate') event.respondWith(shellNow(event));
+  else if (url.pathname.startsWith(NEVER_CHANGES)) event.respondWith(keptFirst(request));
+  else event.respondWith(networkFirst(request));
 });
