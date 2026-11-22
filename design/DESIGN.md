@@ -144,7 +144,7 @@ izquierda; solo se centran los nombres bajo una cara.
 | `rd-glass` | Superficie de vidrio. | Se combina con `rd-card` o `rd-chip`. |
 | `rd-card`, `rd-card--split` | Tarjeta bento. La `--split` tiene dos mitades. | Siempre con `rd-glass`. Radio 28 px. |
 | `rd-decision` (+ `__body`, `__label`) | La tarjeta de la decisión. | Una por pantalla. |
-| `rd-actions`, `rd-button`, `rd-button--quiet` | Botones píldora. | Un primario (negro) por pantalla. El resto, `--quiet`. |
+| `rd-actions`, `rd-button`, `rd-button--quiet`, `rd-button--glass` | Botones píldora. | Un primario (negro) por pantalla. El resto, `--quiet`. `--glass` es la píldora de vidrio blanco con texto en tinta: solo para «Continuar con Google» en el ingreso, donde un bloque negro pesa demasiado sobre la entrada. |
 | `rd-stat`, `rd-stat__unit`, `rd-stat-row` | Número grande con unidad. | Siempre con una `rd-label` arriba. |
 | `rd-chip`, `rd-chip--status`, `rd-dot` | Chip de vidrio y píldora de estado. | Frases cortas, sin punto final. |
 | `rd-cara` (`--chica`, `__gota`, `__halo`, `__anillo`, `__onda`), `rd-person` | La cara de una persona: gota de vidrio con lava y ojos, con sus estados. La monta `faces/caras.js`; no se escribe el HTML a mano. | Cara y nombre siempre juntos. Estados y uso en «Caras». |
