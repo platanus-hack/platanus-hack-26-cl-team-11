@@ -291,7 +291,7 @@
 
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
-  if (presenter && typeof presenter.token === 'string') platformUrl = '/conectar/' + encodeURIComponent(presenter.token) + '#globo';
+  if (presenter && typeof presenter.token === 'string') platformUrl = '/conectar/' + encodeURIComponent(presenter.token);
 
   go(query.has('fin') ? slides.length - 1 : Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);
