@@ -30,6 +30,8 @@ Si el agente no responde en diez segundos, se pasa a la grabación y se dice que
 
 Las láminas limpias para acompañarla están en `design/problema/` (en producción, `/problema`): gancho, la red de 5 a 300, los tres problemas, «Por eso hicimos Montu» y el QR.
 
+Probado en producción el 21-nov-2026 a las 23:55, con la cuenta de Ian y las 24 personas que había en la mesa: la pregunta de permiso llegó unos 9 segundos después de enviar el bloqueo, y la propuesta («Robert te ayuda») unos 12 segundos después de «Permitir». La ronda tuvo una conversación y una propuesta. La propuesta se descartó con «Ahora no».
+
 Probado en local el 21-nov-2026 con las 5 personas de `npm run seed` y el Claude de la terminal: del «Permitir» a la propuesta, 14 segundos y 4 llamadas al modelo; la pregunta al equipo, 10 segundos.
 
 ## Qué tiene que funcionar de punta a punta
