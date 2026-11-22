@@ -124,6 +124,7 @@
   .uv-li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 2px; box-sizing: border-box; }
   .uv-li + .uv-li { border-top: 1px solid var(--rd-hairline); }
   .uv-li-text > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .uv-li[data-full] .uv-li-text > span { display: block; }
   /* Tarjeta de la persona tocada en el globo: cara, nombre y su estado rápido. */
   .uv-who-card { position: absolute; left: 24px; bottom: 24px; z-index: 4; width: min(300px, calc(100% - 48px)); box-sizing: border-box; padding: 16px; gap: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .3s var(--ease), transform .4s var(--ease); }
   .uv-who-card[data-on] { opacity: 1; transform: none; pointer-events: auto; }
@@ -278,7 +279,9 @@ function clearFeed() { items = []; const old = [...feed.children], fr = feed.get
   old.forEach((c, k) => Object.assign(c.style, { position: 'absolute', left: (rects[k].left - fr.left) + 'px', top: (rects[k].top - fr.top) + 'px', width: rects[k].width + 'px', margin: 0 }));
   old.forEach(c => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(4px)' }], { duration: 360, easing: 'ease-in', fill: 'forwards' }).onfinish = () => c.remove()); }
 let stuck = true;
-feed.addEventListener('scroll', () => { stuck = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60; });
+feed.addEventListener('scroll', () => { if (feed.scrollHeight - feed.scrollTop - feed.clientHeight < 4) stuck = true; });
+feed.addEventListener('wheel', e => { if (e.deltaY < 0) stuck = false; }, { passive: true });
+feed.addEventListener('touchstart', () => { stuck = false; }, { passive: true });
 function push(node) { RondaStream.append(feed, node); while (feed.children.length > (LIVE ? 60 : 16)) feed.firstElementChild.remove(); }
 // Fila de lista, como las del Resumen: caras, título, una línea gris y el check al final.
 function pairRow(list, title, sub, check) {
@@ -633,7 +636,7 @@ if ((q.get('vivo') || '').startsWith('/api/people/')) {
   SCENES.length = 0; SCENES.push({ kind: 'vivo', dur: Infinity }); SHOWN.length = 0; SCRIPTS.length = 0;
   root.setAttribute('data-vivo', '');
   startScene(0);
-  const live = document.createElement('script'); live.src = './universo-vivo.js?v=15'; document.body.append(live);
+  const live = document.createElement('script'); live.src = './universo-vivo.js?v=16'; document.body.append(live);
 } else {
   startScene(q.has('s') ? +q.get('s') : q.has('g') ? 1 + +q.get('g') : 0);
   if (q.has('t')) { clock = +q.get('t'); T = clock; }

@@ -161,7 +161,9 @@
   }
 
   function note(need, faces, title, sub, check) {
-    push(pairRow(faces, title, sub, check));
+    var row = pairRow(faces, title, sub, check);
+    row.setAttribute('data-full', '');
+    push(row);
     var read = Math.min(LONGEST_READ, READ_BASE + (sub || '').length / READ_RATE);
     need.lastEnd = clock + read; need.next = clock + read;
   }

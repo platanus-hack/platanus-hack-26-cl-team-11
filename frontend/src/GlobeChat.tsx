@@ -46,7 +46,7 @@ export function GlobeChat({ token, name = '', stage = false, ideas = [], onRound
     return prompt !== undefined && !answered.has(prompt) && latestOfPrompt.get(prompt) === message.key;
   };
   const lastHeard = heardAll.at(-1);
-  const shown = stage ? fresh.filter(waits) : heardAll.filter((message) => waits(message) || (message === lastHeard && message.options.length === 0));
+  const shown = stage ? fresh.filter((message) => message.role === 'persona' || waits(message)) : heardAll.filter((message) => waits(message) || (message === lastHeard && message.options.length === 0));
   const count = shown.length;
 
   useEffect(() => {
@@ -163,6 +163,7 @@ export function GlobeChat({ token, name = '', stage = false, ideas = [], onRound
   }
 
   const idle = sending === null && draft === '' && !shown.some(waits);
+  const alreadyShown = fresh.filter((message) => message.role === 'persona').at(-1)?.text === sending;
   const unused = ideas.filter((idea) => !used.has(idea));
 
   return (
@@ -172,14 +173,25 @@ export function GlobeChat({ token, name = '', stage = false, ideas = [], onRound
         <span className="app-stage__title">Tu agente</span>
       </div>
       <div className="app-stage__lines" ref={lines} aria-live="polite">
-        {shown.map((message) => (
-          <div key={message.key} className="rd-decision app-stage__decision">
-            <div className="rd-decision__body">
-              <p className="app-stage__text">{message.text}</p>
-              {actionsOf(message)}
+        {shown.map((message) =>
+          message.role === 'persona' ? (
+            <div key={message.key} className="app-stage__line app-stage__line--mine">
+              <div className="rd-bubble">{message.text}</div>
             </div>
+          ) : (
+            <div key={message.key} className="rd-decision app-stage__decision">
+              <div className="rd-decision__body">
+                <p className="app-stage__text">{message.text}</p>
+                {actionsOf(message)}
+              </div>
+            </div>
+          ),
+        )}
+        {sending !== null && !alreadyShown && (
+          <div className="app-stage__line app-stage__line--mine">
+            <div className="rd-bubble">{sending}</div>
           </div>
-        ))}
+        )}
         {sending !== null && <div className="app-stage__line">{typing}</div>}
       </div>
       {problem}
