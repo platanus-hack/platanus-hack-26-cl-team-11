@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { formatAgo } from './ago';
 import { AssistantLogo } from './AssistantLogo';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
 import { ItemIcon } from './ItemIcon';
 import { PairingLine } from './PairingLine';
-import { PasteBack } from './PasteBack';
 import type { Assistant } from './roomApi';
 
 interface AgentConnectProps {
@@ -14,9 +12,7 @@ interface AgentConnectProps {
   onChange: () => void;
 }
 
-export function AgentConnect({ token, assistants, onChange }: AgentConnectProps) {
-  const [chat, setChat] = useState(false);
-
+export function AgentConnect({ token, assistants }: AgentConnectProps) {
   return (
     <div className="rd-list">
       {assistants.map((assistant) => (
@@ -45,24 +41,6 @@ export function AgentConnect({ token, assistants, onChange }: AgentConnectProps)
         <div className="rd-item__detail">
           <PairingLine token={token} connected={assistants.length} auto />
         </div>
-      </div>
-      <div>
-        <Item
-          icon={
-            <ItemIcon>
-              <Glyph name="chat" />
-            </ItemIcon>
-          }
-          title="Tu agente no puede abrir un link"
-          subtitle="Copias una pregunta y pegas su respuesta"
-          expanded={chat}
-          onToggle={() => setChat((current) => !current)}
-        />
-        {chat && (
-          <div className="rd-item__detail">
-            <PasteBack token={token} onSaved={onChange} />
-          </div>
-        )}
       </div>
     </div>
   );
