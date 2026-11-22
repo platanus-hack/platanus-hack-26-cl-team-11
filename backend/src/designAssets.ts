@@ -5,7 +5,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz|contexto|montu|pitch|prep)\/|(?:tokens|ronda)\.css$)/;
+const SERVED = /^\/design\/(?:(?:grafo|faces|logo|sources|luz|contexto|montu|pitch|prep|libro)\/|(?:tokens|ronda)\.css$)/;
 
 const ESCAPES_OR_CLIMBS = /%|\\|\.\./;
 const isServed = (path: string) => SERVED.test(path) && !ESCAPES_OR_CLIMBS.test(path);
@@ -24,6 +24,7 @@ export function designAssets() {
   const serve = serveStatic({ root: relative(process.cwd(), REPO_ROOT) || '.' });
   for (const path of ['/dec', '/deck', '/problema']) routes.get(path, (c) => c.redirect('/design/pitch/index.html'));
   routes.get('/prep', (c) => c.redirect('/design/prep/index.html'));
+  routes.get('/libro', (c) => c.redirect('/design/libro/index.html'));
   routes.use('/design/*', etag(), cached, (c, next) => (isServed(c.req.path) ? serve(c, next) : next()));
   return routes;
 }

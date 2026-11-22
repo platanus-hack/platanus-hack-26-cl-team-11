@@ -499,6 +499,7 @@ Abierto: el isotipo (la cabeza de halcón como grafo) todavía no lo revisó Mat
 | `sources/` | Íconos reales de las apps que se conectan (Apple Health, Granola, Gmail, Google Calendar, GitHub, Linear), sin modificar. Solo para las filas de fuentes. |
 | `sources/apps/` | Íconos de app completos (192 px, a sangre) de 21 apps, para las teclas chunky de `contexto/`. Sin modificar, salvo el de Codex, recortado a sangre. |
 | `contexto/` | Páginas de prueba del contexto personal: `resumen.html` (bento con el globo al centro), `conexiones.html` (directorio de apps y superficie de conexión), `superficies.html` (las cinco formas de conectar y sus estados) y `mapa.html` (esfera de puntos). Todo con datos de prueba. Detalle en `contexto/README.md`. |
+| `libro/` | El libro «Platanus Hack by Montu» (`/libro` en prod, aparte de la presentación): por qué se hizo Montu y cómo medirlo. Es la única página que se lee como libro: tapa, índice y páginas que se pasan con las flechas, los bordes o deslizando (`libro.js` reparte el texto en páginas; `libro.css` solo usa tokens). En papel sale en A5. Lleva en la tapa los logos de Platanus y de Buk, redibujados en SVG. Pedido del 22-nov, pendiente de revisión de Mati. |
 | `lint.sh` | Revisa que ningún archivo de UI se salga de los tokens. |
 | `canvas/` | Fuente del tablero en el canvas de diseño. |
 | `archive/` | Direcciones descartadas. No usar. |

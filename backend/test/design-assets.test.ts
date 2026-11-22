@@ -19,3 +19,14 @@ test('the globe, the context pages and their styles are served, and the rest of 
   assert.equal((await app.request('/design/archive/index.html')).status, 404);
   assert.equal((await app.request('/design/grafo/../../.env.example')).status, 404);
 });
+
+test('the book lives apart from the deck: /libro opens it and its files are served', async () => {
+  const app = designAssets();
+  const short = await app.request('/libro');
+  assert.equal(short.status, 302);
+  assert.equal(short.headers.get('location'), '/design/libro/index.html');
+  const book = await app.request('/design/libro/index.html');
+  assert.equal(book.status, 200);
+  assert.match(await book.text(), /Platanus Hack/);
+  assert.equal((await app.request('/design/libro/libro.css')).status, 200);
+});

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 412 412" role="img" aria-label="Platanus">
+  <circle cx="206" cy="206" r="206" fill="#F5B841"/>
+  <g fill="#FFFFFF">
+    <path d="M246 84h28c40 82 42 176 2 260h-36c44-84 44-178 6-260z"/>
+    <path d="M224 90h14c-2 96-38 168-100 206l-14-16c56-40 92-102 100-190z"/>
+    <path d="M214 96c-14 50-60 86-138 96l12 20c84-6 134-46 140-116z"/>
+  </g>
+</svg>
