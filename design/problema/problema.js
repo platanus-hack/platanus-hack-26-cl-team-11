@@ -7,15 +7,24 @@
   var pairsOf = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
-  var SMALL = 5;
-  var LARGE = 300;
+  var SIZES = [5, 10, 25, 100, 300];
+  var SMALL = SIZES[0];
   var GOLDEN_ANGLE = 2.39996323;
-  var COUNT_MS = 1400;
+  var COUNT_MS = 600;
+  var DRAW_FRAMES = 14;
+  var RING_UP_TO = 10;
 
   var net = byId('net');
   var pen = net.getContext('2d');
   var drawing = 0;
   var people = 0;
+
+  function lookFor(n) {
+    if (n <= 10) return { dot: 11, line: 2.2, alpha: 0.5 };
+    if (n <= 25) return { dot: 7, line: 1.4, alpha: 0.28 };
+    if (n <= 100) return { dot: 3.6, line: 0.7, alpha: 0.1 };
+    return { dot: 2.4, line: 0.5, alpha: 0.045 };
+  }
 
   function drawNet(n, instant) {
     var run = ++drawing;
@@ -26,18 +35,19 @@
     net.width = box.width * ratio;
     net.height = box.height * ratio;
     pen.setTransform(ratio, 0, 0, ratio, 0, 0);
-    var few = n <= 12;
+    var ring = n <= RING_UP_TO;
+    var look = lookFor(n);
     var radius = Math.min(box.width, box.height) * 0.42;
     var points = [];
     for (var k = 0; k < n; k++) {
-      var reach = few ? radius * 0.86 : radius * Math.sqrt((k + 0.5) / n);
-      var angle = few ? -Math.PI / 2 + (k / n) * Math.PI * 2 : k * GOLDEN_ANGLE;
+      var reach = ring ? radius * 0.82 : radius * Math.sqrt((k + 0.5) / n);
+      var angle = ring ? -Math.PI / 2 + (k / n) * Math.PI * 2 : k * GOLDEN_ANGLE;
       points.push([box.width / 2 + reach * Math.cos(angle), box.height / 2 + reach * Math.sin(angle)]);
     }
     var ink = token('--rd-ink');
     var tint = token('--rd-g3');
     var total = pairsOf(n);
-    var batch = Math.ceil(total / (few ? 30 : 80));
+    var batch = Math.ceil(total / DRAW_FRAMES);
     var done = 0;
     var i = 0;
     var j = 1;
@@ -46,16 +56,16 @@
       pen.fillStyle = ink;
       points.forEach(function (point) {
         pen.beginPath();
-        pen.arc(point[0], point[1], few ? 12 : 2.4, 0, Math.PI * 2);
+        pen.arc(point[0], point[1], look.dot, 0, Math.PI * 2);
         pen.fill();
       });
     };
     var frame = function () {
       if (run !== drawing) return;
       var upto = Math.min(total, done + batch);
-      pen.globalAlpha = few ? 0.55 : 0.045;
-      pen.strokeStyle = few ? ink : tint;
-      pen.lineWidth = few ? 2.5 : 0.5;
+      pen.globalAlpha = look.alpha;
+      pen.strokeStyle = n <= 25 ? ink : tint;
+      pen.lineWidth = look.line;
       pen.beginPath();
       while (done < upto) {
         pen.moveTo(points[i][0], points[i][1]);
@@ -69,7 +79,7 @@
       else if (instant) frame();
       else requestAnimationFrame(frame);
     };
-    if (few) dots();
+    dots();
     frame();
   }
 
@@ -92,11 +102,11 @@
   }
 
   function showScale(step, instant) {
-    var n = step >= 2 ? LARGE : SMALL;
+    var n = SIZES[Math.min(SIZES.length, step) - 1];
     byId('people').textContent = format(n) + ' personas';
     countTo(pairsOf(n), instant);
-    if (n === LARGE && people !== LARGE) drawNet(LARGE, instant);
     if (n === SMALL) { drawing += 1; people = 0; }
+    else if (n !== people) drawNet(n, instant);
   }
 
   var Caras = window.RondaCaras;
@@ -162,7 +172,7 @@
     if (data.key === 'ArrowRight' || data.key === 'PageDown') forward();
     else if (data.key === 'ArrowLeft' || data.key === 'PageUp') back();
   });
-  window.addEventListener('resize', function () { if (current === scale && people === LARGE) drawNet(LARGE, true); });
+  window.addEventListener('resize', function () { if (current === scale && people > SMALL) drawNet(people, true); });
 
   fetch('qr.svg').then(function (response) { return response.text(); }).then(function (svg) { document.querySelector('.pb-qr').innerHTML = svg; }).catch(function () {});
 
