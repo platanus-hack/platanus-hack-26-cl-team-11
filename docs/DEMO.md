@@ -28,7 +28,7 @@ Antes de subir:
 
 Si el agente no responde en veinte segundos, se pasa a la grabación y se dice que es una grabación.
 
-Probado en producción el 22-nov-2026 de madrugada, con las personas de prueba como quien pide: 6 preguntas al equipo de 6 respondidas con Mati y Roberto, entre 11 y 17 segundos; 5 bloqueos de punta a punta de 5 con la propuesta correcta, entre 14 y 27 segundos desde «Permitir». El recorrido completo en la pantalla de escenario se probó en una copia local.
+Probado en producción el 22-nov-2026 de madrugada, con las personas de prueba como quien pide: 6 preguntas al equipo de 6 respondidas con Mati y Roberto, entre 11 y 17 segundos; 5 bloqueos de punta a punta de 5 con la propuesta correcta, entre 14 y 27 segundos desde «Permitir». Después se repitieron tres bloqueos ya usados: los tres volvieron a pedir permiso y terminaron en propuesta (15 a 20 segundos). El recorrido completo en la pantalla de escenario, dentro de la presentación y solo con teclado, se hizo dos veces en producción con la cuenta de Ian: la pregunta respondió «Mati y Roberto» en unos 15 segundos, y el bloqueo terminó en «Lian y Robert te ayudan» unos 25 segundos después de «Permitir», la segunda vez después de haber aceptado la primera. Queda una grabación de ese recorrido en `~/Downloads/montu-demo-escenario.gif` (18 cuadros, no es un video fluido).
 
 ## Qué tiene que funcionar de punta a punta
 
