@@ -4,34 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Wellness Company · esfera</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='white'/%3E%3Ccircle cx='32' cy='32' r='24' fill='black'/%3E%3Cpath d='M14 30 C22 18 40 18 50 30 C40 44 24 44 14 30Z' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+<link id="fav" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='white'/%3E%3Ccircle cx='32' cy='32' r='24' fill='black'/%3E%3Cpath d='M14 30 C22 18 40 18 50 30 C40 44 24 44 14 30Z' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IM+Fell+English&family=Big+Shoulders+Display:wght@700&family=Syne:wght@700&family=Bodoni+Moda:opsz,wght@6..96,500&family=Cormorant+Garamond:wght@500&family=Unbounded:wght@500&family=Space+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=IM+Fell+English:ital@0;1&family=Big+Shoulders+Display:wght@700&family=Syne:wght@700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Unbounded:wght@500&family=Space+Mono&family=Gloock&family=Young+Serif&family=Libre+Caslon+Display&family=DM+Serif+Display:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&family=EB+Garamond:ital,wght@0,500;1,500&family=Old+Standard+TT:ital@0;1&family=Cinzel:wght@500&family=Marcellus+SC&family=Italiana&family=Forum&family=Cormorant+Unicase:wght@500&family=Rozha+One&family=Bricolage+Grotesque:opsz,wght@12..96,600&family=Familjen+Grotesk:wght@500&family=Instrument+Sans:wght@500&family=Darker+Grotesque:wght@600&family=Space+Grotesk:wght@500&family=IBM+Plex+Mono:wght@500&family=Major+Mono+Display&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; font: 13px/1.4 system-ui, sans-serif; background: #e9e8e4; color: #111; display: grid; grid-template-columns: 300px 1fr; }
+  :root { --paper: #fff; }
+  body { margin: 0; font: 13px/1.4 system-ui, sans-serif; background: #e9e8e4; color: #111; display: grid; grid-template-columns: 330px 1fr; }
   aside { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid #0001; padding: 16px 16px 40px; background: #e9e8e4; }
   aside h1 { font-size: 15px; margin: 0 0 4px; }
-  aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #0008; margin: 18px 0 6px; }
+  details { border-top: 1px solid #0001; margin-top: 10px; }
+  summary { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #0009; padding: 10px 0 2px; cursor: pointer; font-weight: 600; }
   .ctl { margin: 8px 0; }
   .ctl > label { display: flex; justify-content: space-between; color: #000b; margin-bottom: 4px; }
   .ctl > label output { color: #0008; font-variant-numeric: tabular-nums; }
   .opts { display: flex; flex-wrap: wrap; gap: 4px; }
-  button { font: inherit; font-size: 12px; border: 1px solid #0002; background: #fff; border-radius: 999px; padding: 3px 9px; cursor: pointer; }
+  .cat { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #0007; margin: 6px 0 3px; }
+  .fontpick button { font-size: 15px; padding: 2px 9px; }
+  button { font: inherit; font-size: 12px; border: 1px solid #0002; background: #fff; color: #111; border-radius: 999px; padding: 3px 9px; cursor: pointer; }
   button[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
+  .sw i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #0003; vertical-align: -3px; margin-right: 5px; position: relative; overflow: hidden; }
+  .sw i b { position: absolute; inset: 3px; border-radius: 50%; }
   input[type=range] { width: 100%; accent-color: #111; }
+  select, input[type=text] { width: 100%; font: inherit; padding: 5px 8px; border-radius: 8px; border: 1px solid #0002; background: #fff; }
+  input[type=color] { width: 100%; height: 30px; border: 1px solid #0002; border-radius: 8px; background: #fff; padding: 2px; }
+  .colors { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .actions { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
   main { min-width: 0; }
-  .hero { display: grid; grid-template-columns: minmax(300px, 560px) 1fr; gap: 24px; padding: 20px 24px; align-items: center; }
-  .hero canvas { width: 100%; aspect-ratio: 1; background: #fff; border-radius: 24px; display: block; }
-  .hero p { margin: 6px 0; color: #000b; max-width: 46ch; }
+  .hero { display: grid; grid-template-columns: minmax(300px, 600px) 1fr; gap: 24px; padding: 20px 24px; align-items: center; }
+  .hero canvas { width: 100%; aspect-ratio: 1; background: var(--paper); border-radius: 24px; display: block; }
+  .hero p { margin: 6px 0; color: #000b; max-width: 50ch; }
   .row { padding: 12px 24px 4px; }
   .row h2 { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
   .row h2 small { font-weight: 400; color: #0008; margin-left: 6px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
   .card { cursor: pointer; }
-  .card canvas { width: 100%; aspect-ratio: 1; background: #fff; border-radius: 14px; display: block; transition: transform .15s; }
+  .card canvas { width: 100%; aspect-ratio: 1; background: var(--paper); border-radius: 14px; display: block; transition: transform .15s; }
   .card:hover canvas { transform: translateY(-2px); }
   .card.on canvas { outline: 3px solid #111; outline-offset: 3px; }
   .card span { display: block; margin-top: 4px; font-size: 11px; color: #0007; }
@@ -41,21 +50,25 @@
 <body>
 <aside>
   <h1>The Wellness Company</h1>
-  <div style="color:#0008">Esfera · todo se ajusta en vivo</div>
-  <div id="controls"></div>
+  <div style="color:#0008">Esfera · todo se ajusta en vivo y queda en el link</div>
   <div class="actions">
     <button id="play">Girando</button>
     <button id="png">Descargar PNG</button>
+    <button id="copy">Copiar link</button>
+    <button id="dice">Sorpréndeme</button>
     <button id="reset">Restablecer</button>
   </div>
+  <div id="controls"></div>
 </aside>
 <main>
   <section class="hero">
-    <canvas id="hero" width="900" height="900"></canvas>
+    <canvas id="hero" width="1000" height="1000"></canvas>
     <div>
       <p id="hero-label"></p>
-      <p>La cinta de Vita es el mapa de un planeta. Con <b>Vitas</b> pones dos, tres o cuatro cintas entrelazadas sobre el mismo globo. Con la superficie en <b>vidrio</b>, la esfera desaparece y queda solo su contorno, y las cintas de atrás se ven a través.</p>
-      <p>Clic en cualquier tarjeta para verla grande. «Descargar PNG» baja la grande.</p>
+      <div class="ctl"><label>Diseño</label><div class="opts" id="layouts"></div></div>
+      <div class="ctl"><label>Técnica</label><div class="opts" id="techs"></div></div>
+      <p>La cinta de Vita es el mapa de un planeta. Aquí eliges el diseño y la técnica de impresión; color, letra, ciudad y espaciado están en el panel.</p>
+      <p>«Copiar link» guarda la versión exacta. Clic en cualquier tarjeta para verla grande.</p>
     </div>
   </section>
   <div id="rows"></div>
@@ -68,24 +81,80 @@ const VITA_PATHS = [
   "m478.563 129.218c-7.775.528-21.235 1.415-37.462 1.246-19.628-.211-46.018-.486-78.662-9.14-20.031-5.319-35.455-11.948-44.519-16.211-17.896-8.4228-32.327-17.7316-43.272-25.774 14.346-13.3195 37.842-31.325 70.972-42.4914 19.396-6.5226 48.047-16.1058 83.501-7.7469 10.861 2.5542 42.681 10.5754 66.683 40.4862 17.305 21.5729 22.207 44.1591 23.834 55.2621-10.797 1.562-24.742 3.272-41.075 4.369z"
 ];
 
-const CITIES = ["Santiago", "Miami", "San Francisco", "Palo Alto"];
-const FONTS = [
-  { name: "Instrument Serif", fam: "Instrument Serif", w: 400 },
-  { name: "Fraunces", fam: "Fraunces", w: 600 },
-  { name: "IM Fell", fam: "IM Fell English", w: 400 },
-  { name: "Bodoni", fam: "Bodoni Moda", w: 500 },
-  { name: "Cormorant", fam: "Cormorant Garamond", w: 500 },
-  { name: "Big Shoulders", fam: "Big Shoulders Display", w: 700 },
-  { name: "Syne", fam: "Syne", w: 700 },
-  { name: "Unbounded", fam: "Unbounded", w: 500 },
-  { name: "Space Mono", fam: "Space Mono", w: 400 },
+const OLD_CITIES = ["Santiago", "Miami", "San Francisco", "Palo Alto"];
+const CITY_GROUPS = [
+  ["Chile", ["Santiago", "Valparaíso", "Viña del Mar", "Concepción", "Puerto Varas", "Punta Arenas", "San Pedro de Atacama"]],
+  ["Latinoamérica", ["Buenos Aires", "Montevideo", "Lima", "Bogotá", "Medellín", "Ciudad de México", "Tulum", "São Paulo", "Río de Janeiro"]],
+  ["Estados Unidos", ["Miami", "San Francisco", "Palo Alto", "Los Angeles", "New York", "Austin", "Boulder"]],
+  ["Mundo", ["Lisboa", "Madrid", "Barcelona", "London", "Copenhagen", "Zürich", "Tokyo", "Kyoto", "Ubud"]],
 ];
+const ALL_CITIES = CITY_GROUPS.flatMap(g => g[1]);
+
+const FONTS = [
+  { name: "Instrument Serif", fam: "Instrument Serif", w: 400, cat: "Serif" },
+  { name: "Fraunces", fam: "Fraunces", w: 600, cat: "Serif" },
+  { name: "IM Fell", fam: "IM Fell English", w: 400, cat: "Serif" },
+  { name: "Bodoni", fam: "Bodoni Moda", w: 500, cat: "Serif" },
+  { name: "Cormorant", fam: "Cormorant Garamond", w: 500, cat: "Serif" },
+  { name: "Big Shoulders", fam: "Big Shoulders Display", w: 700, cat: "Display" },
+  { name: "Syne", fam: "Syne", w: 700, cat: "Display" },
+  { name: "Unbounded", fam: "Unbounded", w: 500, cat: "Display" },
+  { name: "Space Mono", fam: "Space Mono", w: 400, cat: "Mono" },
+  { name: "Gloock", fam: "Gloock", w: 400, cat: "Serif" },
+  { name: "Young Serif", fam: "Young Serif", w: 400, cat: "Serif" },
+  { name: "Caslon Display", fam: "Libre Caslon Display", w: 400, cat: "Serif" },
+  { name: "DM Serif", fam: "DM Serif Display", w: 400, cat: "Serif" },
+  { name: "Newsreader", fam: "Newsreader", w: 500, cat: "Serif" },
+  { name: "EB Garamond", fam: "EB Garamond", w: 500, cat: "Serif" },
+  { name: "Old Standard", fam: "Old Standard TT", w: 400, cat: "Serif" },
+  { name: "Cinzel", fam: "Cinzel", w: 500, cat: "Mayúsculas" },
+  { name: "Marcellus SC", fam: "Marcellus SC", w: 400, cat: "Mayúsculas" },
+  { name: "Italiana", fam: "Italiana", w: 400, cat: "Mayúsculas" },
+  { name: "Forum", fam: "Forum", w: 400, cat: "Mayúsculas" },
+  { name: "Cormorant Unicase", fam: "Cormorant Unicase", w: 500, cat: "Mayúsculas" },
+  { name: "Rozha One", fam: "Rozha One", w: 400, cat: "Display" },
+  { name: "Bricolage", fam: "Bricolage Grotesque", w: 600, cat: "Sans" },
+  { name: "Familjen", fam: "Familjen Grotesk", w: 500, cat: "Sans" },
+  { name: "Instrument Sans", fam: "Instrument Sans", w: 500, cat: "Sans" },
+  { name: "Darker Grotesque", fam: "Darker Grotesque", w: 600, cat: "Sans" },
+  { name: "Space Grotesk", fam: "Space Grotesk", w: 500, cat: "Sans" },
+  { name: "Plex Mono", fam: "IBM Plex Mono", w: 500, cat: "Mono" },
+  { name: "Major Mono", fam: "Major Mono Display", w: 400, cat: "Mono" },
+  { name: "Pinyon Script", fam: "Pinyon Script", w: 400, cat: "Script" },
+];
+const FONT_CATS = ["Serif", "Mayúsculas", "Display", "Sans", "Mono", "Script"];
+
+const PALETTES = [
+  { name: "Tinta", ink: "#000000", paper: "#ffffff", ink2: "#8a8a8a" },
+  { name: "Invertido", ink: "#ffffff", paper: "#000000", ink2: "#7a7a7a" },
+  { name: "Papel crema", ink: "#1d1a16", paper: "#f2ebdc", ink2: "#b0623a" },
+  { name: "Sepia", ink: "#4a2e1a", paper: "#efe2c8", ink2: "#a9805a" },
+  { name: "Cianotipo", ink: "#f4f1e8", paper: "#1f3f78", ink2: "#8fb0e0" },
+  { name: "Azul tinta", ink: "#1a2a6c", paper: "#fafaf7", ink2: "#d0453a" },
+  { name: "Verde botica", ink: "#1f3d2e", paper: "#e8eee4", ink2: "#8aa98f" },
+  { name: "Rojo sello", ink: "#b3261e", paper: "#f7f1e6", ink2: "#1d1a16" },
+  { name: "Grafito", ink: "#3b3b3b", paper: "#e6e4df", ink2: "#9c9a95" },
+  { name: "Oro", ink: "#c9a45c", paper: "#0e0e0e", ink2: "#6b5a38" },
+  { name: "Plata", ink: "#cfd3d6", paper: "#1b1d20", ink2: "#6d7378" },
+];
+
 const SHADES = [
   { id: "line", name: "Línea" },
   { id: "engrave", name: "Grabado" },
   { id: "halftone", name: "Medio tono" },
   { id: "negative", name: "Negativo" },
+  { id: "bayer4", name: "Bayer 4×4" },
+  { id: "bayer8", name: "Bayer 8×8" },
+  { id: "fs", name: "Floyd–Steinberg" },
+  { id: "atk", name: "Atkinson" },
+  { id: "stipple", name: "Punteado" },
+  { id: "lines", name: "Trama de líneas" },
+  { id: "hatch", name: "Achurado" },
+  { id: "contour", name: "Curvas de nivel" },
+  { id: "ascii", name: "ASCII" },
 ];
+const GRID_SHADES = 4;
+const BLOCK = new Set(["bayer4", "bayer8", "fs", "atk", "stipple", "ascii"]);
 const LAYOUTS = [
   { id: "solo", name: "Solo la esfera", note: "la marca sin texto" },
   { id: "planet", name: "Planeta", note: "la esfera y el nombre abajo" },
@@ -95,11 +164,37 @@ const LAYOUTS = [
   { id: "label", name: "Etiqueta de botica", note: "casa con sucursales" },
   { id: "stamp", name: "Estampilla", note: "sello de correo perforado" },
 ];
+const CASES = [["upper", "MAYÚS"], ["title", "Título"], ["lower", "minúsculas"], ["smallcaps", "Versalitas"]];
 
 const CONTROLS = [
   { section: "Texto" },
-  { key: "city", label: "Ciudad", options: CITIES.map((c, i) => [i, c]) },
-  { key: "font", label: "Letra", options: FONTS.map((f, i) => [i, f.name]) },
+  { key: "city", label: "Ciudad", select: CITY_GROUPS },
+  { key: "cityCustom", label: "Otra ciudad", text: "Escribe cualquier ciudad" },
+  { key: "font", label: "Letra del nombre", fonts: true },
+  { key: "cityFont", label: "Letra de la ciudad", fontSelect: true },
+  { section: "Tipografía" },
+  { key: "textCase", label: "Nombre en", options: CASES },
+  { key: "lines", label: "Líneas del nombre", options: [[1, "Una"], [2, "Dos"]] },
+  { key: "showThe", label: "«The»", options: [[true, "Con The"], [false, "Sin The"]] },
+  { key: "nameSp", label: "Espaciado del nombre", min: -5, max: 40, unit: "%" },
+  { key: "nameSize", label: "Tamaño del nombre", min: 50, max: 140, unit: "%" },
+  { key: "connector", label: "Ciudad como", options: [["of", "of Ciudad"], ["dash", "— Ciudad —"], ["plain", "Ciudad"], ["est", "est. en Ciudad"], ["initials", "S·F"]] },
+  { key: "cityCase", label: "Ciudad en", options: CASES },
+  { key: "cityItalic", label: "Cursiva", options: [[false, "Recta"], [true, "Cursiva"]] },
+  { key: "citySp", label: "Espaciado de la ciudad", min: -5, max: 40, unit: "%" },
+  { key: "citySize", label: "Tamaño de la ciudad", min: 30, max: 140, unit: "%" },
+  { key: "gap", label: "Aire entre nombre y ciudad", min: 80, max: 300, unit: "%" },
+  { key: "cityTone", label: "Tono de la ciudad", min: 10, max: 100, unit: "%" },
+  { section: "Color" },
+  { key: "palette", palette: true },
+  { colors: [["ink", "Tinta"], ["paper", "Papel"], ["ink2", "2.ª tinta"]] },
+  { key: "twoInk", label: "Segunda tinta (cinta de atrás, anillo, malla)", options: [[false, "No"], [true, "Sí"]] },
+  { section: "Tramado" },
+  { key: "contrast", label: "Contraste", min: 30, max: 400, unit: "%" },
+  { key: "gamma", label: "Gamma (más = más claro)", min: 30, max: 300, unit: "%" },
+  { key: "angle", label: "Ángulo de trama", min: 0, max: 180, unit: "°" },
+  { key: "pixel", label: "Píxel (Bayer, difusión, punteado)", min: 1, max: 12, unit: "" },
+  { key: "density", label: "Densidad (grabado, puntos, líneas)", min: 50, max: 400, unit: "%" },
   { section: "Cintas (el mapa)" },
   { key: "vitas", label: "Vitas", options: [["1", "Una"], ["2x", "2 cruzadas"], ["2o", "2 opuestas"], ["2m", "2 espejo"], ["2t", "2 trenzadas"], ["3", "3 trenzadas"], ["4", "4 alrededor"]] },
   { key: "sep", label: "Separación", min: 0, max: 120, unit: "°" },
@@ -111,27 +206,54 @@ const CONTROLS = [
   { key: "thick", label: "Grosor de la cinta", min: 15, max: 110 },
   { section: "Esfera" },
   { key: "surface", label: "Superficie", options: [["solid", "Sólida"], ["glass", "Vidrio (solo contorno)"], ["none", "Sin esfera"]] },
-  { key: "outlineW", label: "Grosor del contorno", min: 0, max: 40, unit: "" },
+  { key: "outlineW", label: "Grosor del contorno", min: 0, max: 80, unit: "" },
   { key: "rings", label: "Contornos extra", min: 0, max: 4, unit: "" },
   { key: "grat", label: "Meridianos", options: [["auto", "Auto"], ["on", "Sí"], ["off", "No"]] },
   { key: "gratStep", label: "Malla", options: [[15, "15°"], [30, "30°"], [45, "45°"], [90, "90°"]] },
   { key: "ghost", label: "Cinta de atrás", min: 0, max: 100, unit: "%" },
-  { key: "density", label: "Densidad (grabado, puntos)", min: 50, max: 220, unit: "%" },
   { key: "light", label: "Luz", min: 0, max: 360, unit: "°" },
-  { section: "Movimiento" },
+  { section: "Movimiento", closed: true },
   { key: "tilt", label: "Inclinación", min: -80, max: 80, unit: "°" },
   { key: "yaw0", label: "Rotación (tarjetas)", min: -180, max: 180, unit: "°" },
   { key: "speed", label: "Velocidad", min: 0, max: 300, unit: "%" },
-  { section: "Color" },
-  { key: "invert", label: "Fondo", options: [[false, "Blanco"], [true, "Negro"]] },
 ];
 
-const DEFAULTS = { city: 0, font: 0, vitas: "2o", sep: 26, twist: 90, proj: "merc", span: 110, lat: 0, ribbon: "fill", thick: 50, surface: "glass", outlineW: 10, rings: 0, grat: "auto", gratStep: 30, ghost: 40, density: 100, light: 225, tilt: 22, yaw0: -24, speed: 100, invert: false };
-const state = { ...DEFAULTS, play: !matchMedia("(prefers-reduced-motion: reduce)").matches, hero: { layout: 0, shade: 0 } };
+const DEFAULTS = {
+  city: "San Francisco", cityCustom: "", font: 0, cityFont: -1,
+  textCase: "upper", lines: 1, showThe: true, nameSp: 8, nameSize: 100,
+  connector: "of", cityCase: "title", cityItalic: false, citySp: 4, citySize: 80, gap: 150, cityTone: 60,
+  ink: "#000000", paper: "#ffffff", ink2: "#8a8a8a", twoInk: false,
+  contrast: 100, gamma: 100, angle: 45, pixel: 2, density: 220,
+  vitas: "2o", sep: 59, twist: 5, proj: "merc", span: 188, lat: 20, ribbon: "fill", thick: 67,
+  surface: "glass", outlineW: 40, rings: 0, grat: "off", gratStep: 30, ghost: 17, light: 0,
+  tilt: 22, yaw0: -24, speed: 100,
+};
+const HERO0 = { layout: 1, shade: 1 };
+const state = { ...DEFAULTS, play: !matchMedia("(prefers-reduced-motion: reduce)").matches, hero: { ...HERO0 } };
 
 const TW = 2048, TH = 2048;
 const texCache = new Map();
-const TEX_KEYS = ["vitas", "sep", "twist", "span", "lat", "ribbon", "thick", "city", "font"];
+const TEX_KEYS = ["vitas", "sep", "twist", "span", "lat", "ribbon", "thick", "city", "cityCustom", "font", "textCase", "cityCase", "connector", "showThe"];
+
+const CITY = () => (state.cityCustom || "").trim() || state.city;
+const NF = () => FONTS[state.font] ?? FONTS[0];
+const CF = () => FONTS[state.cityFont >= 0 ? state.cityFont : state.font] ?? FONTS[0];
+const cased = (s, mode) => mode === "upper" ? s.toUpperCase() : mode === "lower" ? s.toLowerCase() : s;
+const nameText = () => cased(state.showThe ? "The Wellness Company" : "Wellness Company", state.textCase);
+const nameLines = () => (state.lines === 2 ? [state.showThe ? "The Wellness" : "Wellness", "Company"] : [state.showThe ? "The Wellness Company" : "Wellness Company"]).map(l => cased(l, state.textCase));
+function cityText() {
+  const c = CITY();
+  if (state.connector === "initials") {
+    const ws = c.split(/\s+/).filter(Boolean);
+    return (ws.length > 1 ? ws.map(w => w[0]) : [...c.slice(0, 3)]).join("·").toUpperCase();
+  }
+  const s = { of: `of ${c}`, dash: `— ${c} —`, plain: c, est: `est. en ${c}` }[state.connector] ?? `of ${c}`;
+  return cased(s, state.cityCase);
+}
+const dN = () => (state.nameSp - 8) / 100;
+const dC = () => (state.citySp - 4) / 100;
+const nameO = (sp = state.nameSp / 100) => ({ font: NF(), caps: state.textCase === "smallcaps", spacing: sp });
+const cityO = (sp = state.citySp / 100) => ({ font: CF(), caps: state.cityCase === "smallcaps", italic: state.cityItalic, spacing: sp, color: `rgba(0,0,0,${state.cityTone / 100})` });
 
 function copies() {
   const d = state.sep, tw = state.twist;
@@ -147,7 +269,7 @@ function copies() {
 }
 
 function makeTexture(withText) {
-  const key = [withText, ...TEX_KEYS.map(k => state[k])].join("|");
+  const key = [withText, state.proj, ...TEX_KEYS.map(k => state[k])].join("|");
   if (texCache.has(key)) return texCache.get(key);
   if (texCache.size > 24) texCache.clear();
   const c = document.createElement("canvas");
@@ -187,13 +309,14 @@ function makeTexture(withText) {
     }
   }
   if (withText) {
-    const f = FONTS[state.font];
-    const str = `THE WELLNESS COMPANY · OF ${CITIES[state.city].toUpperCase()} ·`;
+    const f = NF();
+    const str = `${nameText()} · ${cityText()} ·`;
     const from = 60, to = 300;
     const width = TW * (to - from) / 360;
     const chars = [...str];
     const gap = 0.18;
     let size = 200;
+    g.fontVariantCaps = state.textCase === "smallcaps" ? "small-caps" : "normal";
     g.font = `${f.w} ${size}px "${f.fam}"`;
     const measure = () => chars.reduce((a, ch) => a + g.measureText(ch).width, 0);
     size = size * width / (measure() * (1 + gap));
@@ -250,6 +373,37 @@ function toView(X, Y, Z, yaw, tilt) {
 }
 const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
 
+function bayer(n) {
+  let m = [[0]];
+  while (m.length < n) {
+    const s = m.length, r = [];
+    for (let y = 0; y < 2 * s; y++) {
+      r[y] = [];
+      for (let x = 0; x < 2 * s; x++) r[y][x] = 4 * m[y % s][x % s] + [[0, 2], [3, 1]][Math.floor(y / s)][Math.floor(x / s)];
+    }
+    m = r;
+  }
+  return m.flat().map(v => (v + 0.5) / (n * n));
+}
+const BAYER = { 4: bayer(4), 8: bayer(8) };
+const KERNELS = {
+  fs: [[1, 0, 7 / 16], [-1, 1, 3 / 16], [0, 1, 5 / 16], [1, 1, 1 / 16]],
+  atk: [[1, 0, 1 / 8], [2, 0, 1 / 8], [-1, 1, 1 / 8], [0, 1, 1 / 8], [1, 1, 1 / 8], [0, 2, 1 / 8]],
+};
+function diffuse(A, nx, ny, ker) {
+  for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+    const i = y * nx + x, old = A[i], nv = old >= 0.5 ? 1 : 0, e = old - nv;
+    A[i] = nv;
+    if (!e) continue;
+    for (const [dx, dy, w] of ker) {
+      const xx = x + dx, yy = y + dy;
+      if (xx >= 0 && xx < nx && yy < ny) A[yy * nx + xx] += e * w;
+    }
+  }
+}
+const ign = (x, y) => { const v = 52.9829189 * ((0.06711056 * x + 0.00583715 * y) % 1); return v - Math.floor(v); };
+const RAMP = " .·:-=+*#%@";
+
 function drawSphere(ctx, cx, cy, R, shade, yaw, withText) {
   const tilt = state.tilt * Math.PI / 180;
   const look = sampler(makeTexture(withText));
@@ -260,64 +414,151 @@ function drawSphere(ctx, cx, cy, R, shade, yaw, withText) {
   const dens = state.density / 100;
   const cell = Math.max(3, R / (24 * dens));
   const latP = Math.PI / (46 * dens);
+  const ang = state.angle * Math.PI / 180, ca = Math.cos(ang), sa = Math.sin(ang);
+  const C = state.contrast / 100, G = state.gamma / 100;
+  const curve = t => { if (t <= 1e-4) return 0; if (t >= 1) return 1; const a = Math.pow(t, C); return Math.pow(a / (a + Math.pow(1 - t, C)), G); };
+  const hatchL = [[ca, sa, 0.1], [-sa, ca, 0.4], [(ca - sa) * Math.SQRT1_2, (sa + ca) * Math.SQRT1_2, 0.68]];
   const x0 = Math.max(0, Math.floor(cx - R - 1)), y0 = Math.max(0, Math.floor(cy - R - 1));
   const w = Math.min(ctx.canvas.width - x0, Math.ceil(2 * R + 3)), h = Math.min(ctx.canvas.height - y0, Math.ceil(2 * R + 3));
   if (w <= 0 || h <= 0) return;
-  if (state.grat === "on" || (state.grat === "auto" && shade === "line")) { if (!solid) graticule(ctx, cx, cy, R, yaw, tilt, false); }
-  const img = ctx.getImageData(x0, y0, w, h);
-  const d = img.data;
-  for (let j = 0; j < h; j++) {
-    for (let i = 0; i < w; i++) {
-      const px = x0 + i + 0.5, py = y0 + j + 0.5;
-      const dx = (px - cx) / R, dy = (py - cy) / R;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > 1 + 2 / R) continue;
-      const cov = clamp01((1 - Math.sqrt(d2)) * R + 0.5);
-      if (cov <= 0) continue;
-      const z = Math.sqrt(Math.max(0, 1 - d2));
-      const [X, Y, Z] = toWorld(dx, -dy, z, yaw, tilt);
-      const mf = look(X, Y, Z);
-      const [Xb, Yb, Zb] = toWorld(dx, -dy, -z, yaw, tilt);
-      const mb = state.proj === "decal" ? 0 : look(Xb, Yb, Zb);
-      const lam = Math.max(0, dx * Lv[0] - dy * Lv[1] + z * Lv[2]);
-      let ink;
-      if (shade === "line") {
-        ink = mf + (1 - mf) * ghost * mb;
-      } else if (shade === "negative") {
-        ink = solid ? 1 - (mf + (1 - mf) * ghost * mb) : mf + (1 - mf) * ghost * mb;
-      } else if (shade === "engrave") {
-        const lat = Math.asin(Math.max(-1, Math.min(1, Y)));
-        const lon = Math.atan2(X, Z);
-        const pix = 1 / (R * Math.max(z, 0.18));
-        const dark = 0.12 + 0.78 * (1 - lam);
-        const fl = Math.abs(((lat / latP) % 1 + 1) % 1 - 0.5) * latP;
-        const cl = clamp01((dark * latP / 2 - fl) / pix + 0.5);
-        const lonP = latP / Math.max(0.2, Math.cos(lat));
-        const fm = Math.abs(((lon / lonP) % 1 + 1) % 1 - 0.5) * lonP * Math.cos(lat);
-        const cm = clamp01((0.8 * latP / 2 - fm) / pix + 0.5);
-        const mark = mf * Math.max(cm, 0.55 + 0.45 * cl);
-        ink = solid ? Math.max(cl, mark) : Math.max(mark, ghost * mb * clamp01((0.5 * latP / 2 - fl) / pix + 0.5));
-      } else {
-        const gx = Math.floor(px / cell), gy = Math.floor(py / cell);
-        const dist = Math.hypot(px - (gx + 0.5) * cell, py - (gy + 0.5) * cell);
-        const base = solid ? cell * 0.5 * Math.sqrt(0.04 + 0.5 * (1 - lam)) : 0;
-        let r = base + (cell * 0.74 - base) * mf;
-        r = Math.max(r, cell * 0.55 * ghost * mb);
-        ink = clamp01(r - dist + 0.5);
+  const grat = state.grat === "on" || (state.grat === "auto" && shade === "line");
+  if (grat && !solid) graticule(ctx, cx, cy, R, yaw, tilt, false);
+
+  let cov = 0, mf = 0, mb = 0, lam = 0, zz = 0, X = 0, Y = 0, Z = 0, tf = 0, tb = 0;
+  const S = (px, py) => {
+    const dx = (px - cx) / R, dy = (py - cy) / R, d2 = dx * dx + dy * dy;
+    if (d2 > 1 + 2 / R) return false;
+    cov = clamp01((1 - Math.sqrt(d2)) * R + 0.5);
+    if (cov <= 0) return false;
+    zz = Math.sqrt(Math.max(0, 1 - d2));
+    const f = toWorld(dx, -dy, zz, yaw, tilt); X = f[0]; Y = f[1]; Z = f[2];
+    mf = look(X, Y, Z);
+    if (state.proj === "decal") mb = 0;
+    else { const b = toWorld(dx, -dy, -zz, yaw, tilt); mb = look(b[0], b[1], b[2]); }
+    lam = Math.max(0, dx * Lv[0] - dy * Lv[1] + zz * Lv[2]);
+    return true;
+  };
+  const tones = () => {
+    if (solid) { tf = curve(Math.max(0.04 + 0.62 * (1 - lam), mf * (0.82 + 0.18 * (1 - lam)))); tb = 0; }
+    else { tf = curve(mf * (0.38 + 0.62 * (1 - lam))); tb = curve(ghost * mb * (1 - mf)); }
+  };
+  const edge = (px, py) => {
+    const dx = (px - cx) / R, dy = (py - cy) / R;
+    return clamp01((1 - Math.sqrt(dx * dx + dy * dy)) * R + 0.5);
+  };
+
+  if (shade === "ascii") {
+    const ps = Math.max(6, R / (10 * dens));
+    ctx.save();
+    ctx.font = `400 ${ps * 1.25}px "Space Mono"`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const n = RAMP.length - 1;
+    for (let py = y0 + ps / 2; py < y0 + h; py += ps) for (let px = x0 + ps / 2; px < x0 + w; px += ps) {
+      if (!S(px, py) || cov < 0.5) continue;
+      tones();
+      const cf = RAMP[Math.round(tf * n)];
+      if (cf !== " ") { ctx.fillStyle = "#000"; ctx.fillText(cf, px, py); continue; }
+      if (tb > 0.01) {
+        const cb = RAMP[Math.max(1, Math.min(n, Math.round(tb * 2.5 * n)))];
+        ctx.fillStyle = "rgb(255,0,0)"; ctx.fillText(cb, px, py);
       }
-      const k = (j * w + i) * 4;
-      if (solid) {
-        const gval = 255 * (1 - ink);
-        d[k] = d[k] * (1 - cov) + gval * cov; d[k + 1] = d[k + 1] * (1 - cov) + gval * cov; d[k + 2] = d[k + 2] * (1 - cov) + gval * cov;
-      } else {
-        const a = ink * cov;
-        d[k] *= 1 - a; d[k + 1] *= 1 - a; d[k + 2] *= 1 - a;
-      }
-      d[k + 3] = 255;
     }
+    ctx.restore();
+  } else {
+    const img = ctx.getImageData(x0, y0, w, h);
+    const d = img.data;
+    const put = (k, fi, bi, c) => {
+      const A = 1 - (1 - fi) * (1 - bi);
+      if (solid) { d[k] += (255 * (1 - fi) - d[k]) * c; d[k + 1] += (255 * (1 - A) - d[k + 1]) * c; }
+      else { d[k] *= 1 - fi * c; d[k + 1] *= 1 - A * c; }
+      d[k + 2] = d[k + 1]; d[k + 3] = 255;
+    };
+    if (BLOCK.has(shade)) {
+      const ps = Math.max(1, Math.round(state.pixel * R / 250));
+      const nx = Math.ceil(w / ps), ny = Math.ceil(h / ps);
+      const F = new Float32Array(nx * ny), B = new Float32Array(nx * ny);
+      for (let by = 0; by < ny; by++) for (let bx = 0; bx < nx; bx++) {
+        if (!S(x0 + (bx + 0.5) * ps, y0 + (by + 0.5) * ps)) continue;
+        tones(); F[by * nx + bx] = tf; B[by * nx + bx] = tb;
+      }
+      if (shade === "fs" || shade === "atk") { diffuse(F, nx, ny, KERNELS[shade]); diffuse(B, nx, ny, KERNELS[shade]); }
+      else {
+        const n = shade === "bayer8" ? 8 : 4, M = BAYER[n];
+        for (let by = 0; by < ny; by++) for (let bx = 0; bx < nx; bx++) {
+          const i = by * nx + bx;
+          const t1 = shade === "stipple" ? ign(bx, by) : M[(by % n) * n + (bx % n)];
+          const t2 = shade === "stipple" ? ign(bx + 37, by + 11) : t1;
+          F[i] = F[i] > t1 ? 1 : 0; B[i] = B[i] > t2 ? 1 : 0;
+        }
+      }
+      for (let j = 0; j < h; j++) {
+        const row = Math.floor(j / ps) * nx;
+        for (let i = 0; i < w; i++) {
+          const c = edge(x0 + i + 0.5, y0 + j + 0.5);
+          if (c <= 0) continue;
+          const b = row + Math.floor(i / ps);
+          put((j * w + i) * 4, F[b], B[b], c);
+        }
+      }
+    } else {
+      for (let j = 0; j < h; j++) {
+        for (let i = 0; i < w; i++) {
+          const px = x0 + i + 0.5, py = y0 + j + 0.5;
+          if (!S(px, py)) continue;
+          let fi = 0, bi = 0;
+          if (shade === "line") { fi = mf; bi = ghost * mb; }
+          else if (shade === "negative") {
+            if (solid) fi = 1 - (mf + (1 - mf) * ghost * mb);
+            else { fi = mf; bi = ghost * mb; }
+          } else if (shade === "engrave") {
+            const lat = Math.asin(Math.max(-1, Math.min(1, Y)));
+            const lon = Math.atan2(X, Z);
+            const pix = 1 / (R * Math.max(zz, 0.18));
+            const dark = 0.12 + 0.78 * (1 - lam);
+            const fl = Math.abs(((lat / latP) % 1 + 1) % 1 - 0.5) * latP;
+            const cl = clamp01((dark * latP / 2 - fl) / pix + 0.5);
+            const lonP = latP / Math.max(0.2, Math.cos(lat));
+            const fm = Math.abs(((lon / lonP) % 1 + 1) % 1 - 0.5) * lonP * Math.cos(lat);
+            const cm = clamp01((0.8 * latP / 2 - fm) / pix + 0.5);
+            const mark = mf * Math.max(cm, 0.55 + 0.45 * cl);
+            if (solid) fi = Math.max(cl, mark);
+            else { fi = mark; bi = ghost * mb * clamp01((0.5 * latP / 2 - fl) / pix + 0.5); }
+          } else if (shade === "halftone") {
+            const u = px * ca + py * sa, v = -px * sa + py * ca;
+            const dist = Math.hypot(u - (Math.floor(u / cell) + 0.5) * cell, v - (Math.floor(v / cell) + 0.5) * cell);
+            const base = solid ? cell * 0.5 * Math.sqrt(0.04 + 0.5 * (1 - lam)) : 0;
+            fi = clamp01(base + (cell * 0.74 - base) * mf - dist + 0.5);
+            bi = clamp01(cell * 0.55 * ghost * mb - dist + 0.5);
+          } else if (shade === "lines") {
+            tones();
+            const u = (px * ca + py * sa) / cell, fl = Math.abs(u - Math.floor(u) - 0.5) * cell;
+            fi = clamp01(tf * cell * 0.5 - fl + 0.5);
+            bi = clamp01(tb * cell * 0.5 - fl + 0.5);
+          } else if (shade === "hatch") {
+            tones();
+            for (const [c1, s1, thr] of hatchL) {
+              if (tf <= thr) continue;
+              const u = (px * c1 + py * s1) / cell, fl = Math.abs(u - Math.floor(u) - 0.5) * cell;
+              fi = Math.max(fi, clamp01(cell * (0.1 + 0.2 * clamp01((tf - thr) * 2.5)) - fl + 0.5));
+            }
+            if (tb > 0.02) {
+              const u = (px * ca + py * sa) / cell, fl = Math.abs(u - Math.floor(u) - 0.5) * cell;
+              bi = clamp01(cell * (0.1 + 0.3 * tb) - fl + 0.5);
+            }
+          } else if (shade === "contour") {
+            const N = 3 + 2.5 * dens;
+            const s = (0.7 * (1 - lam) + 0.55 * mf) * N;
+            fi = clamp01(1 - Math.abs(s - Math.round(s)) / 0.11);
+            bi = solid ? 0 : ghost * mb * (1 - mf) * 0.8;
+          }
+          put((j * w + i) * 4, fi, bi, cov);
+        }
+      }
+    }
+    ctx.putImageData(img, x0, y0);
   }
-  ctx.putImageData(img, x0, y0);
-  if (state.grat === "on" || (state.grat === "auto" && shade === "line")) graticule(ctx, cx, cy, R, yaw, tilt, true);
+
+  if (grat) graticule(ctx, cx, cy, R, yaw, tilt, true);
   const ow = state.outlineW / 10 * Math.max(1, R / 110);
   const wantOutline = state.surface !== "none" && ow > 0 && !(solid && shade === "negative");
   ctx.save();
@@ -326,7 +567,7 @@ function drawSphere(ctx, cx, cy, R, shade, yaw, withText) {
   if (state.surface !== "none") {
     for (let r = 1; r <= state.rings; r++) {
       ctx.lineWidth = Math.max(0.8, ow * 0.6);
-      ctx.beginPath(); ctx.arc(cx, cy, R * (1 + r * 0.07), 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, R * (1 + r * 0.07) + ow * 0.5 * r, 0, Math.PI * 2); ctx.stroke();
     }
   }
   ctx.restore();
@@ -334,7 +575,7 @@ function drawSphere(ctx, cx, cy, R, shade, yaw, withText) {
 
 function graticule(ctx, cx, cy, R, yaw, tilt, front) {
   ctx.save();
-  ctx.strokeStyle = front ? "rgba(0,0,0,.32)" : "rgba(0,0,0,.1)";
+  ctx.strokeStyle = front ? "rgba(0,0,0,.32)" : "rgba(255,0,0,.16)";
   ctx.lineWidth = Math.max(0.8, R / 160);
   const step = state.gratStep;
   const line = pts => {
@@ -362,42 +603,50 @@ function graticule(ctx, cx, cy, R, yaw, tilt, front) {
   ctx.restore();
 }
 
-function font(size, f = FONTS[state.font]) { return `${f.w} ${size}px "${f.fam}"`; }
-function text(ctx, str, x, y, size, opts = {}) {
+function font(size, f = NF(), italic = false) { return `${italic ? "italic " : ""}${f.w} ${size}px "${f.fam}"`; }
+function setFont(ctx, size, o) {
+  ctx.font = font(size, o.font ?? NF(), o.italic);
+  ctx.fontVariantCaps = o.caps ? "small-caps" : "normal";
+  ctx.letterSpacing = `${(o.spacing ?? 0) * size}px`;
+}
+function text(ctx, str, x, y, size, o = {}) {
   ctx.save();
-  ctx.font = font(size);
-  const sp = (opts.spacing ?? 0) * size;
-  ctx.letterSpacing = `${sp}px`;
-  ctx.fillStyle = opts.color ?? "#000";
-  ctx.textAlign = opts.align ?? "center";
-  ctx.textBaseline = opts.baseline ?? "alphabetic";
+  setFont(ctx, size, o);
+  const sp = (o.spacing ?? 0) * size;
+  ctx.fillStyle = o.color ?? "#000";
+  ctx.textAlign = o.align ?? "center";
+  ctx.textBaseline = o.baseline ?? "alphabetic";
   ctx.fillText(str, x + (ctx.textAlign === "center" ? sp / 2 : 0), y);
   ctx.restore();
 }
-function fitSize(ctx, str, maxW, spacing, start = 200) {
-  ctx.save(); ctx.font = font(start); ctx.letterSpacing = `${spacing * start}px`;
-  const w = ctx.measureText(str).width; ctx.restore();
-  return start * maxW / w;
-}
-const CITY = () => CITIES[state.city];
+function measureW(ctx, str, size, o = {}) { ctx.save(); setFont(ctx, size, o); const w = ctx.measureText(str).width; ctx.restore(); return w; }
+function fitSize(ctx, str, maxW, o = {}, start = 200) { return start * maxW / Math.max(1, measureW(ctx, str, start, o)); }
 
 const DRAW = {
   solo(ctx, W, H, shade, t) { drawSphere(ctx, W / 2, H / 2, W * 0.36, shade, t, false); },
   planet(ctx, W, H, shade, t) {
     drawSphere(ctx, W / 2, H * 0.41, W * 0.28, shade, t, false);
-    const s = fitSize(ctx, "THE WELLNESS COMPANY", W * 0.78, 0.08);
-    text(ctx, "THE WELLNESS COMPANY", W / 2, H * 0.84, s, { spacing: 0.08 });
-    text(ctx, `of ${CITY()}`, W / 2, H * 0.84 + s * 1.5, s * 0.8, { spacing: 0.04, color: "#0009" });
+    const lines = nameLines(), no = nameO(), co = cityO(), city = cityText();
+    const s = Math.min(...lines.map(l => fitSize(ctx, l, W * 0.8 * state.nameSize / 100, no)), W * 0.2);
+    const cs = Math.min(s * state.citySize / 100, fitSize(ctx, city, W * 0.88, co));
+    const lead = s * 1.08;
+    const lastY = (lines.length - 1) * lead;
+    const cityY = lastY + s * (state.gap / 100 - 0.8) + cs;
+    const top = -s * 0.74, bottom = cityY + cs * 0.28;
+    const k = Math.min(1, H * 0.27 / (bottom - top));
+    const y0 = H * 0.86 - (top + bottom) / 2 * k;
+    lines.forEach((l, i) => text(ctx, l, W / 2, y0 + i * lead * k, s * k, no));
+    text(ctx, city, W / 2, y0 + cityY * k, cs * k, co);
   },
   equator(ctx, W, H, shade, t) { drawSphere(ctx, W / 2, H / 2, W * 0.4, shade, t - 2.6, true); },
   saturn(ctx, W, H, shade, t) {
     const cx = W / 2, cy = H * 0.48, R = W * 0.25;
     const rx = W * 0.44, ry = W * 0.11, rot = -0.2;
-    const chars = [...`THE WELLNESS COMPANY · ${CITY().toUpperCase()} · `];
+    const chars = [...`${nameText()} · ${cased(CITY(), state.textCase)} · `];
     const dt = Math.PI * 2 / chars.length;
     const size = rx * dt * 1.35, band = size * 0.62;
-    const ring = (from, to, alpha) => {
-      ctx.save(); ctx.strokeStyle = `rgba(0,0,0,${alpha})`; ctx.lineWidth = Math.max(1, W / 380);
+    const ring = (from, to, front) => {
+      ctx.save(); ctx.strokeStyle = front ? "#000" : "rgba(255,0,0,.4)"; ctx.lineWidth = Math.max(1, W / 380);
       for (const r of [-band, band]) { ctx.beginPath(); ctx.ellipse(cx, cy + r * Math.cos(rot), rx, ry, rot, from, to); ctx.stroke(); }
       ctx.restore();
     };
@@ -408,50 +657,58 @@ const DRAW = {
       ctx.save();
       ctx.translate(cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot));
       ctx.rotate(rot); ctx.scale((front ? 1 : -1) * Math.max(0.08, Math.abs(sa)), 1);
-      ctx.font = font(size); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillStyle = front ? "#000" : "rgba(0,0,0,.28)"; ctx.fillText(ch, 0, 0);
+      setFont(ctx, size, { font: NF(), caps: state.textCase === "smallcaps" });
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = front ? "#000" : "rgba(255,0,0,.45)"; ctx.fillText(ch, 0, 0);
       ctx.restore();
     });
-    ring(Math.PI, Math.PI * 2, 0.35); glyphs(false);
+    ring(Math.PI, Math.PI * 2, false); glyphs(false);
     drawSphere(ctx, cx, cy, R, shade, t, false);
-    ring(0, Math.PI, 1); glyphs(true);
+    ring(0, Math.PI, true); glyphs(true);
   },
   company(ctx, W, H, shade, t) {
-    const sp = 0.06;
-    const measure = size => {
-      ctx.save(); ctx.font = font(size); ctx.letterSpacing = `${sp * size}px`;
-      const a = ctx.measureText("C").width, b = ctx.measureText("MPANY").width; ctx.restore();
-      return { a, b, o: size * 0.78 };
-    };
+    const sp = Math.max(-0.05, 0.06 + dN());
+    const no = nameO(sp);
+    const word = cased("Company", state.textCase), a = word[0], rest = word.slice(2);
+    const measure = size => ({ a: measureW(ctx, a, size, no), b: measureW(ctx, rest, size, no), o: size * 0.78 });
     let f = 100, m = measure(f);
     f = f * (W * 0.86) / (m.a + m.o + m.b + f * sp); m = measure(f);
     const total = m.a + m.o + m.b + f * sp, x0 = (W - total) / 2, base = H * 0.6;
-    text(ctx, "C", x0, base, f, { align: "left", spacing: sp });
+    text(ctx, a, x0, base, f, { ...no, align: "left" });
     const ox = x0 + m.a + m.o / 2;
     drawSphere(ctx, ox, base - f * 0.35, m.o / 2 * 1.02, shade, t, false);
-    text(ctx, "MPANY", ox + m.o / 2 + f * sp, base, f, { align: "left", spacing: sp });
-    const s = fitSize(ctx, "THE WELLNESS", total * 0.62, 0.22);
-    text(ctx, "THE WELLNESS", W / 2, base - f * 0.95, s, { spacing: 0.22 });
-    text(ctx, `— of ${CITY()} —`, W / 2, base + f * 0.55, s * 0.85, { spacing: 0.06, color: "#0009" });
+    text(ctx, rest, ox + m.o / 2 + f * sp, base, f, { ...no, align: "left" });
+    const topWord = cased(state.showThe ? "The Wellness" : "Wellness", state.textCase);
+    const to = nameO(0.22 + dN());
+    const s = fitSize(ctx, topWord, total * 0.62 * state.nameSize / 100, to);
+    text(ctx, topWord, W / 2, base - f * 0.95, s, to);
+    const co = cityO(0.06 + dC()), city = cityText();
+    const cs = Math.min(s * 0.85 * state.citySize / 80, fitSize(ctx, city, W * 0.86, co));
+    text(ctx, city, W / 2, base + f * 0.55 * state.gap / 150, cs, co);
   },
   label(ctx, W, H, shade, t) {
-    const m = W * 0.07, lw = Math.max(1, W / 300), inner = W - 2 * m;
+    const m = W * 0.07, lw = Math.max(1, W / 300), inner = W - 2 * m, tc = state.textCase;
+    const no = sp => nameO(sp + dN());
     ctx.strokeStyle = "#000";
     ctx.lineWidth = lw * 2; ctx.strokeRect(m, m, W - 2 * m, H - 2 * m);
     ctx.lineWidth = lw; ctx.strokeRect(m + lw * 6, m + lw * 6, W - 2 * m - lw * 12, H - 2 * m - lw * 12);
-    text(ctx, "THE", W / 2, H * 0.2, W * 0.045, { spacing: 0.3 });
-    const big = fitSize(ctx, "WELLNESS", inner * 0.78, 0.04);
-    text(ctx, "WELLNESS", W / 2, H * 0.2 + big * 0.95, big, { spacing: 0.04 });
+    if (state.showThe) text(ctx, cased("The", tc), W / 2, H * 0.2, W * 0.045, no(0.3));
+    const wide = inner * Math.min(0.92, 0.78 * state.nameSize / 100);
+    const w1 = cased("Wellness", tc), w2 = cased("Company", tc);
+    const big = fitSize(ctx, w1, wide, no(0.04));
+    text(ctx, w1, W / 2, H * 0.2 + big * 0.95, big, no(0.04));
     const R = W * 0.1, cy = H * 0.5;
     ctx.lineWidth = lw;
     ctx.beginPath(); ctx.moveTo(m + inner * 0.08, cy); ctx.lineTo(W / 2 - R * 1.35, cy); ctx.moveTo(W / 2 + R * 1.35, cy); ctx.lineTo(W - m - inner * 0.08, cy); ctx.stroke();
     drawSphere(ctx, W / 2, cy, R, shade, t, false);
-    const big2 = fitSize(ctx, "COMPANY", inner * 0.78, 0.04);
-    text(ctx, "COMPANY", W / 2, cy + R * 1.35 + big2 * 0.75, big2, { spacing: 0.04 });
-    const branches = [CITY(), ...CITIES.filter(c => c !== CITY())].map(c => c.toUpperCase()).join(" · ");
-    const s = fitSize(ctx, branches, inner * 0.8, 0.12);
-    text(ctx, branches, W / 2, H * 0.84, s, { spacing: 0.12 });
-    text(ctx, "EST. MMXXVI", W / 2, H * 0.84 + s * 2, s, { spacing: 0.3, color: "#0009" });
+    const big2 = fitSize(ctx, w2, wide, no(0.04));
+    text(ctx, w2, W / 2, cy + R * 1.35 + big2 * 0.75, big2, no(0.04));
+    const cc = state.cityCase === "title" ? "upper" : state.cityCase;
+    const branches = [CITY(), ...OLD_CITIES.filter(c => c !== CITY())].slice(0, 4).map(c => cased(c, cc)).join(" · ");
+    const bo = { ...cityO(0.12 + dC()), italic: false, color: "#000" };
+    const s = fitSize(ctx, branches, inner * 0.8, bo);
+    text(ctx, branches, W / 2, H * 0.84, s, bo);
+    text(ctx, "EST. MMXXVI", W / 2, H * 0.84 + s * 2, s, { ...bo, spacing: 0.3, caps: false, color: cityO().color });
   },
   stamp(ctx, W, H, shade, t) {
     const m = W * 0.1, x0 = m, y0 = m * 0.9, w = W - 2 * m, h = H - 1.8 * m;
@@ -464,13 +721,38 @@ const DRAW = {
     ctx.fillRect(x0 + p, y0 + p, w - 2 * p, h - 2 * p);
     ctx.strokeStyle = "#000"; ctx.lineWidth = Math.max(1, W / 360);
     ctx.strokeRect(x0 + p * 1.6, y0 + p * 1.6, w - 3.2 * p, h - 3.2 * p);
-    const s = fitSize(ctx, "THE WELLNESS COMPANY", w * 0.72, 0.1);
-    text(ctx, "THE WELLNESS COMPANY", W / 2, y0 + p * 1.6 + s * 2.1, s, { spacing: 0.1 });
+    const no = nameO(0.1 + dN()), nm = nameText();
+    const s = fitSize(ctx, nm, w * 0.72 * Math.min(1.15, state.nameSize / 100), no);
+    text(ctx, nm, W / 2, y0 + p * 1.6 + s * 2.1, s, no);
     drawSphere(ctx, W / 2, y0 + h * 0.52, w * 0.27, shade, t, false);
-    text(ctx, CITY().toUpperCase(), x0 + p * 2.4, y0 + h - p * 2.3, s * 0.95, { align: "left", spacing: 0.12 });
-    text(ctx, "N.º 1", x0 + w - p * 2.4, y0 + h - p * 2.3, s * 1.6, { align: "right" });
+    const cc = state.cityCase === "title" ? "upper" : state.cityCase;
+    const co = { ...cityO(0.12 + dC()), color: "#000" }, cityStr = cased(CITY(), cc);
+    const cs = Math.min(s * 0.95 * state.citySize / 80, fitSize(ctx, cityStr, w * 0.55, co));
+    text(ctx, cityStr, x0 + p * 2.4, y0 + h - p * 2.3, cs, { ...co, align: "left" });
+    text(ctx, "N.º 1", x0 + w - p * 2.4, y0 + h - p * 2.3, s * 1.6, { font: NF(), align: "right" });
   },
 };
+
+let COL = null;
+const hexRGB = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+function applyColors() {
+  const I = hexRGB(state.ink), P = hexRGB(state.paper);
+  COL = { I, P, I2: state.twoInk ? hexRGB(state.ink2) : I };
+  document.documentElement.style.setProperty("--paper", state.paper);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='${state.paper}'/><circle cx='32' cy='32' r='23' fill='none' stroke='${state.ink}' stroke-width='5'/><path d='M14 30 C22 18 40 18 50 30 C40 44 24 44 14 30Z' fill='${state.ink}'/></svg>`;
+  document.getElementById("fav").href = "data:image/svg+xml," + encodeURIComponent(svg);
+}
+function colorize(ctx, W, H) {
+  const img = ctx.getImageData(0, 0, W, H), d = img.data, { I, P, I2 } = COL;
+  for (let k = 0; k < d.length; k += 4) {
+    const F = 1 - d[k] / 255, A = 1 - d[k + 1] / 255, B = A > F ? A - F : 0, Pw = 1 - F - B;
+    d[k] = P[0] * Pw + I[0] * F + I2[0] * B;
+    d[k + 1] = P[1] * Pw + I[1] * F + I2[1] * B;
+    d[k + 2] = P[2] * Pw + I[2] * F + I2[2] * B;
+    d[k + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
 
 function paint(canvas, layoutId, shade, t) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -479,36 +761,35 @@ function paint(canvas, layoutId, shade, t) {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   DRAW[layoutId](ctx, canvas.width, canvas.height, shade, t);
-  if (state.invert) {
-    ctx.globalCompositeOperation = "difference";
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = "source-over";
-  }
+  colorize(ctx, canvas.width, canvas.height);
 }
 
 const dpr = Math.min(2, devicePixelRatio || 1);
 const yawCards = () => state.yaw0 * Math.PI / 180;
 
+function card(li, si) {
+  return `<div class="card${li === state.hero.layout && si === state.hero.shade ? " on" : ""}" data-l="${li}" data-s="${si}"><canvas></canvas><span>${SHADES[si].name}</span></div>`;
+}
 function renderGrid() {
   const rows = document.getElementById("rows");
-  rows.innerHTML = LAYOUTS.map((l, li) => `
-    <section class="row"><h2>${l.name}<small>${l.note}</small></h2>
-      <div class="cards">${SHADES.map((s, si) => `<div class="card${li === state.hero.layout && si === state.hero.shade ? " on" : ""}" data-l="${li}" data-s="${si}"><canvas></canvas><span>${s.name}</span></div>`).join("")}</div>
-    </section>`).join("");
-  rows.querySelectorAll(".card").forEach(card => {
-    const cv = card.querySelector("canvas");
+  const L = LAYOUTS[state.hero.layout];
+  rows.innerHTML = `<section class="row"><h2>Tramados<small>${L.name} en las ${SHADES.length} técnicas</small></h2><div class="cards">${SHADES.map((_, si) => card(state.hero.layout, si)).join("")}</div></section>`
+    + LAYOUTS.map((l, li) => `<section class="row"><h2>${l.name}<small>${l.note}</small></h2><div class="cards">${SHADES.slice(0, GRID_SHADES).map((_, si) => card(li, si)).join("")}</div></section>`).join("");
+  rows.querySelectorAll(".card").forEach(c => {
+    const cv = c.querySelector("canvas");
     cv.width = cv.height = Math.round(cv.getBoundingClientRect().width * dpr) || 400;
-    paint(cv, LAYOUTS[+card.dataset.l].id, SHADES[+card.dataset.s].id, yawCards());
+    paint(cv, LAYOUTS[+c.dataset.l].id, SHADES[+c.dataset.s].id, yawCards());
   });
 }
+let gridTimer;
+const scheduleGrid = () => { clearTimeout(gridTimer); gridTimer = setTimeout(renderGrid, 250); };
 
 const hero = document.getElementById("hero");
 let yaw = yawCards(), last = 0;
 function renderHero() {
-  const L0 = LAYOUTS[state.hero.layout], S0 = SHADES[state.hero.shade];
+  const L0 = LAYOUTS[state.hero.layout], S0 = SHADES[state.hero.shade] ?? SHADES[0];
   paint(hero, L0.id, S0.id, state.play ? yaw : yawCards());
-  document.getElementById("hero-label").innerHTML = `<b>${L0.name}</b> · ${S0.name}`;
+  document.getElementById("hero-label").innerHTML = `<b>${L0.name}</b> · ${S0.name} · ${CITY()}`;
 }
 function loop(ts) {
   if (state.play) { yaw += (last ? Math.min(50, ts - last) : 16) * 0.00045 * state.speed / 100; renderHero(); }
@@ -517,44 +798,151 @@ function loop(ts) {
 }
 function renderAll() { renderHero(); renderGrid(); }
 
-let debounce;
+function saveHash() {
+  const snap = {};
+  for (const k of Object.keys(DEFAULTS)) if (state[k] !== DEFAULTS[k]) snap[k] = state[k];
+  if (state.hero.layout !== HERO0.layout || state.hero.shade !== HERO0.shade) snap.hero = state.hero;
+  history.replaceState(null, "", Object.keys(snap).length ? "#" + encodeURIComponent(JSON.stringify(snap)) : location.pathname);
+}
+const loadFonts = () => Promise.all([font(40, NF()), font(40, CF()), font(40, CF(), state.cityItalic), '400 40px "Space Mono"'].map(f => document.fonts.load(f).catch(() => null)));
+
+const FONT_KEYS = new Set(["font", "cityFont", "cityItalic"]);
+const COLOR_KEYS = new Set(["ink", "paper", "ink2", "twoInk"]);
 function changed(key) {
-  const snap = {}; for (const k of Object.keys(DEFAULTS)) if (state[k] !== DEFAULTS[k]) snap[k] = state[k]; snap.hero = state.hero;
-  history.replaceState(null, "", "#" + encodeURIComponent(JSON.stringify(snap)));
-  if (key === "font") { document.fonts.load(font(40)).then(renderAll); return; }
+  saveHash();
+  if (COLOR_KEYS.has(key)) applyColors();
   if (key === "yaw0") yaw = yawCards();
+  if (FONT_KEYS.has(key)) { loadFonts().then(() => { renderHero(); scheduleGrid(); }); return; }
   renderHero();
-  clearTimeout(debounce);
-  debounce = setTimeout(renderGrid, 220);
+  scheduleGrid();
 }
 
+const openSections = {};
+function chip(label, pressed, onClick) {
+  const b = document.createElement("button");
+  b.textContent = label;
+  b.setAttribute("aria-pressed", String(pressed));
+  b.onclick = onClick;
+  return b;
+}
+function pressOnly(box, b) { box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); }
 function buildControls() {
   const root = document.getElementById("controls");
   root.innerHTML = "";
+  let box = root;
   for (const c of CONTROLS) {
-    if (c.section) { const h = document.createElement("h3"); h.textContent = c.section; root.appendChild(h); continue; }
+    if (c.section) {
+      const det = document.createElement("details");
+      det.open = openSections[c.section] ?? !c.closed;
+      det.ontoggle = () => { openSections[c.section] = det.open; };
+      const sum = document.createElement("summary"); sum.textContent = c.section; det.appendChild(sum);
+      root.appendChild(det); box = det; continue;
+    }
     const wrap = document.createElement("div"); wrap.className = "ctl";
-    const lab = document.createElement("label"); lab.textContent = c.label; wrap.appendChild(lab);
+    if (c.label) { const lab = document.createElement("label"); lab.textContent = c.label; wrap.appendChild(lab); }
+    const lab = wrap.querySelector("label");
     if (c.options) {
-      const box = document.createElement("div"); box.className = "opts";
-      for (const [v, name] of c.options) {
-        const b = document.createElement("button"); b.textContent = name;
-        b.setAttribute("aria-pressed", String(state[c.key] === v));
-        b.onclick = () => { state[c.key] = v; box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); changed(c.key); };
-        box.appendChild(b);
+      const opts = document.createElement("div"); opts.className = "opts";
+      for (const [v, name] of c.options) opts.appendChild(chip(name, state[c.key] === v, e => { state[c.key] = v; pressOnly(opts, e.currentTarget); changed(c.key); }));
+      wrap.appendChild(opts);
+    } else if (c.select) {
+      const sel = document.createElement("select");
+      sel.innerHTML = c.select.map(([g, list]) => `<optgroup label="${g}">${list.map(n => `<option${n === state[c.key] ? " selected" : ""}>${n}</option>`).join("")}</optgroup>`).join("");
+      sel.onchange = () => {
+        state[c.key] = sel.value;
+        if (c.key === "city") { state.cityCustom = ""; const t = document.getElementById("ctl-cityCustom"); if (t) t.value = ""; }
+        changed(c.key);
+      };
+      wrap.appendChild(sel);
+    } else if (c.fontSelect) {
+      const sel = document.createElement("select");
+      sel.innerHTML = `<option value="-1">Igual que el nombre</option>` + FONT_CATS.map(cat => `<optgroup label="${cat}">${FONTS.map((f, i) => f.cat === cat ? `<option value="${i}"${i === state[c.key] ? " selected" : ""}>${f.name}</option>` : "").join("")}</optgroup>`).join("");
+      sel.value = String(state[c.key]);
+      sel.onchange = () => { state[c.key] = +sel.value; changed(c.key); };
+      wrap.appendChild(sel);
+    } else if (c.text) {
+      const inp = document.createElement("input"); inp.type = "text"; inp.id = `ctl-${c.key}`; inp.placeholder = c.text; inp.value = state[c.key];
+      inp.oninput = () => { state[c.key] = inp.value; changed(c.key); };
+      wrap.appendChild(inp);
+    } else if (c.fonts) {
+      const pick = document.createElement("div"); pick.className = "fontpick";
+      const sel = e => { pressOnly(pick, e.currentTarget); };
+      if (c.same) {
+        const o = document.createElement("div"); o.className = "opts";
+        o.appendChild(chip("Igual que el nombre", state[c.key] === -1, e => { state[c.key] = -1; sel(e); changed(c.key); }));
+        pick.appendChild(o);
       }
-      wrap.appendChild(box);
+      for (const cat of FONT_CATS) {
+        const h = document.createElement("div"); h.className = "cat"; h.textContent = cat; pick.appendChild(h);
+        const o = document.createElement("div"); o.className = "opts";
+        FONTS.forEach((f, i) => {
+          if (f.cat !== cat) return;
+          const b = chip(f.name, state[c.key] === i, e => { state[c.key] = i; sel(e); changed(c.key); });
+          b.style.fontFamily = `"${f.fam}"`; b.style.fontWeight = f.w;
+          o.appendChild(b);
+        });
+        pick.appendChild(o);
+      }
+      wrap.appendChild(pick);
+    } else if (c.palette) {
+      const opts = document.createElement("div"); opts.className = "opts";
+      for (const p of PALETTES) {
+        const b = chip("", state.ink === p.ink && state.paper === p.paper, () => { Object.assign(state, { ink: p.ink, paper: p.paper, ink2: p.ink2 }); changed("ink"); buildControls(); });
+        b.className = "sw";
+        b.innerHTML = `<i style="background:${p.paper}"><b style="background:${p.ink}"></b></i>${p.name}`;
+        opts.appendChild(b);
+      }
+      wrap.appendChild(opts);
+    } else if (c.colors) {
+      const grid = document.createElement("div"); grid.className = "colors";
+      for (const [k, name] of c.colors) {
+        const cell = document.createElement("label"); cell.style.display = "block";
+        cell.innerHTML = `<div style="color:#000b;margin-bottom:3px">${name}</div>`;
+        const inp = document.createElement("input"); inp.type = "color"; inp.value = state[k];
+        inp.oninput = () => { state[k] = inp.value; if (k === "ink2" && !state.twoInk) { state.twoInk = true; buildControls(); } changed(k); };
+        cell.appendChild(inp); grid.appendChild(cell);
+      }
+      wrap.appendChild(grid);
     } else {
       const out = document.createElement("output"); out.textContent = state[c.key] + (c.unit ?? ""); lab.appendChild(out);
       const r = document.createElement("input"); r.type = "range"; r.min = c.min; r.max = c.max; r.value = state[c.key];
       r.oninput = () => { state[c.key] = +r.value; out.textContent = r.value + (c.unit ?? ""); changed(c.key); };
       wrap.appendChild(r);
     }
-    root.appendChild(wrap);
+    box.appendChild(wrap);
   }
 }
-try { if (location.hash.length > 1) Object.assign(state, JSON.parse(decodeURIComponent(location.hash.slice(1)))); } catch {}
+
+function syncCards() {
+  document.querySelectorAll(".card").forEach(x => x.classList.toggle("on", +x.dataset.l === state.hero.layout && +x.dataset.s === state.hero.shade));
+}
+function setHero(layout, shade) {
+  const layoutChanged = layout !== state.hero.layout;
+  state.hero = { layout, shade };
+  buildHeroChips(); saveHash(); renderHero(); syncCards();
+  if (layoutChanged) scheduleGrid();
+}
+function buildHeroChips() {
+  const mk = (id, list, cur, pick) => {
+    const box = document.getElementById(id); box.innerHTML = "";
+    list.forEach((x, i) => box.appendChild(chip(x.name, i === cur, () => pick(i))));
+  };
+  mk("layouts", LAYOUTS, state.hero.layout, i => setHero(i, state.hero.shade));
+  mk("techs", SHADES, state.hero.shade, i => setHero(state.hero.layout, i));
+}
+
+try {
+  if (location.hash.length > 1) {
+    const h = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+    if (typeof h.city === "number") h.city = OLD_CITIES[h.city] ?? DEFAULTS.city;
+    if (h.invert) { h.ink = "#ffffff"; h.paper = "#000000"; }
+    delete h.invert;
+    Object.assign(state, h);
+  }
+} catch {}
+applyColors();
 buildControls();
+buildHeroChips();
 
 const play = document.getElementById("play");
 const syncPlay = () => { play.setAttribute("aria-pressed", String(state.play)); play.textContent = state.play ? "Girando" : "Quieto"; };
@@ -562,21 +950,47 @@ syncPlay();
 play.onclick = () => { state.play = !state.play; syncPlay(); renderHero(); };
 document.getElementById("png").onclick = () => {
   const a = document.createElement("a");
-  a.download = `wellness-co-${LAYOUTS[state.hero.layout].id}-${SHADES[state.hero.shade].id}.png`;
+  a.download = `wellness-co-${LAYOUTS[state.hero.layout].id}-${SHADES[state.hero.shade].id}-${CITY().toLowerCase().replace(/\s+/g, "-")}.png`;
   a.href = hero.toDataURL("image/png"); a.click();
 };
-document.getElementById("reset").onclick = () => { Object.assign(state, DEFAULTS); buildControls(); yaw = yawCards(); renderAll(); };
+document.getElementById("copy").onclick = async e => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(location.href); b.textContent = "Copiado ✓"; }
+  catch { prompt("Copia este link:", location.href); }
+  setTimeout(() => { b.textContent = "Copiar link"; }, 1600);
+};
+document.getElementById("reset").onclick = () => {
+  Object.assign(state, DEFAULTS); state.hero = { ...HERO0 };
+  yaw = yawCards(); applyColors(); buildControls(); buildHeroChips(); saveHash();
+  loadFonts().then(renderAll);
+};
+document.getElementById("dice").onclick = () => {
+  const pick = a => a[Math.floor(Math.random() * a.length)], rnd = (a, b) => Math.round(a + Math.random() * (b - a));
+  const P = pick(PALETTES);
+  Object.assign(state, {
+    vitas: pick(["1", "2o", "2o", "2x", "2m", "2t", "3"]), sep: rnd(10, 90), twist: rnd(0, 180), span: rnd(110, 230), lat: rnd(-25, 25),
+    thick: rnd(35, 85), ribbon: pick(["fill", "fill", "fill", "outline", "thin"]), surface: pick(["glass", "glass", "solid", "none"]),
+    outlineW: rnd(8, 60), rings: pick([0, 0, 0, 1, 2]), grat: pick(["off", "off", "on"]), gratStep: pick([15, 30, 45]), ghost: rnd(0, 45),
+    density: rnd(80, 300), light: rnd(0, 360), contrast: rnd(80, 200), gamma: rnd(70, 140), angle: pick([0, 15, 45, 75]), pixel: rnd(1, 4),
+    font: rnd(0, FONTS.length - 1), cityFont: Math.random() < 0.5 ? -1 : rnd(0, FONTS.length - 1),
+    textCase: pick(["upper", "upper", "title", "smallcaps"]), cityCase: pick(["title", "upper", "smallcaps"]),
+    connector: pick(["of", "of", "dash", "plain", "est"]), cityItalic: Math.random() < 0.3, lines: pick([1, 1, 2]),
+    nameSp: rnd(0, 24), citySp: rnd(0, 20), city: pick(ALL_CITIES), cityCustom: "",
+    ink: P.ink, paper: P.paper, ink2: P.ink2, twoInk: Math.random() < 0.35,
+  });
+  state.hero = { layout: rnd(0, LAYOUTS.length - 1), shade: rnd(0, SHADES.length - 1) };
+  applyColors(); buildControls(); buildHeroChips(); saveHash();
+  loadFonts().then(renderAll);
+};
 
 document.getElementById("rows").addEventListener("click", e => {
   const c = e.target.closest(".card");
   if (!c) return;
-  state.hero = { layout: +c.dataset.l, shade: +c.dataset.s };
-  document.querySelectorAll(".card").forEach(x => x.classList.toggle("on", x === c));
-  renderHero();
+  setHero(+c.dataset.l, +c.dataset.s);
   window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 });
 
-document.fonts.ready.then(() => Promise.all(FONTS.map(f => document.fonts.load(font(40, f))))).then(() => { renderAll(); requestAnimationFrame(loop); });
+loadFonts().then(() => { renderAll(); requestAnimationFrame(loop); });
 </script>
 </body>
 </html>
