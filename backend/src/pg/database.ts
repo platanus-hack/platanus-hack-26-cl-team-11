@@ -109,7 +109,7 @@ function asStored(row: Row): Row {
 
 const asNamedInCode = (column: Row): Row => ({ ...column, name: typeof column.name === 'string' ? (originalNames.get(column.name) ?? column.name) : column.name });
 
-const REMEMBERED_FOR_MS = 30_000;
+const REMEMBERED_FOR_MS = 120_000;
 const MOST_REMEMBERED = 4000;
 const READS = /^\s*SELECT\b/i;
 const DEPENDS_ON_THE_MOMENT = /\b(?:setval|nextval|random|now|clock_timestamp|pg_\w+)\s*\(|\binformation_schema\b|\bcurrent_schema\b|\bFOR\s+UPDATE\b/i;

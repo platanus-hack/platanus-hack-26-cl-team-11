@@ -49,7 +49,7 @@ interface ConnectionRow {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SIGNAL_HISTORY_DAYS = 60;
-const WINDOW_STEP_MS = 60_000;
+const WINDOW_STEP_MS = 10 * 60_000;
 const RECENT_SIGNAL_SOURCES: SourceId[] = ['apple_health', 'checkin', 'github', 'google_calendar', 'granola'];
 const WHOLE_HISTORY_SIGNAL_SOURCES: SourceId[] = ['linear'];
 const EVENT_COLUMNS = 'id, source, type, occurred_at, summary, raw, received_at';

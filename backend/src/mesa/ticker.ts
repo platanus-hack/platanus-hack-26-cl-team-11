@@ -7,7 +7,7 @@ import { DEFAULT_MESA_DAILY_TOKEN_CAP, MESA_TEAM_ID } from './store.js';
 
 const DEFAULT_TICK_MS = 5000;
 const DAY_MS = 86_400_000;
-const WINDOW_STEP_MS = 60_000;
+const WINDOW_STEP_MS = 10 * 60_000;
 
 export type MesaTick = 'sin_modelo' | 'manual' | 'en_curso' | 'esperando' | 'tope' | 'sin_novedad' | 'iniciada';
 

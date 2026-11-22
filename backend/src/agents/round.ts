@@ -30,7 +30,7 @@ export const MAX_NEEDS_PER_ROUND = 10;
 export const MIN_TEAM_SIZE = 2;
 const NEEDS_IN_PARALLEL = 3;
 const ACTIVE_PROPOSAL_DAYS = 7;
-const WINDOW_STEP_MS = 60_000;
+const WINDOW_STEP_MS = 10 * 60_000;
 const DAY_MS = 86_400_000;
 const MAX_PROPOSAL_LENGTH = 500;
 
