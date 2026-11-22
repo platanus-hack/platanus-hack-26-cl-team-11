@@ -13,7 +13,6 @@ import { SectionHead } from './SectionHead';
 import { SIGNAL_GROUPS } from './signalGroups';
 import { TeamAdminSection } from './TeamAdminSection';
 import { usePolicy } from './usePolicy';
-import { WhatsAppSection } from './WhatsAppSection';
 import { MontuInline } from './MontuLoader';
 
 interface SettingsTabProps {

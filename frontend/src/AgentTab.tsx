@@ -5,7 +5,6 @@ import { Glyph } from './Glyph';
 import { RowButton } from './RowButton';
 import { useAction } from './useAction';
 import { usePolling } from './usePolling';
-import { WhatsAppSection } from './WhatsAppSection';
 
 const MAX_MESSAGE_LENGTH = 1000;
 const IDEAS = ['¿Cómo viene mi día?', 'Tengo un bloqueo y necesito ayuda', '¿Quién de mi equipo sabe de pagos?'];
@@ -116,7 +115,6 @@ export function AgentTab({ token, name, active }: { token: string; name: string;
           {error ?? loadError}
         </p>
       )}
-      <WhatsAppSection token={token} />
     </div>
   );
 }

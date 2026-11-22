@@ -15,7 +15,7 @@ interface MountedMontu {
 declare global {
   interface Window {
     RondaMontu: { mount(canvas: HTMLCanvasElement): MountedMontu; introMs(): number };
-    RondaEntrada: { mount(host: HTMLElement, options?: { still?: boolean }): MountedMontu; introMs(): number; leaveMs(): number };
+    RondaEntrada: { mount(host: HTMLElement, options?: { still?: boolean; names?: string[] }): MountedMontu; introMs(): number; leaveMs(): number };
   }
 }
 

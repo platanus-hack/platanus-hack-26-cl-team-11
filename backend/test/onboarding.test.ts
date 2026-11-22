@@ -9,13 +9,13 @@ const setup = () => {
   const ctx = createContext({ location: ':memory:', model: null });
   const app = createApp(ctx);
   const ana = ctx.store.addPerson('Ana');
-  const stepsOf = async () => (await (await app.request(`/api/people/${ana.token}/onboarding`)).json()) as { steps: Array<{ id: string; done: boolean }>; pending: number };
+  const stepsOf = async () => (await (await app.request(`/api/people/${ana.token}/onboarding`)).json()) as { steps: Array<{ id: string; done: boolean }>; pending: number; welcome: boolean };
   return { ctx, app, ana, stepsOf };
 };
 
 test('a new person starts with every first step pending, in the order they are walked through', async () => {
   const { stepsOf } = setup();
-  const { steps, pending } = await stepsOf();
+  const { steps, pending, welcome } = await stepsOf();
   assert.deepEqual(
     steps.map((step) => [step.id, step.done]),
     [
@@ -26,6 +26,7 @@ test('a new person starts with every first step pending, in the order they are w
     ],
   );
   assert.equal(pending, 4);
+  assert.equal(welcome, true);
 });
 
 test('each first step is marked done by the thing the person actually did', async () => {
@@ -42,6 +43,7 @@ test('each first step is marked done by the thing the person actually did', asyn
     ['equipo', 'checkin', 'salud'],
   );
   assert.equal(pending, 1);
+  assert.equal((await stepsOf()).welcome, false);
 });
 
 test('the first steps of a link that does not exist are not found', async () => {

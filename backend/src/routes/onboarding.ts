@@ -32,7 +32,8 @@ export function onboardingRoutes(ctx: AppContext) {
     const person = ctx.store.findPerson(c.req.param('token'));
     if (!person) return c.json(NOT_FOUND, 404);
     const steps = onboardingStepsOf(ctx, person.token);
-    return c.json({ steps, pending: steps.filter((step) => !step.done).length });
+    const welcome = steps.every((step) => !step.done) && ctx.store.listConnections(person.token).length === 0;
+    return c.json({ steps, pending: steps.filter((step) => !step.done).length, welcome });
   });
 
   return routes;

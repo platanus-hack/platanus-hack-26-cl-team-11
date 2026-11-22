@@ -114,7 +114,7 @@ export interface OnboardingStep {
   done: boolean;
 }
 
-export const fetchOnboarding = (token: string) => request<{ steps: OnboardingStep[]; pending: number }>(`${personPath(token)}/onboarding`);
+export const fetchOnboarding = (token: string) => request<{ steps: OnboardingStep[]; pending: number; welcome?: boolean }>(`${personPath(token)}/onboarding`);
 export const createPerson = (name: string) => request<CreatedPerson>('/api/people', post({ name }));
 export const connectSource = (token: string, source: string, secret: string) =>
   request<{ account: string; imported: number }>(`${personPath(token)}/connections/${source}`, post({ secret }));

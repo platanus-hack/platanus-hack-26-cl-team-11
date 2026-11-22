@@ -17,9 +17,11 @@ import { usePolling } from './usePolling';
 import { YouTab } from './YouTab';
 import { MontuLoading } from './MontuLoader';
 import { LoginPage } from './LoginPage';
+import { Welcome, welcomeSeen } from './Welcome';
 
 const HEALTH_SOURCE = 'apple_health';
-const RETIRED_STEP = 'checkin';
+const RETIRED_STEPS: OnboardingStepId[] = ['checkin', 'whatsapp'];
+const AFTER_WELCOME_TAB = 'globo';
 
 export function ConnectPage({ token }: { token: string }) {
   const [page, setPage] = useState<PersonPage | null>(null);
@@ -27,6 +29,7 @@ export function ConnectPage({ token }: { token: string }) {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [firstSteps, setFirstSteps] = useState<OnboardingStep[]>([]);
   const [focusedSource, setFocusedSource] = useState<string | null>(() => (new URLSearchParams(window.location.search).has(HEALTH_RETURN_PARAM) ? HEALTH_SOURCE : null));
+  const [welcome, setWelcome] = useState(false);
   const { tab, select } = useHashTab();
 
   const load = useCallback(async () => {
@@ -34,7 +37,8 @@ export function ConnectPage({ token }: { token: string }) {
     setPage(person);
     setSignals(derived.signals);
     setSummary(derived.summary);
-    setFirstSteps((onboarding?.steps ?? []).filter((step) => step.id !== RETIRED_STEP));
+    setFirstSteps((onboarding?.steps ?? []).filter((step) => !RETIRED_STEPS.includes(step.id)));
+    setWelcome(onboarding?.welcome === true && !welcomeSeen(token));
   }, [token]);
   const { error, refresh, signInRequired } = usePolling(load);
   const name = page?.name;
@@ -90,21 +94,33 @@ export function ConnectPage({ token }: { token: string }) {
   };
 
   return (
-    <div className="app-column rd-panel">
-      <TopBar signedIn={Boolean(page.login?.email)} />
-      <main>
-        {error && (
-          <p className="rd-note app-alert" role="alert">
-            {error}
-          </p>
-        )}
-        {TABS.map(({ id, name }) => (
-          <section key={id} className="app-tab" aria-label={name} hidden={tab !== id}>
-            {content[id]}
-          </section>
-        ))}
-      </main>
-      <TabBar active={tab} name={page.name} onSelect={select} />
-    </div>
+    <>
+      <div className="app-column rd-panel">
+        <TopBar signedIn={Boolean(page.login?.email)} />
+        <main>
+          {error && (
+            <p className="rd-note app-alert" role="alert">
+              {error}
+            </p>
+          )}
+          {TABS.map(({ id, name }) => (
+            <section key={id} className="app-tab" aria-label={name} hidden={tab !== id}>
+              {content[id]}
+            </section>
+          ))}
+        </main>
+        <TabBar active={tab} name={page.name} onSelect={select} />
+      </div>
+      {welcome && (
+        <Welcome
+          token={token}
+          name={page.name}
+          onDone={() => {
+            setWelcome(false);
+            select(AFTER_WELCOME_TAB);
+          }}
+        />
+      )}
+    </>
   );
 }
