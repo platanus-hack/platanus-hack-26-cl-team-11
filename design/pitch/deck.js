@@ -85,18 +85,23 @@
   }
 
   var counting = 0;
+  function writeHook(text) {
+    byId('hook-first').textContent = text.charAt(0);
+    byId('hook-rest').textContent = text.slice(1);
+  }
   function countTo(target, instant, node) {
     var run = ++counting;
     node = node || byId('count');
+    var write = node.id === 'hook' ? writeHook : function (text) { node.textContent = text; };
     var from = Number(node.dataset.value || target);
     node.dataset.value = String(target);
-    if (instant || from === target) { node.textContent = format(target); return; }
+    if (instant || from === target) { write(format(target)); return; }
     var start = performance.now();
     var frame = function (now) {
       if (run !== counting) return;
       var progress = Math.min(1, (now - start) / COUNT_MS);
       var eased = 1 - Math.pow(1 - progress, 4);
-      node.textContent = format(Math.round(from + (target - from) * eased));
+      write(format(Math.round(from + (target - from) * eased)));
       if (progress < 1) requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
@@ -129,7 +134,41 @@
     return ringSpots.slice(at + 1).map(function (to) { return '<line x1="' + from[0] + '" y1="' + from[1] + '" x2="' + to[0] + '" y2="' + to[1] + '"/>'; }).join('');
   }).join('');
 
+  var KINDS = [['linear', 'Tarea', '--rd-g2'], ['github', 'Código', '--rd-g1'], ['gmail', 'Correo', '--rd-g4']];
+  var PILE_ROWS = 6;
+  var BRICK_MS = 110;
+  var pile = byId('pile');
+  var bricks = [];
+  for (var row = 0; row < PILE_ROWS; row++) {
+    var line = document.createElement('div');
+    line.className = 'pb-pile__row';
+    for (var place = 0; place < PILE_ROWS - row; place++) {
+      var kind = KINDS[(place + row * 2) % KINDS.length];
+      var brick = document.createElement('span');
+      brick.className = 'pb-brick';
+      brick.style.setProperty('--tint', 'var(' + kind[2] + ')');
+      brick.innerHTML = '<img src="../sources/apps/' + kind[0] + '.png" alt="">' + kind[1];
+      line.append(brick);
+      bricks.push(brick);
+    }
+    pile.append(line);
+  }
+  var piling = 0;
+  function startPile() {
+    var run = ++piling;
+    bricks.forEach(function (brick) { brick.removeAttribute('data-in'); });
+    if (still) { bricks.forEach(function (brick) { brick.setAttribute('data-in', ''); }); return; }
+    bricks.forEach(function (brick, at) {
+      setTimeout(function () {
+        if (run !== piling) return;
+        brick.setAttribute('data-in', '');
+        if (at === bricks.length - 1) faces.forEach(function (entry) { if (entry.slide === flood) entry.face.set('ausente'); });
+      }, 500 + at * BRICK_MS);
+    });
+  }
+
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
+  var flood = document.querySelector('.pb-flood');
   var scale = slides.indexOf(document.querySelector('.pb-scale'));
   var current = -1;
   var stepAt = 1;
@@ -154,6 +193,7 @@
       byId('hook').dataset.value = '0';
       countTo(HOOK, still, byId('hook'));
     }
+    if (slides[index] === flood && entering) startPile();
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
   }

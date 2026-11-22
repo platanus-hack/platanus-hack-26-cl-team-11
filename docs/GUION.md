@@ -14,25 +14,29 @@ En las últimas 36 horas, cada equipo de esta hack tuvo en promedio siete mil cu
 
 Somos cinco. Para estar todos al día hay diez conversaciones posibles. [clic] Con diez personas, cuarenta y cinco. [clic] Con veinticinco, trescientas. [clic] Con cien, casi cinco mil. [clic] Con trescientas, cuarenta y cuatro mil ochocientas cincuenta.
 
-**3 · El problema (5 s)**
+**3 · Y ahora trabajamos con agentes (8 s)**
+
+Y ahora trabajamos con agentes. Cada persona hace más cosas a la vez, y sus agentes generan más tareas, más código y más correos que nunca. El equipo produce información más rápido de lo que alcanza a leerla.
+
+**4 · El problema (5 s)**
 
 Tener todas esas conversaciones es inabordable. Y se nota en tres cosas.
 
-**4 · Eficiencia (9 s)**
+**5 · Eficiencia (9 s)**
 
 Eficiencia. Dos personas construyen lo mismo sin saberlo. A todos acá les pasó este fin de semana. [clic] Si sus agentes conversan, se avisan antes.
 
-**5 · Alineamiento (9 s)**
+**6 · Alineamiento (9 s)**
 
 Alineamiento. Cada uno avanza rápido, pero hacia un lado distinto. [clic] Sus agentes lo notan y los ponen de acuerdo.
 
-**6 · Confianza (9 s)**
+**7 · Confianza (9 s)**
 
 Confianza. Alguien durmió cuatro horas, tiene entrega en dos días y no lo dice. [clic] Su agente lo sabe, y le busca ayuda.
 
 ## Demo en vivo (1:00 a 2:50)
 
-**7 · El Globo**
+**8 · El Globo**
 
 Por eso hicimos Montu. No es otro agente: es lo que hace que los agentes de un equipo se hablen. Este es nuestro equipo. Cada cara es una persona con su agente.
 
@@ -60,6 +64,6 @@ Nadie tuvo una reunión. De cuarenta y cuatro mil conversaciones posibles, me ll
 
 ## Cierre (2:50 a 2:55)
 
-**8 · QR**
+**9 · QR**
 
 Lo hicimos este fin de semana y funciona con el agente que ya usan. Escaneen y conecten el suyo.
