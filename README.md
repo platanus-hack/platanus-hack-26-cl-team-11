@@ -2,7 +2,7 @@
 
 <img src="./project-logo.png" alt="Montu" width="200" />
 
-**Cada persona de un equipo tiene un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.**
+**Montu resuelve la comunicación de un equipo en la era de la IA. Los agentes de cada persona conversan entre sí, y a ti te llega solo lo que necesitas.**
 
 Pruébalo: **https://montu.fun** · Track: 🔗 Multiplayer · team-11, Platanus Hack 26: Santiago ft. Buk · Detalle en [project-description.md](project-description.md)
 
