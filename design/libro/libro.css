@@ -33,7 +33,7 @@
 .ld-quote--big { max-width: 16ch; font-size: clamp(30px, 3.4vw, 46px); line-height: 1.08; letter-spacing: var(--rd-track-hero); }
 .ld-quote--big small { max-width: 44ch; line-height: 1.4; }
 .ld-text--after { margin-top: 32px; }
-.ld-quote--thanks { max-width: 22ch; margin: 72px 0 0; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.1; letter-spacing: var(--rd-track-hero); }
+.ld-quote--thanks { max-width: 26ch; margin: 72px 0 0; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.1; letter-spacing: var(--rd-track-hero); }
 .ld-split--top { margin-top: 40px; align-items: center; }
 .ld-split--top .ld-quote { margin: 0; }
 .ld-subtitle { margin: 40px 0 16px; font-size: 24px; font-weight: var(--rd-weight); letter-spacing: var(--rd-track-title); }
@@ -44,9 +44,6 @@
 .ld-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ld-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ld-grid--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.ld-member { gap: 8px; }
-.ld-member .ld-face { align-self: flex-start; flex: none; margin: 4px 0 8px; }
-.ld-member p { font-size: 15px; line-height: 1.45; }
 .ld-split--story { margin-top: var(--rd-space-4); gap: var(--rd-space-4); }
 .ld-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 
@@ -61,6 +58,16 @@
 .ld-card__head { display: flex; flex-direction: column; gap: 6px; }
 .ld-card__title { margin: 0; font-size: 18px; font-weight: var(--rd-weight); letter-spacing: -0.01em; line-height: 1.3; }
 .ld-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.ld-card__pillar { font-size: 14px; color: var(--rd-muted); }
+/* Un pilar: su marca de color arriba (un tinte por tarjeta) y lo que lo rompe, en lista */
+.ld-pillar::before { content: ""; width: 56px; height: 10px; border-radius: 6px; background: var(--tint); }
+.ld-pillar .ld-card__title { font-size: 24px; letter-spacing: var(--rd-track-title); }
+.ld-points { margin: 4px 0 0; padding: 12px 0 0 18px; border-top: 1px solid var(--rd-hairline); }
+.ld-points li { margin: 0 0 8px; font-size: 15px; line-height: 1.45; color: var(--rd-muted); }
+.ld-teamnote { margin: -12px 0 0; max-width: 60ch; }
+.ld-more { margin-top: 28px; }
+.ld-more summary { cursor: pointer; font-size: var(--rd-text-name); font-weight: var(--rd-weight); }
+.ld-more .ld-list { margin-top: 16px; max-width: 620px; }
 .ld-card__n { font-family: var(--rd-font-num); font-size: 28px; font-weight: var(--rd-weight); color: var(--rd-muted); line-height: 1; }
 .ld-card__proof { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rd-hairline); }
 .ld-card__proof .rd-stat { font-size: 32px; }
