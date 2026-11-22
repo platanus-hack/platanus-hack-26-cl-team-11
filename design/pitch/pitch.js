@@ -1,5 +1,5 @@
 /*
- * Montu · la presentación. Siete láminas, una idea cada una.
+ * Montu · la presentación. Ocho láminas, una idea cada una.
  *   ← → espacio y clic avanzan · N notas · F pantalla completa · V grabación de la demo · ?s=<n> abre una lámina (&k=2 su segundo paso)
  *   Las animaciones no se detienen solas: los controles de abajo pausan, adelantan y apuran la de la lámina abierta.
  */
@@ -133,41 +133,63 @@
     skip: function () { sourceTiles.forEach(function (tile) { tile.setAttribute('data-sent', ''); }); lit = sourceTiles.length; contextFace.set('lista'); },
   };
 
-  /* ---------- 3. 300 personas, 44.850 conversaciones ---------- */
-  var SIZES = [5, 10, 20, 50, 150, 300];
+  /* ---------- 4. No escala: una red donde todos hablan con todos, de 5 personas a 300 ---------- */
   var pairs = function (n) { return n * (n - 1) / 2; };
-  var MAX = pairs(300);
-  var bars = SIZES.map(function (n) {
-    var row = document.createElement('div');
-    row.className = 'pt-bar';
-    row.innerHTML = '<span class="pt-bar__who">' + n + '</span><span class="pt-bar__track"><span class="pt-bar__fill"></span></span><span class="pt-bar__n">' + fmt(pairs(n)) + '</span>';
-    $('bars').append(row);
-    return row;
-  });
+  var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
+  var net = $('net'), pen = net.getContext('2d'), netSize = 5, netRun = 0;
   var showPeople = counter($('n-people'), 5), showTalks = counter($('n-talks'), 10);
-  var at = -1;
-  function growTo(i) {
-    at = i;
-    bars.forEach(function (row, j) {
-      var on = j <= i;
-      row.toggleAttribute('data-on', on);
-      row.querySelector('.pt-bar__fill').style.width = on ? Math.max(0.4, pairs(SIZES[j]) / MAX * 100) + '%' : '0';
-    });
-    showPeople(SIZES[i]);
-    showTalks(pairs(SIZES[i]));
+  function drawNet(n, instant) {
+    var run = ++netRun, box = net.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    netSize = n;
+    if (!box.width || !pen) return;
+    net.width = box.width * dpr;
+    net.height = box.height * dpr;
+    pen.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var few = n <= 12, radius = Math.min(box.width, box.height) / 2 - 32, points = [];
+    for (var k = 0; k < n; k++) {
+      var r = few ? radius * 0.86 : radius * Math.sqrt((k + 0.5) / n);
+      var angle = few ? -Math.PI / 2 + (k / n) * Math.PI * 2 : k * 2.39996323;
+      points.push([box.width / 2 + r * Math.cos(angle), box.height / 2 + r * Math.sin(angle)]);
+    }
+    var ink = token('--rd-ink'), tint = token('--rd-g2'), total = pairs(n), done = 0, i = 0, j = 1;
+    var dots = function () {
+      pen.globalAlpha = 1;
+      pen.fillStyle = ink;
+      points.forEach(function (point) { pen.beginPath(); pen.arc(point[0], point[1], few ? 11 : 2.4, 0, Math.PI * 2); pen.fill(); });
+    };
+    var frame = function () {
+      if (run !== netRun) return;
+      if (paused && !instant) { requestAnimationFrame(frame); return; }
+      var upto = instant ? total : Math.min(total, done + Math.ceil(total / (few ? 24 : 70)) * speed);
+      pen.globalAlpha = few ? 0.6 : 0.045;
+      pen.strokeStyle = few ? ink : tint;
+      pen.lineWidth = few ? 2.5 : 0.5;
+      pen.beginPath();
+      while (done < upto) {
+        pen.moveTo(points[i][0], points[i][1]);
+        pen.lineTo(points[j][0], points[j][1]);
+        done += 1; j += 1;
+        if (j === n) { i += 1; j = i + 1; }
+      }
+      pen.stroke();
+      if (done < total) requestAnimationFrame(frame); else dots();
+    };
+    if (few) dots();
+    frame();
   }
-  var growthTick = ticker(function () {
-    if (at === SIZES.length - 1) { growTo(0); return 1600; }
-    growTo(at + 1);
-    return at === SIZES.length - 1 ? 6000 : 1600;
-  }, 1600);
   var growth = {
-    enter: function () { growTo(still ? SIZES.length - 1 : 0); growthTick.start(); },
-    leave: function () { growthTick.stop(); },
-    skip: function () { growTo(SIZES.length - 1); },
+    step: function (k) {
+      var n = k >= 2 ? 300 : 5;
+      showPeople(n);
+      showTalks(pairs(n));
+      drawNet(n, still);
+    },
+    leave: function () { netRun += 1; },
+    skip: function () { go(current, 2); },
   };
+  window.addEventListener('resize', function () { if (scenes[current] === growth) drawNet(netSize, true); });
 
-  /* ---------- 4. El globo ---------- */
+  /* ---------- 6. El globo ---------- */
   var globe = $('globe'), globeTalks = 0, showGlobe = counter($('globe-talks'), 0);
   var tellGlobe = function (type, valor) { if (globe.contentWindow) globe.contentWindow.postMessage({ ronda: 'pagina', type: type, valor: valor }, '*'); };
   window.addEventListener('message', function (event) {
@@ -190,7 +212,7 @@
     skip: function () { tellGlobe('adelantar'); },
   };
 
-  /* ---------- 5. Tu agente es tuyo ---------- */
+  /* ---------- 7. Tu agente es tuyo ---------- */
   var askFace = Caras.mount(document.querySelector('#ask [data-face]'), 'Lian', { size: 40, state: 'pensando' });
   $('allow').addEventListener('click', function () { askFace.set('lista'); roll($('ask-label'), 'Permitido: tu agente lo cuenta'); });
   $('deny').addEventListener('click', function () { askFace.set('reposo'); roll($('ask-label'), 'Tu agente no cuenta nada'); });
@@ -198,7 +220,7 @@
 
   /* ---------- La presentación ---------- */
   var slides = Array.from(document.querySelectorAll('.pt-slide'));
-  var scenes = [coverScene, silos, context, growth, globeScene, ask, null];
+  var scenes = [coverScene, silos, context, growth, null, globeScene, ask, null];
   var current = -1, stepAt = 1;
   slides.forEach(function (slide, i) {
     var tab = document.createElement('a');

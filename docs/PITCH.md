@@ -94,27 +94,33 @@ Alinear a un equipo es difícil. Saber quién está trabado, quién anda con la 
 
 Y esos agentes ya saben todo de nosotros. Les conectamos el WhatsApp, el calendario, el correo, el sueño del reloj, el código, las reuniones. Tu agente sabe cómo estás mejor que cualquiera de tu equipo. Esa información ya existe. Nadie la está usando para alinear a las personas.
 
-**Lámina 4 · 300 personas, 44.850 conversaciones (1:10)**
+**Lámina 4 · Coordinar un equipo no escala (≈12 s)**
 
-¿Por qué no lo hacemos nosotros? Por los números. Para que todos sepan cómo están todos, cada persona tendría que hablar con cada una de las demás. Con cinco personas son diez conversaciones. Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. Nadie puede con eso. Por eso inventamos jefaturas, reuniones y reportes, y en el camino se pierde casi todo.
+Coordinar un equipo no escala. Con cinco personas hay diez conversaciones posibles. [clic] Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. Y con agentes es peor: cada uno hace más cosas a la vez y genera más información de la que el equipo alcanza a leer.
 
-**Lámina 5 · Los agentes sí pueden tenerlas (1:35)**
+**Lámina 5 · Tres problemas (≈18 s)**
 
-Los agentes sí pueden: no se cansan y conversan con cientos de pares en segundos. Montu es eso. No es otro agente: es la infraestructura para que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás.
+Eso se nota en tres cosas. Eficiencia: dos personas construyen lo mismo sin saberlo. Alineamiento: cada uno avanza hacia un lado distinto, y cada vez más rápido. Confianza: alguien está trabado o explotado, y no lo dice, porque no se siente en confianza para hacerlo. Nadie lo hace mal a propósito. Tener todas esas conversaciones es inabordable.
+
+[Las láminas 4 y 5 son la sección «Problema», de 30 segundos, del guion nuevo del 21-nov en la noche. Las láminas 1 a 3 y 6 a 8 siguen con el guion anterior y sus tiempos: falta reescribirlas y volver a medir los 3 minutos.]
+
+**Lámina 6 · Por eso hicimos Montu (1:35)**
+
+Por eso hicimos Montu. Los agentes sí pueden tener esas conversaciones: no se cansan y conversan con cientos de pares en segundos. Montu es eso. No es otro agente: es la infraestructura para que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás.
 
 Miren. [demo por WhatsApp; si falla la red, tecla V y se dice que es una grabación] Le escribo a mi agente que estoy trabada. Me pregunta si puede contarlo. Le digo que sí. Conversa con los agentes del equipo y en quince segundos me llega una sola cosa: quién me puede ayudar.
 
-**Lámina 6 · Tu agente es tuyo (2:15)**
+**Lámina 7 · Tu agente es tuyo (2:15)**
 
 Esto funciona solo si confías en tu agente. Si crees que le reporta a tu jefe, no le cuentas nada. Por eso tu agente sigue siendo tuyo: pregunta antes de contar algo, y cómo dormiste o cómo te sientes no sale nunca de él.
 
-**Lámina 7 · Pruébalo ahora (2:35)**
+**Lámina 8 · Pruébalo ahora (2:35)**
 
 Lo armamos este fin de semana y funciona con el agente que ya usan. Sus agentes ya los conocen. Montu hace que se hablen entre ellos y les traigan solo las conversaciones que valen la pena. Escaneen el QR y conecten el suyo.
 
 [silencio, con el QR en pantalla]
 
-Si falta tiempo, se acorta la demo de la lámina 5, nunca las láminas 2 y 4: son el porqué.
+Si falta tiempo, se acorta la demo de la lámina 6, nunca las láminas 4 y 5: son el porqué.
 
 Cómo presentarlo, según Ralston y Hale:
 
@@ -133,17 +139,18 @@ YC desaconseja las demos y los videos en un Demo Day, porque fallan y nadie alca
 
 ## Las láminas
 
-Kevin Hale: entre cinco y siete láminas, una idea por lámina. Están en `design/pitch/index.html`.
+Kevin Hale: entre cinco y siete láminas, una idea por lámina. Hoy son ocho, porque el problema va en dos. Están en `design/pitch/index.html`.
 
 | # | Texto de la lámina | Idea |
 |---|---|---|
 | 1 | Que los agentes de tu equipo se hablen. | Qué hacemos (la esfera de la entrada con el equipo) |
 | 2 | Alinear a un equipo es difícil. → Hoy todos trabajan con su agente. → Pero los agentes no se hablan. | El problema, en tres clics |
 | 3 | Tu agente ya sabe todo de ti. | El contexto ya existe |
-| 4 | 300 personas, 44.850 conversaciones. | Por qué las personas no pueden |
-| 5 | Los agentes sí pueden tenerlas. | El giro; después va la demo |
-| 6 | Tu agente es tuyo. | Privacidad |
-| 7 | Pruébalo ahora. | El QR, una ronda en 15 s y los agentes que ya usas |
+| 4 | Coordinar un equipo no escala. | Una red de 5 personas y 10 conversaciones; con el clic, 300 personas y 44.850 |
+| 5 | Eficiencia · Alineamiento · Confianza. Tener todas esas conversaciones es inabordable. | Los tres problemas que deja no poder conversar |
+| 6 | Por eso hicimos Montu. | El giro; después va la demo |
+| 7 | Tu agente es tuyo. | Privacidad |
+| 8 | Pruébalo ahora. | El QR, una ronda en 15 s y los agentes que ya usas |
 
 Reglas de Hale y Ralston:
 

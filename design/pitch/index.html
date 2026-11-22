@@ -50,20 +50,28 @@
         </div>
       </section>
 
-      <section class="pt-slide" data-tab="El problema" data-notes="(1:10) ¿Por qué no lo hacemos nosotros? Por los números. Para que todos sepan cómo están todos, cada persona tendría que hablar con cada una de las demás. Con cinco personas son diez conversaciones. Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. Nadie puede con eso. Por eso inventamos jefaturas, reuniones y reportes, y en el camino se pierde casi todo.">
-        <h1 class="pt-title">300 personas, 44.850 conversaciones.</h1>
+      <section class="pt-slide" data-tab="No escala" data-steps="2" data-notes="(≈12 s) Coordinar un equipo no escala. Con cinco personas hay diez conversaciones posibles. [clic] Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. Y con agentes es peor: cada uno hace más cosas a la vez y genera más información de la que el equipo alcanza a leer.">
+        <h1 class="pt-title">Coordinar un equipo no escala.</h1>
         <div class="pt-growth">
           <div class="rd-card rd-glass pt-growth__nums ss-stage" id="growth-nums">
             <div class="pt-stat pt-stat--small"><span class="rd-label">Personas</span><span class="cx-num cx-count" id="n-people" role="img" aria-label="5"></span></div>
             <div class="pt-stat"><span class="rd-label">Conversaciones posibles</span><span class="cx-num cx-count" id="n-talks" role="img" aria-label="10"></span></div>
-            <p class="rd-note">Cada persona nueva suma una conversación con cada una de las demás.</p>
           </div>
-          <div class="rd-card rd-glass pt-bars ss-stage" id="bars"></div>
+          <div class="rd-card rd-glass pt-net ss-stage"><canvas id="net" role="img" aria-label="Una red donde cada persona está conectada con todas las demás"></canvas></div>
         </div>
       </section>
 
-      <section class="pt-slide" data-tab="Los agentes" data-notes="(1:35) Los agentes sí pueden: no se cansan y conversan con cientos de pares en segundos. Montu es eso. No es otro agente: es la infraestructura para que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás. Miren. [DEMO WhatsApp; si falla la red, tecla V y decir que es grabación] Le escribo a mi agente que estoy trabada. Me pregunta si puede contarlo. Le digo que sí. Conversa con los agentes del equipo y en quince segundos me llega una sola cosa: quién me puede ayudar.">
-        <h1 class="pt-title">Los agentes sí pueden tenerlas.</h1>
+      <section class="pt-slide" data-tab="Tres problemas" data-notes="(≈18 s) Eso se nota en tres cosas. Eficiencia: dos personas construyen lo mismo sin saberlo. Alineamiento: cada uno avanza hacia un lado distinto, y cada vez más rápido. Confianza: alguien está trabado o explotado, y no lo dice, porque no se siente en confianza para hacerlo. Nadie lo hace mal a propósito. Tener todas esas conversaciones es inabordable.">
+        <div class="pt-three">
+          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g1)"><h2 class="pt-three__name">Eficiencia</h2><p class="pt-three__say">Dos personas construyen lo mismo sin saberlo.</p></div>
+          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g3)"><h2 class="pt-three__name">Alineamiento</h2><p class="pt-three__say">Cada uno avanza hacia un lado distinto, y cada vez más rápido.</p></div>
+          <div class="rd-card rd-glass pt-three__col" style="--tint: var(--rd-g5)"><h2 class="pt-three__name">Confianza</h2><p class="pt-three__say">Alguien está trabado o explotado, y no lo dice.</p></div>
+        </div>
+        <h1 class="pt-title pt-title--close">Tener todas esas conversaciones es inabordable.</h1>
+      </section>
+
+      <section class="pt-slide" data-tab="Los agentes" data-notes="(1:35) Por eso hicimos Montu. Los agentes sí pueden tener esas conversaciones: no se cansan y conversan con cientos de pares en segundos. Montu es eso. No es otro agente: es la infraestructura para que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás. Miren. [DEMO WhatsApp; si falla la red, tecla V y decir que es grabación] Le escribo a mi agente que estoy trabada. Me pregunta si puede contarlo. Le digo que sí. Conversa con los agentes del equipo y en quince segundos me llega una sola cosa: quién me puede ayudar.">
+        <h1 class="pt-title">Por eso hicimos Montu.</h1>
         <div class="rd-card rd-glass pt-globe ss-stage" id="globe-card">
           <iframe id="globe" title="El globo del equipo: los agentes conversan entre sí. Arrástralo para girarlo."></iframe>
           <div class="pt-globe__head">
@@ -119,7 +127,7 @@
     <div class="pt-bar-bottom">
       <div class="pt-step">
         <button type="button" class="rd-iconbutton" id="prev" aria-label="Lámina anterior"><svg class="pt-stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 4L6 9l5 5"/></svg></button>
-        <span class="rd-note" id="where">1 / 7</span>
+        <span class="rd-note" id="where">1 / 8</span>
         <button type="button" class="rd-iconbutton" id="next" aria-label="Lámina siguiente"><svg class="pt-stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg></button>
       </div>
       <div class="pt-controls" role="group" aria-label="Controles de la animación">
