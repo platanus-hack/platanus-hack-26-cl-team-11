@@ -6,7 +6,7 @@
 
 .pb-intro { flex-direction: column; justify-content: center; gap: clamp(20px, 4vh, 44px); }
 .pb-face { display: block; flex: 0 0 auto; width: var(--size, 120px); height: var(--size, 120px); }
-.pb-by { position: absolute; left: clamp(20px, 6vw, 112px); bottom: clamp(24px, 6vh, 72px); margin: 0; display: flex; align-items: center; gap: 12px; font-size: clamp(16px, 1.5vw, 24px); font-weight: var(--rd-weight); letter-spacing: -0.02em; color: var(--rd-ink); }
+.pb-by { position: absolute; right: clamp(20px, 6vw, 112px); bottom: clamp(24px, 6vh, 72px); margin: 0; display: flex; align-items: center; gap: 12px; font-size: clamp(16px, 1.5vw, 24px); font-weight: var(--rd-weight); letter-spacing: -0.02em; color: var(--rd-ink); }
 .pb-by__of { color: var(--rd-muted); }
 .pb-by__vita { display: block; height: clamp(22px, 2.2vw, 34px); width: auto; }
 .pb-team { display: flex; gap: clamp(8px, 1.4vw, 20px); }
