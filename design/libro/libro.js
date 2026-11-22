@@ -10,7 +10,10 @@
   // El globo aprobado, incrustado: cada acuerdo entre agentes suma a la cuenta.
   var globe = document.getElementById('globe'), count = document.getElementById('globe-count'), talks = 0;
   var narrow = window.matchMedia('(max-width: 900px)').matches;
-  globe.src = '../grafo/globo.html?embed&marco=' + (narrow ? 300 : 330) + '&ancho=' + (narrow ? 300 : 420) + (reduced ? '&still' : '');
+  // En el teléfono el encuadre es más ancho que la tarjeta, para que ningún nombre quede cortado.
+  globe.src = '../grafo/globo.html?embed&marco=' + (narrow ? 320 : 330) + '&ancho=' + (narrow ? 400 : 420) + (reduced ? '&still' : '');
+  // Con movimiento reducido el globo queda quieto y no avisa acuerdos: la cuenta no se muestra en cero.
+  if (reduced) document.getElementById('globe-head').hidden = true;
   window.addEventListener('message', function (event) {
     var data = event.data;
     if (event.source !== globe.contentWindow || !data || data.ronda !== 'globo' || data.type !== 'acuerdo') return;
@@ -29,6 +32,6 @@
     var watcher = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) { if (entry.isIntersecting) mark(entry.target.id); });
     }, { rootMargin: '-35% 0px -60% 0px' });
-    document.querySelectorAll('.ld-section[id]').forEach(function (section) { watcher.observe(section); });
+    document.querySelectorAll('.ld-section[id], .ld-hero').forEach(function (section) { watcher.observe(section); });
   }
 })();
