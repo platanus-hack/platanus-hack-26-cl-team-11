@@ -232,9 +232,7 @@
   var slides = Array.from(document.querySelectorAll('.pb-slide'));
   slides.forEach(function (slide) { slide.dataset.k = '1'; });
   var flood = document.querySelector('.pb-flood');
-  var live = slides.indexOf(document.querySelector('.pb-live'));
-  var STAGE_LEAD = 2;
-  var stageUrl = null;
+  var platformUrl = '/';
   var intro = document.querySelector('.pb-intro');
   var scale = slides.indexOf(document.querySelector('.pb-scale'));
   var current = -1;
@@ -269,15 +267,12 @@
       countTo(HOOK, still, byId('hook'));
     }
     if (slides[index] === intro && step === 2 && !still) { if (!bankOn) { bankOn = true; startBank(); } } else if (bankOn) { bankOn = false; stopBank(); }
-    if (stageUrl && index >= live - STAGE_LEAD && !byId('stage').getAttribute('src')) byId('stage').src = stageUrl;
-    if (index !== live && document.activeElement === byId('stage')) { byId('stage').blur(); window.focus(); }
-    if (index === live && entering) setTimeout(function () { var stage = byId('stage'); stage.focus(); if (stage.contentWindow) stage.contentWindow.postMessage({ montu: 'escenario' }, window.location.origin); }, 600);
     if (slides[index] === flood && entering) startPile();
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
   }
 
-  var forward = function () { if (stepAt < stepsOf(current)) go(current, stepAt + 1); else go(current + 1, 1); };
+  var forward = function () { if (stepAt < stepsOf(current)) go(current, stepAt + 1); else if (current === slides.length - 1) window.location.href = platformUrl; else go(current + 1, 1); };
   var back = function () { if (stepAt > 1) go(current, stepAt - 1); else if (current > 0) go(current - 1, stepsOf(current - 1)); };
 
   byId('deck').addEventListener('click', forward);
@@ -290,19 +285,13 @@
     else if (key === 'Home') go(0, 1);
     else if (key === 'End') go(slides.length - 1, 1);
   });
-  window.addEventListener('message', function (event) {
-    var data = event.data;
-    if (event.origin !== window.location.origin || !data || data.montu !== 'deck') return;
-    if (data.key === 'ArrowRight' || data.key === 'PageDown') forward();
-    else if (data.key === 'ArrowLeft' || data.key === 'PageUp') back();
-  });
   window.addEventListener('resize', function () { if (current === scale && people > SMALL) drawNet(people, true); });
 
   fetch('qr.svg').then(function (response) { return response.text(); }).then(function (svg) { document.querySelector('.pb-qr').innerHTML = svg; }).catch(function () {});
 
   var presenter = null;
   try { presenter = JSON.parse(window.localStorage.getItem('ronda.persona') || 'null'); } catch (failure) { presenter = null; }
-  stageUrl = presenter && typeof presenter.token === 'string' ? '/conectar/' + encodeURIComponent(presenter.token) + '?vivo&escenario#globo' : '/';
+  if (presenter && typeof presenter.token === 'string') platformUrl = '/conectar/' + encodeURIComponent(presenter.token) + '#globo';
 
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
   if (still) Caras.still(8);
