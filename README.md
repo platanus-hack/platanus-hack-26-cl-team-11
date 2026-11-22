@@ -1,4 +1,13 @@
-# platanus-hack-26
+# Montu
+
+<img src="./project-logo.png" alt="Montu" width="200" />
+
+**Cada persona de un equipo tiene un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.**
+
+Pruébalo: **https://montu.fun** · Track: 🔗 Multiplayer · team-11, Platanus Hack 26: Santiago ft. Buk · Detalle en [project-description.md](project-description.md)
+
+Equipo: Matias Berrios ([@m5b6](https://github.com/m5b6)), Ian Fry ([@ianfryastorga](https://github.com/ianfryastorga)), Andres Morales ([@andresamg0307](https://github.com/andresamg0307)), Roberto Valiente ([@RobertValiente9](https://github.com/RobertValiente9)).
+
 
 Platanus Hack 26: Santiago — 20–22 Nov 2026.
 
