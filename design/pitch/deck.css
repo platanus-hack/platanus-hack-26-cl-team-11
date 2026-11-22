@@ -99,12 +99,21 @@
 
 .pb-try { align-items: center; justify-content: center; gap: clamp(24px, 6vw, 112px); }
 .pb-qr { flex: 0 0 auto; width: min(52vh, 40vw); aspect-ratio: 1; padding: clamp(12px, 2vh, 24px); border-radius: var(--rd-radius-card); background: var(--rd-glass-solid); color: var(--rd-ink); }
-.pb-qr svg { display: block; width: 100%; height: 100%; }
+.pb-qr__box { position: relative; width: 100%; height: 100%; }
+.pb-qr__draft, .pb-qr__code { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pb-qr__code { visibility: hidden; }
+.pb-qr__code svg { display: block; width: 100%; height: 100%; }
+.pb-qr[data-built] .pb-qr__code { visibility: visible; }
+.pb-qr[data-built] .pb-qr__draft { visibility: hidden; }
+.pb-qr__agent { position: absolute; left: 0; top: 0; margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); opacity: 0; will-change: transform; transition: opacity 0.3s var(--pb-ease); }
+.pb-qr[data-building] .pb-qr__agent, .pb-qr[data-built] .pb-qr__agent { opacity: 1; }
+.pb-qr[data-built] .pb-qr__agent { transition: opacity 0.3s var(--pb-ease), transform 0.7s var(--pb-ease); }
 .pb-try .pb-count { width: auto; }
 .pb-url { font-size: clamp(48px, 8vw, 136px); font-weight: var(--rd-weight); letter-spacing: -0.05em; line-height: 1; color: var(--rd-ink); }
 
 @media (max-width: 720px) {
   .pb-try { flex-direction: column; }
+  .pb-qr[data-built] .pb-qr__agent { opacity: 0; }
   .pb-scale { flex-direction: column; align-items: stretch; }
   .pb-ring { height: auto; flex: 1 1 0; min-height: 0; }
   .pb-case { flex-direction: column; align-items: stretch; }
@@ -114,7 +123,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pb-slide, .pb-col, .pb-close, .pb-by--late, .pb-roll > span, .pb-brick, .pb-claim, .pb-hook, .pb-hook__bet, .pb-swap, .pb-who, .pb-chip, .pb-link, .pb-arrow, .pb-ring__face, .pb-bank { transition: none; }
+  .pb-slide, .pb-col, .pb-close, .pb-by--late, .pb-roll > span, .pb-brick, .pb-claim, .pb-hook, .pb-hook__bet, .pb-swap, .pb-who, .pb-chip, .pb-link, .pb-arrow, .pb-ring__face, .pb-bank, .pb-qr__agent { transition: none; }
   .pb-spin { animation: none; }
   .pb-col { transform: none; }
 }

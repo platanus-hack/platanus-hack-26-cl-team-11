@@ -7,7 +7,7 @@
 <link rel="icon" href="../logo/montu-mark.svg">
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../ronda.css">
-<link rel="stylesheet" href="deck.css?v=5">
+<link rel="stylesheet" href="deck.css?v=6">
 </head>
 <body style="margin: 0">
 <div class="rd-page pb">
@@ -109,7 +109,17 @@
     </section>
 
     <section class="pb-slide pb-try">
-      <div class="pb-qr" role="img" aria-label="Código QR a montu.fun"></div>
+      <div class="pb-qr" id="qr" role="img" aria-label="Código QR para entrar al equipo">
+        <div class="pb-qr__box">
+          <canvas class="pb-qr__draft" id="qr-draft" aria-hidden="true"></canvas>
+          <div class="pb-qr__code" id="qr-code"></div>
+          <span class="pb-face pb-qr__agent" data-face="Mati" data-size="56" data-state="activa"></span>
+          <span class="pb-face pb-qr__agent" data-face="Ian" data-size="56" data-state="activa"></span>
+          <span class="pb-face pb-qr__agent" data-face="Lian" data-size="56" data-state="activa"></span>
+          <span class="pb-face pb-qr__agent" data-face="Andrés" data-size="56" data-state="activa"></span>
+          <span class="pb-face pb-qr__agent" data-face="Roberto" data-size="56" data-state="activa"></span>
+        </div>
+      </div>
       <div class="pb-count">
         <span class="pb-url">montu.fun</span>
       </div>
@@ -120,6 +130,7 @@
 </div>
 <script src="../luz/luz.js"></script>
 <script src="../faces/caras.js"></script>
-<script src="deck.js?v=10"></script>
+<script src="qr-encoder.js"></script>
+<script src="deck.js?v=11"></script>
 </body>
 </html>
