@@ -44,3 +44,22 @@ test('the panel lists recent rounds with their full conversations', async () => 
 
   assert.equal((await app.request(`/api/admin/nadie`)).status, 404);
 });
+
+test('an operator takes a person out of the mesa and brings them back', async () => {
+  const { ctx, app, token } = setup();
+  const panel = (await (await app.request(`/api/admin/${token}`)).json()) as { people: Array<{ id: string; name: string; member: boolean; signedIn: boolean }> };
+  const other = panel.people[1];
+  assert.ok(other?.member);
+  assert.equal(other.signedIn, false);
+
+  const out = await app.request(`/api/admin/${token}/people/${other.id}/membership`, send('PUT', { member: false }));
+  assert.deepEqual(await out.json(), { id: other.id, name: other.name, member: false });
+  const after = (await (await app.request(`/api/admin/${token}`)).json()) as { people: Array<{ id: string; member: boolean }> };
+  assert.equal(after.people.find((person) => person.id === other.id)?.member, false);
+  assert.equal(ctx.mesa.hasLeft(token), false);
+
+  const back = await app.request(`/api/admin/${token}/people/${other.id}/membership`, send('PUT', { member: true }));
+  assert.equal(((await back.json()) as { member: boolean }).member, true);
+  assert.equal((await app.request(`/api/admin/${token}/people/nadie/membership`, send('PUT', { member: false }))).status, 404);
+  assert.equal((await app.request(`/api/admin/${token}/people/${other.id}/membership`, send('PUT', {}))).status, 400);
+});

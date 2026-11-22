@@ -1,16 +1,22 @@
 import { Hono } from 'hono';
 import { cardFor } from '../agents/round.js';
 import type { Round } from '../agents/store.js';
+import { publicIdOf } from '../codes.js';
 import type { AppContext } from '../context.js';
+import { openLoginStore } from '../logins.js';
 import { hasPublished, isMesaOperator, mesaCardDeps } from '../mesa/members.js';
 import { isGlobeMode, MESA_TEAM_ID } from '../mesa/store.js';
 import { mesaDailyCapOf, mesaTokensLastDay } from '../mesa/ticker.js';
+import { oncePerDatabase } from '../pg/database.js';
 import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_AN_OPERATOR = { error: 'Solo el equipo de Montu entra al panel.' } as const;
 const INVALID_MODE = { error: 'El globo va «mesa» (en vivo) o «demo».' } as const;
 const ROUND_NOT_FOUND = { error: 'Esa ronda no existe.' } as const;
+const INVALID_MEMBERSHIP = { error: 'Falta decir si la persona queda en la mesa.' } as const;
 const RECENT_ROUNDS = 40;
+
+const loginsOf = oncePerDatabase(openLoginStore);
 
 export function adminRoutes(ctx: AppContext) {
   const { store, agents, mesa } = ctx;
@@ -48,7 +54,13 @@ export function adminRoutes(ctx: AppContext) {
     const people = store
       .listPeople()
       .filter((person) => !ctx.sim.isSynthetic(person.token))
-      .map((person) => ({ name: person.name, member: !mesa.hasLeft(person.token), publishing: hasPublished(cardFor(deps, person, now)) }));
+      .map((person) => ({
+        id: publicIdOf(person.token),
+        name: person.name,
+        member: !mesa.hasLeft(person.token),
+        publishing: hasPublished(cardFor(deps, person, now)),
+        signedIn: loginsOf(ctx.db).loginOf(person.token) !== undefined,
+      }));
     return c.json({
       globeMode: mesa.globeMode(),
       configured: ctx.model !== null,
@@ -66,6 +78,17 @@ export function adminRoutes(ctx: AppContext) {
     if (!isGlobeMode(mode)) return c.json(INVALID_MODE, 400);
     mesa.setGlobeMode(mode);
     return c.json({ globeMode: mesa.globeMode() });
+  });
+
+  routes.put('/admin/:token/people/:id/membership', async (c) => {
+    const found = operatorOf(c.req.param('token'));
+    if ('error' in found) return c.json(found.error, found.status);
+    const member = asObject(await c.req.text()).member;
+    if (typeof member !== 'boolean') return c.json(INVALID_MEMBERSHIP, 400);
+    const person = store.listPeople().find((candidate) => publicIdOf(candidate.token) === c.req.param('id'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    mesa.setLeft(person.token, !member);
+    return c.json({ id: publicIdOf(person.token), name: person.name, member: !mesa.hasLeft(person.token) });
   });
 
   routes.get('/admin/:token/rounds/:roundId', (c) => {
