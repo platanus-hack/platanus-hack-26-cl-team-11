@@ -1,6 +1,6 @@
 /*
  * Montu · la presentación de ensayo (design/prep/, se abre en /prep). Copia de design/pitch/ para probar el guion nuevo:
- * la portada es un cohete con los agentes del equipo y abajo de cada lámina va lo que se dice, paso a paso (N lo esconde).
+ * la portada es un solo número y abajo de cada lámina va lo que se dice, paso a paso (N lo esconde).
  * Ocho láminas, una idea cada una.
  *   ← → espacio y clic avanzan · N notas · F pantalla completa · V grabación de la demo · ?s=<n> abre una lámina (&k=2 su segundo paso)
  *   Las animaciones no se detienen solas: los controles de abajo pausan, adelantan y apuran la de la lámina abierta.
@@ -71,66 +71,12 @@
     };
   }
 
-  /* ---------- Portada: los agentes del equipo viajan en el mismo cohete ---------- */
-  var launch = $('launch'), unit = launch.clientHeight / 64 || 10;
-  var riders = Array.from(launch.querySelectorAll('[data-rider]')).map(function (port) {
-    var size = Math.round(port.clientWidth || unit * 10);
-    return Caras.mount(port, port.dataset.rider, { size: size, interactive: true, trigger: launch });
-  });
-  for (var streak = 0; streak < 18; streak++) {
-    var line = document.createElement('i');
-    line.style.left = (4 + (streak * 37) % 92) + '%';
-    line.style.height = (5 + (streak * 13) % 12) + '%';
-    line.style.animationDuration = (0.9 + ((streak * 7) % 10) / 10) + 's';
-    line.style.animationDelay = -((streak * 11) % 20) / 10 + 's';
-    line.style.setProperty('--tint', 'var(--rd-g' + (1 + streak % 5) + ')');
-    $('sky').append(line);
-  }
-  var riderAt = 0;
-  var ridersTick = ticker(function () { riders[riderAt++ % riders.length].pulse(); }, 1100);
+  /* ---------- Portada: un solo número ---------- */
+  var HOOK = 7408;
+  var showHook = counter($('hook-n'), 0), hookSlide = document.querySelector('.pt-hook');
   var coverScene = {
-    enter: function () {
-      if (!still) { launch.removeAttribute('data-up'); void launch.offsetWidth; }
-      launch.setAttribute('data-up', '');
-      ridersTick.start();
-    },
-    leave: function () { ridersTick.stop(); },
-    pause: function (v) { launch.toggleAttribute('data-paused', v); },
-  };
-
-  /* ---------- 2. Cada uno con su agente ---------- */
-  var SILOS = [
-    { name: 'Mati', app: 'claude', agent: 'Claude Code' },
-    { name: 'Ian', app: 'codex', agent: 'Codex' },
-    { name: 'Lian', app: 'chatgpt', agent: 'ChatGPT' },
-    { name: 'Roberto', app: 'claude', agent: 'Claude Code' },
-    { name: 'Andrés', app: 'codex', agent: 'Codex' },
-    { name: 'Sofía', app: 'chatgpt', agent: 'ChatGPT' },
-  ];
-  var siloFaces = SILOS.map(function (p) {
-    var card = document.createElement('div');
-    card.className = 'rd-card rd-glass pt-silo ss-stage';
-    card.innerHTML =
-      '<span class="pt-face" style="--size: 56px"></span>' +
-      '<span class="rd-person"><span class="rd-person__name">' + p.name + '</span><span class="rd-person__status">con ' + p.agent + '</span></span>' +
-      '<span class="pt-silo__agent" aria-hidden="true"><span class="pt-dots"><i></i><i></i><i></i></span><span class="cx-tile" style="--s: 48px"><img src="../sources/apps/' + p.app + '.png" alt=""></span></span>';
-    $('silos').append(card);
-    return Caras.mount(card.firstElementChild, p.name, { size: 56, trigger: card });
-  });
-  var siloPulse = 0;
-  var silosTick = ticker(function () { siloFaces[siloPulse++ % siloFaces.length].pulse(); }, 900);
-  var silos = {
-    step: function (k) {
-      var alone = k >= 3;
-      $('silos').classList.toggle('pt-alone', alone);
-      $('silos').classList.toggle('pt-hard', k === 1);
-      roll($('silo-title'), alone ? 'Pero los agentes no se hablan.' : k === 2 ? 'Los agentes ya son parte del equipo.' : 'Alinear a un equipo es difícil.');
-      roll($('silo-count'), alone ? '0 conversaciones' : '6 agentes');
-      setTimeout(function () { roll($('silo-note'), alone ? 'entre esos seis agentes' : 'cada uno con su persona'); }, still ? 0 : 60);
-      siloFaces.forEach(function (face) { face.set(alone ? 'ausente' : 'reposo'); });
-      if (alone) silosTick.stop(); else silosTick.start();
-    },
-    leave: function () { silosTick.stop(); },
+    enter: function () { setTimeout(function () { showHook(HOOK); }, still ? 0 : 350); },
+    step: function (k) { hookSlide.toggleAttribute('data-bet', k >= 2); },
   };
 
   /* ---------- Contexto: todo lo de tu vida ya llega a tu agente ---------- */
@@ -162,7 +108,6 @@
   var pairs = function (n) { return n * (n - 1) / 2; };
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
   var net = $('net'), pen = net.getContext('2d'), netSize = 5, netRun = 0;
-  var showPeople = counter($('n-people'), 5), showTalks = counter($('n-talks'), 10);
   function drawNet(n, instant) {
     var run = ++netRun, box = net.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
     netSize = n;
@@ -205,14 +150,45 @@
   var growth = {
     step: function (k) {
       var n = k >= 2 ? 300 : 5;
-      showPeople(n);
-      showTalks(pairs(n));
+      roll($('net-caption'), fmt(n) + ' personas · ' + fmt(pairs(n)) + ' conversaciones');
       drawNet(n, still);
     },
     leave: function () { netRun += 1; },
     skip: function () { go(current, 2); },
   };
   window.addEventListener('resize', function () { if (scenes[current] === growth) drawNet(netSize, true); });
+
+  /* ---------- Con agentes: una persona, su agente y todo lo que se acumula alrededor ---------- */
+  var KINDS = [['linear', 'Tarea'], ['github', 'Código'], ['gmail', 'Correo']];
+  var flood = $('flood'), floodFace = Caras.mount($('flood-face'), 'Lian', { size: 128, interactive: true, trigger: flood }), chips = [], seed = 7;
+  var chance = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  function addChip() {
+    var x, y;
+    do { x = 1 + chance() * 86; y = 2 + chance() * 86; } while (x > 30 && x < 62 && y > 22 && y < 70);
+    var kind = KINDS[chips.length % KINDS.length], chip = document.createElement('span');
+    chip.className = 'pt-chip rd-glass';
+    chip.style.left = x + '%';
+    chip.style.top = y + '%';
+    chip.style.setProperty('--turn', (chance() * 14 - 7).toFixed(1) + 'deg');
+    chip.innerHTML = '<img src="../sources/apps/' + kind[0] + '.png" alt="">' + kind[1];
+    flood.append(chip);
+    chips.push(chip);
+    if (chips.length % 4 === 0) floodFace.pulse();
+  }
+  var clearChips = function () { chips.forEach(function (chip) { chip.remove(); }); chips = []; seed = 7; };
+  var floodTick = ticker(function () {
+    if (chips.length >= 72) { clearChips(); return 500; }
+    addChip();
+    return chips.length >= 72 ? 5000 : Math.max(70, 360 - chips.length * 6);
+  }, 400);
+  var floodScene = {
+    enter: function () { clearChips(); if (still) { for (var c = 0; c < 60; c++) addChip(); } floodTick.start(); },
+    leave: function () { floodTick.stop(); },
+    skip: function () { while (chips.length < 72) addChip(); },
+  };
+
+  /* ---------- Tres pilares: con el clic final se apagan y queda la frase ---------- */
+  var pillars = { step: function (k) { $('pillars').toggleAttribute('data-close', k >= 2); } };
 
   /* ---------- 6. El globo ---------- */
   var globe = $('globe'), globeTalks = 0, showGlobe = counter($('globe-talks'), 0);
@@ -245,7 +221,7 @@
 
   /* ---------- La presentación ---------- */
   var slides = Array.from(document.querySelectorAll('.pt-slide'));
-  var scenes = [coverScene, silos, growth, null, globeScene, context, ask, null];
+  var scenes = [coverScene, growth, floodScene, pillars, globeScene, context, ask, null];
   var current = -1, stepAt = 1;
   slides.forEach(function (slide, i) {
     var tab = document.createElement('a');
@@ -315,7 +291,6 @@
   $('play').addEventListener('click', function () {
     paused = !paused;
     globeScene.pause(paused);
-    coverScene.pause(paused);
     $('play').setAttribute('aria-pressed', String(paused));
     $('play').setAttribute('aria-label', paused ? 'Seguir' : 'Pausar');
     $('play-icon').setAttribute('d', paused ? PLAY : PAUSE);

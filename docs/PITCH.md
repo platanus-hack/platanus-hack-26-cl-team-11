@@ -74,7 +74,7 @@ Lo que se puede decir sin exagerar, porque está probado:
 
 ## Guion de 3 minutos
 
-La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). Hay una copia de ensayo en `design/prep/` ([montu.fun/prep](https://montu.fun/prep)): portada con un cohete, el gancho nuevo en dos láminas («Alinear a un equipo es difícil» → «Los agentes ya son parte del equipo» → «Pero los agentes no se hablan»), el contexto después de «Por eso hicimos Montu» y el guion escrito abajo de cada lámina. Lo que se apruebe ahí se pasa a `design/pitch/`. El mismo texto está en las notas de cada lámina (tecla N). Son unas 420 palabras: a ritmo tranquilo, 3 minutos justos. Lo que va entre corchetes no se dice.
+La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). Hay una copia de ensayo en `design/prep/` ([montu.fun/prep](https://montu.fun/prep)) con el guion más nuevo (21-nov, noche) escrito abajo de cada lámina: la portada es un solo número («El equipo promedio de esta hack tuvo 7.408 conversaciones con su agente» y, con el clic, la apuesta de las bananas), y el problema va en tres láminas (no escala, con agentes hay más información de la que se alcanza a leer, tres pilares que se apagan para dejar «Tener todas esas conversaciones es inabordable»). Después siguen Montu, contexto, privacidad y QR con el guion anterior. Lo que se apruebe ahí se pasa a `design/pitch/`. El mismo texto está en las notas de cada lámina (tecla N). Son unas 420 palabras: a ritmo tranquilo, 3 minutos justos. Lo que va entre corchetes no se dice.
 
 **Lámina 1 · Que los agentes de tu equipo se hablen (0:00)**
 

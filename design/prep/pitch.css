@@ -19,30 +19,15 @@
 .pt-sub { margin: 0; font-size: clamp(17px, 1.6vw, 24px); color: var(--rd-muted); line-height: 1.35; max-width: 46ch; }
 .pt-body { flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; gap: var(--rd-space-6); }
 
-/* ---------- 1. Portada: el cohete con los agentes del equipo ---------- */
-.pt-cover { justify-content: center; }
-.pt-cover__grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--rd-space-6); }
-.pt-cover__text { display: flex; flex-direction: column; gap: 20px; }
+/* ---------- 1. Portada: un solo número ---------- */
 .pt-face { display: block; width: var(--size, 120px); height: var(--size, 120px); }
-.pt-launch { --u: calc(min(58vh, 44vw, 620px) / 64); position: relative; width: calc(var(--u) * 58); height: calc(var(--u) * 64); overflow: hidden; border-radius: var(--rd-radius-card); }
-.pt-sky { position: absolute; inset: 0; }
-.pt-sky i { position: absolute; top: -20%; width: calc(var(--u) * 0.5); border-radius: var(--rd-radius-pill); background: var(--tint); opacity: 0.32; animation: pt-fall 1.4s linear infinite; }
-@keyframes pt-fall { to { transform: translateY(calc(var(--u) * 90)); } }
-.pt-rocket { position: absolute; left: 50%; top: calc(var(--u) * 5); width: calc(var(--u) * 40); height: calc(var(--u) * 50); margin-left: calc(var(--u) * -20); transform: translateY(calc(var(--u) * 70)) rotate(7deg); transition: transform 1.5s var(--ease); }
-.pt-launch[data-up] .pt-rocket { transform: rotate(7deg); animation: pt-hover 3.2s ease-in-out 1.5s infinite; }
-@keyframes pt-hover { 50% { transform: translateY(calc(var(--u) * -1.4)) rotate(5deg); } }
-.pt-rocket__body, .pt-rocket__side { position: absolute; display: flex; flex-direction: column; align-items: center; background: var(--rd-glass-solid); box-shadow: var(--rd-shadow-card), inset 0 calc(var(--u) * -0.8) 0 var(--soft); }
-.pt-rocket__body { left: calc(var(--u) * 11); top: 0; width: calc(var(--u) * 18); height: calc(var(--u) * 44); padding-top: calc(var(--u) * 7.5); gap: calc(var(--u) * 1.2); border-radius: 50% 50% calc(var(--u) * 3) calc(var(--u) * 3) / 30% 30% calc(var(--u) * 3) calc(var(--u) * 3); box-sizing: border-box; }
-.pt-rocket__body::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * 2.4); width: calc(var(--u) * 5); height: calc(var(--u) * 1.2); margin-left: calc(var(--u) * -2.5); border-radius: var(--rd-radius-pill); background: var(--rd-gradient); }
-.pt-rocket__side { top: calc(var(--u) * 20); width: calc(var(--u) * 13); height: calc(var(--u) * 24); padding-top: calc(var(--u) * 5.5); border-radius: 50% 50% calc(var(--u) * 3) calc(var(--u) * 3) / 34% 34% calc(var(--u) * 3) calc(var(--u) * 3); box-sizing: border-box; }
-.pt-rocket__side--left { left: 0; }
-.pt-rocket__side--right { right: 0; }
-.pt-port { display: block; width: calc(var(--u) * 10.5); height: calc(var(--u) * 10.5); flex: none; }
-.pt-rocket__side .pt-port { width: calc(var(--u) * 9); height: calc(var(--u) * 9); }
-.pt-flame { position: absolute; left: 50%; top: 100%; width: 46%; height: calc(var(--u) * 9); margin-left: -23%; border-radius: 50% 50% 50% 50% / 22% 22% 78% 78%; background: var(--rd-gradient); opacity: 0.9; transform-origin: 50% 0; animation: pt-burn 0.22s ease-in-out infinite alternate; }
-.pt-flame--main { height: calc(var(--u) * 13); }
-@keyframes pt-burn { from { transform: scaleY(0.82) scaleX(1.06); } to { transform: scaleY(1.08) scaleX(0.94); } }
-.pt-launch[data-paused] .pt-sky i, .pt-launch[data-paused] .pt-flame, .pt-launch[data-paused] .pt-rocket { animation-play-state: paused; }
+.pt-hook { justify-content: center; align-items: center; text-align: center; gap: clamp(20px, 4vh, 44px); }
+.pt-hook__say { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: var(--rd-weight); }
+.pt-hook__lead { font-size: clamp(24px, 3.3vw, 54px); letter-spacing: -0.035em; line-height: 1.1; }
+.pt-hook__num.cx-num { font-size: clamp(120px, 23vw, 380px); line-height: 0.95; letter-spacing: -0.06em; }
+.pt-hook__bet { margin: 0; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: clamp(20px, 2.5vw, 40px); letter-spacing: -0.025em; color: var(--rd-muted); opacity: 0; transition: opacity 0.6s var(--ease); }
+.pt-hook[data-bet] .pt-hook__bet { opacity: 1; }
+.pt-hook__bet svg { width: 1.5em; height: 1.5em; flex: none; fill: var(--rd-g5); }
 
 /* ---------- 2. Cada uno con su agente ---------- */
 .pt-silos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rd-space-4); flex: 1 1 auto; align-content: center; }
@@ -76,8 +61,15 @@
 .pt-stat { display: flex; flex-direction: column; gap: 6px; }
 .pt-stat .cx-num { font-size: clamp(56px, 7vw, 112px); }
 .pt-stat--small .cx-num { font-size: clamp(40px, 4.2vw, 64px); }
-.pt-net { position: relative; padding: 0; overflow: hidden; min-height: 240px; }
+.pt-net { position: relative; flex: 1 1 auto; min-height: 0; }
 .pt-net canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pt-caption { margin: 0; align-self: center; font-family: var(--rd-font-num); font-size: clamp(26px, 3.6vw, 60px); font-weight: var(--rd-weight); letter-spacing: -0.04em; line-height: 1.1; }
+
+/* ---------- Con agentes ---------- */
+.pt-flood { position: relative; flex: 1 1 auto; min-height: 0; }
+.pt-flood__who { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: flex-end; gap: 10px; z-index: 2; }
+.pt-chip { position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: var(--key); font-size: clamp(13px, 1.1vw, 17px); font-weight: var(--rd-weight); box-shadow: var(--rd-shadow-card); transform: rotate(var(--turn, 0deg)); animation: pt-arrive 0.35s var(--ease) both; }
+.pt-chip img { width: 26px; height: 26px; border-radius: var(--mark); }
 
 /* ---------- Tres problemas ---------- */
 .pt-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rd-space-4); flex: 1 1 auto; min-height: 0; }
@@ -85,11 +77,15 @@
 .pt-three__col::before { content: ""; width: 56px; height: 10px; border-radius: var(--mark); background: var(--tint); }
 .pt-three__name { margin: 0; font-size: clamp(30px, 3.3vw, 52px); font-weight: var(--rd-weight); letter-spacing: -0.035em; line-height: 1.05; }
 .pt-three__say { margin: 0; font-size: clamp(20px, 2vw, 32px); line-height: 1.22; letter-spacing: -0.015em; }
-.pt-title--close { font-size: clamp(30px, 4.4vw, 72px); }
-.pt-slide[data-on] .pt-three__col, .pt-slide[data-on] .pt-title--close { animation: pt-arrive 0.7s var(--ease) both; }
+.pt-title--close { font-size: clamp(28px, 3.9vw, 64px); }
+.pt-pillars { position: absolute; }
+.pt-three__col { transition: opacity 0.6s var(--ease), filter 0.6s var(--ease); }
+.pt-pillars[data-close] .pt-three__col { opacity: 0.1; filter: blur(7px) saturate(0.4); }
+.pt-pillars__close { position: absolute; left: 0; right: 0; top: 42%; transform: translateY(-50%); text-align: center; opacity: 0; transition: opacity 0.6s var(--ease) 0.15s; pointer-events: none; }
+.pt-pillars[data-close] .pt-pillars__close { opacity: 1; }
+.pt-slide[data-on] .pt-three__col { animation: pt-arrive 0.7s var(--ease) both; }
 .pt-slide[data-on] .pt-three__col:nth-child(2) { animation-delay: 0.25s; }
 .pt-slide[data-on] .pt-three__col:nth-child(3) { animation-delay: 0.5s; }
-.pt-slide[data-on] .pt-title--close { animation-delay: 0.9s; }
 @keyframes pt-arrive { from { opacity: 0; } }
 
 /* ---------- 4. El globo ---------- */
@@ -167,6 +163,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pt-slide, .pt-slide[data-on] { transition: none; transform: none; }
   .pt-dots i { animation: none; opacity: 0.6; }
-  .pt-sky i, .pt-flame, .pt-rocket, .pt-launch[data-up] .pt-rocket { animation: none; transition: none; }
-  .pt-three__col, .pt-title--close { animation: none !important; }
+  .pt-chip { animation: none; }
+  .pt-three__col { animation: none !important; }
 }
