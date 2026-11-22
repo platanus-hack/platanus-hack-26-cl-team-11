@@ -1,13 +1,17 @@
 import { askTeam } from '../agents/ask.js';
 import { cardDepsFrom, roundDepsFrom } from '../agents/deps.js';
-import { AgentModelError } from '../agents/model.js';
-import { cardFor, runRound } from '../agents/round.js';
+import { AgentModelError, type AgentModel } from '../agents/model.js';
+import { topicKeyOf } from '../agents/cards.js';
+import { cardFor, openNeedsOf, runRound } from '../agents/round.js';
 import type { PartyDecision, Proposal } from '../agents/store.js';
 import { MAX_TEXT_LENGTH as MAX_POST_LENGTH, openBoardStore, type BoardPost } from '../board/store.js';
 import { CHECKIN_SOURCE, isMood, MAX_CHECKIN_TEXT_LENGTH, recordCheckin, type Mood } from '../checkins.js';
 import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
 import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
+import { mesaCardDeps } from '../mesa/members.js';
+import { MESA_NAME, MESA_TEAM_ID } from '../mesa/store.js';
+import { startMesaRound } from '../mesa/ticker.js';
 import type { JsonObject, Person } from '../types.js';
 import { digitsOf, type ReplyButton, type WhatsAppChannel } from './kapso.js';
 import { InboundReading, isIntent, readingPrompt, readingSystemFor } from './reading.js';
@@ -42,6 +46,7 @@ const COPY = {
   help: 'Puedes contarme cómo viene tu día o preguntarle algo a tu equipo.',
   allowedNow: 'Listo. Tu agente ya está conversando con los de tu equipo.',
   allowedLater: 'Listo. Lo pido en la próxima ronda.',
+  alreadyProposed: 'Ya hay una propuesta de ayuda con ese tema. Respóndela y, si no te sirve, lo vuelvo a pedir.',
   denied: 'Entendido. No lo cuento.',
   accepted: 'Anotado. Te aviso cuando acepten todos.',
   rejected: 'Entendido. No esta vez.',
@@ -115,6 +120,9 @@ const todayLine = (signals: LevelSignal[]): string | null => {
   return known.length > 0 ? `Por tus fuentes veo: ${known.join(' y ')}.` : null;
 };
 
+const MESA_RETRY_MS = 3000;
+const ACTIVE_PROPOSAL_MS = 7 * 86_400_000;
+
 const optionIdOf = (promptId: string, choice: string) => `${promptId}:${choice}`;
 
 const viewMessage = (message: InboxMessage): AgentMessage => ({
@@ -140,7 +148,6 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
   const lastUnknownReply = new Map<string, number>();
 
   const phoneFor = (personToken: string, door: Door | null) => (channel && door !== 'asistente' ? links.phoneOf(personToken) : undefined);
-  const hasDoor = (personToken: string) => (channel !== null && links.phoneOf(personToken) !== undefined) || ctx.assistants.assistantsOf(personToken).length > 0;
 
   const sendTextThrough = (personToken: string, body: string, door: Door | null = EVERY_DOOR): void => {
     links.addMessage(personToken, body, null, [], new Date());
@@ -148,10 +155,10 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     if (channel && phone) void channel.sendText(phone, body);
   };
 
-  const sendPrompt = (personToken: string, kind: PromptKind, ref: string, body: string, options: PromptOption[], door: Door | null = EVERY_DOOR): void => {
-    if (!hasDoor(personToken)) return;
+  const sendPrompt = (personToken: string, kind: PromptKind, ref: string, body: string, options: PromptOption[], door: Door | null = EVERY_DOOR, askAgain = false): void => {
+    if (ctx.sim.isSynthetic(personToken)) return;
     const now = new Date();
-    const promptId = links.openPrompt(personToken, kind, ref, now);
+    const promptId = links.openPrompt(personToken, kind, ref, now) ?? (askAgain ? links.unansweredPrompt(personToken, kind, ref) : undefined);
     if (!promptId) return;
     links.addMessage(personToken, body, promptId, options, now);
     const phone = phoneFor(personToken, door);
@@ -171,9 +178,9 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     return isMood(mood) ? mood : null;
   };
 
-  const askPermissions = (personToken: string, door: Door | null = EVERY_DOOR): void => {
+  const askPermissions = (personToken: string, door: Door | null = EVERY_DOOR, statedNow: string | null = null): void => {
     const person = ctx.store.findPerson(personToken);
-    if (!person || !hasDoor(personToken)) return;
+    if (!person) return;
     for (const need of cardFor(cardDepsFrom(ctx), person, new Date()).pendingAsks) {
       sendPrompt(
         person.token,
@@ -185,13 +192,53 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
           { choice: DENY, title: 'No contar' },
         ],
         door,
+        statedNow !== null && topicKeyOf(need.topic) === topicKeyOf(statedNow),
       );
+    }
+  };
+
+  const inMesa = (personToken: string) => !ctx.mesa.hasLeft(personToken) && !ctx.sim.isSynthetic(personToken);
+
+  const hasOpenNeed = (personToken: string): boolean =>
+    openNeedsOf({ ...mesaCardDeps(ctx), chatter: undefined }, MESA_TEAM_ID, new Date(), personToken).openNeeds.some((open) => open.requester.token === personToken);
+
+  const waiting = new Set<string>();
+  let waitingTimer: ReturnType<typeof setInterval> | null = null;
+
+  const beginMesaRound = (model: AgentModel, personToken: string): boolean => {
+    const mesaRound = startMesaRound(ctx, model, personToken);
+    if (mesaRound) void mesaRound.done.catch((failure: unknown) => console.error('La ronda de la mesa pública falló.', failure));
+    return mesaRound !== null;
+  };
+
+  const startWaiting = (model: AgentModel): void => {
+    try {
+      if (ctx.agents.latestRound(MESA_TEAM_ID)?.status === 'en_curso') return;
+      const next = [...waiting].find(hasOpenNeed);
+      waiting.clear();
+      if (next) beginMesaRound(model, next);
+    } catch (failure) {
+      waiting.clear();
+      console.error('No se pudo iniciar la ronda pendiente de la mesa pública.', failure);
+    }
+    if (waiting.size === 0 && waitingTimer) {
+      clearInterval(waitingTimer);
+      waitingTimer = null;
     }
   };
 
   const startRounds = (personToken: string): boolean => {
     const { model } = ctx;
     if (!model) return false;
+    if (inMesa(personToken)) {
+      if (beginMesaRound(model, personToken)) return true;
+      waiting.add(personToken);
+      if (!waitingTimer) {
+        waitingTimer = setInterval(() => startWaiting(model), MESA_RETRY_MS);
+        waitingTimer.unref();
+      }
+      return false;
+    }
     let started = false;
     for (const team of ctx.teams.teamsOf(personToken)) {
       const round = ctx.agents.startRound(team.id, personToken);
@@ -213,13 +260,13 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
   };
 
   const askQuestion = (person: Person, question: string, door: Door): Promise<void> | null => {
-    const team = ctx.teams.teamsOf(person.token).at(-1);
+    const team = ctx.teams.teamsOf(person.token).at(-1) ?? (inMesa(person.token) ? { id: MESA_TEAM_ID, name: MESA_NAME } : undefined);
     if (!team) {
       sendTextThrough(person.token, COPY.noTeam, door);
       return null;
     }
     const post = board.createPost({ teamId: team.id, authorToken: person.token, kind: 'pregunta', text: question.slice(0, MAX_POST_LENGTH) });
-    const outcome = askTeam({ ...cardDepsFrom(ctx), board, model: ctx.model }, post);
+    const outcome = askTeam({ ...(team.id === MESA_TEAM_ID ? mesaCardDeps(ctx) : cardDepsFrom(ctx)), board, model: ctx.model }, post);
     if (outcome.state !== 'started') {
       sendTextThrough(person.token, `Tu pregunta quedó en el tablero de ${team.name}. Los agentes están ocupados; pídeles la respuesta desde tu página.`, door);
       return null;
@@ -250,12 +297,18 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     }
 
     const now = new Date();
-    const stated = reading.mood.trim().toLowerCase();
+    const statedMood = reading.mood.trim().toLowerCase();
     const earlier = moodToday(person, now);
     const within = (text: string) => [...text.trim()].slice(0, MAX_CHECKIN_TEXT_LENGTH).join('') || null;
-    recordCheckin(ctx.store, person.token, { mood: isMood(stated) ? stated : (earlier ?? UNSTATED_MOOD), blocker: within(reading.blocker), note: within(reading.note) }, now);
+    recordCheckin(ctx.store, person.token, { mood: isMood(statedMood) ? statedMood : (earlier ?? UNSTATED_MOOD), blocker: within(reading.blocker), note: within(reading.note) }, now);
     sendText(person.token, [reply || COPY.noted, earlier === null ? todayOf(person, now) : null].filter(Boolean).join('\n'));
-    askPermissions(person.token, door);
+    const stated = within(reading.blocker);
+    const waitsForPermission = stated !== null && cardFor(cardDepsFrom(ctx), person, new Date()).pendingAsks.some((need) => topicKeyOf(need.topic) === topicKeyOf(stated));
+    askPermissions(person.token, door, stated);
+    if (stated === null || waitsForPermission || !inMesa(person.token)) return;
+    if (hasOpenNeed(person.token)) return sendText(person.token, startRounds(person.token) ? COPY.allowedNow : COPY.allowedLater);
+    const lastWeek = new Date(Date.now() - ACTIVE_PROPOSAL_MS).toISOString();
+    if (ctx.agents.activeTopicKeys(MESA_TEAM_ID, person.token, lastWeek).has(topicKeyOf(stated))) sendText(person.token, COPY.alreadyProposed);
   };
 
   const greetUnknown = (phone: string): void => {

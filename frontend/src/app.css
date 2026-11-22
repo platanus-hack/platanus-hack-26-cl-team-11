@@ -52,7 +52,12 @@ body { margin: 0; }
 .app-mesa > .rd-actions { margin-top: var(--rd-space-2); }
 .app-mesa > .rd-actions + .rd-label { margin-top: var(--rd-space-3); }
 .app-mesa > .rd-note { margin: 0; }
-@media (min-width: 960px) { .app-universe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
+@media (min-width: 960px) { .app-globe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
+.app-globe { position: relative; }
+.app-globe__dock { position: absolute; left: var(--rd-space-6); bottom: var(--rd-space-6); width: min(440px, calc(100% - 2 * var(--rd-space-6))); display: flex; flex-direction: column; align-items: stretch; gap: var(--rd-space-2); }
+.app-globe__dock .rd-bubble { max-width: 100%; }
+.app-globe__dock .rd-button { flex: 0 0 auto; }
+@media (max-width: 959px) { .app-globe__dock { position: static; width: auto; margin-top: var(--rd-space-3); } }
 .app-block > .rd-thread--chat + .rd-list { margin-top: var(--rd-space-3); }
 .app-chat { min-height: 180px; padding: var(--rd-space-3) 0; }
 .app-chat > .rd-note { margin: 0; }

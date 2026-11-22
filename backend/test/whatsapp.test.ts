@@ -1,3 +1,4 @@
+import { MESA_TEAM_ID } from '../src/mesa/store.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
@@ -183,7 +184,7 @@ test('a check-in by WhatsApp stays private, the agent asks before telling a bloc
   assert.equal(sent.at(-1)?.body, 'Anotado. Te aviso cuando acepten todos.');
   await press(TOMAS_PHONE, buttonOf(offerOf(TOMAS_PHONE), 'Aceptar'));
   await until(() => sent.filter((message) => message.body.startsWith('Quedó acordado entre Ana y Tomás.')).length === 2);
-  assert.equal(ctx.agents.proposalsOf(ctx.teams.teamsOf(ana.token)[0]?.id ?? '')[0]?.status, 'acordada');
+  assert.equal(ctx.agents.proposalsOf(MESA_TEAM_ID)[0]?.status, 'acordada');
 
   await press(ANA_PHONE, buttonOf(offerOf(ANA_PHONE), 'Aceptar'));
   assert.equal(sent.at(-1)?.body, 'Eso ya lo respondiste.');

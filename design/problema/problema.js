@@ -136,5 +136,7 @@
   });
   window.addEventListener('resize', function () { if (current === scale) drawNet(people || SMALL, true); });
 
+  fetch('qr.svg').then(function (response) { return response.text(); }).then(function (svg) { document.querySelector('.pb-qr').innerHTML = svg; }).catch(function () {});
+
   go(Number(query.get('s')) || 0, Number(query.get('k')) || 1);
 })();

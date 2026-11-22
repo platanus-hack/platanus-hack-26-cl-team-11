@@ -2,6 +2,35 @@
 
 Platanus Hack 26, Santiago, 20–22 de noviembre de 2026.
 
+## La demo en vivo de un minuto
+
+Una sola pantalla: la pestaña Globo de quien presenta, con su sesión de Google. Abajo a la izquierda está la barra «Escríbele a tu agente». El equipo es el real (las cinco personas de Montu), con sus fuentes conectadas.
+
+| Segundo | Qué hace quien presenta | Qué se ve |
+|---|---|---|
+| 0 a 10 | Muestra el Globo. «Este es nuestro equipo. Cada cara es una persona con su agente.» | Las caras del equipo en la esfera |
+| 10 a 25 | Escribe el bloqueo en la barra y envía | El agente pregunta «¿Le pido ayuda a tu equipo con …?» |
+| 25 a 30 | Aprieta «Permitir» | «Listo. Tu agente ya está conversando con los de tu equipo.» |
+| 30 a 50 | Narra. «Mi agente no le avisa a todos: elige a quién escribirle.» | Los arcos en la esfera y, a la derecha, la conversación escribiéndose |
+| 50 a 60 | Lee la propuesta y aprieta «Aceptar» | «Tu agente encontró ayuda con …» y quién ayuda |
+
+Segundo momento, solo si sobra tiempo: escribir una pregunta al equipo («¿Alguien ya está trabajando en …?»). La respuesta llega armada con lo que comparte cada agente.
+
+Antes de subir:
+
+1. Entrar a montu.fun con Google en el computador que se proyecta y dejar abierta la pestaña Globo.
+2. Dejar el intervalo automático apagado, para que no haya una ronda corriendo cuando empiece la demo. Si hay una, el pedido espera a que termine.
+3. Ensayar la frase exacta del bloqueo dos veces en producción. Tiene que ser un tema que otra persona del equipo tenga en su repo o en sus fuentes.
+4. Grabar la pantalla en el último ensayo que salga bien. Esa grabación es el respaldo.
+5. Recargar la página justo antes de subir y esperar a que termine la entrada: la barra muestra solo lo que llega después de abrirla. No recargar entre escribir el bloqueo y apretar «Permitir».
+6. Después de cada ensayo, responder la propuesta. Con «Ahora no» el mismo tema se puede volver a pedir; si queda aceptada o sin responder, el agente avisa que ya hay una propuesta y no sale otra ronda.
+
+Si el agente no responde en diez segundos, se pasa a la grabación y se dice que es una grabación.
+
+Las láminas limpias para acompañarla están en `design/problema/` (en producción, `/problema`): gancho, la red de 5 a 300, los tres problemas, «Por eso hicimos Montu» y el QR.
+
+Probado en local el 21-nov-2026 con las 5 personas de `npm run seed` y el Claude de la terminal: del «Permitir» a la propuesta, 14 segundos y 4 llamadas al modelo; la pregunta al equipo, 10 segundos.
+
 ## Qué tiene que funcionar de punta a punta
 
 **Agentes conversando.** Es el corazón de la demo y lo que nos diferencia.

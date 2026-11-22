@@ -27,7 +27,16 @@
 .pb-close { margin: 0; font-size: clamp(26px, 3.6vw, 60px); font-weight: var(--rd-weight); letter-spacing: -0.04em; line-height: 1.06; color: var(--rd-ink); opacity: 0; transition: opacity 0.7s var(--pb-ease) 0.7s; }
 .pb-three[data-on] .pb-close { opacity: 1; }
 
+.pb-turn { flex-direction: column; justify-content: center; }
+
+.pb-try { align-items: center; justify-content: center; gap: clamp(24px, 6vw, 112px); }
+.pb-qr { flex: 0 0 auto; width: min(52vh, 40vw); aspect-ratio: 1; padding: clamp(12px, 2vh, 24px); border-radius: var(--rd-radius-card); background: var(--rd-glass-solid); color: var(--rd-ink); }
+.pb-qr svg { display: block; width: 100%; height: 100%; }
+.pb-try .pb-count { width: auto; }
+.pb-url { font-size: clamp(48px, 8vw, 136px); font-weight: var(--rd-weight); letter-spacing: -0.05em; line-height: 1; color: var(--rd-ink); }
+
 @media (max-width: 720px) {
+  .pb-try { flex-direction: column; }
   .pb-scale { flex-direction: column; align-items: stretch; }
   .pb-net { height: auto; flex: 1 1 0; min-height: 0; }
   .pb-count { width: auto; }

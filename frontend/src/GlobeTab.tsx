@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchGlobeMode } from './api';
+import { GlobeChat } from './GlobeChat';
 
 const DEMO_PATH = '/design/grafo/universo.html?embed&v=10';
 
@@ -25,7 +26,10 @@ export function GlobeTab({ token, active }: { token: string; active: boolean }) 
 
   return (
     <div className="app-block">
-      <iframe key={mode} className="app-universe" title="Globo de agentes" src={mode === 'mesa' ? livePath : DEMO_PATH} />
+      <div className="app-globe">
+        <iframe key={mode} className="app-universe" title="Globo de agentes" src={mode === 'mesa' ? livePath : DEMO_PATH} />
+        {mode === 'mesa' && <GlobeChat token={token} />}
+      </div>
     </div>
   );
 }
