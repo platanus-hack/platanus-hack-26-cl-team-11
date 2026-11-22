@@ -54,7 +54,6 @@ function changeSignIn(by: number) {
 const isSigningIn = () => signInScreens > 0;
 
 const NOTICE_PARAM = 'aviso';
-const SIGN_IN_NOTE = 'Tu página se abre solo con tu cuenta.';
 
 export function useSignInScreen() {
   useEffect(() => {
@@ -193,7 +192,7 @@ export function MontuSplash() {
             <img src={googleLogo} alt="" />
             Continuar con Google
           </a>
-          <p className="rd-note">{notice ?? SIGN_IN_NOTE}</p>
+          {notice && <p className="rd-note">{notice}</p>}
         </div>
       )}
     </div>
