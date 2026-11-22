@@ -43,6 +43,11 @@
 .ld-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ld-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ld-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ld-grid--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ld-member { gap: 8px; }
+.ld-member .ld-face { align-self: flex-start; flex: none; margin: 4px 0 8px; }
+.ld-member p { font-size: 15px; line-height: 1.45; }
+.ld-split--story { margin-top: var(--rd-space-4); gap: var(--rd-space-4); }
 .ld-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 
 /* Tarjeta con un dato: etiqueta, número grande, qué significa y de dónde sale */
@@ -98,7 +103,7 @@
   .ld-globe { min-height: 400px; }
   .ld-globe iframe { top: 70px; height: calc(100% - 104px); }
   .ld-section { padding-top: 56px; }
-  .ld-grid--3, .ld-grid--2, .ld-split { grid-template-columns: minmax(0, 1fr); }
+  .ld-grid--5, .ld-grid--3, .ld-grid--2, .ld-split { grid-template-columns: minmax(0, 1fr); }
   .ld-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rd-space-3); }
   .ld-grid--4 .ld-fact { padding: 16px; }
   .ld-grid--4 .ld-fact .rd-stat { font-size: 34px; }
@@ -110,6 +115,7 @@
   .ld-sources ol { columns: 1; }
 }
 @media (min-width: 901px) and (max-width: 1140px) {
+  .ld-grid--5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .ld-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ld-top .rd-tag { display: none; }
 }
