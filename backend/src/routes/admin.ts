@@ -3,6 +3,7 @@ import { cardFor } from '../agents/round.js';
 import type { Round } from '../agents/store.js';
 import { publicIdOf } from '../codes.js';
 import type { AppContext } from '../context.js';
+import { findHubSource } from '../hub/catalog.js';
 import { openLoginStore } from '../logins.js';
 import { hasPublished, isMesaOperator, mesaCardDeps } from '../mesa/members.js';
 import { isGlobeMode, MESA_TEAM_ID } from '../mesa/store.js';
@@ -17,6 +18,8 @@ const ROUND_NOT_FOUND = { error: 'Esa ronda no existe.' } as const;
 const INVALID_MEMBERSHIP = { error: 'Falta decir si la persona queda en la mesa.' } as const;
 const INVALID_TIRED = { error: 'Falta decir si el equipo queda cansado.' } as const;
 const DEMO_FOLDER = 'demo/';
+const DEMO_HUB_SOURCE = 'claude';
+const DEMO_HUB_ITEMS = 1;
 const DEMO_AUTHOR = 'demo';
 const DEMO_MESSAGE = 'Contexto para la demo';
 const RECENT_ROUNDS = 40;
@@ -123,7 +126,13 @@ export function adminRoutes(ctx: AppContext) {
       ? ctx.repo.shared(source.token).map((file) => ({ path: `${DEMO_FOLDER}${file.path}`, content: file.content.replaceAll(source.name, person.name), share: 'siempre' as const }))
       : [];
     const kept = files.map((file) => file.path);
-    const result = ctx.repo.commit(person.token, { by: DEMO_AUTHOR, message: DEMO_MESSAGE, topics: [], files, remove: remove.filter((path) => !kept.includes(path)) });
+    const hubSource = findHubSource(DEMO_HUB_SOURCE);
+    const topics = source && hubSource ? [...new Set(ctx.hub.items(source.token, hubSource.id, DEMO_HUB_ITEMS).flatMap((item) => item.topics))] : [];
+    const result = ctx.repo.commit(person.token, { by: DEMO_AUTHOR, message: DEMO_MESSAGE, topics, files, remove: remove.filter((path) => !kept.includes(path)) });
+    if (result.ok && hubSource && topics.length > 0) {
+      if (!ctx.hub.connections(person.token).some((connection) => connection.source === hubSource.id)) ctx.hub.connect(person.token, hubSource.id, hubSource.account(person.name));
+      ctx.hub.addItem(person.token, { source: hubSource.id, summary: DEMO_MESSAGE, topics, occurredAt: new Date().toISOString() });
+    }
     return c.json({ id: publicIdOf(person.token), name: person.name, files: result.ok ? files.length : 0 });
   });
 
