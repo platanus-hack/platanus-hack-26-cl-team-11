@@ -8,6 +8,7 @@
   var token = function (name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); };
 
   var HOOK = 7408;
+  var BANANAS = 3454;
   var SIZES = [5, 10, 25, 100, 300];
   var SMALL = SIZES[0];
   var GOLDEN_ANGLE = 2.39996323;
@@ -82,6 +83,44 @@
     };
     dots();
     frame();
+  }
+
+  var banking = 0;
+  var bankOn = false;
+  function stopBank() {
+    banking += 1;
+    byId('bank-num').textContent = format(BANANAS);
+    byId('bank-move').textContent = '';
+  }
+  function startBank() {
+    var run = ++banking;
+    var shown = BANANAS;
+    var num = byId('bank-num');
+    var move = byId('bank-move');
+    var glide = function (to, ms, done) {
+      var from = shown;
+      var start = performance.now();
+      var frame = function (now) {
+        if (run !== banking) return;
+        var progress = Math.min(1, (now - start) / ms);
+        shown = Math.round(from + (to - from) * (1 - Math.pow(1 - progress, 3)));
+        num.textContent = format(shown);
+        if (progress < 1) requestAnimationFrame(frame);
+        else done();
+      };
+      requestAnimationFrame(frame);
+    };
+    var jumps = 0;
+    var jump = function () {
+      if (run !== banking) return;
+      var up = jumps++ === 0 || (shown < 60000 && Math.random() < 0.62);
+      var factor = jumps === 1 ? 40 + Math.random() * 40 : up ? (Math.random() < 0.18 ? 3 + Math.random() * 6 : 1.25 + Math.random()) : 0.45 + Math.random() * 0.4;
+      var to = Math.max(3, Math.round(shown * factor));
+      move.textContent = (to >= shown ? '▲ ' : '▼ ') + format(Math.abs(to - shown));
+      glide(to, 260 + Math.random() * 320, function () { setTimeout(jump, 350 + Math.random() * 900); });
+    };
+    move.textContent = '▼ ' + format(BANANAS - 41);
+    setTimeout(function () { glide(41, 1400, function () { setTimeout(jump, 900); }); }, 500);
   }
 
   var counting = 0;
@@ -194,6 +233,7 @@
       byId('hook').dataset.value = '0';
       countTo(HOOK, still, byId('hook'));
     }
+    if (slides[index] === intro && step === 2 && !still) { if (!bankOn) { bankOn = true; startBank(); } } else if (bankOn) { bankOn = false; stopBank(); }
     if (slides[index] === flood && entering) startPile();
     if (index === scale) showScale(step, still || (entering && step === 1 ? false : still));
     history.replaceState(null, '', '?s=' + index + (step > 1 ? '&k=' + step : '') + (query.has('still') ? '&still' : ''));
