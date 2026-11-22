@@ -52,11 +52,10 @@ body { margin: 0; }
 .app-mesa > .rd-actions { margin-top: var(--rd-space-2); }
 .app-mesa > .rd-actions + .rd-label { margin-top: var(--rd-space-3); }
 .app-mesa > .rd-note { margin: 0; }
-@media (min-width: 960px) { .app-globe { width: min(1180px, calc(100vw - 64px)); margin-left: 50%; transform: translateX(-50%); } }
+@media (min-width: 960px) { .app-globe { width: calc(100vw - 48px); margin-left: 50%; transform: translateX(-50%); } .app-globe > .app-universe { max-width: 1180px; margin: 0 auto; } }
 .app-globe { position: relative; }
 .app-stage { position: fixed; inset: 0; z-index: 5; display: grid; grid-template-columns: clamp(340px, 30vw, 460px) minmax(0, 1fr); gap: var(--rd-space-4); padding: var(--rd-space-4); }
 .app-stage--inline { position: relative; inset: auto; z-index: auto; padding: 0; height: calc(100dvh - 240px); min-height: 460px; grid-template-columns: clamp(300px, 24vw, 380px) minmax(0, 1fr); }
-@media (min-width: 960px) { .app-globe:has(.app-stage--inline) { width: calc(100vw - 48px); } }
 .app-globe__mode { display: flex; justify-content: flex-end; margin-bottom: var(--rd-space-3); }
 .app-stage__globe { display: block; width: 100%; height: 100%; border: 0; border-radius: var(--rd-radius-card); }
 .app-stage__agent { display: flex; flex-direction: column; gap: var(--rd-space-4); min-height: 0; padding: var(--rd-space-6); border-radius: var(--rd-radius-card); }
