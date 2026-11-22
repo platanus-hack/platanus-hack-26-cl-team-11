@@ -188,7 +188,7 @@ export function MontuSplash() {
       <p className="rd-loader__name">Montu</p>
       {signingIn && (
         <div className="rd-loader__actions">
-          <a className="rd-button" href={GOOGLE_LOGIN_PATH}>
+          <a className="rd-button rd-button--glass" href={GOOGLE_LOGIN_PATH}>
             <img src={googleLogo} alt="" />
             Continuar con Google
           </a>
