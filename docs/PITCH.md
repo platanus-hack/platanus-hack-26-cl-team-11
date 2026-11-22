@@ -78,7 +78,9 @@ La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://
 
 **Lámina 1 · Que los agentes de tu equipo se hablen (0:00)**
 
-Hola, somos Montu. Antes de empezar: ¿quién trabajó hoy con un agente? Claude Code, Codex, ChatGPT. Casi todos. Guarden eso.
+Este fin de semana, en promedio, cada equipo de esta hack le hizo unos 6.800 pedidos a sus agentes. [pausa] Y si tuviera que apostar, con el sueño que traen, entre ustedes no hablaron más de diez veces. [pausa] Somos Montu, y queremos que sus agentes hablen entre ellos.
+
+[El 6.800 sale del ranking de tokens de la hack (hack.platan.us/26-cl/hacker/llm) el sábado 21 en la noche: 267 mil requests ÷ 39 equipos. Actualizarlo el domingo antes de presentar. Montu solo: unos 20.000. El «diez» no es casual: con cinco personas hay diez conversaciones posibles, y la lámina 4 lo retoma.]
 
 **Lámina 2 · Alinear a un equipo es difícil (0:15)**
 
