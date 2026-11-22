@@ -6,7 +6,9 @@ Todo dato de avance viene de pruebas hechas el 21-nov-2026. Lo que falta decidir
 
 ## En una frase
 
-> **Montu le da a cada persona de un equipo un agente que la conoce. Los agentes conversan entre sí y le dicen a cada persona quién la puede ayudar, sin reuniones.**
+> **Montu es la infraestructura para que los agentes de un equipo se hablen. Cada persona trae el agente que ya usa (Claude Code, Codex, ChatGPT) y Montu lo pone a conversar con los de los demás, para alinear a las personas sin reuniones.**
+
+Montu no le da un agente a nadie: es *headless*. Las personas ya tienen su agente y ya le conectan todo (WhatsApp, calendario, correo, salud, código, reuniones). Montu es la capa que falta entre esos agentes (Mati, 21-nov).
 
 Versiones para otros momentos:
 
@@ -72,31 +74,43 @@ Lo que se puede decir sin exagerar, porque está probado:
 
 ## Guion de 3 minutos
 
-La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). Las notas de cada lámina están en la tecla N. No es un texto para leer: es la dirección de cada momento y la frase que no puede faltar. Con tus palabras, más lento de lo que parece natural.
+La presentación es `design/pitch/index.html` (en prod: [montu.fun/dec](https://montu.fun/dec)). El mismo texto está en las notas de cada lámina (tecla N). Son unas 420 palabras: a ritmo tranquilo, 3 minutos justos. Lo que va entre corchetes no se dice.
 
-**El arco en una línea:** todos ya le damos nuestra vida a un agente; pero los agentes no se hablan; un equipo no puede tener todas las conversaciones que necesita; los agentes sí; y el tuyo es tuyo.
+**Lámina 1 · Que los agentes de tu equipo se hablen (0:00)**
 
-### Acto 1 · El problema (0:00 a 1:35)
+Hola, somos Montu. Antes de empezar: ¿quién trabajó hoy con un agente? Claude Code, Codex, ChatGPT. Casi todos. Guarden eso.
 
-| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
-|---|---|---|---|
-| 0:00 | 1 · «Un agente por persona.» | Presentarse y decir qué hacemos, sin preámbulo. La esfera con las caras ya dice «equipo». | «Somos Montu. Le damos a cada persona un agente que la conoce, y hacemos que esos agentes conversen entre sí.» |
-| 0:15 | 2 · «Alinear a un equipo es difícil.» (tres clics) | Partir de algo que todos vivieron: no saber quién está trabado ni quién sabe de qué. Clic: todos ya trabajan con un agente. Clic: cada agente está solo. | «Entre esos agentes hay cero conversaciones.» |
-| 0:45 | 3 · «Tu agente ya sabe todo de ti.» | El giro de contexto: WhatsApp, calendario, correo, salud, código, reuniones ya llegan a tu agente. Dejar que se enciendan los íconos. | «Ese conocimiento ya existe. Falta usarlo para alinear al equipo.» |
-| 1:10 | 4 · «300 personas, 44.850 conversaciones.» | Por qué las personas no pueden: cada persona nueva suma una conversación con cada una de las demás. Dejar rodar el número. | «Ningún humano puede tener 44.850 conversaciones. Por eso existen las reuniones y las jerarquías, y por eso se pierde información.» |
+**Lámina 2 · Alinear a un equipo es difícil (0:15)**
 
-### Acto 2 · La solución (1:35 a 2:35)
+Alinear a un equipo es difícil. Saber quién está trabado, quién anda con la carga al tope, quién sabe resolver lo que tú no sabes. Hoy eso se arregla con reuniones y con mensajes que nadie termina de leer.
 
-| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
-|---|---|---|---|
-| 1:35 | 5 · «Los agentes sí pueden tenerlas.» | El globo en vivo, y la demo por WhatsApp: «estoy trabada con…», Permitir, llega la propuesta. Si falla la red, tecla V (grabación) y se dice que es grabada. | «Los agentes no se cansan. Una ronda toma 15 segundos, y a ti te llega una sola cosa: quién te puede ayudar.» |
-| 2:15 | 6 · «Tu agente es tuyo.» | Adelantarse a la pregunta de vigilancia. Tocar «Permitir» en la tarjeta. | «Si crees que tu agente te reporta, no le cuentas nada. Por eso pregunta antes de contar, y lo que duermes o sientes no sale nunca.» |
+[clic] Mientras tanto, cada uno trabaja con su agente.
 
-### Acto 3 · El cierre (2:35 a 3:00)
+[clic] Pero esos agentes no se hablan. Seis personas, seis agentes, cero conversaciones entre ellos.
 
-| Tiempo | Lámina | Dirección | La frase que tiene que quedar |
-|---|---|---|---|
-| 2:35 | 7 · «Pruébalo ahora.» | Repetir la idea en una línea y pedir algo concreto. Quedarse callado con el QR en pantalla. | «Un agente por persona. Los agentes conversan. Tú recibes solo las conversaciones que necesitas tener. Escaneen y pruébenlo.» |
+**Lámina 3 · Tu agente ya sabe todo de ti (0:45)**
+
+Y esos agentes ya saben todo de nosotros. Les conectamos el WhatsApp, el calendario, el correo, el sueño del reloj, el código, las reuniones. Tu agente sabe cómo estás mejor que cualquiera de tu equipo. Esa información ya existe. Nadie la está usando para alinear a las personas.
+
+**Lámina 4 · 300 personas, 44.850 conversaciones (1:10)**
+
+¿Por qué no lo hacemos nosotros? Por los números. Para que todos sepan cómo están todos, cada persona tendría que hablar con cada una de las demás. Con cinco personas son diez conversaciones. Con trescientas, cuarenta y cuatro mil ochocientas cincuenta. Nadie puede con eso. Por eso inventamos jefaturas, reuniones y reportes, y en el camino se pierde casi todo.
+
+**Lámina 5 · Los agentes sí pueden tenerlas (1:35)**
+
+Los agentes sí pueden: no se cansan y conversan con cientos de pares en segundos. Montu es eso. No es otro agente: es la infraestructura para que los agentes de un equipo se hablen. Tú traes el tuyo, lo conectas, y Montu lo pone a conversar con los de los demás.
+
+Miren. [demo por WhatsApp; si falla la red, tecla V y se dice que es una grabación] Le escribo a mi agente que estoy trabada. Me pregunta si puede contarlo. Le digo que sí. Conversa con los agentes del equipo y en quince segundos me llega una sola cosa: quién me puede ayudar.
+
+**Lámina 6 · Tu agente es tuyo (2:15)**
+
+Esto funciona solo si confías en tu agente. Si crees que le reporta a tu jefe, no le cuentas nada. Por eso tu agente sigue siendo tuyo: pregunta antes de contar algo, y cómo dormiste o cómo te sientes no sale nunca de él.
+
+**Lámina 7 · Pruébalo ahora (2:35)**
+
+Lo armamos este fin de semana y funciona con el agente que ya usan. Sus agentes ya los conocen. Montu hace que se hablen entre ellos y les traigan solo las conversaciones que valen la pena. Escaneen el QR y conecten el suyo.
+
+[silencio, con el QR en pantalla]
 
 Si falta tiempo, se acorta la demo de la lámina 5, nunca las láminas 2 y 4: son el porqué.
 
@@ -121,7 +135,7 @@ Kevin Hale: entre cinco y siete láminas, una idea por lámina. Están en `desig
 
 | # | Texto de la lámina | Idea |
 |---|---|---|
-| 1 | Un agente por persona. | Qué hacemos (la esfera de la entrada con el equipo) |
+| 1 | Que los agentes de tu equipo se hablen. | Qué hacemos (la esfera de la entrada con el equipo) |
 | 2 | Alinear a un equipo es difícil. → Hoy todos trabajan con su agente. → Pero los agentes no se hablan. | El problema, en tres clics |
 | 3 | Tu agente ya sabe todo de ti. | El contexto ya existe |
 | 4 | 300 personas, 44.850 conversaciones. | Por qué las personas no pueden |
@@ -172,7 +186,7 @@ De [ROADMAP.md](ROADMAP.md#qué-existe-hoy-en-estados-unidos). Una línea por ca
 
 - **Lo que se puede decir:** según varios artículos sobre los pedidos de startups de YC para Fall 2026, uno de los 13 se llama «Multiplayer AI», de Aaron Epstein. Su argumento es que la colaboración hizo ganar a Google Docs y a Figma, y que la IA todavía no tiene su momento multijugador.
 - **Lo que no se pudo verificar:** el texto original. La página oficial muestra hoy la lista de Winter 2027, que no incluye ese pedido, y el anuncio de Fall 2026 no cargó.
-- **Cuidado al citarlo:** ese pedido habla de sesiones compartidas donde un equipo mira y redirige a un agente. Montu es otra cosa: un agente por persona, que conversan entre sí. Se puede decir que YC pidió IA multijugador; no que pidió esto.
+- **Cuidado al citarlo:** ese pedido habla de sesiones compartidas donde un equipo mira y redirige a un agente. Montu es otra cosa: la capa que hace conversar a los agentes que cada persona ya usa. Se puede decir que YC pidió IA multijugador; no que pidió esto.
 
 ## Pendientes
 
