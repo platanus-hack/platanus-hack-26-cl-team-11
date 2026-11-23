@@ -67,6 +67,8 @@ const missingCredentials = (provider: string) => {
   return { error: `Falta configurar ${provider} en el servidor: define ${prefix}_CLIENT_ID y ${prefix}_CLIENT_SECRET.` };
 };
 
+const OUTSIDE_DOMAIN = 'Este Montu es solo para las cuentas de su equipo. Entra con tu correo de trabajo.';
+
 export function oauthRoutes(ctx: AppContext) {
   const routes = new Hono();
   const { store, vault, config } = ctx;
@@ -157,6 +159,8 @@ export function oauthRoutes(ctx: AppContext) {
     if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
     const tokens = await provider.exchange(code, credentials, redirectUriFor(c.req.url, LOGIN_PROVIDER), ctx.fetch, nonce);
     const profile = await googleProfile(tokens.accessToken, ctx.fetch);
+    const allowed = ctx.config.loginDomains ?? [];
+    if (allowed.length > 0 && !allowed.includes(profile.email.slice(profile.email.lastIndexOf('@') + 1).toLowerCase())) throw new ConnectorError(OUTSIDE_DOMAIN, 403);
     const mappedToken = logins.personOf(profile.email);
     const mapped = mappedToken ? store.findPerson(mappedToken) : undefined;
     const asking = state.token ? store.findPerson(state.token) : undefined;

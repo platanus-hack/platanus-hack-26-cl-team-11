@@ -148,3 +148,17 @@ test('sin Google configurado en el servidor nadie queda afuera de su página', a
   ctx.db.prepare('INSERT INTO logins (email, person_token, linked_at, name) VALUES (?, ?, ?, ?)').run('ian@vita.lat', person.token, new Date().toISOString(), 'Ian');
   assert.equal((await app.request(`/api/people/${person.token}`)).status, 200);
 });
+
+test('with a list of domains, only those accounts get in and nobody else gets a page', async () => {
+  const { ctx, through, signInAs } = setup({ config: { ...config, loginDomains: ['vita.lat'] } });
+  const inside = await through('/api/login/google/start');
+  assert.match(inside.headers.get('location') ?? '', /^\/conectar\//);
+  const people = ctx.store.listPeople().length;
+
+  signInAs('alguien@gmail.com', 'Alguien');
+  const outside = await through('/api/login/google/start');
+  assert.equal(outside.status, 302);
+  assert.equal(outside.headers.get('location'), `/?aviso=${encodeURIComponent('Este Montu es solo para las cuentas de su equipo. Entra con tu correo de trabajo.')}`);
+  assert.ok(!(outside.headers.get('set-cookie') ?? '').includes('montu_sesion'));
+  assert.equal(ctx.store.listPeople().length, people);
+});

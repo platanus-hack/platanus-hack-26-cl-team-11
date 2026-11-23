@@ -38,6 +38,7 @@ export interface Config {
   mesaDailyTokenCap?: number;
   mesaMemoMs?: number;
   nudges?: boolean;
+  loginDomains?: string[];
 }
 
 export interface AppContext {
@@ -104,6 +105,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     mesaDailyTokenCap: mesaDailyTokenCapFrom(env.MESA_DAILY_TOKEN_CAP),
     mesaMemoMs: MESA_MEMO_MS,
     nudges: env.NUDGES?.trim().toLowerCase() !== 'off',
+    loginDomains: (env.LOGIN_DOMAINS ?? '').split(',').map((domain) => domain.trim().toLowerCase().replace(/^@/, '')).filter(Boolean),
     agentRoundHour: agentRoundHourFrom(env.AGENT_ROUND_HOUR),
     healthShortcut: healthShortcutFrom(env),
     publicBaseUrl: env.PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL || null,
