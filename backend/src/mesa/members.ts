@@ -14,7 +14,11 @@ const MESA_CHATTER = 10;
 
 export const hasPublished = (card: AgentCard): boolean => card.statements.length + card.expertise.length + card.needs.length > 0;
 
-export const mesaMembersOf = (ctx: AppContext): TeamMember[] => ctx.store.listPeople().filter((person) => !ctx.sim.isSynthetic(person.token) && !ctx.mesa.hasLeft(person.token));
+export const inPrivateTeam = (ctx: AppContext, personToken: string): boolean => ctx.teams.teamsOf(personToken).some((team) => team.id !== MESA_TEAM_ID && !ctx.rooms.roomOfTeam(team.id));
+
+export const sitsAtMesa = (ctx: AppContext, personToken: string): boolean => !ctx.sim.isSynthetic(personToken) && !ctx.mesa.hasLeft(personToken) && !inPrivateTeam(ctx, personToken);
+
+export const mesaMembersOf = (ctx: AppContext): TeamMember[] => ctx.store.listPeople().filter((person) => sitsAtMesa(ctx, person.token));
 
 const mesaTeams = (ctx: AppContext): TeamStore => ({
   ...ctx.teams,

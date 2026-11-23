@@ -1,4 +1,3 @@
-import { MESA_TEAM_ID } from '../src/mesa/store.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
@@ -184,7 +183,7 @@ test('a check-in by WhatsApp stays private, the agent asks before telling a bloc
   assert.equal(sent.at(-1)?.body, 'Anotado. Te aviso cuando acepten todos.');
   await press(TOMAS_PHONE, buttonOf(offerOf(TOMAS_PHONE), 'Aceptar'));
   await until(() => sent.filter((message) => message.body.startsWith('Quedó acordado entre Ana y Tomás.')).length === 2);
-  assert.equal(ctx.agents.proposalsOf(MESA_TEAM_ID)[0]?.status, 'acordada');
+  assert.equal(ctx.agents.proposalsOf(ctx.teams.teamsOf(ana.token)[0]?.id ?? '')[0]?.status, 'acordada');
 
   await press(ANA_PHONE, buttonOf(offerOf(ANA_PHONE), 'Aceptar'));
   assert.equal(sent.at(-1)?.body, 'Eso ya lo respondiste.');
@@ -232,7 +231,7 @@ test('a question by WhatsApp goes to the board and the assembled answer comes ba
   await say(ANA_PHONE, 'alguien ya integró pagos con toku?');
   await until(() => sent.length === before + 2);
   assert.deepEqual(sent.slice(before).map((message) => message.body), [
-    'Le pregunto a los agentes de tu equipo. Te aviso cuando respondan.',
+    'Le pregunto a los agentes de Producto. Te aviso cuando respondan.',
     'Tomás ya integró pagos con Toku.\n\nArmada con lo que comparte Tomás.',
   ]);
 });
@@ -299,11 +298,11 @@ test('saying the same blocker again asks for permission again and reopens it eve
   await until(() => offersOf(ANA_PHONE).length === 1 && offersOf(TOMAS_PHONE).length === 1);
   await press(ANA_PHONE, buttonOf(offersOf(ANA_PHONE)[0], 'Aceptar'));
   await press(TOMAS_PHONE, buttonOf(offersOf(TOMAS_PHONE)[0], 'Aceptar'));
-  await until(() => ctx.agents.proposalsOf(MESA_TEAM_ID)[0]?.status === 'acordada');
+  await until(() => ctx.agents.proposalsOf(ctx.teams.teamsOf(ana.token)[0]?.id ?? '')[0]?.status === 'acordada');
 
   await say(ANA_PHONE, 'sigo pegada con la integración de pagos');
   await until(() => asksOf().length === 2);
-  assert.equal(ctx.agents.proposalsOf(MESA_TEAM_ID).filter((proposal) => proposal.status === 'acordada').length, 0);
+  assert.equal(ctx.agents.proposalsOf(ctx.teams.teamsOf(ana.token)[0]?.id ?? '').filter((proposal) => proposal.status === 'acordada').length, 0);
   await press(ANA_PHONE, buttonOf(asksOf()[1], 'Permitir'));
   await until(() => offersOf(ANA_PHONE).length === 2);
 });

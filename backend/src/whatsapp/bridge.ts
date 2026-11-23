@@ -9,7 +9,7 @@ import { CHECKIN_SOURCE, isMood, MAX_CHECKIN_TEXT_LENGTH, recordCheckin, type Mo
 import type { AppContext } from '../context.js';
 import { openPolicyStore, withChosenVisibility } from '../policy/store.js';
 import { dayKeyOf, deriveSignals, type LevelSignal } from '../signals.js';
-import { mesaCardDeps } from '../mesa/members.js';
+import { mesaCardDeps, sitsAtMesa } from '../mesa/members.js';
 import { MESA_TEAM_ID } from '../mesa/store.js';
 import { startMesaRound } from '../mesa/ticker.js';
 import type { RoomEventType } from '../rooms/store.js';
@@ -200,7 +200,7 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     }
   };
 
-  const inMesa = (personToken: string) => !ctx.mesa.hasLeft(personToken) && !ctx.sim.isSynthetic(personToken);
+  const inMesa = (personToken: string) => sitsAtMesa(ctx, personToken);
 
   const hasOpenNeed = (personToken: string): boolean =>
     openNeedsOf({ ...mesaCardDeps(ctx), chatter: undefined }, MESA_TEAM_ID, new Date(), personToken).openNeeds.some((open) => open.requester.token === personToken);
@@ -324,7 +324,8 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
         ctx.agents.forgetTopic(person.token, stated);
         links.reopenPrompt(person.token, 'permiso', stated);
       }
-      for (const proposal of ctx.agents.proposalsOf(MESA_TEAM_ID)) {
+      const homes = inMesa(person.token) ? [MESA_TEAM_ID] : ctx.teams.teamsOf(person.token).map((team) => team.id);
+      for (const proposal of homes.flatMap((teamId) => ctx.agents.proposalsOf(teamId))) {
         const asksForIt = proposal.parties.some((party) => party.role === 'pide' && party.token === person.token);
         if (asksForIt && proposal.status !== 'descartada' && topicKeyOf(proposal.topic) === key) ctx.agents.answerProposal(proposal.id, person.token, REJECT);
       }

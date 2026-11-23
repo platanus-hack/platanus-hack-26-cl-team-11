@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createContext } from '../src/context.js';
 import { openLoginStore } from '../src/logins.js';
+import { mesaMembersOf } from '../src/mesa/members.js';
 import { commonSlot, sameWork, weekKeyOf } from '../src/nudges/detectors.js';
 import { deliverNudges, isWorkingTime, MAX_NUDGES_PER_DAY, nudgesFor, privateGroupsOf } from '../src/nudges/routine.js';
 import type { EventDraft } from '../src/types.js';
@@ -167,4 +168,17 @@ test('a task with no progress for days asks its owner in private before anyone e
   assert.equal(pending.length, 1);
   assert.match(pending[0]?.text ?? '', /^¿Le pido ayuda a tu equipo con «Integración con ClassPass»\?/);
   assert.deepEqual(pending[0]?.options.map((option) => option.label), ['Permitir', 'No contar']);
+});
+
+test('whoever is in a private team no longer sits at the public table, and a room does not count as private', () => {
+  const { ctx, ana } = setup();
+  const visitor = ctx.store.addPerson('Visita');
+  const guest = ctx.store.addPerson('Invitada');
+  const roomTeam = ctx.teams.createTeam('Demo');
+  ctx.rooms.createRoom(roomTeam.id);
+  ctx.teams.addMember(roomTeam.id, guest.token);
+  const seated = mesaMembersOf(ctx).map((member) => member.token);
+  assert.ok(!seated.includes(ana.token));
+  assert.ok(seated.includes(visitor.token));
+  assert.ok(seated.includes(guest.token));
 });
