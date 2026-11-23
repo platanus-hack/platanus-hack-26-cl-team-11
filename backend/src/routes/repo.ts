@@ -39,10 +39,9 @@ const HUB_SOURCE_OF_KIND: Record<AssistantKind, string> = {
   otro: 'asistente',
 };
 
-export function repoRoutes({ store, teams, rooms, hub, assistants, repo }: AppContext) {
-  const routes = new Hono();
-  const limitTo = (maxSize: number) => bodyLimit({ maxSize, onError: (c) => c.json(TOO_LONG, 413) });
+export type RepoWrite = { ok: true; commit: unknown; files: number } | { ok: false; status: 409 | 422; error: string };
 
+export function repoWriter({ teams, rooms, hub, repo }: Pick<AppContext, 'teams' | 'rooms' | 'hub' | 'repo'>) {
   const announce = (person: { token: string; name: string }, kind: AssistantKind, summary: string, topics: string[]) => {
     const source = findHubSource(HUB_SOURCE_OF_KIND[kind]);
     if (source) {
@@ -51,6 +50,25 @@ export function repoRoutes({ store, teams, rooms, hub, assistants, repo }: AppCo
     }
     recordInRoomsOf({ teams, rooms }, person.token, 'repo_cambia', { person: publicIdOf(person.token), files: repo.tree(person.token).length });
   };
+
+  const write = (person: { token: string; name: string }, assistant: { kind: AssistantKind; label: string }, body: Record<string, unknown>): RepoWrite => {
+    const checked = checkCommit(body);
+    if (!checked.ok) return { ok: false, status: 422, error: checked.error };
+    const topics = cleanTopics(body.topics);
+    const result = repo.commit(person.token, { by: assistant.label, message: checked.value.message, topics, files: checked.value.files, remove: checked.value.remove });
+    if (!result.ok) return { ok: false, status: 409, error: REPO_FULL.error };
+    announce(person, assistant.kind, checked.value.message, topics);
+    return { ok: true, commit: result.commit, files: repo.tree(person.token).length };
+  };
+
+  return { announce, write };
+}
+
+export function repoRoutes(ctx: AppContext) {
+  const { store, teams, rooms, assistants, repo } = ctx;
+  const routes = new Hono();
+  const limitTo = (maxSize: number) => bodyLimit({ maxSize, onError: (c) => c.json(TOO_LONG, 413) });
+  const { announce, write } = repoWriter(ctx);
 
   const viewRepo = (personToken: string) => ({ files: repo.tree(personToken), log: repo.log(personToken, LOG_ENTRIES) });
 
@@ -72,14 +90,9 @@ export function repoRoutes({ store, teams, rooms, hub, assistants, repo }: AppCo
     if (!assistant) return c.json(INVALID_ASSISTANT, 401);
     const person = store.findPerson(assistant.personToken);
     if (!person) return c.json(INVALID_ASSISTANT, 401);
-    const body = asObject(await c.req.text());
-    const checked = checkCommit(body);
-    if (!checked.ok) return c.json({ error: checked.error }, 422);
-    const topics = cleanTopics(body.topics);
-    const result = repo.commit(person.token, { by: assistant.label, message: checked.value.message, topics, files: checked.value.files, remove: checked.value.remove });
-    if (!result.ok) return c.json(REPO_FULL, 409);
-    announce(person, assistant.kind, checked.value.message, topics);
-    return c.json({ commit: result.commit, files: repo.tree(person.token).length }, 201);
+    const written = write(person, assistant, asObject(await c.req.text()));
+    if (!written.ok) return c.json({ error: written.error }, written.status);
+    return c.json({ commit: written.commit, files: written.files }, 201);
   });
 
   routes.get('/people/:token/repo', (c) => {

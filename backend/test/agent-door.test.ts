@@ -114,7 +114,7 @@ test('a question asked through the assistant comes back answered in the same cal
   ]);
 });
 
-test('the same three actions are MCP tools, and only for an assistant that is still connected', async () => {
+test('the three actions and the repo are MCP tools, and only for an assistant that is still connected', async () => {
   const { app, headers } = setup(() => ({ intent: 'otro', reply: 'Hola. Puedes contarme cómo vienes.' }));
   const rpc = async (body: unknown, auth = headers) => app.request('/api/mcp', { method: 'POST', headers: auth, body: JSON.stringify(body) });
   const result = async <Result>(body: unknown) => ((await (await rpc(body)).json()) as { result: Result }).result;
@@ -125,12 +125,12 @@ test('the same three actions are MCP tools, and only for an assistant that is st
   assert.equal((await rpc({ jsonrpc: '2.0', method: 'notifications/initialized' })).status, 202);
 
   const listed = await result<{ tools: Array<{ name: string }> }>({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_decir', 'ronda_pendientes', 'ronda_responder']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_decir', 'ronda_pendientes', 'ronda_responder', 'ronda_repo_ver', 'ronda_repo_guardar']);
 
   const said = await result<{ content: Array<{ text: string }> }>({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'ronda_decir', arguments: { mensaje: 'hola' } } });
   assert.equal(said.content[0]?.text, 'Hola. Puedes contarme cómo vienes.');
   const pending = await result<{ content: Array<{ text: string }> }>({ jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'ronda_pendientes', arguments: {} } });
-  assert.match(pending.content[0]?.text ?? '', /^Pendientes:\nSin novedades\.\n\nÚltimos mensajes:\nHola\./);
+  assert.match(pending.content[0]?.text ?? '', /\n\nPendientes:\nSin novedades\.\n\nÚltimos mensajes:\nHola\./);
 
   const unknown = (await (await rpc({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'otra', arguments: {} } })).json()) as { error: { code: number } };
   assert.equal(unknown.error.code, -32602);
@@ -142,4 +142,43 @@ test('the join document tells the assistant how to talk to the agent and never t
   assert.ok(doc.includes('https://ronda.test/api/agent/say'));
   assert.ok(doc.includes('claude mcp add --transport http ronda https://ronda.test/api/mcp --header "Authorization: Bearer <token>"'));
   assert.ok(doc.includes('Never choose for Ana'));
+});
+
+test('a connector made on the page gives a URL and a header, and through MCP the assistant writes and reads the repo', async () => {
+  const { ctx, app, ana } = setup(() => ({ intent: 'otro' }), { whatsapp: false });
+  const made = (await (await app.request(`/api/people/${ana.token}/assistants/connectors`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'instinct' }) })).json()) as {
+    url: string;
+    header: string;
+    keyUrl: string;
+  };
+  assert.ok(made.url.endsWith('/api/mcp'));
+  const key = made.keyUrl.slice(made.keyUrl.lastIndexOf('/') + 1);
+  assert.equal(made.header, `Authorization: Bearer ${key}`);
+  assert.ok(ctx.assistants.assistantsOf(ana.token).some((assistant) => assistant.kind === 'instinct'));
+
+  const call = async (path: string, name: string, args: unknown, headers: Record<string, string> = {}) => {
+    const response = await app.request(path, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }) });
+    return ((await response.json()) as { result: { content: Array<{ text: string }> } }).result.content[0]?.text ?? '';
+  };
+  const byHeader = { authorization: `Bearer ${key}` };
+
+  assert.equal(await call('/api/mcp', 'ronda_repo_ver', {}, byHeader), 'El repo está vacío.');
+  const saved = await call(`/api/mcp/k/${key}`, 'ronda_repo_guardar', { mensaje: 'Primer contexto', temas: ['pagos'], archivos: [{ path: 'ahora.md', content: 'Trabaja en cobros.', share: 'siempre' }] });
+  assert.match(saved, /^Guardado\. El repo tiene 1 archivo\./);
+  assert.equal(await call('/api/mcp', 'ronda_repo_ver', {}, byHeader), 'ahora.md · siempre · 18 bytes');
+  assert.equal(await call('/api/mcp', 'ronda_repo_ver', { ruta: 'ahora.md' }, byHeader), 'Trabaja en cobros.');
+  const refused = await call('/api/mcp', 'ronda_repo_guardar', { mensaje: 'Llave', archivos: [{ path: 'llave.md', content: 'sk-abcdefghijklmnopqrstuvwxyz0123' }] }, byHeader);
+  assert.match(refused, /^No se guardó nada\./);
+  assert.equal((await app.request('/api/mcp/k/rda_inventado', { method: 'POST', body: '{}' })).status, 401);
+});
+
+test('the pending tool says what is new since the last time this assistant looked', async () => {
+  const { app, headers, post } = setup(() => ({ intent: 'otro', reply: 'Hola.' }), { whatsapp: false });
+  const pending = async () => {
+    const response = await app.request('/api/mcp', { method: 'POST', headers, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'ronda_pendientes', arguments: {} } }) });
+    return ((await response.json()) as { result: { content: Array<{ text: string }> } }).result.content[0]?.text ?? '';
+  };
+  await post('/agent/say', { text: 'hola' });
+  assert.match(await pending(), /^Nuevo desde la última vez:\nHola\./);
+  assert.match(await pending(), /^Nuevo desde la última vez:\nSin novedades\./);
 });

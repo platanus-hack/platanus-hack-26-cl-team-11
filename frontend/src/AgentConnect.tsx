@@ -1,5 +1,6 @@
 import { formatAgo } from './ago';
 import { AssistantLogo } from './AssistantLogo';
+import { ConnectorLine } from './ConnectorLine';
 import { Glyph } from './Glyph';
 import { Item } from './Item';
 import { ItemIcon } from './ItemIcon';
@@ -12,7 +13,7 @@ interface AgentConnectProps {
   onChange: () => void;
 }
 
-export function AgentConnect({ token, assistants }: AgentConnectProps) {
+export function AgentConnect({ token, assistants, onChange }: AgentConnectProps) {
   return (
     <div className="rd-list">
       {assistants.map((assistant) => (
@@ -40,6 +41,7 @@ export function AgentConnect({ token, assistants }: AgentConnectProps) {
         />
         <div className="rd-item__detail">
           <PairingLine token={token} connected={assistants.length} auto />
+          <ConnectorLine token={token} onChange={onChange} />
         </div>
       </div>
     </div>

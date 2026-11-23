@@ -49,6 +49,7 @@ export interface AssistantStore {
   createPairing(personToken: string): Pairing;
   pairingState(code: string): { state: PairingState; code: string; personToken: string | null; expiresAt: string | null };
   redeem(code: string, kind: AssistantKind, label: string): Redeemed;
+  connect(personToken: string, kind: AssistantKind, label: string): { assistant: Assistant; token: string } | null;
   authenticate(token: string): Assistant | undefined;
   assistantsOf(personToken: string): Assistant[];
   revoke(personToken: string, assistantId: string): boolean;
@@ -156,6 +157,12 @@ export function openAssistantStore(db: DatabaseSync, now: () => Date = () => new
       if (Number(claimed.changes) !== 1) return { state: 'usado' };
       const token = newToken();
       return { state: 'vigente', assistant: insert(row.person_token, kind, label, token, instant), token };
+    },
+
+    connect(personToken, kind, label) {
+      if (assistantsOf(personToken).length >= MAX_ASSISTANTS_PER_PERSON) return null;
+      const token = newToken();
+      return { assistant: insert(personToken, kind, label, token, now().toISOString()), token };
     },
 
     authenticate(token) {

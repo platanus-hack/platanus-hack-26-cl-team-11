@@ -25,7 +25,7 @@ const REFUSAL: Record<Refused, { status: 404 | 409 | 410; error: string }> = {
 
 const viewAssistant = (assistant: Assistant) => ({ id: assistant.id, kind: assistant.kind, label: assistant.label, createdAt: assistant.createdAt, lastSeenAt: assistant.lastSeenAt });
 
-export function assistantRoutes({ store, teams, rooms, assistants, repo }: AppContext) {
+export function assistantRoutes({ store, teams, rooms, assistants, repo, config }: AppContext) {
   const routes = new Hono();
   const limited = rateLimit(JOIN_ATTEMPTS_PER_MINUTE);
 
@@ -34,6 +34,18 @@ export function assistantRoutes({ store, teams, rooms, assistants, repo }: AppCo
     if (!person) return c.json(NOT_FOUND, 404);
     const pairing = assistants.createPairing(person.token);
     return c.json({ code: pairing.code, path: `/a/${pairing.code}`, expiresAt: pairing.expiresAt, minutes: PAIRING_MINUTES }, 201);
+  });
+
+  routes.post('/people/:token/assistants/connectors', async (c) => {
+    const person = store.findPerson(c.req.param('token'));
+    if (!person) return c.json(NOT_FOUND, 404);
+    const body = asObject(await c.req.text());
+    const kind = isAssistantKind(body.kind) ? body.kind : 'otro';
+    const connected = assistants.connect(person.token, kind, `${ASSISTANT_NAMES[kind]} (conector)`);
+    if (!connected) return c.json({ error: REFUSAL.lleno.error }, REFUSAL.lleno.status);
+    recordInRoomsOf({ teams, rooms }, person.token, 'asistente_conecta', { person: publicIdOf(person.token), kind });
+    const url = `${(config.publicBaseUrl ?? new URL(c.req.url).origin).replace(TRAILING_SLASHES, '')}/api/mcp`;
+    return c.json({ url, header: `Authorization: Bearer ${connected.token}`, keyUrl: `${url}/k/${connected.token}`, assistant: viewAssistant(connected.assistant) }, 201);
   });
 
   routes.get('/people/:token/assistants', (c) => {

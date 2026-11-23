@@ -3,6 +3,8 @@ import { assistantFrom, INVALID_ASSISTANT } from '../assistants/auth.js';
 import type { AppContext } from '../context.js';
 import { rateLimit } from '../rateLimit.js';
 import type { AgentMessage } from '../whatsapp/bridge.js';
+import type { Assistant } from '../assistants/store.js';
+import { repoWriter } from './repo.js';
 import { asObject } from './shared.js';
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -13,6 +15,17 @@ const PROTOCOL_VERSION = '2025-06-18';
 const METHOD_NOT_FOUND = -32601;
 const INVALID_PARAMS = -32602;
 const NOTHING_NEW = 'Sin novedades.';
+const EMPTY_REPO = 'El repo está vacío.';
+const FILE_NOT_FOUND = 'Ese archivo no existe.';
+const FILE_SHAPE = {
+  type: 'object',
+  properties: {
+    path: { type: 'string', description: 'Ruta dentro del repo, por ejemplo ahora.md.' },
+    content: { type: 'string', description: 'El contenido completo del archivo, en resumen. Nunca código, mensajes ni transcripciones tal cual.' },
+    share: { type: 'string', enum: ['siempre', 'preguntar', 'nunca'], description: 'Quién puede usarlo. Solo cuenta al crear el archivo.' },
+  },
+  required: ['path', 'content'],
+} as const;
 
 const TOOLS = [
   {
@@ -31,6 +44,27 @@ const TOOLS = [
     description: 'Elige una opción de un pendiente, por ejemplo permitir o aceptar. Usa el id de la opción que entrega ronda_pendientes. Hazlo solo cuando tu persona te lo diga.',
     inputSchema: { type: 'object', properties: { opcion: { type: 'string', description: 'El id de la opción elegida.' } }, required: ['opcion'] },
   },
+  {
+    name: 'ronda_repo_ver',
+    description:
+      'Muestra el repo de contexto de tu persona en Montu: la lista de archivos con su permiso, o el contenido de uno si das la ruta. Léelo antes de escribir, para actualizar en vez de repetir.',
+    inputSchema: { type: 'object', properties: { ruta: { type: 'string', description: 'Ruta de un archivo. Sin ruta, devuelve la lista.' } } },
+  },
+  {
+    name: 'ronda_repo_guardar',
+    description:
+      'Guarda en el repo de contexto de tu persona en qué trabaja, qué la tiene trabada y qué sabe, para que su agente de Montu lo use al conversar con los agentes de su equipo. Úsalo cuando su trabajo cambie: un bloqueo nuevo, algo terminado, algo aprendido. Antes del primer cambio, muéstrale qué vas a escribir y espera su sí. Sin secretos, sin código y sin datos crudos.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        mensaje: { type: 'string', description: 'Una línea que dice qué cambió.' },
+        temas: { type: 'array', items: { type: 'string' }, description: 'Hasta seis etiquetas cortas en minúscula.' },
+        archivos: { type: 'array', items: FILE_SHAPE, description: 'Archivos a crear o reemplazar. Sugeridos: README.md, ahora.md, sabe.md.' },
+        borrar: { type: 'array', items: { type: 'string' }, description: 'Rutas a borrar.' },
+      },
+      required: ['mensaje'],
+    },
+  },
 ] as const;
 
 const asText = (messages: AgentMessage[]): string =>
@@ -38,11 +72,27 @@ const asText = (messages: AgentMessage[]): string =>
     ? NOTHING_NEW
     : messages.map((message) => (message.options.length === 0 ? message.text : `${message.text}\nOpciones: ${message.options.map((option) => `${option.label} (id: ${option.id})`).join(' · ')}`)).join('\n\n');
 
-export function agentDoorRoutes({ assistants, whatsapp }: AppContext) {
+export function agentDoorRoutes(ctx: AppContext) {
+  const { db, store, assistants, whatsapp, repo } = ctx;
   const routes = new Hono();
   const limited = rateLimit(CALLS_PER_MINUTE);
+  const { write } = repoWriter(ctx);
 
-  const ownerOf = (c: Context) => assistantFrom(assistants, c.req.header('authorization'))?.personToken;
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS agent_inbox_seen (
+      assistant_id TEXT PRIMARY KEY,
+      last_id INTEGER NOT NULL
+    );
+  `);
+  const lastSeenBy = (assistantId: string) => Number((db.prepare('SELECT last_id FROM agent_inbox_seen WHERE assistant_id = ?').get(assistantId) as { last_id: number } | undefined)?.last_id ?? 0);
+  const markSeen = (assistantId: string, lastId: number) =>
+    db.prepare('INSERT INTO agent_inbox_seen (assistant_id, last_id) VALUES (?, ?) ON CONFLICT (assistant_id) DO UPDATE SET last_id = excluded.last_id').run(assistantId, lastId);
+
+  const assistantOf = (c: Context): Assistant | undefined => {
+    const key = c.req.param('key');
+    return key ? assistants.authenticate(key) : assistantFrom(assistants, c.req.header('authorization'));
+  };
+  const ownerOf = (c: Context) => assistantOf(c)?.personToken;
 
   const textFrom = (value: unknown) => (typeof value === 'string' ? value.trim().slice(0, MAX_MESSAGE_LENGTH) : '');
 
@@ -68,25 +118,42 @@ export function agentDoorRoutes({ assistants, whatsapp }: AppContext) {
     return c.json({ replies: whatsapp.choose(owner, option), pending: whatsapp.inboxOf(owner).pending });
   });
 
-  const callTool = async (owner: string, name: unknown, args: Record<string, unknown>): Promise<string | null> => {
+  const callTool = async (assistant: Assistant, name: unknown, args: Record<string, unknown>): Promise<string | null> => {
+    const owner = assistant.personToken;
     if (name === 'ronda_decir') {
       const message = textFrom(args.mensaje);
       return message ? asText(await whatsapp.say(owner, message)) : null;
     }
     if (name === 'ronda_pendientes') {
       const inbox = whatsapp.inboxOf(owner);
-      return `Pendientes:\n${asText(inbox.pending)}\n\nÚltimos mensajes:\n${asText(inbox.recent)}`;
+      const seen = lastSeenBy(assistant.id);
+      const fresh = inbox.recent.filter((message) => message.id > seen);
+      const newest = Math.max(seen, ...inbox.recent.map((message) => message.id), ...inbox.pending.map((message) => message.id));
+      if (newest > seen) markSeen(assistant.id, newest);
+      return `Nuevo desde la última vez:\n${asText(fresh)}\n\nPendientes:\n${asText(inbox.pending)}\n\nÚltimos mensajes:\n${asText(inbox.recent)}`;
     }
     if (name === 'ronda_responder') {
       const option = textFrom(args.opcion);
       return option ? asText(whatsapp.choose(owner, option)) : null;
     }
+    if (name === 'ronda_repo_ver') {
+      const path = typeof args.ruta === 'string' ? args.ruta.trim() : '';
+      if (path) return repo.read(owner, path)?.content ?? FILE_NOT_FOUND;
+      const files = repo.tree(owner);
+      return files.length === 0 ? EMPTY_REPO : files.map((file) => `${file.path} · ${file.share} · ${file.size} bytes`).join('\n');
+    }
+    if (name === 'ronda_repo_guardar') {
+      const person = store.findPerson(owner);
+      if (!person) return null;
+      const written = write(person, assistant, { message: args.mensaje, topics: args.temas, files: args.archivos, delete: args.borrar });
+      return written.ok ? `Guardado. El repo tiene ${written.files} ${written.files === 1 ? 'archivo' : 'archivos'}. Tu persona puede cambiar quién ve cada uno en su página de Montu.` : `No se guardó nada. ${written.error}`;
+    }
     return null;
   };
 
-  routes.post('/mcp', limited, async (c) => {
-    const owner = ownerOf(c);
-    if (!owner) return c.json(INVALID_ASSISTANT, 401, { 'www-authenticate': 'Bearer' });
+  const serveMcp = async (c: Context) => {
+    const assistant = assistantOf(c);
+    if (!assistant) return c.json(INVALID_ASSISTANT, 401, { 'www-authenticate': 'Bearer' });
     const message = asObject(await c.req.text());
     const { id, method } = message;
     const params = asObject(JSON.stringify(message.params ?? {}));
@@ -105,13 +172,17 @@ export function agentDoorRoutes({ assistants, whatsapp }: AppContext) {
     if (method === 'ping') return result({});
     if (method === 'tools/list') return result({ tools: TOOLS });
     if (method === 'tools/call') {
-      const text = await callTool(owner, params.name, asObject(JSON.stringify(params.arguments ?? {})));
+      const text = await callTool(assistant, params.name, asObject(JSON.stringify(params.arguments ?? {})));
       return text === null ? failure(INVALID_PARAMS, 'Herramienta o argumentos no válidos.') : result({ content: [{ type: 'text', text }] });
     }
     return failure(METHOD_NOT_FOUND, 'Método no disponible.');
-  });
+  };
+
+  routes.post('/mcp', limited, serveMcp);
+  routes.post('/mcp/k/:key', limited, serveMcp);
 
   routes.get('/mcp', (c) => c.body(null, 405, { allow: 'POST' }));
+  routes.get('/mcp/k/:key', (c) => c.body(null, 405, { allow: 'POST' }));
 
   return routes;
 }

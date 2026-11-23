@@ -101,6 +101,13 @@ export const joinRoom = (code: string, who: { name: string } | { token: string }
 
 export const fetchAssistants = (token: string) => request<{ assistants: Assistant[] }>(`${personPath(token)}/assistants`);
 export const createPairing = (token: string) => request<Pairing>(`${personPath(token)}/assistants/pairings`, post());
+export interface Connector {
+  url: string;
+  header: string;
+  keyUrl: string;
+}
+
+export const createConnector = (token: string) => request<Connector>(`${personPath(token)}/assistants/connectors`, post({ kind: 'otro' }));
 export const removeAssistant = (token: string, assistantId: string) =>
   request<{ ok: boolean }>(`${personPath(token)}/assistants/${encodeURIComponent(assistantId)}`, { method: 'DELETE' });
 

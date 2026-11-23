@@ -100,9 +100,10 @@ curl -sS -X POST ${baseUrl}/api/agent/answer \\
 
 - \`say\` sends ${ownerName}'s words to their agent and returns its \`replies\`. A check-in is saved in ${ownerName}'s private memory. A question for the team returns the answer the teammates' agents put together; it can take up to a minute.
 - \`inbox\` returns \`pending\` (things the agent is waiting for, each with \`options\`) and \`recent\` messages.
+- Montu also writes first: it leaves notices for ${ownerName} in the inbox (someone is waiting on them, a deadline at risk, two people on the same thing, the weekly summary). At the start of each working session, read the inbox and tell ${ownerName} what is new.
 - \`answer\` chooses one option by its \`id\`. Never choose for ${ownerName}: show them the pending item and wait for their answer. Allowing a blocker tells their teammates' agents about it; accepting a proposal commits them to help or be helped.
 
-If you can add MCP servers, the same three actions are tools (\`ronda_decir\`, \`ronda_pendientes\`, \`ronda_responder\`) at ${baseUrl}/api/mcp, with the header \`Authorization: Bearer <token>\`. In Claude Code:
+If you can add MCP servers, the same three actions and the repo are tools (\`ronda_decir\`, \`ronda_pendientes\`, \`ronda_responder\`, \`ronda_repo_ver\`, \`ronda_repo_guardar\`) at ${baseUrl}/api/mcp, with the header \`Authorization: Bearer <token>\`. In Claude Code:
 
 \`\`\`
 claude mcp add --transport http ronda ${baseUrl}/api/mcp --header "Authorization: Bearer <token>"
