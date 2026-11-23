@@ -128,7 +128,8 @@ test('pull sends the access token as Bearer and passes since as a variable', asy
   const seen: SeenRequest[] = [];
   await linear.pull('lin_oauth_good', 'ana@example.com', since, linearFetch(() => [], seen));
 
-  assert.equal(seen.length, 1);
+  assert.equal(seen.length, 2);
+  assert.ok(seen[1]?.query.includes('RondaIssueContext'));
   assert.equal(seen[0]?.authorization, 'Bearer lin_oauth_good');
   assert.equal(seen[0]?.method, 'POST');
   assert.deepEqual(seen[0]?.variables, { since: since.toISOString() });
@@ -176,4 +177,51 @@ test('syncing twice imports an issue once and a later update becomes a new event
   const summaries = ctx.store.listEvents(token).map((event) => event.summary);
   assert.deepEqual(summaries, ['VIT-123 Webhook de pagos · Terminado', 'VIT-123 Webhook de pagos · En progreso']);
   assert.equal(ctx.store.findConnection(token, 'linear')?.lastError, null);
+});
+
+test('a task carries its project and what blocks it, urgent issues without an owner come along, and a failed context query does not stop the tasks', async () => {
+  const contextFetch = (context: () => Response): Fetch =>
+    (async (_input: Parameters<Fetch>[0], init?: Parameters<Fetch>[1]) => {
+      const body = JSON.parse(String(init?.body ?? '{}')) as { query?: string };
+      if (body.query?.includes('RondaIssueContext')) return context();
+      return Response.json({ data: { viewer: { assignedIssues: { nodes: [issue()] } } } });
+    }) as Fetch;
+
+  const drafts = await linear.pull(
+    'lin_oauth_good',
+    'ana@example.com',
+    since,
+    contextFetch(() =>
+      Response.json({
+        data: {
+          viewer: {
+            assignedIssues: {
+              nodes: [
+                {
+                  id: 'issue-uuid-1',
+                  project: { id: 'pro-1', name: 'Cobros', progress: 0.4, startDate: '2026-11-01', targetDate: '2026-12-01', lead: { email: 'Tomas@Example.com' } },
+                  inverseRelations: {
+                    nodes: [
+                      { type: 'blocks', issue: { identifier: 'VIT-9', title: 'Llave de Toku', state: { type: 'started' }, assignee: { email: 'tomas@example.com', name: 'Tomás' } } },
+                      { type: 'blocks', issue: { identifier: 'VIT-8', title: 'Ya resuelto', state: { type: 'completed' }, assignee: null } },
+                      { type: 'related', issue: { identifier: 'VIT-7', title: 'Relacionado', state: { type: 'started' }, assignee: null } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          issues: { nodes: [{ id: 'issue-uuid-5', identifier: 'VIT-50', title: 'Caída de pagos', url: 'https://linear.app/acme/issue/VIT-50', priority: 1 }] },
+        },
+      }),
+    ),
+  );
+  const raw = drafts[0]?.raw as { project: { name: string; leadEmail: string }; blockedBy: Array<{ identifier: string; assigneeEmail: string }> };
+  assert.deepEqual(raw.project, { id: 'pro-1', name: 'Cobros', progress: 0.4, startDate: '2026-11-01', targetDate: '2026-12-01', leadEmail: 'tomas@example.com' });
+  assert.deepEqual(raw.blockedBy, [{ identifier: 'VIT-9', title: 'Llave de Toku', assigneeEmail: 'tomas@example.com', assigneeName: 'Tomás' }]);
+  assert.deepEqual(drafts.map((draft) => draft.type), ['tarea', 'urgente_sin_dueno']);
+
+  const plain = await linear.pull('lin_oauth_good', 'ana@example.com', since, contextFetch(() => Response.json({ errors: [{ message: 'Query too complex' }] })));
+  assert.deepEqual(plain.map((draft) => draft.type), ['tarea']);
+  assert.equal((plain[0]?.raw as { project?: unknown }).project, undefined);
 });

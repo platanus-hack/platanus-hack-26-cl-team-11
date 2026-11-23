@@ -207,7 +207,7 @@ test('a Linear callback stores the connection and imports the assigned issues wi
   });
 
   const queries = calls.filter((call) => call.url === LINEAR_GRAPHQL_URL);
-  assert.equal(queries.length, 2);
+  assert.equal(queries.length, 3);
   assert.ok(queries.every((call) => call.method === 'POST' && call.authorization === 'Bearer lin-access'));
   assert.ok(queries[0]?.body.includes('viewer { email }'));
 

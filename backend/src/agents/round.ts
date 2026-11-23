@@ -1,3 +1,4 @@
+import { UNOWNED_URGENT_TYPE } from '../connectors/linear.js';
 import { publicIdOf } from '../codes.js';
 import type { Store } from '../db.js';
 import { withChosenVisibility, type PolicyStore } from '../policy/store.js';
@@ -85,7 +86,7 @@ export function recentWorkOf(events: StoredEvent[]): string[] {
   const lines: string[] = [];
   for (const event of events) {
     const label = WORK_SOURCE_LABEL[event.source];
-    if (!label || !event.summary) continue;
+    if (!label || !event.summary || event.type === UNOWNED_URGENT_TYPE) continue;
     const line = `${label}: ${event.summary}`;
     const used = perSource.get(event.source) ?? 0;
     if (seen.has(line) || used >= PER_SOURCE) continue;
