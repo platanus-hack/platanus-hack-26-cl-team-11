@@ -14,6 +14,7 @@
 | Multijugador | Una sala abierta con QR. El agente que cada persona ya usa entra con un link y escribe su repo; el agente personal de Montu conversa leyendo ese repo. Detalle en [AGENT_MODEL.md](AGENT_MODEL.md#agente-personal-y-asistentes-conectados). |
 | Cómo se conecta un agente | No hay un estándar único. Se usa un link pegado con un documento de ingreso (como hizo Moltbook con OpenClaw) y, para apps de chat, copiar una pregunta y pegar la respuesta. Un servidor MCP queda como siguiente puerta; A2A no calza porque exige que cada agente sea un servidor con dirección. |
 | Modelo | DeepSeek en 50x, con `FIFTYX_API_KEY`. |
+| Avisos (23-nov-2026, Rob) | Montu escribe primero con once avisos por reglas, solo para equipos privados. Una tarea sin avances pregunta a su dueño antes de contarle al equipo. Quien está en un equipo privado deja la mesa pública. Detalle en [ARCHITECTURE.md](ARCHITECTURE.md#avisos-montu-escribe-primero). |
 
 ## Abierto
 
@@ -55,6 +56,14 @@
 - [x] **Probar la ronda de agentes contra el modelo real.** Corrió con DeepSeek en 50x, en local y en producción (21-nov-2026).
 - [ ] **Probar las preguntas del tablero contra el modelo real.** Los agentes responden una pregunta y arman una sola respuesta ([ARCHITECTURE.md](ARCHITECTURE.md#preguntarle-al-equipo)); solo ha corrido con un modelo falso.
 - [ ] **Conectar el globo a datos reales.** El globo de `design/grafo/` usa conversaciones simuladas. La ruta de agentes ya entrega las flechas ([API.md](API.md#agentes)).
+
+### Avisos
+
+- [ ] **Probar los avisos con datos reales.** Corren con pruebas automáticas; ningún aviso ha salido todavía de una cuenta real de Linear, Calendar o Apple Health.
+- [ ] **Avisos que necesitan permisos nuevos.** PR sin revisión, «ya existe», trabajo cancelado (GitHub en repos privados: hoy solo lee actividad pública); decisión que no llegó, compromiso sin tarea, tema que no se cierra (contenido de las reuniones: de Granola se guarda solo el título); cliente que se enfría, cliente pide otra cosa (hilos de Gmail: hoy solo asunto y remitente).
+- [ ] **Canal.** Fuera de la ventana de 24 horas de WhatsApp, un aviso llega solo al panel y al agente conectado.
+- [ ] **Cerrar el ingreso.** `LOGIN_DOMAINS` está construida y sin cargar en Render.
+- [ ] **Instinct.** No encontramos documentación de que acepte conectores propios. Queda la dirección del conector y, si no, la línea con el link.
 
 ### Equipo
 

@@ -197,7 +197,9 @@ El agente que una persona conectó (Claude Code, Codex) puede hablarle a su agen
 | `POST /api/agent/say` | `{ "text": "…" }`, hasta 2.000 caracteres | `{ replies, pending }`. Un check-in queda en la memoria privada. Una pregunta al equipo espera hasta un minuto y devuelve la respuesta armada |
 | `GET /api/agent/inbox` | — | `{ pending, recent }`: lo que el agente espera de la persona y sus últimos 10 mensajes |
 | `POST /api/agent/answer` | `{ "option": "<id>" }` | `{ replies, pending }`. Elige una opción de un pendiente |
-| `POST /api/mcp` | Un mensaje JSON-RPC de MCP | Las mismas tres acciones como herramientas: `ronda_decir`, `ronda_pendientes`, `ronda_responder` |
+| `POST /api/mcp` | Un mensaje JSON-RPC de MCP | Las mismas tres acciones como herramientas (`ronda_decir`, `ronda_pendientes`, `ronda_responder`) y el repo (`ronda_repo_ver`, `ronda_repo_guardar`). `ronda_pendientes` parte por lo nuevo desde la última vez que ese asistente miró |
+| `POST /api/mcp/k/<token>` | Lo mismo | Lo mismo, con el token en la dirección, para un agente que solo acepta una dirección. Esa dirección es una clave |
+| `POST /api/people/<token>/assistants/connectors` | `{ "kind": "claude" }` (opcional) | `{ url, header, keyUrl, assistant }`. Crea un asistente sin pasar por el link de ingreso, para agregarlo como conector en Claude, Instinct u otro. El token se muestra una sola vez |
 
 Un mensaje es `{ id, text, at, options }`. `options` trae `[{ id, label }]` cuando el mensaje espera una decisión (permitir o no contar un bloqueo, aceptar o no una propuesta).
 

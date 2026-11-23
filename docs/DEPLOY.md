@@ -70,6 +70,13 @@ Las rondas de agentes necesitan acceso al modelo. Sin estas variables, la pesta�
 | `AGENT_MODEL` | Opcional. Por defecto `claude-opus-5-5` | Qué modelo conversa |
 | `AGENT_ROUND_HOUR` | Opcional. Hora de Santiago, de 0 a 23; por defecto 9. Cualquier otro valor apaga la ronda diaria | Desde qué hora corre sola la ronda de cada día |
 
+### Avisos y acceso
+
+| Variable | Valor | Para qué |
+|---|---|---|
+| `NUDGES` | Opcional. `off` los apaga | Los avisos que Montu manda primero ([ARCHITECTURE.md](ARCHITECTURE.md#avisos-montu-escribe-primero)). Sin la variable están encendidos, y solo para equipos privados |
+| `LOGIN_DOMAINS` | Opcional. Dominios separados por coma, por ejemplo `vita.lat,getvita.ai` | Con ella, el ingreso con Google solo deja entrar a cuentas de esos dominios. Sin ella entra cualquier cuenta de Google. No cierra las sesiones ya abiertas ni las páginas sin cuenta de Google |
+
 ### Para activar WhatsApp
 
 El puente de WhatsApp usa Kapso. Sin las tres primeras variables, la sección WhatsApp no aparece en Ajustes y el webhook responde 404. Los pasos están en [INTEGRATIONS.md](INTEGRATIONS.md#whatsapp).

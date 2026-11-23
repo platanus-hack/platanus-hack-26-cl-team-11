@@ -244,6 +244,48 @@ Reglas:
 - **Las señales no pasan por el modelo.** La frase «Por tus fuentes veo…» la arma el código.
 - **Un teléfono que nadie unió no gasta modelo**: recibe una sola vez por hora la instrucción para conectarse.
 
+## Avisos: Montu escribe primero
+
+`backend/src/nudges/`. Además de responder, Montu detecta situaciones y le deja un aviso a una persona. No hay conversación entre agentes ni modelo: son reglas sobre los eventos que ya llegan de las fuentes.
+
+```
+eventos de las fuentes  →  detectores  →  registro (no repetir)  →  bandeja del agente
+```
+
+| Pieza | Qué hace | Dónde |
+|---|---|---|
+| Detectores | Funciones puras: reciben a las personas de un equipo con sus eventos y señales, y devuelven avisos con destinatario, tipo, referencia y texto | `nudges/detectors.ts` |
+| Registro | Un aviso con la misma persona, tipo y referencia sale una sola vez | `nudges/store.ts` |
+| Rutina | Cada 15 minutos arma los equipos, corre los detectores y entrega | `nudges/routine.ts` |
+
+| Aviso | Lo detecta | A quién |
+|---|---|---|
+| `esperan_por_ti` | Una tarea de Linear de un compañero está bloqueada por una tuya que sigue abierta | A quien tiene la tarea que bloquea |
+| `deadline` | Una tarea vence en 2 días o menos y no ha partido, o no se mueve hace 2 días | A su dueño |
+| `se_pisan` | Dos tareas en curso de dos personas con títulos parecidos (2 palabras en común y la mitad del vocabulario). Si los dos comparten su carga y tienen Calendar, propone un hueco libre de ambos | A los dos |
+| `sobrecarga` | 2 de las últimas 3 noches con menos de 6 horas y carga alta | Solo a la persona |
+| `meta_en_riesgo` | Un proyecto de Linear va 25 puntos o más por debajo de lo que exige su fecha, o ya pasó su fecha | A quien lidera el proyecto en Linear, si está en el equipo |
+| `fecha_movida` | La fecha de una tarea abierta se corrió 2 veces o más | Solo a su dueño |
+| `fuera_de_prioridad` | Hay temas urgentes sin dueño en Linear y nada de lo que la persona tiene en curso es urgente | A la persona, una vez por semana |
+| `sin_pausas` | 3 días hábiles seguidos con más de 5 horas de reuniones, o commits de noche 3 días en la semana | Solo a la persona, con un link para bloquear tiempo en Calendar |
+| `reconocimiento` | Una propuesta de ayuda quedó acordada hace 2 a 9 días | A quien recibió la ayuda |
+| `persona_nueva` | Alguien entró al equipo hace 7 días o menos | A la persona nueva, con lo que cada uno comparte |
+| `resumen_semanal` | Es lunes | A cada persona, con lo que comparten los demás y quién le toca de cerca |
+
+El orden de la tabla es la prioridad. A esto se suma **trabado en silencio**: en cada pasada la rutina le pregunta en privado a quien tiene una tarea en curso sin moverse hace 3 días si quiere que su agente pida ayuda. Desde el 23-nov-2026 esa tarea ya no se cuenta sola al equipo: espera el «Permitir», igual que un bloqueo dicho en el check-in.
+
+Reglas:
+
+- **Solo equipos privados.** Reciben avisos las personas de un equipo creado con código y aprobación. La mesa pública y las salas con QR no reciben.
+- **Quien está en un equipo privado deja la mesa pública** (`sitsAtMesa` en `mesa/members.ts`): su agente conversa, pregunta y reabre bloqueos solo dentro de su equipo.
+- **Horario hábil.** Lunes a viernes, de 9:00 a 19:00 de Santiago. Hasta 3 avisos por persona en 24 horas; lo que no cupo sale después.
+- **Respeta los permisos.** Lo que nombra el trabajo de otra persona (`se_pisan`, `persona_nueva`, `resumen_semanal`) solo usa a quienes tienen «Temas de trabajo» en «siempre». Lo de sueño y carga llega solo a su dueño.
+- **Los datos plantados para la demo no cuentan** (eventos con `demo` en el dato crudo).
+- **Llega por la bandeja del agente**: el panel, el agente conectado (`ronda_pendientes` dice qué es nuevo) y WhatsApp si el teléfono está unido y dentro de la ventana de 24 horas.
+- Se apaga con `NUDGES=off`.
+
+Para que una persona de Linear se reconozca como alguien del equipo se usa su correo: el del ingreso con Google o el de su cuenta de Linear conectada.
+
 ## Sala, asistentes y repo
 
 Una persona entra a una sala con un código, conecta el agente que ya usa y ese agente llena su repo. El agente personal de Montu habla en las rondas con lo que hay en ese repo.

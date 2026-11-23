@@ -42,6 +42,8 @@ Las tres están creadas desde el 21-nov-2026 y sus variables están cargadas en 
 | Linear | Settings → API → OAuth applications | `https://ronda-n8if.onrender.com/api/oauth/linear/callback` | `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET` |
 | Google | Google Cloud → Credenciales → Cliente OAuth web | `https://ronda-n8if.onrender.com/api/oauth/google/callback` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 
+Linear trae las tareas asignadas a la persona y, en una segunda consulta, el proyecto de cada una (avance, fechas y quién lo lidera), las tareas abiertas que la bloquean y hasta 10 temas urgentes sin dueño del workspace. Si esa segunda consulta falla, las tareas llegan igual. No está probado contra Linear real: los campos se revisaron contra su esquema público el 23-nov-2026.
+
 GitHub pide solo `read:user`, así que lee la actividad pública. Leer repos privados exige el permiso `repo`, que también da escritura, y por eso queda fuera. Linear pide `read`.
 
 Una fuente OAuth sin credenciales en el servidor aparece en la página como «Falta configurarla en el servidor».

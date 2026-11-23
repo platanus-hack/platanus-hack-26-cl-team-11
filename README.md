@@ -34,6 +34,7 @@ Una herramienta para mejorar el rendimiento y la coordinación de equipos: cada 
 | [docs/API.md](docs/API.md) | Todas las rutas del backend: qué reciben y qué responden. |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Despliegue en Render y cómo corre el CI. |
 | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Cómo entra la señal de cada fuente; el receptor está en `backend/`. |
+| [docs/EQUIPO.md](docs/EQUIPO.md) | Cómo parte un equipo: entrar, crear el equipo, conectar las fuentes y el agente. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisiones tomadas y preguntas abiertas. |
 | [design/DESIGN.md](design/DESIGN.md) | Dirección visual, tokens y primitivas de UI. Obligatorio antes de tocar UI. |
 
@@ -93,6 +94,10 @@ En producción: https://ronda-n8if.onrender.com
 Los agentes ya conversan en rondas por equipo y dejan propuestas que cada persona acepta. También responden las preguntas del tablero: quien pregunta recibe una sola respuesta armada con lo que comparten los demás (probado solo con un modelo falso). El modelo es DeepSeek en 50x cuando está `FIFTYX_API_KEY`. La llave está en el servidor desde el 21-nov-2026: la ronda corrió con 50x en local y una simulación de 4 personas corrió en producción. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 **Panel del equipo.** En [`/admin`](https://ronda-n8if.onrender.com/admin) quien opera la mesa elige si el globo abre en vivo o en demo, hace que los agentes conversen ahora o cada cierto tiempo, y lee el historial de las últimas 40 rondas con cada conversación completa. En producción desde el 21-nov-2026. Detalle en [docs/API.md](docs/API.md#panel-del-equipo-admin).
+
+**Avisos.** Montu también escribe primero. Para los equipos privados detecta once situaciones (alguien espera por ti, un deadline en riesgo, dos personas en lo mismo, sobrecarga, un proyecto atrasado, una fecha que se corre, temas urgentes sin dueño, días sin pausa, una ayuda que agradecer, una persona nueva y el resumen del lunes) y le deja el aviso a quien corresponde, en horario hábil y hasta tres al día. Construido el 23-nov-2026 con pruebas automáticas; falta verlo con datos reales. Detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#avisos-montu-escribe-primero) y cómo parte un equipo en [docs/EQUIPO.md](docs/EQUIPO.md).
+
+**Conector.** Claude, Instinct o cualquier agente que acepte servidores MCP se conecta desde «Tu agente» con una dirección y una cabecera: lee y escribe el repo, habla con el agente de Montu y ve los avisos. Probado con pruebas automáticas, no con un cliente real.
 
 **WhatsApp.** Cada persona puede unir su teléfono y hablar con su agente por WhatsApp, vía Kapso: check-in, permiso para contar un bloqueo, propuestas con botones, presentación al acordar y preguntas al equipo. Construido y probado con un Kapso falso. El servidor ya tiene la llave y el webhook registrado en el número de prueba de Kapso; falta probarlo con un teléfono. Detalle en [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md#whatsapp).
 
