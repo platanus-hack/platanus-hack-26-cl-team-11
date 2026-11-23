@@ -1,6 +1,7 @@
 import type { Signals, Summary } from './api';
 import { YourAgentSection } from './YourAgentSection';
 import { Face } from './Face';
+import { NoticesSection } from './NoticesSection';
 import { SummarySection } from './SummarySection';
 
 interface YouTabProps {
@@ -35,6 +36,7 @@ export function YouTab({ token, name, signals, summary }: YouTabProps) {
       </div>
       {signals && summary && <SummarySection signals={signals} summary={summary} />}
     </div>
+    <NoticesSection token={token} />
     <YourAgentSection token={token} />
     </>
   );
