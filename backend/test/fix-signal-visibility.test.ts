@@ -46,13 +46,13 @@ test('signals carry the permission the person stored, in the signals route and i
 test('a permission the person never chose keeps the default of each signal', async () => {
   const { app, token } = setup();
   const untouched = await checkin(app, token);
-  assert.deepEqual(visibilityBySource(untouched), { checkin: 'preguntar', linear: 'siempre' });
+  assert.deepEqual(visibilityBySource(untouched), { checkin: 'preguntar', linear: 'preguntar' });
   assert.deepEqual(untouched.visibility, { energy: 'siempre', load: 'siempre', blockers: 'siempre', expertise: 'siempre' });
 
   await app.request(`/api/people/${token}/policy`, send('PUT', { load: 'nunca', includeInPulse: false }));
   const partial = await signalsOf(app, token);
   assert.equal(partial.load.visibility, 'nunca');
   assert.equal(partial.energy.visibility, 'siempre');
-  assert.deepEqual(visibilityBySource(partial), { checkin: 'preguntar', linear: 'siempre' });
+  assert.deepEqual(visibilityBySource(partial), { checkin: 'preguntar', linear: 'preguntar' });
   assert.deepEqual(partial.visibility, { energy: 'siempre', load: 'nunca', blockers: 'siempre', expertise: 'siempre' });
 });

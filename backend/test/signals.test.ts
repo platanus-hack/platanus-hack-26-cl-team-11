@@ -280,7 +280,7 @@ test('the demo seed is deterministic and does not duplicate on a second run', ()
   assert.equal(ctx.store.listEvents(ana.token, 500).length, before);
 });
 
-test('a blocker told in a check-in asks before it is shared, a stale task does not', () => {
+test('a blocker told in a check-in asks before it is shared, and so does a stale task', () => {
   const now = new Date('2026-11-21T15:00:00.000Z');
   const event = (id: number, source: string, type: string, occurredAt: string, raw: unknown): StoredEvent => ({ id, source, type, occurredAt, summary: '', raw, receivedAt: occurredAt });
   const signals = deriveSignals(
@@ -291,7 +291,7 @@ test('a blocker told in a check-in asks before it is shared, a stale task does n
     now,
   );
   assert.equal(signals.blockers.find((blocker) => blocker.source === 'checkin')?.visibility, 'preguntar');
-  assert.equal(signals.blockers.find((blocker) => blocker.source === 'linear')?.visibility, 'siempre');
+  assert.equal(signals.blockers.find((blocker) => blocker.source === 'linear')?.visibility, 'preguntar');
 });
 
 test('what a person is working on comes from their started tasks, open pull requests and recent commits, with no text written by them', () => {

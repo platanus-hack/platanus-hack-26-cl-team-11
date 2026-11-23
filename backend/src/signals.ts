@@ -336,7 +336,7 @@ function staleTaskBlockers(tasks: Task[], now: Date, today: string, timeZone: st
       since: new Date(task.updatedAt).toISOString(),
       statement: `Sin avances en «${task.title}» ${elapsedText(daysBetween(dayKeyOf(new Date(task.updatedAt), timeZone), today))}`,
       source: 'linear' as const,
-      visibility: 'siempre' as const,
+      visibility: 'preguntar' as const,
     }));
 }
 
