@@ -89,6 +89,7 @@ export interface WhatsAppBridge {
   proposalCreated(proposal: Proposal): void;
   proposalAnswered(proposal: Proposal, answeredBy: string): void;
   askPermissions(personToken: string): void;
+  notify(personToken: string, text: string): void;
   say(personToken: string, text: string): Promise<AgentMessage[]>;
   choose(personToken: string, optionId: string): AgentMessage[];
   inboxOf(personToken: string): AgentInbox;
@@ -105,6 +106,7 @@ export const SILENT_BRIDGE: WhatsAppBridge = {
   proposalCreated: () => {},
   proposalAnswered: () => {},
   askPermissions: () => {},
+  notify: () => {},
   say: () => Promise.resolve([]),
   choose: () => [],
   inboxOf: () => ({ pending: [], recent: [] }),
@@ -449,6 +451,10 @@ export function createWhatsAppBridge(ctx: AppContext, channel: WhatsAppChannel |
     },
 
     askPermissions: (personToken) => askPermissions(personToken),
+
+    notify(personToken, text) {
+      if (!ctx.sim.isSynthetic(personToken)) sendTextThrough(personToken, text);
+    },
 
     async say(personToken, text) {
       const person = ctx.store.findPerson(personToken);

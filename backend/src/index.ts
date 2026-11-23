@@ -7,6 +7,7 @@ import { createContext, dataLocation, SQLITE_FILE } from './context.js';
 import { designAssets } from './designAssets.js';
 import { serveFrontend } from './frontendFiles.js';
 import { startMesaTicker } from './mesa/ticker.js';
+import { startNudgeRoutine } from './nudges/routine.js';
 import { describeImport, importFromSqlite } from './pg/importSqlite.js';
 import { startScheduler } from './scheduler.js';
 
@@ -20,6 +21,7 @@ if (process.env.DATABASE_URL?.trim()) {
 startScheduler(ctx);
 startAgentRoutine(ctx);
 startMesaTicker(ctx);
+startNudgeRoutine(ctx);
 app.route('/', designAssets());
 const frontendDist = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'frontend', 'dist');
 
