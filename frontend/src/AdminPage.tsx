@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { formatAgo } from './ago';
-import { fetchAdmin, fetchAdminRound, fetchSessionPerson, setGlobeMode, setMesaInterval, startMesaRound, type AdminRound, type AdminRoundDetail, type AdminView, type GlobeMode } from './api';
+import { fetchAdmin, fetchSessionPerson, setGlobeMode, setMesaInterval, startMesaRound, type AdminRound, type AdminView, type GlobeMode } from './api';
 import { countOf } from './format';
 import { Item } from './Item';
 import { MontuInline } from './MontuLoader';
 import { SectionHead } from './SectionHead';
-import { ThreadRow } from './ThreadRow';
 import { useAction } from './useAction';
 import { usePolling } from './usePolling';
 
@@ -27,53 +26,13 @@ const IDLE_REFRESH_MS = 6000;
 
 const amount = (value: number) => Math.round(value).toLocaleString('es-CL');
 
-function RoundRow({ token, round, now }: { token: string; round: AdminRound; now: number }) {
-  const [detail, setDetail] = useState<AdminRoundDetail | null>(null);
-  const [open, setOpen] = useState(false);
-  const [openThread, setOpenThread] = useState<string | null>(null);
-  const [problem, setProblem] = useState<string | null>(null);
-
-  const toggle = () => {
-    setOpen((current) => !current);
-    if (!detail)
-      fetchAdminRound(token, round.id).then(setDetail, (failure: unknown) => setProblem(failure instanceof Error ? failure.message : 'No se pudo abrir.'));
-  };
-
-  const who = round.startedBy ? `la inició ${round.startedBy}` : 'sola';
+function RoundRow({ round, now }: { round: AdminRound; now: number }) {
   return (
-    <div>
-      <Item
-        icon={<span className="rd-chip rd-glass">{STATUS[round.status]}</span>}
-        title={`${formatAgo(round.startedAt, now)} · ${countOf(round.threads, 'conversación', 'conversaciones')}`}
-        subtitle={`${who} · ${amount(round.tokens)} tokens en ${countOf(round.calls, 'llamada', 'llamadas')}${round.problem ? ` · ${round.problem}` : ''}`}
-        expanded={open}
-        onToggle={toggle}
-      />
-      {open && (
-        <div className="app-thread">
-          {problem && <p className="rd-note" role="alert">{problem}</p>}
-          {!detail && !problem && <MontuInline />}
-          {detail && detail.threads.length === 0 && <p className="rd-note">No conversaron en esta ronda.</p>}
-          {detail && (
-            <div className="rd-list">
-              {detail.threads.map((thread) => (
-                <ThreadRow
-                  key={thread.id}
-                  thread={{ ...thread, mine: false }}
-                  open={openThread === thread.id}
-                  onToggle={() => setOpenThread((current) => (current === thread.id ? null : thread.id))}
-                />
-              ))}
-            </div>
-          )}
-          {detail?.proposals.map((proposal) => (
-            <p key={proposal.id} className="rd-note">
-              Propuesta · {proposal.topic}: {proposal.text}
-            </p>
-          ))}
-        </div>
-      )}
-    </div>
+    <Item
+      icon={<span className="rd-chip rd-glass">{STATUS[round.status]}</span>}
+      title={`${formatAgo(round.startedAt, now)} · ${countOf(round.threads, 'conversación', 'conversaciones')}`}
+      subtitle={`${amount(round.tokens)} tokens en ${countOf(round.calls, 'llamada', 'llamadas')}`}
+    />
   );
 }
 
@@ -140,11 +99,11 @@ function Panel({ token }: { token: string }) {
         </section>
       </div>
       <div className="app-block">
-        <SectionHead title="Historial" />
+        <SectionHead title="Estado de las rondas" />
         {view.rounds.length === 0 && <p className="rd-note">Todavía no conversan.</p>}
         <div className="rd-list">
           {view.rounds.map((round) => (
-            <RoundRow key={round.id} token={token} round={round} now={now} />
+            <RoundRow key={round.id} round={round} now={now} />
           ))}
         </div>
       </div>

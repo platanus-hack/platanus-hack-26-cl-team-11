@@ -27,7 +27,7 @@ test('the globe opens live until an operator switches it to the demo', async () 
   assert.equal(invalid.status, 400);
 });
 
-test('the panel lists recent rounds with their full conversations', async () => {
+test('the operator only receives round metrics, including when requesting an old detail URL', async () => {
   const { ctx, app, token } = setup();
   const round = ctx.agents.startRound('mesa-publica', token);
   assert.ok(round);
@@ -41,8 +41,8 @@ test('the panel lists recent rounds with their full conversations', async () => 
   assert.equal(panel.rounds[0]?.id, round.id);
   assert.equal(panel.rounds[0]?.threads, 1);
 
-  const detail = (await (await app.request(`/api/admin/${token}/rounds/${round.id}`)).json()) as { threads: Array<{ messages: Array<{ text: string }> }> };
-  assert.equal(detail.threads[0]?.messages[0]?.text, 'Hola, ¿me ayudas con pagos?');
+  assert.deepEqual(Object.keys(panel.rounds[0]!).sort(), ['calls', 'finishedAt', 'id', 'startedAt', 'status', 'threads', 'tokens']);
+  assert.equal((await app.request(`/api/admin/${token}/rounds/${round.id}`)).status, 404);
 
   assert.equal((await app.request(`/api/admin/nadie`)).status, 404);
 });

@@ -103,6 +103,7 @@ export interface AgentStore {
   addThread(draft: ThreadDraft): string;
   addMessage(threadId: string, fromToken: string, text: string): void;
   setThreadHelp(threadId: string, help: HelpAnswer): void;
+  threadCountOf(roundId: string): number;
   threadsOf(roundId: string): Thread[];
   addProposal(draft: ProposalDraftRecord): Proposal;
   findProposal(proposalId: string): Proposal | undefined;
@@ -424,6 +425,11 @@ export function openAgentStore(db: DatabaseSync): AgentStore {
 
     setThreadHelp(threadId, help) {
       db.prepare('UPDATE agent_threads SET help = ? WHERE id = ?').run(help, threadId);
+    },
+
+    threadCountOf(roundId) {
+      const row = db.prepare('SELECT COUNT(*) AS total FROM agent_threads WHERE round_id = ?').get(roundId) as { total: number };
+      return Number(row.total);
     },
 
     threadsOf(roundId) {

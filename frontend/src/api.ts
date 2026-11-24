@@ -564,8 +564,6 @@ export interface AdminRound {
   status: 'en_curso' | 'lista' | 'fallida';
   startedAt: string;
   finishedAt: string | null;
-  problem: string | null;
-  startedBy: string | null;
   threads: number;
   tokens: number;
   calls: number;
@@ -580,15 +578,8 @@ export interface AdminView {
   rounds: AdminRound[];
 }
 
-export interface AdminRoundDetail {
-  round: AdminRound;
-  threads: Array<Omit<AgentThread, 'mine' | 'messages'> & { messages: AgentMessage[] }>;
-  proposals: Array<{ id: string; topic: string; text: string }>;
-}
-
 const adminPath = (token: string) => `/api/admin/${encodeURIComponent(token)}`;
 
 export const fetchGlobeMode = () => request<{ mode: GlobeMode }>('/api/mesa/globe');
 export const fetchAdmin = (token: string) => request<AdminView>(adminPath(token));
 export const setGlobeMode = (token: string, mode: GlobeMode) => request<{ globeMode: GlobeMode }>(`${adminPath(token)}/globe`, put({ mode }));
-export const fetchAdminRound = (token: string, roundId: string) => request<AdminRoundDetail>(`${adminPath(token)}/rounds/${encodeURIComponent(roundId)}`);

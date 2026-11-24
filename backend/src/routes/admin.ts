@@ -14,7 +14,6 @@ import { asObject, NOT_FOUND } from './shared.js';
 
 const NOT_AN_OPERATOR = { error: 'Solo el equipo de Montu entra al panel.' } as const;
 const INVALID_MODE = { error: 'El globo va «mesa» (en vivo) o «demo».' } as const;
-const ROUND_NOT_FOUND = { error: 'Esa ronda no existe.' } as const;
 const INVALID_MEMBERSHIP = { error: 'Falta decir si la persona queda en la mesa.' } as const;
 const INVALID_TIRED = { error: 'Falta decir si el equipo queda cansado.' } as const;
 const DEMO_FOLDER = 'demo/';
@@ -44,9 +43,7 @@ export function adminRoutes(ctx: AppContext) {
       status: round.status,
       startedAt: round.startedAt,
       finishedAt: round.finishedAt,
-      problem: round.problem,
-      startedBy: round.startedBy ? (store.findPerson(round.startedBy)?.name ?? null) : null,
-      threads: agents.threadsOf(round.id).length,
+      threads: agents.threadCountOf(round.id),
       tokens: spent ? spent.inputTokens + spent.outputTokens : 0,
       calls: spent?.calls ?? 0,
     };
@@ -142,27 +139,6 @@ export function adminRoutes(ctx: AppContext) {
       ctx.hub.addItem(person.token, { source: hubSource.id, summary: DEMO_MESSAGE, topics, occurredAt: new Date().toISOString() });
     }
     return c.json({ id: publicIdOf(person.token), name: person.name, files: result.ok ? files.length : 0 });
-  });
-
-  routes.get('/admin/:token/rounds/:roundId', (c) => {
-    const found = operatorOf(c.req.param('token'));
-    if ('error' in found) return c.json(found.error, found.status);
-    const roundId = c.req.param('roundId');
-    const round = agents.recentRounds(MESA_TEAM_ID, RECENT_ROUNDS).find((candidate) => candidate.id === roundId);
-    if (!round) return c.json(ROUND_NOT_FOUND, 404);
-    const threads = agents.threadsOf(round.id).map((thread) => ({
-      id: thread.id,
-      topic: thread.topic,
-      requesterName: thread.requesterName,
-      helperName: thread.helperName,
-      help: thread.help,
-      messages: thread.messages.map((message) => ({ fromName: message.fromName, text: message.text, createdAt: message.createdAt })),
-    }));
-    const proposals = agents
-      .proposalsOf(MESA_TEAM_ID)
-      .filter((proposal) => proposal.roundId === round.id)
-      .map((proposal) => ({ id: proposal.id, topic: proposal.topic, text: proposal.text }));
-    return c.json({ round: roundView(round), threads, proposals });
   });
 
   return routes;

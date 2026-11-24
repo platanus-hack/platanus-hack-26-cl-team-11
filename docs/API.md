@@ -268,16 +268,15 @@ La pantalla `/admin` (`frontend/src/AdminPage.tsx`) toma la sesión de Google de
 
 - **El globo abre en: En vivo / Demo.** Fija con qué abre el globo de la pestaña Equipo para todas las personas. Cada persona puede cambiarlo en su pantalla; no se guarda.
 - **Que conversen ahora** y **Que vuelvan a conversar solos.** Usan `POST …/mesa/rounds` y `PUT …/mesa/interval` de arriba.
-- **Historial.** Las últimas 40 rondas de la mesa: estado, quién la inició, conversaciones, tokens y llamadas. Al abrir una se ven todas sus conversaciones con el texto completo y las propuestas que dejó. Quien opera ve el texto de todas las personas, no solo el suyo.
+- **Historial.** El panel muestra estado, tiempos, número de conversaciones, tokens y llamadas de las últimas 40 rondas de la mesa.
 
 | Ruta | Recibe | Responde |
 |---|---|---|
 | `GET /api/mesa/globe` | — | `{ mode: "mesa" \| "demo" }`. Pública; la lee el globo al abrir. Sin valor guardado, `mesa` |
 | `GET /api/admin/<token>` | — | `{ globeMode, configured, intervalSeconds, usage: { lastDayTokens, dailyCap }, people: [{ name, member, publishing }], rounds }` |
 | `PUT /api/admin/<token>/globe` | `{ "mode": "demo" }` | `{ globeMode }`. 400 si no es `mesa` ni `demo` |
-| `GET /api/admin/<token>/rounds/<id>` | — | `{ round, threads: [{ id, topic, requesterName, helperName, help, messages: [{ fromName, text, createdAt }] }], proposals: [{ id, topic, text }] }`. 404 si la ronda no está entre las últimas 40 |
 
-Cada elemento de `rounds` es `{ id, status, startedAt, finishedAt, problem, startedBy, threads, tokens, calls }`; `startedBy` es el nombre de quien la inició o `null` si la inició el intervalo. Las rutas `/api/admin/…` responden 404 a un token que no existe y 403 a quien no opera. El modo del globo se guarda en `mesa_settings` (clave `globe_mode`). Pruebas: `backend/test/admin.test.ts`.
+Cada elemento de `rounds` es `{ id, status, startedAt, finishedAt, threads, tokens, calls }`. Las rutas `/api/admin/…` responden 404 a un token que no existe y 403 a quien no opera. El modo del globo se guarda en `mesa_settings` (clave `globe_mode`). Pruebas: `backend/test/admin.test.ts`.
 
 ## Servidor de contexto (datos de prueba)
 

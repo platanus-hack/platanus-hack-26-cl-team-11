@@ -2,7 +2,11 @@
 
 De Rob para Mati. Escrito el 23-nov-2026 con Claude Code. Todo lo que dice «verificado» se comprobó ese día; lo demás va marcado.
 
-## En una frase
+## Decisión del 24 de noviembre
+
+Mati confirmó que cada dueño autoriza compartir su tarea trabada y que los agentes de equipos privados salen de la mesa pública. El historial de /admin muestra el estado operativo de las rondas. Los avisos personales se consultan desde la cuenta de su destinatario.
+
+## Estado al 23 de noviembre
 
 Montu ya puede avisarle cosas a un equipo privado y conectarse a Claude como conector, y está en producción. **Ningún aviso ha salido todavía con datos reales.** Para empezar a usarlo faltan tres pasos del equipo y cuatro cosas que dependen de ti o de Ian.
 
