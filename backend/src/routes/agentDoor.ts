@@ -6,6 +6,7 @@ import { rateLimit } from '../rateLimit.js';
 import type { AgentMessage } from '../whatsapp/bridge.js';
 import type { Assistant } from '../assistants/store.js';
 import { teamThreads, threadTools, ThreadError } from '../board/threads.js';
+import { MESA_TEAM_ID } from '../mesa/store.js';
 import { sessionTokenOf } from '../session.js';
 import { repoWriter } from './repo.js';
 import { asObject } from './shared.js';
@@ -106,6 +107,14 @@ export function agentDoorRoutes(ctx: AppContext) {
   const { write } = repoWriter(ctx);
   const context = teamContext(ctx);
   const threads = teamThreads(ctx);
+  routes.post('/team-threads/:team/join', limited, (c) => {
+    const owner = sessionTokenOf(c,ctx.vault);
+    if (!owner) return c.json({error:'Entra con Google.'},401);
+    if (!c.req.header('content-type')?.startsWith('application/json') || c.req.header('sec-fetch-site') === 'cross-site') return c.json({error:'Solicita acceso desde Montu.'},403);
+    const team = c.req.param('team');
+    if (team === MESA_TEAM_ID || ctx.rooms.roomOfTeam(team) || !ctx.teams.findTeam(team)) return c.notFound();
+    return c.json({estado:ctx.teams.requestJoin(team,owner)});
+  });
   routes.get('/team-threads/:team/:topic?', async (c) => {
     c.header('Cache-Control','private, no-store');
     const owner=sessionTokenOf(c,ctx.vault);

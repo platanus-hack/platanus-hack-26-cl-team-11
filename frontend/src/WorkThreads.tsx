@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { request, SignInRequired } from './api';
+import { request, post, SignInRequired } from './api';
 import { CopyButton } from './CopyButton';
 import { Face } from './Face';
 import { SectionHead } from './SectionHead';
@@ -38,6 +38,12 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
   const base = '/equipo/' + encodeURIComponent(team) + '/hilos';
   const [data, setData] = useState<Result>();
   const [error, setError] = useState('');
+  const [joining,setJoining]=useState(false);
+  const [pending,setPending]=useState(false);
+  async function join() {
+    setJoining(true);
+    try { await request('/api/team-threads/'+encodeURIComponent(team)+'/join',post({}));setPending(true); } catch(e) {setError(e instanceof Error?e.message:'No se pudo solicitar acceso.');} finally {setJoining(false);}
+  }
   const [login, setLogin] = useState(false);
   useEffect(() => {
     let active = true;
@@ -72,9 +78,8 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
           Entrar con Google
         </a>
       ) : error ? (
-        <p role="alert" className="rd-note">
-          {error}
-        </p>
+        <><p role="alert" className="rd-note">{pending?'Solicitud enviada. Cuando el equipo la apruebe, vuelve a abrir este enlace.':error}</p>
+          {!pending && error==='Este hilo requiere pertenecer al equipo privado.' && <button className="rd-button" disabled={joining} onClick={()=>void join()}>Solicitar acceso al equipo</button>}</>
       ) : !data ? (
         <p role="status">Cargando…</p>
       ) : (
