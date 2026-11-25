@@ -3,6 +3,7 @@ import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { AppContext } from './context.js';
 import { duelRoutes } from './duels/routes.js';
+import { adminMcpRoutes } from './routes/adminMcp.js';
 import { adminRoutes } from './routes/admin.js';
 import { agentDoorRoutes } from './routes/agentDoor.js';
 import { agentRoutes } from './routes/agents.js';
@@ -83,6 +84,7 @@ export function createApp(ctx: AppContext) {
   api.route('/', simRoutes(ctx));
   api.route('/', whatsappRoutes(ctx));
   api.route('/', agentDoorRoutes(ctx));
+  api.route('/', adminMcpRoutes(ctx));
   api.route('/', onboardingRoutes(ctx));
   api.route('/', profileRoutes(ctx));
   api.route('/', faceRoutes(ctx));

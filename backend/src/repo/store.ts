@@ -189,6 +189,7 @@ export function openRepoStore(db: DatabaseSync, now: () => Date = () => new Date
       return Number(row?.last ?? 0);
     },
 
-    shared: (personToken) => files(personToken).filter((file) => file.share === 'siempre'),
+    shared: (personToken) =>
+      (db.prepare(`SELECT ${FILE_COLUMNS} FROM repo_files WHERE person_token = ? AND share = 'siempre' ORDER BY path`).all(personToken) as unknown as FileRow[]).map(toFile),
   };
 }

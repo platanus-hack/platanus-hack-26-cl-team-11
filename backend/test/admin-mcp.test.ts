@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
+import { test } from 'node:test';
+import { createApp } from '../src/app.js';
+import { publicIdOf, sha256 } from '../src/codes.js';
+import { createContext } from '../src/context.js';
+import { openLoginStore } from '../src/logins.js';
+import { SESSION_COOKIE } from '../src/session.js';
+
+test('an operator explicitly binds two read-only clients, measures both personal transports and sees only current shared context', async () => {
+  const email = 'operator@example.test';
+  const ctx = createContext({ location: ':memory:', model: null, config: { publicBaseUrl: null, oauth: { google: { clientId: 'test', clientSecret: 'test' } }, mesaOperators: [email] } });
+  const app = createApp(ctx);
+  const me = ctx.store.addPerson('Operadora');
+  const teammate = ctx.store.addPerson('Compañera');
+  const other = ctx.store.addPerson('Otro');
+  const group = ctx.teams.createTeam('Equipo A');
+  const hidden = ctx.teams.createTeam('Equipo B');
+  ctx.teams.addMember(group.id, me.token); ctx.teams.addMember(group.id, teammate.token); ctx.teams.addMember(hidden.id, other.token);
+  const login = openLoginStore(ctx.db);
+  login.link(email, me.token);
+  login.link('other@example.test', other.token);
+  const key = (prefix: string) => prefix + randomBytes(32).toString('base64url');
+  const personal = [key('rda_'), key('rda_')], admin = [key('mta_'), key('mta_')];
+  const payload = { email, personal: personal.map(sha256), admin: admin.map(sha256) };
+  const post = (path: string, body: unknown, headers = {}) => app.request('/api' + path, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) });
+  const session = (token: string) => ({ cookie: SESSION_COOKIE + '=' + ctx.vault.seal(JSON.stringify({ token })) });
+  const bearer = (token: string) => ({ authorization: 'Bearer ' + token });
+  const call = (token: string, name: string, args = {}) => post('/operator/mcp', { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }, bearer(token));
+  const result = async (response: Response) => JSON.parse((await response.json() as { result: { content: Array<{ text: string }> } }).result.content[0]!.text);
+  assert.equal((await post('/operator/bind', payload)).status, 401);
+  assert.equal((await post('/operator/bind', payload, session(other.token))).status, 403);
+  assert.equal((await post('/operator/bind', { ...payload, email: 'other@example.test' }, session(me.token))).status, 403);
+  assert.equal((await post('/operator/bind', payload, session(me.token))).status, 200);
+  assert.equal((await post('/operator/bind', payload, session(me.token))).status, 200);
+  assert.equal(ctx.assistants.assistantsOf(me.token).length, 2);
+  assert.equal((await call(personal[0]!, 'montu_admin_uso')).status, 401);
+  assert.equal((await app.request('/api/agent/context', { headers: bearer(admin[0]!) })).status, 401);
+  for (const token of personal) assert.equal((await app.request('/api/agent/context', { headers: bearer(token) })).status, 200);
+  await post('/mcp', { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'ronda_contexto' } }, bearer(personal[1]!));
+  await post('/agent/handoff', { equipo: group.id, revision: 0, texto: 'Listo para revisión.' }, bearer(personal[0]!));
+  const usage = await result(await call(admin[0]!, 'montu_admin_uso'));
+  const mine = usage.personas.find((p: { nombre: string }) => p.nombre === me.name);
+  assert.equal(mine.lecturas, 3);
+  assert.equal(mine.cambiosTraspaso, 1);
+  ctx.repo.commit(teammate.token, { by: 'test', message: 'Contexto', topics: [], remove: [], files: [
+    { path: 'equipo.md', content: 'Trabajo compartido', share: 'siempre' },
+    { path: 'personal.md', content: 'Solo personal', share: 'nunca' },
+  ] });
+  const directory = await result(await call(admin[1]!, 'montu_admin_contextos'));
+  assert.deepEqual(directory.equipos.map((t: { nombre: string }) => t.nombre), ['Equipo A']);
+  assert.ok(JSON.stringify(directory).includes('Listo para revisión.'));
+  assert.ok(!JSON.stringify(directory).includes('personal.md'));
+  const args = { equipo: group.id, persona: publicIdOf(teammate.token), ruta: 'equipo.md' };
+  assert.equal((await result(await call(admin[1]!, 'montu_admin_archivo', args))).texto, 'Trabajo compartido');
+  ctx.repo.setShare(teammate.token, 'equipo.md', 'preguntar');
+  assert.ok((await (await call(admin[1]!, 'montu_admin_archivo', args)).text()).includes('"isError":true'));
+  assert.ok(!(await (await call(admin[0]!, 'montu_admin_contextos')).text()).includes('equipo.md'));
+  ctx.assistants.revoke(me.token, ctx.assistants.authenticate(personal[0]!)!.id);
+  assert.equal((await call(admin[0]!, 'montu_admin_uso')).status, 401);
+  assert.equal((await call(admin[1]!, 'montu_admin_uso')).status, 200);
+  ctx.config.mesaOperators = [];
+  assert.equal((await call(admin[1]!, 'montu_admin_uso')).status, 403);
+});

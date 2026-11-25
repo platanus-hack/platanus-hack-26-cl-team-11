@@ -22,3 +22,7 @@ Entra a https://montu.fun con tu cuenta. En **Equipo** acepta la invitación al 
 - **Chat sin herramientas.** Abre **Tú → Tu agente → Ver contexto para pegar**, copia la lectura a tu chat personal y usa su fecha. Para devolver un avance, pega el resumen en esa misma sección, selecciona el equipo y publícalo. Para actualizar la lectura, vuelve a Montu.
 
 Si falta la conexión o recibes 401, indica que necesitas vincular ese agente en «Tu agente». Si la lista de equipos está vacía, pide la invitación al equipo privado. Si faltan tareas o agenda, cada persona conecta sus fuentes en **Ajustes → Fuentes**. El intercambio de traspasos funciona desde que dos personas pertenecen al mismo equipo.
+
+## Prueba y administración
+
+Para probar el intercambio, publica un traspaso acordado, abre una sesión del otro agente y comprueba el texto, la fecha, el autor y el equipo. Si tu persona activó el conector independiente `montu-admin`, consulta `montu_admin_uso` para medir actividad, `montu_admin_contextos` para listar los contextos compartidos y `montu_admin_archivo` para leer una ruta del directorio. Las lecturas y los cambios de traspaso tienen una ventana de 30 días UTC desde el inicio de la medición. Los tokens del modelo se atribuyen a la ronda.

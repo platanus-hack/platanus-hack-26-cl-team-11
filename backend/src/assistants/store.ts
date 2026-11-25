@@ -50,6 +50,7 @@ export interface AssistantStore {
   pairingState(code: string): { state: PairingState; code: string; personToken: string | null; expiresAt: string | null };
   redeem(code: string, kind: AssistantKind, label: string): Redeemed;
   connect(personToken: string, kind: AssistantKind, label: string): { assistant: Assistant; token: string } | null;
+  bindLocal(personToken: string, kind: AssistantKind, digest: string): Assistant | null;
   authenticate(token: string): Assistant | undefined;
   assistantsOf(personToken: string): Assistant[];
   revoke(personToken: string, assistantId: string): boolean;
@@ -118,14 +119,14 @@ export function openAssistantStore(db: DatabaseSync, now: () => Date = () => new
 
   const newToken = () => `${ASSISTANT_TOKEN_PREFIX}${randomBytes(TOKEN_BYTES).toString('base64url')}`;
 
-  const insert = (personToken: string, kind: AssistantKind, label: string, token: string, instant: string): Assistant => {
+  const insert = (personToken: string, kind: AssistantKind, label: string, digest: string, instant: string): Assistant => {
     const assistant: Assistant = { id: `asi_${randomBytes(8).toString('hex')}`, personToken, kind, label, createdAt: instant, lastSeenAt: instant };
     db.prepare('INSERT INTO assistants (id, person_token, kind, label, token_hash, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
       assistant.id,
       personToken,
       kind,
       label,
-      sha256(token),
+      digest,
       instant,
       instant,
     );
@@ -156,13 +157,20 @@ export function openAssistantStore(db: DatabaseSync, now: () => Date = () => new
       const claimed = db.prepare('UPDATE assistant_pairings SET used_at = ? WHERE code = ? AND used_at IS NULL').run(instant, row.code);
       if (Number(claimed.changes) !== 1) return { state: 'usado' };
       const token = newToken();
-      return { state: 'vigente', assistant: insert(row.person_token, kind, label, token, instant), token };
+      return { state: 'vigente', assistant: insert(row.person_token, kind, label, sha256(token), instant), token };
     },
 
     connect(personToken, kind, label) {
       if (assistantsOf(personToken).length >= MAX_ASSISTANTS_PER_PERSON) return null;
       const token = newToken();
-      return { assistant: insert(personToken, kind, label, token, now().toISOString()), token };
+      return { assistant: insert(personToken, kind, label, sha256(token), now().toISOString()), token };
+    },
+
+    bindLocal(personToken, kind, digest) {
+      const known = db.prepare(`SELECT ${ASSISTANT_COLUMNS}, revoked_at FROM assistants WHERE token_hash = ?`).get(digest) as (AssistantRow & { revoked_at: string | null }) | undefined;
+      if (known) return known.person_token === personToken && known.kind === kind && !known.revoked_at ? toAssistant(known) : null;
+      if (assistantsOf(personToken).length >= MAX_ASSISTANTS_PER_PERSON) return null;
+      return insert(personToken, kind, ASSISTANT_NAMES[kind], digest, now().toISOString());
     },
 
     authenticate(token) {
@@ -181,7 +189,7 @@ export function openAssistantStore(db: DatabaseSync, now: () => Date = () => new
       const connected = assistantsOf(personToken);
       if (connected.some((assistant) => assistant.kind === kind && assistant.label === label)) return { label, created: false };
       if (connected.length >= MAX_ASSISTANTS_PER_PERSON) return { label, created: false };
-      insert(personToken, kind, label, newToken(), now().toISOString());
+      insert(personToken, kind, label, sha256(newToken()), now().toISOString());
       return { label, created: true };
     },
 

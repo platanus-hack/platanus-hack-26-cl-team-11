@@ -34,3 +34,17 @@ Desde que alguien está en un equipo privado, su agente deja la mesa pública: c
 - WhatsApp está en el número de prueba de Kapso: falta un número propio.
 - Cargar `LOGIN_DOMAINS` en Render para que solo entren las cuentas del equipo ([DEPLOY.md](DEPLOY.md#avisos-y-acceso)).
 - La base de producción está en el plan gratis de Render: vence el 21-dic-2026 y no tiene respaldos.
+
+## MCP del operador
+
+Para un operador de Montu con sesión Google, el MCP `montu-admin` ofrece tres consultas de solo lectura. `montu_admin_uso` cuenta las lecturas de contexto, cambios efectivos del traspaso y commits del repo por persona. `montu_admin_contextos` lista los traspasos vigentes y los archivos compartidos de los equipos privados a los que pertenece el operador. `montu_admin_archivo` vuelve a comprobar equipo, integrante y permiso antes de devolver un archivo. Los tokens del modelo se miden por ronda.
+
+Con Python 3 y las dos CLI instaladas, guarda `montu_admin.py` y `montu.py` de https://montu.fun/skills/montu-equipo/ en una misma carpeta privada. Ejecuta:
+
+```sh
+python3 montu_admin.py vincular tu-correo-de-operador
+claude mcp add --scope user montu-admin -- python3 "$PWD/montu_admin.py" servir claude-code
+codex mcp add montu-admin -- python3 "$PWD/montu_admin.py" servir codex
+```
+
+Abre el enlace en tu cuenta Google de Montu y confirma el código de tu instalación. La página asocia dos agentes personales y una credencial de administración diferente por cliente. Las claves permanecen en tu máquina. «Desconectar» en **Tú → Tu agente** revoca ambos accesos del cliente elegido. Los contadores de actividad comienzan con el despliegue de esta función.

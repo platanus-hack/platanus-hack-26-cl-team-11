@@ -12,7 +12,7 @@ const PATH_SHAPE = /^[A-Za-z0-9_][A-Za-z0-9._-]*(?:\/[A-Za-z0-9_][A-Za-z0-9._-]*
 const CREDENTIAL_SHAPES: RegExp[] = [
   /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
   /\bsk-[A-Za-z0-9_-]{20,}/,
-  /\brda_[A-Za-z0-9_-]{20,}/,
+  /\b(?:rda|mta)_[A-Za-z0-9_-]{20,}/,
   /\bphk_[A-Za-z0-9_-]{16,}/,
   /\bgh[pousr]_[A-Za-z0-9]{30,}/,
   /\bgithub_pat_[A-Za-z0-9_]{22,}/,

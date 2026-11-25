@@ -1,3 +1,4 @@
+import { activityOf } from '../admin/activity.js';
 import { agendaOf } from '../agents/cards.js';
 import { currentDigest } from '../agents/digest.js';
 import { cardDepsFrom } from '../agents/deps.js';
@@ -14,9 +15,23 @@ export interface Writer {
   label: string;
 }
 
+export function memberWork(ctx: AppContext, person: { token: string; name: string }, now: Date, includeOwn = false) {
+  const policy = cardDepsFrom(ctx).policies.get(person.token);
+  const events = withoutDemo(ctx.store.listSignalEvents(person.token, now));
+  const sharesWork = includeOwn || policy.expertise === 'siempre';
+  const signals = sharesWork ? deriveSignals(events, now) : null;
+  const digest = sharesWork ? currentDigest(ctx, person.token) : undefined;
+  return {
+    nombre: person.name,
+    trabajo: [...new Set([...(signals?.focus ?? []), ...(digest?.workingOn ?? [])])],
+    temas: [...new Set([...(signals?.expertise ?? []), ...(digest?.expertise ?? [])])],
+    agenda: includeOwn || policy.load === 'siempre' ? agendaOf(events, now) : [],
+  };
+}
+
 export function teamContext(ctx: AppContext) {
   const { db, teams, rooms, store } = ctx;
-  const { policies } = cardDepsFrom(ctx);
+  const activity = activityOf(db);
   db.exec(`
     CREATE TABLE IF NOT EXISTS team_handoffs (
       team_id TEXT NOT NULL REFERENCES teams (id),
@@ -41,7 +56,7 @@ export function teamContext(ctx: AppContext) {
     const now = new Date();
     const person = store.findPerson(owner);
     const sync = store.syncBySource(owner);
-    return {
+    const snapshot = {
       consultado: now.toISOString(),
       persona: person?.name,
       equipos: privateTeams(owner).map((team) => {
@@ -52,20 +67,7 @@ export function teamContext(ctx: AppContext) {
           id: team.id,
           nombre: team.name,
           miRevision: Number(rows.find((row) => row.author_token === owner && row.writer_id === writer.id)?.revision ?? 0),
-          personas: members.map((member) => {
-            const me = member.token === owner;
-            const policy = policies.get(member.token);
-            const events = withoutDemo(store.listSignalEvents(member.token, now));
-            const sharesWork = me || policy.expertise === 'siempre';
-            const signals = sharesWork ? deriveSignals(events, now) : null;
-            const digest = sharesWork ? currentDigest(ctx, member.token) : undefined;
-            return {
-              nombre: member.name,
-              trabajo: [...new Set([...(signals?.focus ?? []), ...(digest?.workingOn ?? [])])],
-              temas: [...new Set([...(signals?.expertise ?? []), ...(digest?.expertise ?? [])])],
-              agenda: me || policy.load === 'siempre' ? agendaOf(events, now) : [],
-            };
-          }),
+          personas: members.map((member) => memberWork(ctx, member, now, member.token === owner)),
           traspasos: rows.filter((row) => names.has(String(row.author_token)) && row.body).map((row) => ({
             autor: names.get(String(row.author_token)), mio: row.author_token === owner && row.writer_id === writer.id, agente: row.writer_label, texto: row.body, actualizado: row.updated_at,
           })),
@@ -77,6 +79,8 @@ export function teamContext(ctx: AppContext) {
         .map(({ path, content, updatedAt }) => ({ path, content, updatedAt })),
       miBandeja: ctx.whatsapp.inboxOf(owner),
     };
+    activity(owner, 'read');
+    return snapshot;
   };
 
   const publish = (owner: string, writer: Writer, args: Record<string, unknown>) => {
@@ -92,10 +96,21 @@ export function teamContext(ctx: AppContext) {
     const previous = db.prepare('SELECT body, revision FROM team_handoffs WHERE team_id = ? AND author_token = ? AND writer_id = ?').get(...key);
     if (previous?.body === body || (!previous && !body)) return { revision: Number(previous?.revision ?? 0) };
     const at = new Date().toISOString();
-    const changed = revision === 0
-      ? db.prepare('INSERT INTO team_handoffs (team_id, author_token, writer_id, writer_label, body, revision, updated_at) VALUES (?, ?, ?, ?, ?, 1, ?) ON CONFLICT DO NOTHING').run(...key, writer.label, body, at)
-      : db.prepare('UPDATE team_handoffs SET body = ?, revision = revision + 1, updated_at = ? WHERE team_id = ? AND author_token = ? AND writer_id = ? AND revision = ?').run(body, at, ...key, revision);
-    if (!changed.changes) return { error: 'El traspaso cambió. Lee el contexto y combina los cambios antes de guardar.', status: 409 } as const;
+    db.exec('BEGIN');
+    try {
+      const changed = revision === 0
+        ? db.prepare('INSERT INTO team_handoffs (team_id, author_token, writer_id, writer_label, body, revision, updated_at) VALUES (?, ?, ?, ?, ?, 1, ?) ON CONFLICT DO NOTHING').run(...key, writer.label, body, at)
+        : db.prepare('UPDATE team_handoffs SET body = ?, revision = revision + 1, updated_at = ? WHERE team_id = ? AND author_token = ? AND writer_id = ? AND revision = ?').run(body, at, ...key, revision);
+      if (!changed.changes) {
+        db.exec('ROLLBACK');
+        return { error: 'El traspaso cambió. Lee el contexto y combina los cambios antes de guardar.', status: 409 } as const;
+      }
+      activity(owner, 'publish');
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
     return { revision: revision + 1 };
   };
   return { read, publish };

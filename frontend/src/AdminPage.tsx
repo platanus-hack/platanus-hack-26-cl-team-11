@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AdminBinding } from './AdminBinding';
 import { formatAgo } from './ago';
 import { fetchAdmin, fetchSessionPerson, setGlobeMode, setMesaInterval, startMesaRound, type AdminRound, type AdminView, type GlobeMode } from './api';
 import { countOf } from './format';
@@ -62,6 +63,7 @@ function Panel({ token }: { token: string }) {
 
   return (
     <>
+      <AdminBinding />
       <div className="app-block">
         <SectionHead title="Panel" first end={<span className="rd-chip rd-glass">{running ? 'Conversando' : 'En pausa'}</span>} />
         {problem && (
