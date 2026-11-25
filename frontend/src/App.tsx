@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import markUrl from '../../design/logo/montu-mark.svg';
+import { WorkThreads } from './WorkThreads';
 import { AdminPage } from './AdminPage';
 import { DuelsPage } from './DuelsPage';
 import { ConnectPage } from './ConnectPage';
@@ -80,6 +81,8 @@ function Home() {
 
 function Screen() {
   const [, section, token] = window.location.pathname.split('/');
+  const [, , , area, topic] = window.location.pathname.split('/');
+  if (section === 'equipo' && token && area === 'hilos') return <Shell><WorkThreads team={token} topic={topic}/></Shell>;
   if (section === 'duelos') return <Shell wide><DuelsPage /></Shell>;
   if (section === 'admin')
     return (

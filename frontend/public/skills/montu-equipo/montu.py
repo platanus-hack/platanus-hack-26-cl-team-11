@@ -1,6 +1,7 @@
 """Instala Montu y consulta el contexto de tu equipo con tu identidad personal."""
 import argparse
 import getpass
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -93,12 +94,41 @@ def main():
             sub.add_argument("texto", help="Resumen vigente. Vacío para retirarlo.")
         elif cmd in ("decir", "responder"):
             sub.add_argument("texto", help="Mensaje o id de la opción elegida")
+    for kind in ('hilos', 'hilo', 'publicar', 'novedades'):
+        sub = commands.add_parser(kind)
+        sub.add_argument('equipo')
+        if kind == 'hilos':
+            sub.add_argument('--buscar', default='')
+        elif kind in ('hilo', 'publicar'):
+            ref = sub.add_mutually_exclusive_group(required=True)
+            ref.add_argument('--referencia')
+            ref.add_argument('--hilo')
+        if kind == 'publicar':
+            sub.add_argument('--titulo')
+            sub.add_argument('--tipo', choices=['hallazgo','pregunta','decision','cierre'], default='hallazgo')
+            sub.add_argument('--texto', required=True)
+            sub.add_argument('--clave', help='Identificador estable para reintentos.')
+        if kind in ('hilo','hilos'):
+            sub.add_argument('--antes', type=int)
+        if kind == 'novedades':
+            sub.add_argument('--desde', type=int, default=0)
     args = parser.parse_args()
     if args.action == "instalar":
         return install(args.cliente)
     client = next((key for key, folder in CLIENTS.items() if folder.resolve() == Path(__file__).resolve().parent), None)
     if not client or not token_path(client).exists():
         raise ValueError("Ejecuta primero montu.py instalar para tu cliente y usa la copia instalada.")
+    operations = {'hilos':'ronda_hilos','hilo':'ronda_hilo','publicar':'ronda_hilo_publicar','novedades':'ronda_hilos_novedades'}
+    if args.action in operations:
+        fields = {k:v for k,v in vars(args).items() if k != 'action' and v is not None}
+        if args.action == 'publicar' and 'clave' not in fields:
+            fields['clave'] = hashlib.sha256(json.dumps(fields, sort_keys=True).encode()).hexdigest()
+        payload = {'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':operations[args.action],'arguments':fields}}
+        response = json.loads(fetch(BASE+'/api/mcp', payload, token_path(client).read_text().strip()))
+        result = response.get('result') or {}
+        if result.get('isError') or not result.get('content'):
+            raise ValueError((result.get('content') or [{'text':'Montu no pudo completar la consulta.'}])[0]['text'])
+        return print(result['content'][0]['text'])
     routes = {"contexto": "context", "pendientes": "inbox", "traspaso": "handoff", "decir": "say", "responder": "answer"}
     body = None
     if args.action == "traspaso":

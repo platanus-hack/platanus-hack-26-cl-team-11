@@ -108,7 +108,7 @@ export function oauthRoutes(ctx: AppContext) {
     return true;
   };
 
-  const adminReturn = (value: unknown) => typeof value === 'string' && value.length <= 2048 && /^\/admin(?:[?#][^\r\n]*)?$/.test(value) ? value : undefined;
+  const adminReturn = (value: unknown) => typeof value === 'string' && value.length <= 2048 && /^\/(?:admin|equipo\/team_[a-zA-Z0-9_-]+\/hilos(?:\/[a-f0-9]{24})?)(?:[?#][^\r\n]*)?$/.test(value) ? value : undefined;
   const openState = (sealed: string | undefined, provider: string): OAuthState | null => {
     if (!sealed) return null;
     try {

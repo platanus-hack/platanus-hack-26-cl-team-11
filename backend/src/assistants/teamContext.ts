@@ -66,6 +66,7 @@ export function teamContext(ctx: AppContext) {
         return {
           id: team.id,
           nombre: team.name,
+          hilos: `/equipo/${team.id}/hilos`,
           miRevision: Number(rows.find((row) => row.author_token === owner && row.writer_id === writer.id)?.revision ?? 0),
           personas: members.map((member) => memberWork(ctx, member, now, member.token === owner)),
           traspasos: rows.filter((row) => names.has(String(row.author_token)) && row.body).map((row) => ({

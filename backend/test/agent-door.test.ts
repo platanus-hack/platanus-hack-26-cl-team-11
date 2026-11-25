@@ -125,7 +125,7 @@ test('the three actions and the repo are MCP tools, and only for an assistant th
   assert.equal((await rpc({ jsonrpc: '2.0', method: 'notifications/initialized' })).status, 202);
 
   const listed = await result<{ tools: Array<{ name: string }> }>({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_contexto', 'ronda_traspaso', 'ronda_decir', 'ronda_pendientes', 'ronda_responder', 'ronda_repo_ver', 'ronda_repo_guardar']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_contexto', 'ronda_traspaso', 'ronda_decir', 'ronda_pendientes', 'ronda_responder', 'ronda_repo_ver', 'ronda_repo_guardar','ronda_hilos','ronda_hilo','ronda_hilo_publicar','ronda_hilos_novedades']);
 
   const said = await result<{ content: Array<{ text: string }> }>({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'ronda_decir', arguments: { mensaje: 'hola' } } });
   assert.equal(said.content[0]?.text, 'Hola. Puedes contarme cómo vienes.');

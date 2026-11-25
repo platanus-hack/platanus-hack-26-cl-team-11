@@ -5,6 +5,8 @@ import type { AppContext } from '../context.js';
 import { rateLimit } from '../rateLimit.js';
 import type { AgentMessage } from '../whatsapp/bridge.js';
 import type { Assistant } from '../assistants/store.js';
+import { teamThreads, threadTools, ThreadError } from '../board/threads.js';
+import { sessionTokenOf } from '../session.js';
 import { repoWriter } from './repo.js';
 import { asObject } from './shared.js';
 
@@ -27,6 +29,14 @@ const FILE_SHAPE = {
   },
   required: ['path', 'content'],
 } as const;
+
+const textArg = { type: 'string' };
+const threadSchemas = [
+  ['Busca hilos por referencia, tema o persona en tu equipo.', { buscar:textArg, antes:{type:'integer'} }, []],
+  ['Lee el hilo y su conversación. Indica hilo o referencia exacta.', { hilo:textArg, referencia:textArg, antes:{type:'integer'} }, []],
+  ['Publica un avance compartible en el hilo. Reutiliza la misma clave al reintentar. Usa el ID de ticket, owner/repo#PR o tema estable como referencia.', { referencia:textArg, hilo:textArg,titulo:textArg,texto:textArg,tipo:{type:'string',enum:['hallazgo','pregunta','decision','cierre']},clave:textArg }, ['texto','clave']],
+  ['Lee las siguientes 60 actualizaciones del equipo desde un ID. Entrega mensajes en orden.', { desde:{type:'integer'} }, []],
+] as const;
 
 const TOOLS = [
   {
@@ -78,6 +88,10 @@ const TOOLS = [
       required: ['mensaje'],
     },
   },
+  ...threadTools.map((name,i) => {
+    const [description,properties,required]=threadSchemas[i]!;
+    return {name,description,inputSchema:{type:'object',properties:{equipo:textArg,...properties},required:['equipo',...required]},annotations:{readOnlyHint:i!==2}};
+  }),
 ] as const;
 
 const asText = (messages: AgentMessage[]): string =>
@@ -91,6 +105,16 @@ export function agentDoorRoutes(ctx: AppContext) {
   const limited = rateLimit(CALLS_PER_MINUTE);
   const { write } = repoWriter(ctx);
   const context = teamContext(ctx);
+  const threads = teamThreads(ctx);
+  routes.get('/team-threads/:team/:topic?', async (c) => {
+    c.header('Cache-Control','private, no-store');
+    const owner=sessionTokenOf(c,ctx.vault);
+    if (!owner) return c.json({error:'Entra con Google para leer los hilos.'},401);
+    const topic=c.req.param('topic');
+    try {
+      return c.json(await threads(topic?'ronda_hilo':'ronda_hilos',{personToken:owner,id:'web',label:'Montu'},{equipo:c.req.param('team'),hilo:topic,buscar:c.req.query('buscar'),antes:c.req.query('antes')}));
+    } catch(e) {if (e instanceof ThreadError) return c.json({error:e.message},e.status); throw e;}
+  });
   const web = { id: 'web', label: 'Montu web' };
   routes.get('/people/:token/agent-context', (c) => {
     const owner = c.req.param('token');
@@ -213,6 +237,10 @@ export function agentDoorRoutes(ctx: AppContext) {
     if (method === 'tools/list') return result({ tools: TOOLS });
     if (method === 'tools/call') {
       const args = asObject(JSON.stringify(params.arguments ?? {}));
+      if (threadTools.some(n=>n===params.name)) {
+        try { return result({content:[{type:'text',text:JSON.stringify(await threads(String(params.name),assistant,args))}]}); }
+        catch(e) { if (e instanceof ThreadError) return result({isError:true,content:[{type:'text',text:e.message}]}); throw e; }
+      }
       if (params.name === 'ronda_traspaso') {
         const saved = context.publish(assistant.personToken, assistant, args);
         return result({ isError: Boolean(saved.error), content: [{ type: 'text', text: JSON.stringify(saved) }] });
