@@ -19,6 +19,11 @@ export function serveFrontend(app: Hono, distDir: string): boolean {
   const root = relative(process.cwd(), distDir) || '.';
   app.use(ASSETS_ROUTE, cached(NEVER_CHANGES), serveStatic({ root }));
   app.get(ASSETS_ROUTE, (c) => c.notFound());
+  app.use('/skills/*', cached(ALWAYS_ASK), async (c, next) => {
+    await next();
+    if (c.res.ok && c.req.path.endsWith('.md')) c.res.headers.set('Content-Type', 'text/plain; charset=utf-8');
+  }, serveStatic({ root }));
+  app.get('/skills/*', (c) => c.notFound());
   app.use('*', cached(ALWAYS_ASK), serveStatic({ root }));
   app.get('*', cached(ALWAYS_ASK), serveStatic({ root, path: 'index.html' }));
   return true;

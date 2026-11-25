@@ -12,6 +12,8 @@ function appWithBuild() {
   writeFileSync(join(dist, 'index.html'), '<!doctype html><title>Montu</title>');
   writeFileSync(join(dist, 'assets', 'index-abc123.js'), 'export {};');
   writeFileSync(join(dist, 'sw.js'), 'self.skipWaiting();');
+  mkdirSync(join(dist, 'skills/montu-equipo'), { recursive: true });
+  writeFileSync(join(dist, 'skills/montu-equipo/SYSTEM.md'), 'Instrucción del equipo');
   const app = new Hono();
   assert.equal(serveFrontend(app, dist), true);
   return app;
@@ -43,4 +45,12 @@ test('cualquier ruta de la app entrega la página y pide revisarla cada vez', as
 
 test('sin compilación no se registra nada', () => {
   assert.equal(serveFrontend(new Hono(), mkdtempSync(join(tmpdir(), 'montu-vacio-'))), false);
+});
+
+test('las instrucciones de un agente se leen en el navegador y un archivo de skill ausente da 404', async () => {
+  const app = appWithBuild();
+  const page = await app.request('/skills/montu-equipo/SYSTEM.md');
+  assert.equal(page.headers.get('content-type'), 'text/plain; charset=utf-8');
+  assert.equal(await page.text(), 'Instrucción del equipo');
+  assert.equal((await app.request('/skills/montu-equipo/ausente.md')).status, 404);
 });
