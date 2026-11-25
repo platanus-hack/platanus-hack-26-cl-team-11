@@ -125,7 +125,7 @@ test('the three actions and the repo are MCP tools, and only for an assistant th
   assert.equal((await rpc({ jsonrpc: '2.0', method: 'notifications/initialized' })).status, 202);
 
   const listed = await result<{ tools: Array<{ name: string }> }>({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
-  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_decir', 'ronda_pendientes', 'ronda_responder', 'ronda_repo_ver', 'ronda_repo_guardar']);
+  assert.deepEqual(listed.tools.map((tool) => tool.name), ['ronda_contexto', 'ronda_traspaso', 'ronda_decir', 'ronda_pendientes', 'ronda_responder', 'ronda_repo_ver', 'ronda_repo_guardar']);
 
   const said = await result<{ content: Array<{ text: string }> }>({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'ronda_decir', arguments: { mensaje: 'hola' } } });
   assert.equal(said.content[0]?.text, 'Hola. Puedes contarme cómo vienes.');
@@ -181,4 +181,61 @@ test('the pending tool says what is new since the last time this assistant looke
   await post('/agent/say', { text: 'hola' });
   assert.match(await pending(), /^Nuevo desde la última vez:\nHola\./);
   assert.match(await pending(), /^Nuevo desde la última vez:\nSin novedades\./);
+});
+
+test('handoffs follow the private team and connector across clients, with revocation, withdrawal and revision checks', async () => {
+  const { ctx, app, ana, tomas, headers, post } = setup(() => ({ intent: 'otro' }), { whatsapp: false });
+  const team = ctx.teams.teamsOf(ana.token)[0]!;
+  const room = ctx.teams.createTeam('Sala con QR');
+  ctx.teams.addMember(room.id, ana.token);
+  ctx.rooms.createRoom(room.id);
+  const other = ctx.store.addPerson('Otra persona');
+  const second = ctx.teams.createTeam('Otro equipo');
+  ctx.teams.addMember(second.id, other.token);
+  ctx.teams.addMember(second.id, tomas.token);
+  const codex = ctx.assistants.connect(tomas.token, 'codex', 'Codex de Tomás')!;
+  const chat = ctx.assistants.connect(ana.token, 'chatgpt', 'ChatGPT de Ana')!;
+  const rpc = async (token: string, name: string, args = {}) => {
+    const response = await app.request('/api/mcp/k/' + token, { method: 'POST', body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }) });
+    assert.equal(response.status, 200);
+    const envelope = await response.json() as { result: { content: Array<{ text: string }>; isError?: boolean } };
+    return JSON.parse(envelope.result.content[0]!.text);
+  };
+  const text = 'La carga está probada. Siguiente paso: revisión de Producto.';
+  const write = async (texto: string, revision: number, equipo = team.id) => rpc(codex.token, 'ronda_traspaso', { equipo, texto, revision });
+  assert.deepEqual(await write(text, 0), { revision: 1 });
+  assert.deepEqual(await write(text, 0), { revision: 1 });
+  assert.equal((await write('Otro cambio', 0)).status, 409);
+  assert.equal((await write(codex.token, 1)).status, 422);
+  assert.equal((await write(text, 0, room.id)).status, 403);
+  await post('/agent/say', { text: 'hola' });
+  const local = await (await app.request('/api/agent/context', { headers })).json() as { equipos: unknown[] };
+  const fromChat = await rpc(chat.token, 'ronda_contexto');
+  assert.deepEqual(fromChat.equipos, local.equipos);
+  assert.deepEqual(fromChat.equipos.map((entry: { nombre: string }) => entry.nombre), ['Producto']);
+  const [note] = fromChat.equipos[0].traspasos;
+  assert.equal(note.autor, 'Tomás');
+  assert.equal(note.texto, text);
+  assert.equal(note.mio, false);
+  const own = await rpc(codex.token, 'ronda_contexto');
+  assert.equal(own.equipos.find((item: { id: string }) => item.id === team.id).traspasos[0].mio, true);
+  assert.equal(own.miBandeja.recent.length, 0);
+  assert.equal(fromChat.miBandeja.recent.length, 1);
+  for (const secret of [ana.token, tomas.token, codex.token, team.joinCode, room.joinCode]) {
+    assert.ok(!JSON.stringify(fromChat).includes(secret));
+  }
+  const outsider = ctx.assistants.connect(other.token, 'instinct', 'Instinct')!;
+  assert.ok(!JSON.stringify(await rpc(outsider.token, 'ronda_contexto')).includes(text));
+  assert.equal((await rpc(outsider.token, 'ronda_traspaso', { equipo: team.id, texto: text, revision: 0 })).status, 403);
+  assert.deepEqual(await write('', 1), { revision: 2 });
+  assert.equal((await rpc(chat.token, 'ronda_contexto')).equipos[0].traspasos.length, 0);
+  await write(text, 2);
+  ctx.teams.removeMember(team.id, tomas.token);
+  assert.ok(!JSON.stringify(await rpc(chat.token, 'ronda_contexto')).includes(text));
+  assert.equal((await write(text, 3)).status, 403);
+  await rpc(chat.token, 'ronda_traspaso', { equipo: team.id, texto: 'Nota del conector a retirar', revision: 0 });
+  ctx.assistants.revoke(ana.token, chat.assistant.id);
+  assert.ok(!(await (await app.request('/api/agent/context', { headers })).text()).includes('Nota del conector a retirar'));
+  assert.equal((await app.request('/api/agent/context', { headers: { authorization: 'Bearer ' + chat.token } })).status, 401);
+  assert.equal((await app.request('/api/agent/context')).status, 401);
 });

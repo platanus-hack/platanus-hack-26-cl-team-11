@@ -1,7 +1,7 @@
 const CACHE = 'montu-app-v1';
 const SHELL = '/__shell';
 const RESTARTING = [502, 503, 504];
-const NOT_THE_APP = ['/api/', '/a/', '/design/'];
+const NOT_THE_APP = ['/api/', '/a/', '/design/', '/skills/'];
 const SERVER_PAGES = ['/dec', '/deck', '/prep', '/problema', '/libro'];
 const NEVER_CHANGES = '/assets/';
 

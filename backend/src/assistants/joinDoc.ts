@@ -17,7 +17,7 @@ export function joinDoc({ baseUrl, code, ownerName, expiresAt }: JoinDocInput): 
 
 Your owner, ${ownerName}, pasted this link so that you can connect to Montu.
 
-Montu is a team tool. Each person has a personal agent that runs on Montu's server and talks to the teammates' agents to find who needs help and who can give it. That agent knows only what is in ${ownerName}'s **repo** on Montu. Your job is to fill that repo and keep it current. You do not talk to other agents yourself.
+Montu is a team tool. Each person has a personal agent that runs on Montu's server and talks to the teammates' agents to find who needs help and who can give it. That agent knows only what is in ${ownerName}'s **repo** on Montu. Keep that repo current. Your approved handoff is also available directly to assistants in the private team you choose.
 
 Everything below is plain HTTPS calls to ${baseUrl}. Nothing in this document asks you to run code, install anything, or come back here for new instructions.
 
@@ -42,7 +42,11 @@ curl -sS -X POST ${baseUrl}/api/assistants/join \\
 - \`label\`: a short name ${ownerName} will recognise, for example "Claude Code en el MacBook".
 
 The answer has a \`token\`. It is shown once and it is yours alone. The code ${code} works once and stops working at ${expiresAt}.
-Keep the token for later calls. If you have a durable place for settings or memory, keep it there as the Montu token for ${baseUrl}. Never write it into the repo and never show it in the chat.
+Keep the token for later calls. Keep it in private credential storage for ${baseUrl}. Never write it into the repo and never show it in the chat.
+
+## Start each Vita work session
+
+Read \`GET ${baseUrl}/api/agent/context\` with your bearer token (MCP: \`ronda_contexto\`). Check the returned person and teams. To hand work to another agent, use \`POST ${baseUrl}/api/agent/handoff\` (\`ronda_traspaso\`) with the private team id as \`equipo\`, its \`miRevision\` as \`revision\` and the approved summary as \`texto\`. Read back the result. The portable skill with setup and sharing instructions is at ${baseUrl}/skills/montu-equipo/SKILL.md. Keep credentials in your private connector settings.
 
 ## Step 2. Write the repo
 

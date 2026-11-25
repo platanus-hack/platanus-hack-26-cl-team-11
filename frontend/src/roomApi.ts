@@ -107,7 +107,7 @@ export interface Connector {
   keyUrl: string;
 }
 
-export const createConnector = (token: string) => request<Connector>(`${personPath(token)}/assistants/connectors`, post({ kind: 'otro' }));
+export const createConnector = (token: string, kind: AssistantKind) => request<Connector>(`${personPath(token)}/assistants/connectors`, post({ kind }));
 export const removeAssistant = (token: string, assistantId: string) =>
   request<{ ok: boolean }>(`${personPath(token)}/assistants/${encodeURIComponent(assistantId)}`, { method: 'DELETE' });
 
