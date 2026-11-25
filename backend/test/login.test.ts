@@ -50,6 +50,11 @@ test('entering with Google creates your page the first time and brings you back 
 
   const again = await through('/api/login/google/start');
   assert.equal(again.headers.get('location'), page);
+  const destination = '/admin?persona=persona-ejemplo&vista=contexto&item=f-ejemplo';
+  const fromAdmin = await through('/api/login/google/start?' + new URLSearchParams({ volver: destination }));
+  assert.equal(fromAdmin.headers.get('location'), destination);
+  const external = await through('/api/login/google/start?' + new URLSearchParams({ volver: 'https://example.test/admin' }));
+  assert.equal(external.headers.get('location'), page);
 });
 
 test('a page that already exists is associated with a Google account, also when a login had already opened an empty page', async () => {

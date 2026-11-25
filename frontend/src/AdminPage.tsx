@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AdminDirectory } from './AdminDirectory';
 import { AdminBinding } from './AdminBinding';
 import { formatAgo } from './ago';
 import { fetchAdmin, fetchSessionPerson, setGlobeMode, setMesaInterval, startMesaRound, type AdminRound, type AdminView, type GlobeMode } from './api';
@@ -64,6 +65,7 @@ function Panel({ token }: { token: string }) {
   return (
     <>
       <AdminBinding />
+      <a className="admin-back" href="/admin">‹ Directorio</a>
       <div className="app-block">
         <SectionHead title="Panel" first end={<span className="rd-chip rd-glass">{running ? 'Conversando' : 'En pausa'}</span>} />
         {problem && (
@@ -113,7 +115,7 @@ function Panel({ token }: { token: string }) {
   );
 }
 
-export function AdminPage({ token }: { token?: string }) {
+function RoundPanel({ token }: { token?: string }) {
   const [resolved, setResolved] = useState<string | null | undefined>(token);
 
   useEffect(() => {
@@ -131,4 +133,8 @@ export function AdminPage({ token }: { token?: string }) {
       </p>
     );
   return <Panel token={resolved} />;
+}
+
+export function AdminPage({ token }: { token?: string }) {
+  return token || new URLSearchParams(location.search).get('panel') === 'rondas' ? <RoundPanel token={token} /> : <AdminDirectory />;
 }

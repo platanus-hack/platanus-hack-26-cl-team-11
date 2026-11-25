@@ -27,6 +27,7 @@ interface OAuthState {
   nonce: string;
   login?: boolean;
   origin?: string;
+  adminReturn?: string;
   invite?: string;
   room?: string;
 }
@@ -107,19 +108,20 @@ export function oauthRoutes(ctx: AppContext) {
     return true;
   };
 
+  const adminReturn = (value: unknown) => typeof value === 'string' && value.length <= 2048 && /^\/admin(?:[?#][^\r\n]*)?$/.test(value) ? value : undefined;
   const openState = (sealed: string | undefined, provider: string): OAuthState | null => {
     if (!sealed) return null;
     try {
       const state = JSON.parse(vault.open(sealed)) as Partial<OAuthState> | null;
       if (typeof state?.token !== 'string' || typeof state.at !== 'number' || typeof state.nonce !== 'string' || state.provider !== provider) return null;
       if (Date.now() - state.at > STATE_TTL_MS) return null;
-      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce, login: state.login === true, origin: typeof state.origin === 'string' ? state.origin : undefined };
+      return { token: state.token, provider: state.provider, at: state.at, nonce: state.nonce, login: state.login === true, adminReturn: adminReturn(state.adminReturn), origin: typeof state.origin === 'string' ? state.origin : undefined };
     } catch {
       return null;
     }
   };
 
-  const startLogin = (c: Context, personToken: string, door: { invite?: string; room?: string } = {}) => {
+  const startLogin = (c: Context, personToken: string, door: { invite?: string; room?: string; adminReturn?: string } = {}) => {
     const provider = findProvider(LOGIN_PROVIDER);
     const credentials = credentialsOf(LOGIN_PROVIDER);
     if (!provider || !credentials) return c.json(missingCredentials(LOGIN_PROVIDER), 500);
@@ -188,7 +190,7 @@ export function oauthRoutes(ctx: AppContext) {
       ctx.teams.addMember(teamId, person.token);
       if (roomTeam === teamId) ctx.rooms.record(teamId, 'persona_entra', { person: publicIdOf(person.token), name: person.name });
     }
-    return c.redirect(`/conectar/${person.token}${teamId ? '#equipo' : ''}`, 302);
+    return c.redirect(state.adminReturn ?? `/conectar/${person.token}${teamId ? '#equipo' : ''}`, 302);
   };
 
   routes.get('/session', (c) => {
@@ -206,7 +208,7 @@ export function oauthRoutes(ctx: AppContext) {
   routes.get('/login/google/start', limitedLogins, (c) => {
     const invite = c.req.query('invitacion');
     const room = c.req.query('sala');
-    return startLogin(c, '', { ...(invite && ctx.teams.findInvite(invite, new Date()) ? { invite } : {}), ...(room && ctx.rooms.findRoom(room) ? { room } : {}) });
+    return startLogin(c, '', { adminReturn: adminReturn(c.req.query('volver')), ...(invite && ctx.teams.findInvite(invite, new Date()) ? { invite } : {}), ...(room && ctx.rooms.findRoom(room) ? { room } : {}) });
   });
 
   routes.get('/people/:token/login/google/start', (c) => {

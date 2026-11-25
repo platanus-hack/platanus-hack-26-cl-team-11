@@ -1,0 +1,62 @@
+.admin-directory {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.admin-directory .rd-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.admin-directory .rd-card > p,
+.admin-directory h2 {
+  margin: 0;
+}
+.admin-directory .rd-card > p + h2 {
+  margin-top: 12px;
+}
+.admin-directory .rd-item {
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+.admin-directory .rd-item__title,
+.admin-directory .rd-item__sub,
+.admin-directory h2 {
+  overflow-wrap: anywhere;
+}
+.admin-tabs,
+.admin-heading,
+.admin-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.admin-heading {
+  justify-content: space-between;
+}
+.admin-tabs a,
+.admin-directory .rd-actions > a:not(.rd-button),
+.admin-back {
+  text-decoration: none;
+  color: var(--rd-muted);
+}
+.admin-tabs a {
+  border-radius: var(--rd-radius-pill, 999px);
+  padding: 7px 12px;
+}
+.admin-tabs a[aria-current='page'] {
+  background: var(--rd-ink);
+  color: var(--rd-bg);
+}
+.admin-directory a[aria-current='true'] {
+  color: var(--rd-ink);
+  text-decoration: underline;
+}
+.admin-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  margin: 0;
+}
