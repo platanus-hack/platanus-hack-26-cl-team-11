@@ -29,17 +29,17 @@ async function shellNow(event) {
   return kept;
 }
 
-async function networkFirst(request) {
+async function networkFirst(request, cacheKey = request) {
   const cache = await caches.open(CACHE);
   try {
     const response = await fetch(request);
     if (response.ok) {
-      await cache.put(request, response.clone());
+      await cache.put(cacheKey, response.clone());
       return response;
     }
-    return (RESTARTING.includes(response.status) && (await cache.match(request))) || response;
+    return (RESTARTING.includes(response.status) && (await cache.match(cacheKey))) || response;
   } catch (failure) {
-    const kept = await cache.match(request);
+    const kept = await cache.match(cacheKey);
     if (kept) return kept;
     throw failure;
   }
@@ -49,7 +49,9 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin || NOT_THE_APP.some((prefix) => url.pathname.startsWith(prefix)) || SERVER_PAGES.includes(url.pathname)) return;
-  if (request.mode === 'navigate') event.respondWith(shellNow(event));
+  if (request.mode === 'navigate' && /^\/equipo\/[^/]+\/hilos(?:\/|$)/.test(url.pathname)) {
+    event.respondWith(networkFirst(request, SHELL));
+  } else if (request.mode === 'navigate') event.respondWith(shellNow(event));
   else if (url.pathname.startsWith(NEVER_CHANGES)) event.respondWith(keptFirst(request));
   else event.respondWith(networkFirst(request));
 });

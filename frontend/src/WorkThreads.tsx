@@ -47,8 +47,11 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
   const [login, setLogin] = useState(false);
   useEffect(() => {
     let active = true;
+    const query = new URLSearchParams(location.search);
+    const anchor = /^#mensaje-(\d+)$/.exec(location.hash);
+    if (topic && anchor && !query.has('antes')) query.set('antes', String(Number(anchor[1]) + 1));
     request<Result>(
-      '/api/team-threads/' + encodeURIComponent(team) + (topic ? '/' + encodeURIComponent(topic) : '') + location.search,
+      '/api/team-threads/' + encodeURIComponent(team) + (topic ? '/' + encodeURIComponent(topic) : '') + '?' + query,
     ).then(
       (value) => {
         if (active) setData(value);
@@ -64,6 +67,9 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
       active = false;
     };
   }, [team, topic]);
+  useEffect(() => {
+    if (data?.mensajes) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+  }, [data]);
   const older = new URLSearchParams(params);
   if (data?.antes) older.set('antes', String(data.antes));
   return (
@@ -73,7 +79,7 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
       {login ? (
         <a
           className="rd-button app-link"
-          href={'/api/login/google/start?volver=' + encodeURIComponent(location.pathname + location.search)}
+          href={'/api/login/google/start?volver=' + encodeURIComponent(location.pathname + location.search + location.hash)}
         >
           Entrar con Google
         </a>
@@ -129,13 +135,14 @@ export function WorkThreads({ team, topic }: { team: string; topic?: string }) {
                     </strong>
                   </div>
                   <p className="rd-note">
-                    {kinds[r.tipo]} · <a href={r.enlace + '#mensaje-' + r.id}>{new Date(r.fecha).toLocaleString('es-CL')}</a>
+                    {kinds[r.tipo]} · <a href={r.enlace + '?antes=' + (r.id + 1) + '#mensaje-' + r.id}>{new Date(r.fecha).toLocaleString('es-CL')}</a>
                   </p>
                   <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
                     <Evidence text={r.texto} />
                   </p>
                 </article>
               ))}
+              {(params.has('antes') || location.hash.startsWith('#mensaje-')) && <a href={location.pathname}>Ver lo más reciente</a>}
               <CopyButton label="Copiar enlace al hilo" text={location.origin + location.pathname} />
             </>
           )}
