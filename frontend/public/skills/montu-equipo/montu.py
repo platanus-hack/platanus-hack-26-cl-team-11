@@ -40,13 +40,13 @@ def token_path(client):
 
 def save_private(path, content):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as output:
-        try:
+    descriptor, temporary = tempfile.mkstemp(dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "wb") as output:
             output.write(content)
-            output.flush()
-            os.replace(output.name, path)
-        finally:
-            Path(output.name).unlink(missing_ok=True)
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def install(client):
